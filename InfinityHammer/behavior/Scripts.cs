@@ -1,8 +1,8 @@
 using HarmonyLib;
 
+// Prevents script error by creature awake functions trying to do ZNetView stuff.
 namespace InfinityHammer {
 
-  /// Prevents script error by creature awake functions trying to do ZNetView stuff.
   [HarmonyPatch(typeof(BaseAI), "Awake")]
   public class BaseAIAwake {
     public static bool Prefix() => !ZNetView.m_forceDisableInit;

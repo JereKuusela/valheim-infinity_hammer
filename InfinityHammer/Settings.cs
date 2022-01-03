@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using BepInEx.Configuration;
 
 namespace InfinityHammer {
@@ -24,6 +25,19 @@ namespace InfinityHammer {
     public static bool IgnoreOtherRestrictions => configIgnoreOtherRestrictions.Value && IsCheats;
     public static ConfigEntry<bool> configRemoveAnything;
     public static bool RemoveAnything => configRemoveAnything.Value && IsCheats;
+    public static ConfigEntry<bool> configEnableUndo;
+    public static bool EnableUndo => configEnableUndo.Value && IsCheats;
+    public static ConfigEntry<bool> configAutoRotate;
+    public static bool AutoRotate => configAutoRotate.Value;
+    public static ConfigEntry<string> configSelectRange;
+    public static float SampleRange => Helper.ParseFloat(configSelectRange.Value, 0f);
+    public static ConfigEntry<string> configRemoveRange;
+    public static float RemoveRange => IsCheats ? Helper.ParseFloat(configRemoveRange.Value, 0f) : 0f;
+    public static ConfigEntry<string> configBuildRange;
+    public static float BuildRange => IsCheats ? Helper.ParseFloat(configBuildRange.Value, 0f) : 0f;
+
+    public static ConfigEntry<string> configScaleStep;
+    public static float ScaleStep => IsCheats ? Helper.ParseFloat(configScaleStep.Value, 0f) : 0f;
     public static ConfigEntry<bool> configEnabled;
     public static bool Enabled => configEnabled.Value;
 
@@ -31,6 +45,11 @@ namespace InfinityHammer {
       var section = "General";
       configEnabled = config.Bind(section, "Enabled", true, "Whether this mod is enabled at all.");
       section = "Powers";
+      configSelectRange = config.Bind(section, "Select range", "50", "Range for selecting objects.");
+      configRemoveRange = config.Bind(section, "Remove range", "0", "Range for removing objects (0 = default).");
+      configBuildRange = config.Bind(section, "Build range", "0", "Range for placing objects (0 = default)");
+      configEnableUndo = config.Bind(section, "Enable undo", true, "Enabled undo and redo for placing/removing.");
+      configAutoRotate = config.Bind(section, "Auto rotate", true, "Automatically rotates the selected object.");
       configNoBuildCost = config.Bind(section, "No build cost", true, "Removes build costs and requirements.");
       configIgnoreWards = config.Bind(section, "Ignore wards", true, "Ignores ward restrictions.");
       configIgnoreNoBuild = config.Bind(section, "Ignore no build", true, "Ignores no build areas.");
@@ -39,8 +58,52 @@ namespace InfinityHammer {
       configAllObjects = config.Bind(section, "All objects", true, "Allows placement of non-default objects.");
       configCopyState = config.Bind(section, "Copy state", true, "Copies object's internal state.");
       configAllowInDungeons = config.Bind(section, "Allow in dungeons", true, "Allows building in dungeons.");
-      configRemoveAnything = config.Bind(section, "Remove anything", false, "Allows removing anything (use at your own risk).");
+      configRemoveAnything = config.Bind(section, "Remove anything", false, "Allows removing anything.");
       configIgnoreOtherRestrictions = config.Bind(section, "Ignore other restrictions", true, "Ignores any other restrictions (material, biome, etc.)");
+      configScaleStep = config.Bind(section, "Scaling step", "0.05", "How much each scale up/down affects the size");
+    }
+
+    public static List<string> Options = new List<string>() {
+      "enabled", "select_range", "remove_range", "build_range", "enable_undo", "auto_rotate", "no_build_cost",
+      "ignore_wards", "ignore_no_build", "no_stamina_cost", "no_durability_loss", "all_objects", "copy_state",
+      "allow_in_dungeons", "remove_anything", "ignore_other_restrictions", "scaling_step"
+    };
+    private static string State(bool value) => value ? "enabled" : "disabled";
+    private static void Toggle(Terminal context, ConfigEntry<bool> setting, string name, bool reverse = false) {
+      setting.Value = !setting.Value;
+      Helper.AddMessage(context, $"{name} {State(reverse ? !setting.Value : setting.Value)}.");
+
+    }
+    public static void UpdateValue(Terminal context, string key, string value) {
+      if (key == "enabled") Toggle(context, configEnabled, "Infinity Hammer");
+      if (key == "enable_undo") Toggle(context, configEnableUndo, "Undo");
+      if (key == "auto_rotate") Toggle(context, configAutoRotate, "Auto rotate");
+      if (key == "no_build_cost") Toggle(context, configNoBuildCost, "Build costs", true);
+      if (key == "ignore_wards") Toggle(context, configIgnoreWards, "Building inside wards", true);
+      if (key == "ignore_no_build") Toggle(context, configIgnoreNoBuild, "No build areas", true);
+      if (key == "no_stamina_cost") Toggle(context, configNoStaminaCost, "Hammer stamina cost", true);
+      if (key == "no_durability_loss") Toggle(context, configNoDurabilityLoss, "Hammer durability cost", true);
+      if (key == "all_objects") Toggle(context, configAllObjects, "All objects");
+      if (key == "copy_state") Toggle(context, configCopyState, "Copy state");
+      if (key == "allow_in_dungeons") Toggle(context, configAllowInDungeons, "Building in dungeons");
+      if (key == "remove_anything") Toggle(context, configRemoveAnything, "Removing anything");
+      if (key == "ignore_other_restrictions") Toggle(context, configIgnoreOtherRestrictions, "Other build restrictions", true);
+      if (key == "select_range") {
+        configSelectRange.Value = value;
+        Helper.AddMessage(context, $"Select range set to {value} meters.");
+      }
+      if (key == "remove_range") {
+        configRemoveRange.Value = value;
+        Helper.AddMessage(context, $"Remove range set to {value} meters.");
+      }
+      if (key == "build_range") {
+        configBuildRange.Value = value;
+        Helper.AddMessage(context, $"Build range set to {value} meters.");
+      }
+      if (key == "scaling_step") {
+        configScaleStep.Value = value;
+        Helper.AddMessage(context, $"Scaling step set to {value}%.");
+      }
     }
   }
 }

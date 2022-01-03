@@ -1,0 +1,86 @@
+using System;
+using HarmonyLib;
+using Service;
+using UnityEngine;
+
+// Code related to removing objects.
+namespace InfinityHammer {
+
+  [HarmonyPatch(typeof(Player), "RemovePiece")]
+  public class RemovePiece {
+    public static bool Removing = false;
+    public static UndoData Target;
+
+    public static void SetTarget(ZNetView obj) {
+      Target = UndoHelper.CreateDate(obj);
+    }
+
+    private static bool RemoveAnything(Player obj) {
+      var hits = Physics.RaycastAll(GameCamera.instance.transform.position, GameCamera.instance.transform.forward, 50f, obj.m_interactMask);
+      Array.Sort<RaycastHit>(hits, (RaycastHit x, RaycastHit y) => x.distance.CompareTo(y.distance));
+      foreach (var hit in hits) {
+        if (Vector3.Distance(hit.point, obj.m_eye.position) >= obj.m_maxPlaceDistance) continue;
+        var netView = hit.collider.GetComponentInParent<ZNetView>();
+        if (!netView) continue;
+        if (netView.GetComponentInChildren<Player>()) continue;
+        obj.m_removeEffects.Create(netView.transform.position, Quaternion.identity, null, 1f, -1);
+        SetTarget(netView);
+        Helper.RemoveZDO(netView.GetZDO());
+        var tool = obj.GetRightItem();
+        if (tool != null) {
+          obj.FaceLookDirection();
+          obj.m_zanim.SetTrigger(tool.m_shared.m_attack.m_attackAnimation);
+        }
+        return true;
+      }
+      return false;
+    }
+
+    public static void Prefix(Player __instance) {
+      Removing = true;
+    }
+    public static void Postfix(Player __instance, ref bool __result) {
+      if (!__result && Settings.RemoveAnything) {
+        __result = RemoveAnything(__instance);
+      }
+      if (__result && Target != null && Settings.EnableUndo)
+        UndoManager.Add(new UndoRemove(Target));
+      Removing = false;
+      Target = null;
+    }
+  }
+
+  [HarmonyPatch(typeof(Player), "RemovePiece")]
+  public class PostProcessToolOnRemove {
+    public static void Postfix(Player __instance, ref bool __result) {
+      if (__result) Hammer.PostProcessTool(__instance);
+    }
+  }
+
+  [HarmonyPatch(typeof(Player), "RemovePiece")]
+  public class UnlockRemoveDistance {
+    public static void Prefix(Player __instance, ref float __state) {
+      __state = __instance.m_maxPlaceDistance;
+      if (Settings.RemoveRange > 0f)
+        __instance.m_maxPlaceDistance = Settings.RemoveRange;
+    }
+    public static void Postfix(Player __instance, float __state) {
+      __instance.m_maxPlaceDistance = __state;
+    }
+  }
+  ///<summary>Game code doesn't give direct access to the removed object.</summary>
+  [HarmonyPatch(typeof(Piece), "CanBeRemoved")]
+  public class AccessTargetedObject {
+    public static void Prefix(Piece __instance) {
+      if (RemovePiece.Removing)
+        RemovePiece.SetTarget(__instance.m_nview);
+    }
+  }
+  ///<summary>Resets the sample if it's removed.</summary>
+  [HarmonyPatch(typeof(ZNetScene), "OnZDODestroyed")]
+  public class ResetSampleTarget {
+    public static void Prefix(ZDO zdo) {
+      if (Hammer.SampleZDO == zdo) Hammer.Remove(Player.m_localPlayer);
+    }
+  }
+}

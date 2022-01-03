@@ -1,33 +1,23 @@
-using System;
 using System.Linq;
-using HarmonyLib;
 using UnityEngine;
 
 namespace InfinityHammer {
   public static class Hammer {
     ///<summary>The entity sampled by the hammer (can be an actual entity or a named prefab)</summary>
     private static GameObject Sample = null;
-    ///<summary>ZDO of actual entities.</summary>
-    private static ZDO SampleZDO = null;
 
-    public static void ResetIfSelected(ZDO zdo) {
-      if (SampleZDO == zdo) Remove(Player.m_localPlayer);
-    }
+    ///<summary>Current scale (separate variable to not affect the sample).</summary>
+    private static Vector3 Scale = Vector3.one;
+    ///<summary>ZDO of actual entities.</summary>
+    public static ZDO SampleZDO = null;
 
     ///<summary>Copies ZDO data</summary>
     public static void CopyState(Piece obj) {
-      if (SampleZDO == null || !Settings.CopyState) return;
+      if (SampleZDO == null || !Settings.CopyState || !obj.m_nview) return;
       var zdo = obj.m_nview.GetZDO();
       if (!SampleZDO.IsValid() || !zdo.IsValid()) return;
       var clone = SampleZDO.Clone();
-      zdo.m_floats = clone.m_floats;
-      zdo.m_vec3 = clone.m_vec3;
-      zdo.m_quats = clone.m_quats;
-      zdo.m_ints = clone.m_ints;
-      zdo.m_longs = clone.m_longs;
-      zdo.m_strings = clone.m_strings;
-      zdo.m_byteArrays = clone.m_byteArrays;
-      zdo.IncreseDataRevision();
+      Helper.CopyData(clone, zdo);
     }
     ///<summary>Replaces the placement piece with a clean prefab (prevents attached objects being copied).</summary>
     public static void CleanPlacePrefab(ref Piece piece) {
@@ -39,11 +29,13 @@ namespace InfinityHammer {
     }
     private static bool IsBuildPiece(Player player, GameObject obj)
       => player.m_buildPieces.m_pieces.Any(piece => Utils.GetPrefabName(obj) == Utils.GetPrefabName(piece));
+
     ///<summary>Sets the sample object while ensuring it has the needed Piece component.</summary>
     public static bool Set(Player player, GameObject obj, ZDO state) {
       if (!player || !obj) return false;
       if (obj.GetComponent<Player>()) return false;
       if (!Settings.AllObjects && !IsBuildPiece(player, obj)) return false;
+      Scale = obj.transform.localScale;
       // Without state, the clean should be used immediatelly (so itemstands won't show the item).
       if (!Settings.CopyState) obj = ZNetScene.instance.GetPrefab(Utils.GetPrefabName(obj));
       if (!obj) return false;
@@ -74,32 +66,17 @@ namespace InfinityHammer {
     }
 
     ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
-    public static void PostProcessPlaced() {
+    public static void PostProcessPlaced(Piece piece) {
       if (!Sample) return;
-      if (Piece.m_allPieces.Count == 0) return;
-      var added = Piece.m_allPieces[Piece.m_allPieces.Count - 1];
-      CopyState(added);
-      var piece = added.GetComponent<Piece>();
-      if (piece)
-        piece.m_canBeRemoved = true;
-      var armorStand = added.GetComponentInChildren<ArmorStand>();
-      if (armorStand)
-        armorStand.UpdateVisual();
-      var visEquipment = added.GetComponentInChildren<VisEquipment>();
-      if (visEquipment)
-        visEquipment.UpdateVisuals();
-      var itemStand = added.GetComponentInChildren<ItemStand>();
-      if (itemStand)
-        itemStand.UpdateVisual();
-      var cookingStation = added.GetComponentInChildren<CookingStation>();
-      if (cookingStation)
-        cookingStation.UpdateCooking();
-      var locationProxy = added.GetComponentInChildren<LocationProxy>();
-      if (locationProxy)
-        locationProxy.SpawnLocation();
-      var sign = added.GetComponentInChildren<Sign>();
-      if (sign)
-        sign.UpdateText();
+      CopyState(piece);
+      piece.m_canBeRemoved = true;
+      piece.m_nview?.SetLocalScale(Scale);
+      piece.GetComponentInChildren<ArmorStand>()?.UpdateVisual();
+      piece.GetComponentInChildren<VisEquipment>()?.UpdateVisuals();
+      piece.GetComponentInChildren<ItemStand>()?.UpdateVisual();
+      piece.GetComponentInChildren<CookingStation>()?.UpdateCooking();
+      piece.GetComponentInChildren<LocationProxy>()?.SpawnLocation();
+      piece.GetComponentInChildren<Sign>()?.UpdateText();
     }
 
     ///<summary>Removes placement checks.</summary>
@@ -140,68 +117,43 @@ namespace InfinityHammer {
       if (humanoid) humanoid.enabled = false;
       if (character) character.enabled = false;
       if (tombStone) tombStone.enabled = false;
+      obj.transform.localScale = Scale;
     }
+    ///<summary>Copies the selected object rotation.</summary>
+    public static void Rotate(GameObject obj) {
+      if (!Settings.AutoRotate) return;
+      var player = Player.m_localPlayer;
+      if (!player) return;
+      var rotation = obj.transform.rotation;
+      player.m_placeRotation = Mathf.RoundToInt(rotation.eulerAngles.y / 22.5f);
 
-    ///<summary>Removes any object...</summary>
-    public static void RemoveAnything(Player obj) {
-      var hits = Physics.RaycastAll(GameCamera.instance.transform.position, GameCamera.instance.transform.forward, 50f, obj.m_interactMask);
-      Array.Sort<RaycastHit>(hits, (RaycastHit x, RaycastHit y) => x.distance.CompareTo(y.distance));
-      foreach (var hit in hits) {
-        if (Vector3.Distance(hit.point, obj.m_eye.position) >= obj.m_maxPlaceDistance) continue;
-        var netView = hit.collider.GetComponentInParent<ZNetView>();
-        if (!netView) continue;
-        if (netView.GetComponentInChildren<Player>()) continue;
-        netView.ClaimOwnership();
-        obj.m_removeEffects.Create(netView.transform.position, Quaternion.identity, null, 1f, -1);
-        ZNetScene.instance.Destroy(netView.gameObject);
-        ItemDrop.ItemData rightItem = obj.GetRightItem();
-        if (rightItem != null) {
-          obj.FaceLookDirection();
-          obj.m_zanim.SetTrigger(rightItem.m_shared.m_attack.m_attackAnimation);
-        }
-        PostProcessTool(obj);
-        break;
+      var gizmo = GameObject.Find("GizmoRoot(Clone)");
+      if (!gizmo) {
+        // Gizmo needs these to ensure that it is initialized properly.
+        player.UpdatePlacementGhost(false);
+        player.UpdatePlacement(false, 0);
       }
+      gizmo = GameObject.Find("GizmoRoot(Clone)");
+      if (gizmo)
+        gizmo.transform.rotation = rotation;
     }
-  }
-
-  ///<summary>Overrides the piece selection.</summary>
-  [HarmonyPatch(typeof(PieceTable), "GetSelectedPiece")]
-  public class GetSelectedPiece {
-    public static bool Prefix(ref Piece __result) => !Hammer.ReplacePiece(ref __result);
-  }
-
-  ///<summary>Selecting a piece normally removes the override.</summary>
-  [HarmonyPatch(typeof(Player), "SetSelectedPiece")]
-  public class SetSelectedPiece {
-    public static void Prefix(Player __instance) => Hammer.Remove(__instance);
-  }
-
-  [HarmonyPatch(typeof(Player), "PlacePiece")]
-  public class PlacePiece {
-    public static void Prefix(ref Piece piece) => Hammer.CleanPlacePrefab(ref piece);
-    public static void Postfix(Player __instance, bool __result) {
-      if (__result) {
-        Hammer.PostProcessPlaced();
-        Hammer.PostProcessTool(__instance);
-      }
+    public static void ScaleUp() {
+      if (Settings.ScaleStep <= 0f) return;
+      Scale *= (1f + Settings.ScaleStep);
+      UpdateScale();
     }
-  }
-
-  [HarmonyPatch(typeof(Player), "RemovePiece")]
-  public class RemovePiece {
-    public static void Postfix(Player __instance, bool __result) {
-      if (__result) Hammer.PostProcessTool(__instance);
-      else if (Settings.RemoveAnything) Hammer.RemoveAnything(__instance);
+    public static void ScaleDown() {
+      if (Settings.ScaleStep <= 0f) return;
+      Scale /= (1f + Settings.ScaleStep);
+      UpdateScale();
     }
-  }
-  [HarmonyPatch(typeof(Player), "SetupPlacementGhost")]
-  public class SetupPlacementGhost {
-    public static void Postfix(Player __instance) => Hammer.PostProcessPlacementGhost(__instance.m_placementGhost);
-  }
-  ///<summary>Resets the sample if it's removed.</summary>
-  [HarmonyPatch(typeof(ZNetScene), "OnZDODestroyed")]
-  public class OnZDODestroyed {
-    public static void Prefix(ZDO zdo) => Hammer.ResetIfSelected(zdo);
+    private static void UpdateScale() {
+      if (!Sample) return;
+      var ghost = Player.m_localPlayer?.m_placementGhost;
+      if (!ghost) return;
+      var view = Sample.GetComponent<ZNetView>();
+      if (view.m_syncInitialScale)
+        ghost.transform.localScale = Scale;
+    }
   }
 }

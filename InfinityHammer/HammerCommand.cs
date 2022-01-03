@@ -1,12 +1,9 @@
+using Service;
 using UnityEngine;
 
 namespace InfinityHammer {
 
   public class HammerCommand {
-    public static void AddMessage(Terminal context, string message) {
-      context.AddString(message);
-      Player.m_localPlayer?.Message(MessageHud.MessageType.TopLeft, message);
-    }
     public static GameObject GetPrefab(string name) {
       var prefab = ZNetScene.instance.GetPrefab(name);
       if (!prefab)
@@ -18,16 +15,16 @@ namespace InfinityHammer {
     public static ZNetView GetHovered(Terminal context) {
       if (Player.m_localPlayer == null) return null;
       var interact = Player.m_localPlayer.m_maxInteractDistance;
-      Player.m_localPlayer.m_maxInteractDistance = 50f;
+      Player.m_localPlayer.m_maxInteractDistance = Settings.SampleRange;
       Player.m_localPlayer.FindHoverObject(out var obj, out var creature);
       Player.m_localPlayer.m_maxInteractDistance = interact;
       if (obj == null) {
-        AddMessage(context, "Nothing is being hovered.");
+        Helper.AddMessage(context, "Nothing is being hovered.");
         return null;
       }
       var view = obj.GetComponentInParent<ZNetView>();
       if (view == null) {
-        AddMessage(context, "Nothing is being hovered.");
+        Helper.AddMessage(context, "Nothing is being hovered.");
         return null;
       }
       return view;
@@ -46,17 +43,37 @@ namespace InfinityHammer {
           if (!view) return;
           var name = Utils.GetPrefabName(view.gameObject);
           if (Hammer.Set(Player.m_localPlayer, view.gameObject, view.GetZDO())) {
-            var rotation = view.gameObject.transform.rotation;
-            Player.m_localPlayer.m_placeRotation = Mathf.RoundToInt(rotation.eulerAngles.y / 22.5f);
-            var gizmo = GameObject.Find("GizmoRoot(Clone)");
-            if (gizmo)
-              gizmo.transform.rotation = rotation;
-            AddMessage(args.Context, "Selected " + name + ".");
+            Hammer.Rotate(view.gameObject);
+            Helper.AddMessage(args.Context, "Selected " + name + ".");
           } else {
-            AddMessage(args.Context, "Invalid object.");
+            Helper.AddMessage(args.Context, "Invalid object.");
           }
         }
       }, optionsFetcher: () => ZNetScene.instance.GetPrefabNames());
+      new Terminal.ConsoleCommand("hammer_undo", "Reverts object placing or removing.", delegate (Terminal.ConsoleEventArgs args) {
+        if (!Player.m_localPlayer) return;
+        if (!Settings.EnableUndo) return;
+        UndoManager.Undo();
+      });
+      new Terminal.ConsoleCommand("hammer_redo", "Restores reverted object placing or removing.", delegate (Terminal.ConsoleEventArgs args) {
+        if (!Player.m_localPlayer) return;
+        if (!Settings.EnableUndo) return;
+        UndoManager.Redo();
+      });
+      new Terminal.ConsoleCommand("hammer_scale_up", "Scales up the selection (if the object supports it).", delegate (Terminal.ConsoleEventArgs args) {
+        Hammer.ScaleUp();
+      });
+      new Terminal.ConsoleCommand("hammer_scale_down", "Scales down the selection (if the object supports it).", delegate (Terminal.ConsoleEventArgs args) {
+        Hammer.ScaleDown();
+      });
+      new Terminal.ConsoleCommand("hammer_config", "[key] [value] - Toggles or sets config value.", delegate (Terminal.ConsoleEventArgs args) {
+        if (args.Length < 2) return;
+        if (args.Length == 2)
+          Settings.UpdateValue(args.Context, args[1], "");
+        else
+          Settings.UpdateValue(args.Context, args[1], args[2]);
+      }, optionsFetcher: () => Settings.Options);
     }
+
   }
 }

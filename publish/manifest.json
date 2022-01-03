@@ -1,7 +1,7 @@
 {
   "name": "Infinity_Hammer",
   "version_number": "1.0.0",
-  "website_url": "https://github.com/JereKuusela/infinity-hammer",
+  "website_url": "https://github.com/JereKuusela/valheim-infinity_hammer",
   "description": "Enables placing any object with the hammer, without the usual restrictions.",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.1700"
