@@ -15,7 +15,7 @@ namespace InfinityHammer {
     public static ZNetView GetHovered(Terminal context) {
       if (Player.m_localPlayer == null) return null;
       var interact = Player.m_localPlayer.m_maxInteractDistance;
-      Player.m_localPlayer.m_maxInteractDistance = Settings.SampleRange;
+      Player.m_localPlayer.m_maxInteractDistance = Settings.SelectRange;
       Player.m_localPlayer.FindHoverObject(out var obj, out var creature);
       Player.m_localPlayer.m_maxInteractDistance = interact;
       if (obj == null) {
@@ -28,6 +28,12 @@ namespace InfinityHammer {
         return null;
       }
       return view;
+    }
+    private static void PrintScale(Terminal terminal, GameObject obj) {
+      if (obj)
+        Helper.AddMessage(terminal, $"Scale set to {obj.transform.localScale.y.ToString("P0")}.");
+      else
+        Helper.AddMessage(terminal, "Selected object doesn't support scaling.");
     }
     public HammerCommand() {
       new Terminal.ConsoleCommand("hammer", "[item id] - Adds an object to the hammer placement (hovered object by default).", delegate (Terminal.ConsoleEventArgs args) {
@@ -44,7 +50,7 @@ namespace InfinityHammer {
           var name = Utils.GetPrefabName(view.gameObject);
           if (Hammer.Set(Player.m_localPlayer, view.gameObject, view.GetZDO())) {
             Hammer.Rotate(view.gameObject);
-            Helper.AddMessage(args.Context, "Selected " + name + ".");
+            Helper.AddMessage(args.Context, $"Selected {name} (size {view.transform.localScale.y.ToString("P0")}).");
           } else {
             Helper.AddMessage(args.Context, "Invalid object.");
           }
@@ -61,10 +67,21 @@ namespace InfinityHammer {
         UndoManager.Redo();
       });
       new Terminal.ConsoleCommand("hammer_scale_up", "Scales up the selection (if the object supports it).", delegate (Terminal.ConsoleEventArgs args) {
-        Hammer.ScaleUp();
+        if (Settings.ScaleStep <= 0f) return;
+        PrintScale(args.Context, Hammer.ScaleUp());
       });
       new Terminal.ConsoleCommand("hammer_scale_down", "Scales down the selection (if the object supports it).", delegate (Terminal.ConsoleEventArgs args) {
-        Hammer.ScaleDown();
+        if (Settings.ScaleStep <= 0f) return;
+        PrintScale(args.Context, Hammer.ScaleDown());
+      });
+      new Terminal.ConsoleCommand("hammer_scale", "[value=1] - Sets scale of the selection (if the object supports it).", delegate (Terminal.ConsoleEventArgs args) {
+        if (Settings.ScaleStep <= 0f) return;
+        GameObject scaled = null;
+        if (args.Length < 2)
+          scaled = Hammer.SetScale(1f);
+        else
+          scaled = Hammer.SetScale(Helper.ParseFloat(args[1], 1f));
+        PrintScale(args.Context, scaled);
       });
       new Terminal.ConsoleCommand("hammer_config", "[key] [value] - Toggles or sets config value.", delegate (Terminal.ConsoleEventArgs args) {
         if (args.Length < 2) return;

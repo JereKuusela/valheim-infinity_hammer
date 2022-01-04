@@ -71,6 +71,8 @@ namespace InfinityHammer {
       CopyState(piece);
       piece.m_canBeRemoved = true;
       piece.m_nview?.SetLocalScale(Scale);
+      if (Settings.NoCreator)
+        piece.m_nview.GetZDO().Set("creator", 0L);
       piece.GetComponentInChildren<ArmorStand>()?.UpdateVisual();
       piece.GetComponentInChildren<VisEquipment>()?.UpdateVisuals();
       piece.GetComponentInChildren<ItemStand>()?.UpdateVisual();
@@ -137,23 +139,28 @@ namespace InfinityHammer {
       if (gizmo)
         gizmo.transform.rotation = rotation;
     }
-    public static void ScaleUp() {
-      if (Settings.ScaleStep <= 0f) return;
+    public static GameObject ScaleUp() {
       Scale *= (1f + Settings.ScaleStep);
-      UpdateScale();
+      return UpdateScale();
     }
-    public static void ScaleDown() {
-      if (Settings.ScaleStep <= 0f) return;
+    public static GameObject ScaleDown() {
       Scale /= (1f + Settings.ScaleStep);
-      UpdateScale();
+      return UpdateScale();
     }
-    private static void UpdateScale() {
-      if (!Sample) return;
+    public static GameObject SetScale(float value) {
+      Scale = value * Vector3.one;
+      return UpdateScale();
+    }
+    private static GameObject UpdateScale() {
+      if (!Sample) return null;
       var ghost = Player.m_localPlayer?.m_placementGhost;
-      if (!ghost) return;
+      if (!ghost) return null;
       var view = Sample.GetComponent<ZNetView>();
-      if (view.m_syncInitialScale)
+      if (view.m_syncInitialScale) {
         ghost.transform.localScale = Scale;
+        return ghost;
+      }
+      return null;
     }
   }
 }

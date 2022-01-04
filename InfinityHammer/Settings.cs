@@ -1,8 +1,9 @@
 using System.Collections.Generic;
 using BepInEx.Configuration;
+using Service;
 
 namespace InfinityHammer {
-  public partial class Settings {
+  public class Settings {
     private static bool IsCheats => Enabled && ((ZNet.instance && ZNet.instance.IsServer()) || Console.instance.IsCheatsEnabled());
 
     public static ConfigEntry<bool> configNoBuildCost;
@@ -27,15 +28,18 @@ namespace InfinityHammer {
     public static bool RemoveAnything => configRemoveAnything.Value && IsCheats;
     public static ConfigEntry<bool> configEnableUndo;
     public static bool EnableUndo => configEnableUndo.Value && IsCheats;
+    public static ConfigEntry<bool> configNoCreator;
+    public static bool NoCreator => configNoCreator.Value && IsCheats;
     public static ConfigEntry<bool> configAutoRotate;
     public static bool AutoRotate => configAutoRotate.Value;
+    public static ConfigEntry<string> configUndoLimit;
+    public static int UndoLimit => (int)Helper.ParseFloat(configUndoLimit.Value, 0f);
     public static ConfigEntry<string> configSelectRange;
-    public static float SampleRange => Helper.ParseFloat(configSelectRange.Value, 0f);
+    public static float SelectRange => Helper.ParseFloat(configSelectRange.Value, 0f);
     public static ConfigEntry<string> configRemoveRange;
     public static float RemoveRange => IsCheats ? Helper.ParseFloat(configRemoveRange.Value, 0f) : 0f;
     public static ConfigEntry<string> configBuildRange;
     public static float BuildRange => IsCheats ? Helper.ParseFloat(configBuildRange.Value, 0f) : 0f;
-
     public static ConfigEntry<string> configScaleStep;
     public static float ScaleStep => IsCheats ? Helper.ParseFloat(configScaleStep.Value, 0f) : 0f;
     public static ConfigEntry<bool> configEnabled;
@@ -59,14 +63,17 @@ namespace InfinityHammer {
       configCopyState = config.Bind(section, "Copy state", true, "Copies object's internal state.");
       configAllowInDungeons = config.Bind(section, "Allow in dungeons", true, "Allows building in dungeons.");
       configRemoveAnything = config.Bind(section, "Remove anything", false, "Allows removing anything.");
+      configNoCreator = config.Bind(section, "No creator", false, "Build without setting the creator (ignored by enemies).");
       configIgnoreOtherRestrictions = config.Bind(section, "Ignore other restrictions", true, "Ignores any other restrictions (material, biome, etc.)");
       configScaleStep = config.Bind(section, "Scaling step", "0.05", "How much each scale up/down affects the size");
+      configUndoLimit = config.Bind(section, "Max undo steps", "50", "How many undo actions are stored.");
+      configUndoLimit.SettingChanged += (s, e) => UndoManager.MaxSteps = UndoLimit;
     }
 
     public static List<string> Options = new List<string>() {
       "enabled", "select_range", "remove_range", "build_range", "enable_undo", "auto_rotate", "no_build_cost",
       "ignore_wards", "ignore_no_build", "no_stamina_cost", "no_durability_loss", "all_objects", "copy_state",
-      "allow_in_dungeons", "remove_anything", "ignore_other_restrictions", "scaling_step"
+      "allow_in_dungeons", "remove_anything", "ignore_other_restrictions", "scaling_step", "max_undo_steps", "no_creator"
     };
     private static string State(bool value) => value ? "enabled" : "disabled";
     private static void Toggle(Terminal context, ConfigEntry<bool> setting, string name, bool reverse = false) {
@@ -88,6 +95,7 @@ namespace InfinityHammer {
       if (key == "allow_in_dungeons") Toggle(context, configAllowInDungeons, "Building in dungeons");
       if (key == "remove_anything") Toggle(context, configRemoveAnything, "Removing anything");
       if (key == "ignore_other_restrictions") Toggle(context, configIgnoreOtherRestrictions, "Other build restrictions", true);
+      if (key == "no_creator") Toggle(context, configNoCreator, "Creator", true);
       if (key == "select_range") {
         configSelectRange.Value = value;
         Helper.AddMessage(context, $"Select range set to {value} meters.");
@@ -103,6 +111,10 @@ namespace InfinityHammer {
       if (key == "scaling_step") {
         configScaleStep.Value = value;
         Helper.AddMessage(context, $"Scaling step set to {value}%.");
+      }
+      if (key == "max_undo_steps") {
+        configUndoLimit.Value = value;
+        Helper.AddMessage(context, $"Max undo steps set to {value}%.");
       }
     }
   }
