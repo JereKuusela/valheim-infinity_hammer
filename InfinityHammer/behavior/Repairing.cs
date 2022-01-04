@@ -1,7 +1,5 @@
 using HarmonyLib;
-using Service;
 using UnityEngine;
-using System;
 
 // Code related to repairing objects.
 namespace InfinityHammer {
@@ -45,6 +43,11 @@ namespace InfinityHammer {
       if (!treeBase) return false;
       return RepairShared(obj, treeBase.m_health);
     }
+    private static bool RepairTreeLog(ZNetView obj) {
+      var treeLog = obj.GetComponent<TreeLog>();
+      if (!treeLog) return false;
+      return RepairShared(obj, treeLog.m_health);
+    }
     private static bool RepairMineRock(ZNetView obj, int index) {
       var mineRock = obj.GetComponent<MineRock5>();
       if (!mineRock) return false;
@@ -56,14 +59,15 @@ namespace InfinityHammer {
       if (heal != 0f) {
         area.m_health = max;
         mineRock.SaveHealth();
-        DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, area.m_bound.m_pos, Mathf.Abs(heal));
+        DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, area.m_collider.bounds.center, Mathf.Abs(heal));
         return true;
       }
-      var missing = mineRock.m_hitAreas.Find(area => area.m_health == 0f);
+      var missing = mineRock.m_hitAreas.Find(area => area.m_health <= 0f);
       if (missing != null) {
         missing.m_health = max;
         mineRock.SaveHealth();
-        DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, missing.m_bound.m_pos, Mathf.Abs(heal));
+        mineRock.UpdateMesh();
+        DamageText.instance.ShowText(DamageText.TextType.Heal, missing.m_collider.bounds.center, max);
         return true;
       }
       return false;
@@ -93,6 +97,8 @@ namespace InfinityHammer {
       if (RepairDestructible(obj))
         repaired = true;
       if (RepairTreeBase(obj))
+        repaired = true;
+      if (RepairTreeLog(obj))
         repaired = true;
       if (RepairMineRock(obj, hovered.Index))
         repaired = true;

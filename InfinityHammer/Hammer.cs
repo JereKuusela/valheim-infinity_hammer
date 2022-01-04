@@ -80,7 +80,7 @@ namespace InfinityHammer {
         var character = piece.GetComponent<Character>();
         if (character)
           zdo.Set("max_health", Settings.OverwriteHealth);
-        if (piece.GetComponent<WearNTear>() || piece.GetComponent<Destructible>() || piece.GetComponent<TreeBase>() || character)
+        if (piece.GetComponent<TreeLog>() || piece.GetComponent<WearNTear>() || piece.GetComponent<Destructible>() || piece.GetComponent<TreeBase>() || character)
           zdo.Set("health", Settings.OverwriteHealth);
         var mineRock = piece.GetComponent<MineRock5>();
         if (mineRock) {
