@@ -129,11 +129,11 @@ namespace InfinityHammer {
       }
       if (key == "max_undo_steps") {
         configUndoLimit.Value = value;
-        Helper.AddMessage(context, $"Max undo steps set to {value}%.");
+        Helper.AddMessage(context, $"Max undo steps set to {value}.");
       }
       if (key == "overwrite_health") {
         configOverwriteHealth.Value = value;
-        Helper.AddMessage(context, $"Overwrite health set to {value}%.");
+        Helper.AddMessage(context, $"Overwrite health set to {value}.");
       }
     }
   }

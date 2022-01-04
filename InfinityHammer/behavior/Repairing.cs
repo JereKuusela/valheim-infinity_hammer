@@ -15,31 +15,86 @@ namespace InfinityHammer {
 
     private static bool RepairCharacter(ZNetView obj) {
       var character = obj.GetComponent<Character>();
-      if (character && character.GetHealthPercentage() < 1f) {
-        obj.ClaimOwnership();
-        if (Settings.OverwriteHealth > 0f)
-          obj.GetZDO().Set("max_health", Settings.OverwriteHealth);
-        character.Heal(float.MaxValue, true);
+      if (!character) return false;
+      obj.ClaimOwnership();
+      var zdo = obj.GetZDO();
+      var current = zdo.GetFloat("health", character.GetMaxHealth());
+      var max = Settings.OverwriteHealth > 0f ? Settings.OverwriteHealth : character.GetMaxHealth();
+      zdo.Set("max_health", max);
+      var heal = max - current;
+      if (heal == 0f) return false;
+      zdo.Set("health", max);
+      DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, character.GetTopPoint(), Mathf.Abs(heal));
+      return true;
+    }
+    public static bool RepairStructure(ZNetView obj) {
+      var wearNTear = obj.GetComponent<WearNTear>();
+      if (!wearNTear) return false;
+      var result = RepairShared(obj, wearNTear.m_health);
+      if (result)
+        obj.InvokeRPC(ZNetView.Everybody, "WNTHealthChanged", new object[] { obj.GetZDO().GetFloat("health", wearNTear.m_health) });
+      return true;
+    }
+    private static bool RepairDestructible(ZNetView obj) {
+      var destructible = obj.GetComponent<Destructible>();
+      if (!destructible) return false;
+      return RepairShared(obj, destructible.m_health);
+    }
+    private static bool RepairTreeBase(ZNetView obj) {
+      var treeBase = obj.GetComponent<TreeBase>();
+      if (!treeBase) return false;
+      return RepairShared(obj, treeBase.m_health);
+    }
+    private static bool RepairMineRock(ZNetView obj, int index) {
+      var mineRock = obj.GetComponent<MineRock5>();
+      if (!mineRock) return false;
+      var area = mineRock.GetHitArea(index);
+      obj.ClaimOwnership();
+      var zdo = obj.GetZDO();
+      var max = Settings.OverwriteHealth > 0f ? Settings.OverwriteHealth : mineRock.m_health;
+      var heal = max - area.m_health;
+      if (heal != 0f) {
+        area.m_health = max;
+        mineRock.SaveHealth();
+        DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, area.m_bound.m_pos, Mathf.Abs(heal));
+        return true;
+      }
+      var missing = mineRock.m_hitAreas.Find(area => area.m_health == 0f);
+      if (missing != null) {
+        missing.m_health = max;
+        mineRock.SaveHealth();
+        DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, missing.m_bound.m_pos, Mathf.Abs(heal));
         return true;
       }
       return false;
     }
-    private static bool RepairStructure(ZNetView obj) {
-      var wearNTear = obj.GetComponent<WearNTear>();
-      // Repair behavior is changed elsewhere.
-      if (wearNTear && wearNTear.Repair())
-        return true;
-      return false;
+
+    private static bool RepairShared(ZNetView obj, float maxHealth) {
+      obj.ClaimOwnership();
+      var zdo = obj.GetZDO();
+      var max = Settings.OverwriteHealth > 0f ? Settings.OverwriteHealth : maxHealth;
+      var heal = max - zdo.GetFloat("health", maxHealth);
+      if (heal == 0f) return false;
+      zdo.Set("health", max);
+      DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, obj.transform.position, Mathf.Abs(heal));
+      return true;
     }
 
 
     private static bool RepairAnything(Player player) {
-      var obj = Helper.GetHovered(player);
-      if (!obj) return false;
+      var hovered = Helper.GetHovered(player);
+      if (hovered == null) return false;
+      var obj = hovered.Obj;
       var repaired = false;
       if (RepairStructure(obj))
         repaired = true;
       if (RepairCharacter(obj))
+        repaired = true;
+      if (RepairDestructible(obj))
+        repaired = true;
+      if (RepairTreeBase(obj))
+        repaired = true;
+      if (RepairMineRock(obj, hovered.Index))
         repaired = true;
       if (!repaired) return false;
       var piece = obj.GetComponent<Piece>();
@@ -90,15 +145,11 @@ namespace InfinityHammer {
     }
   }
   [HarmonyPatch(typeof(WearNTear), "Repair")]
-  public class SetRepairHealth {
-    public static bool Prefix(WearNTear __instance) {
-      if (Settings.OverwriteHealth == 0) return true;
+  public class AdvancedRepair {
+    public static bool Prefix(WearNTear __instance, ref bool __result) {
+      if (!Settings.Enabled) return true;
       var netView = __instance.m_nview;
-      if (!netView.IsValid()) return true;
-      netView.ClaimOwnership();
-      // Copypaste from RPC_Repair.
-      netView.GetZDO().Set("health", Settings.OverwriteHealth);
-      netView.InvokeRPC(ZNetView.Everybody, "WNTHealthChanged", new object[] { Settings.OverwriteHealth });
+      __result = Repair.RepairStructure(netView);
       return false;
     }
   }

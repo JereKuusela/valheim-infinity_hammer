@@ -46,7 +46,7 @@ namespace InfinityHammer {
       }
     }
 
-    public static ZNetView GetHovered(Player obj) {
+    public static Hovered GetHovered(Player obj) {
       var hits = Physics.RaycastAll(GameCamera.instance.transform.position, GameCamera.instance.transform.forward, 50f, obj.m_interactMask);
       Array.Sort<RaycastHit>(hits, (RaycastHit x, RaycastHit y) => x.distance.CompareTo(y.distance));
       foreach (var hit in hits) {
@@ -54,9 +54,20 @@ namespace InfinityHammer {
         var netView = hit.collider.GetComponentInParent<ZNetView>();
         if (!netView) continue;
         if (netView.GetComponentInChildren<Player>()) continue;
-        return netView;
+        var mineRock = netView.GetComponent<MineRock5>();
+        var index = 0;
+        if (mineRock)
+          index = mineRock.GetAreaIndex(hit.collider);
+        return new Hovered() {
+          Obj = netView,
+          Index = index
+        };
       }
       return null;
     }
+  }
+  public class Hovered {
+    public ZNetView Obj;
+    public int Index;
   }
 }

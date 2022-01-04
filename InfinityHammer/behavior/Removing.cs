@@ -16,11 +16,11 @@ namespace InfinityHammer {
     }
 
     private static bool RemoveAnything(Player obj) {
-      var netView = Helper.GetHovered(obj);
-      if (!netView) return false;
-      obj.m_removeEffects.Create(netView.transform.position, Quaternion.identity, null, 1f, -1);
-      SetTarget(netView);
-      Helper.RemoveZDO(netView.GetZDO());
+      var hovered = Helper.GetHovered(obj);
+      if (hovered == null) return false;
+      obj.m_removeEffects.Create(hovered.Obj.transform.position, Quaternion.identity, null, 1f, -1);
+      SetTarget(hovered.Obj);
+      Helper.RemoveZDO(hovered.Obj.GetZDO());
       var tool = obj.GetRightItem();
       if (tool != null) {
         obj.FaceLookDirection();
