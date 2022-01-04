@@ -76,9 +76,12 @@ namespace InfinityHammer {
         zdo.Set("creator", 0L);
       else
         piece.SetCreator(Game.instance.GetPlayerProfile().GetPlayerID());
-      if (Settings.InfiniteHealth) {
-        if (piece.GetComponent<WearNTear>())
-          zdo.Set("health", float.MaxValue / 2f);
+      if (Settings.OverwriteHealth > 0f) {
+        var character = piece.GetComponent<Character>();
+        if (character)
+          zdo.Set("max_health", Settings.OverwriteHealth);
+        if (piece.GetComponent<WearNTear>() || character)
+          zdo.Set("health", Settings.OverwriteHealth);
       }
       piece.GetComponentInChildren<ArmorStand>()?.UpdateVisual();
       piece.GetComponentInChildren<VisEquipment>()?.UpdateVisuals();
@@ -156,6 +159,10 @@ namespace InfinityHammer {
     }
     public static GameObject SetScale(float value) {
       Scale = value * Vector3.one;
+      return UpdateScale();
+    }
+    public static GameObject SetScale(Vector3 value) {
+      Scale = value;
       return UpdateScale();
     }
     private static GameObject UpdateScale() {

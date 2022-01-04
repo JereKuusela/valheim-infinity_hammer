@@ -19,7 +19,7 @@ Client-side mod that is compatible with unmodded clients.
 - hammer [item id]: Selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)).
 - hammer_undo: Reverts building or removing actions.
 - hammer_redo: Restores reverted actions.
-- hammer_scale [value=1]: Scales the selection (only for supported objects).
+- hammer_scale [value=1]: Scales the selection (only for supported objects). Number or x,y,z.
 - hammer_scale_up: Scales up the selection (only for supported objects).
 - hammer_scale_down: Scales down the selection (only for supported objects).
 - hammer_config [key] [value]: Toggles or sets configuration values.
@@ -53,8 +53,11 @@ Following powers are available and can be disabled from the config file:
 - No creator: Builds without setting the creator information (won't be targeted by the enemies). Disabled by default.
 - No durability loss: Hammer autorepairs used durability.
 - No stamina cost: Hammer auto-regens used stamina.
-- Remove anything: Allows removing any object with the hammer. Disabled by default.
+- Overwrite health: Sets the health of built or repaired objects.
+- Remove anything: Allows removing any object. Disabled by default.
 - Remove range: Range for removing (capped at about 50 meters).
+- Repair anything: Allows repairing any object. Disabled by default.
+- Repair range: Range for repairing (capped at about 50 meters).
 - Scaling step: How much the selection scales up/down.
 - Select range: Range for selecting (capped at about 50 meters).
 
@@ -64,9 +67,15 @@ On servers, above features are disabled without cheat access (except Auto rotate
 
 - v1.1.0: 
 	- Size is no longer shown for objects that don't support changing it.
+	- Messages now have a high priority (fixes scaling messages lagging behind).
 	- Slightly better support when selecting pieces from the build window.
 	- Creator is now properly set for copied objects (unless "No Creator" is on).
 	- Auto rotate setting renamed to Copy rotation.
+	- Added new setting to overwrite the health of built and repaired objects.
+	- Added no stamina and durability cost to also affect repairing.
+	- Added new setting to change repair range.
+	- Added new setting to repair anything.
+	- Added support for non-uniform scaling with hammer_scale command.
 
 - v1.0.0: 
 	- Initial release

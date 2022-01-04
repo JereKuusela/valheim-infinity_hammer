@@ -4,13 +4,6 @@ using UnityEngine;
 namespace InfinityHammer {
 
   public class HammerCommand {
-    public static GameObject GetPrefab(string name) {
-      var prefab = ZNetScene.instance.GetPrefab(name);
-      if (!prefab)
-        Player.m_localPlayer.Message(MessageHud.MessageType.TopLeft, "Missing object " + name, 0, null);
-      return prefab;
-    }
-
     ///<summary>Returns the hovered object within 50 meters.</summary>
     public static ZNetView GetHovered(Terminal context) {
       if (Player.m_localPlayer == null) return null;
@@ -46,7 +39,7 @@ namespace InfinityHammer {
         Helper.AddMessage(terminal, $"Selected {name}.");
     }
     private static GameObject SetItem(Terminal terminal, string name) {
-      var prefab = GetPrefab(name);
+      var prefab = ZNetScene.instance.GetPrefab(name);
       if (!prefab) return null;
       if (!Hammer.Set(Player.m_localPlayer, prefab, null)) return null;
       return prefab;
@@ -94,7 +87,17 @@ namespace InfinityHammer {
         GameObject scaled = null;
         if (args.Length < 2)
           scaled = Hammer.SetScale(1f);
-        else
+        else if (args[1].Contains(",")) {
+          var scale = Vector3.one;
+          var split = args[1].Split(',');
+          if (split.Length > 0) scale.x = Helper.ParseFloat(split[0], 1f);
+          if (split.Length > 1) scale.y = Helper.ParseFloat(split[2], 1f);
+          if (split.Length > 2) scale.z = Helper.ParseFloat(split[3], 1f);
+          if (scale.x == 0f) scale.x = 1f;
+          if (scale.y == 0f) scale.y = 1f;
+          if (scale.z == 0f) scale.z = 1f;
+          scaled = Hammer.SetScale(scale);
+        } else
           scaled = Hammer.SetScale(Helper.ParseFloat(args[1], 1f));
         PrintScale(args.Context, scaled);
       });

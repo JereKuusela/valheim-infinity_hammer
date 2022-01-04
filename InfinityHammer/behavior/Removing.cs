@@ -16,24 +16,17 @@ namespace InfinityHammer {
     }
 
     private static bool RemoveAnything(Player obj) {
-      var hits = Physics.RaycastAll(GameCamera.instance.transform.position, GameCamera.instance.transform.forward, 50f, obj.m_interactMask);
-      Array.Sort<RaycastHit>(hits, (RaycastHit x, RaycastHit y) => x.distance.CompareTo(y.distance));
-      foreach (var hit in hits) {
-        if (Vector3.Distance(hit.point, obj.m_eye.position) >= obj.m_maxPlaceDistance) continue;
-        var netView = hit.collider.GetComponentInParent<ZNetView>();
-        if (!netView) continue;
-        if (netView.GetComponentInChildren<Player>()) continue;
-        obj.m_removeEffects.Create(netView.transform.position, Quaternion.identity, null, 1f, -1);
-        SetTarget(netView);
-        Helper.RemoveZDO(netView.GetZDO());
-        var tool = obj.GetRightItem();
-        if (tool != null) {
-          obj.FaceLookDirection();
-          obj.m_zanim.SetTrigger(tool.m_shared.m_attack.m_attackAnimation);
-        }
-        return true;
+      var netView = Helper.GetHovered(obj);
+      if (!netView) return false;
+      obj.m_removeEffects.Create(netView.transform.position, Quaternion.identity, null, 1f, -1);
+      SetTarget(netView);
+      Helper.RemoveZDO(netView.GetZDO());
+      var tool = obj.GetRightItem();
+      if (tool != null) {
+        obj.FaceLookDirection();
+        obj.m_zanim.SetTrigger(tool.m_shared.m_attack.m_attackAnimation);
       }
-      return false;
+      return true;
     }
 
     public static void Prefix(Player __instance) {

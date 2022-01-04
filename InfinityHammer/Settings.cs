@@ -26,12 +26,14 @@ namespace InfinityHammer {
     public static bool IgnoreOtherRestrictions => configIgnoreOtherRestrictions.Value && IsCheats;
     public static ConfigEntry<bool> configRemoveAnything;
     public static bool RemoveAnything => configRemoveAnything.Value && IsCheats;
+    public static ConfigEntry<bool> configRepairAnything;
+    public static bool RepairAnything => configRepairAnything.Value && IsCheats;
     public static ConfigEntry<bool> configEnableUndo;
     public static bool EnableUndo => configEnableUndo.Value && IsCheats;
     public static ConfigEntry<bool> configNoCreator;
     public static bool NoCreator => configNoCreator.Value && IsCheats;
-    public static ConfigEntry<bool> configInfiniteHealth;
-    public static bool InfiniteHealth => configInfiniteHealth.Value && IsCheats;
+    public static ConfigEntry<string> configOverwriteHealth;
+    public static float OverwriteHealth => IsCheats ? Helper.ParseFloat(configOverwriteHealth.Value, 0f) : 0f;
     public static ConfigEntry<bool> configCopyRotation;
     public static bool CopyRotation => configCopyRotation.Value;
     public static ConfigEntry<string> configUndoLimit;
@@ -40,6 +42,8 @@ namespace InfinityHammer {
     public static float SelectRange => Helper.ParseFloat(configSelectRange.Value, 0f);
     public static ConfigEntry<string> configRemoveRange;
     public static float RemoveRange => IsCheats ? Helper.ParseFloat(configRemoveRange.Value, 0f) : 0f;
+    public static ConfigEntry<string> configRepairRange;
+    public static float RepairRange => IsCheats ? Helper.ParseFloat(configRepairRange.Value, 0f) : 0f;
     public static ConfigEntry<string> configBuildRange;
     public static float BuildRange => IsCheats ? Helper.ParseFloat(configBuildRange.Value, 0f) : 0f;
     public static ConfigEntry<string> configScaleStep;
@@ -53,6 +57,7 @@ namespace InfinityHammer {
       section = "Powers";
       configSelectRange = config.Bind(section, "Select range", "50", "Range for selecting objects.");
       configRemoveRange = config.Bind(section, "Remove range", "0", "Range for removing objects (0 = default).");
+      configRepairRange = config.Bind(section, "Repair range", "0", "Range for repairing objects (0 = default).");
       configBuildRange = config.Bind(section, "Build range", "0", "Range for placing objects (0 = default)");
       configEnableUndo = config.Bind(section, "Enable undo", true, "Enabled undo and redo for placing/removing.");
       configCopyRotation = config.Bind(section, "Copy rotation", true, "Copies rotation of the selected object.");
@@ -65,7 +70,8 @@ namespace InfinityHammer {
       configCopyState = config.Bind(section, "Copy state", true, "Copies object's internal state.");
       configAllowInDungeons = config.Bind(section, "Allow in dungeons", true, "Allows building in dungeons.");
       configRemoveAnything = config.Bind(section, "Remove anything", false, "Allows removing anything.");
-      configInfiniteHealth = config.Bind(section, "Max health", false, "Built and repaired objects are set to very high health.");
+      configRepairAnything = config.Bind(section, "Repair anything", false, "Allows reparing anything.");
+      configOverwriteHealth = config.Bind(section, "Overwrite health", "0", "Overwrites the health of built or repaired objects.");
       configNoCreator = config.Bind(section, "No creator", false, "Build without setting the creator (ignored by enemies).");
       configIgnoreOtherRestrictions = config.Bind(section, "Ignore other restrictions", true, "Ignores any other restrictions (material, biome, etc.)");
       configScaleStep = config.Bind(section, "Scaling step", "0.05", "How much each scale up/down affects the size");
@@ -77,7 +83,7 @@ namespace InfinityHammer {
       "enabled", "select_range", "remove_range", "build_range", "enable_undo", "copy_rotation", "no_build_cost",
       "ignore_wards", "ignore_no_build", "no_stamina_cost", "no_durability_loss", "all_objects", "copy_state",
       "allow_in_dungeons", "remove_anything", "ignore_other_restrictions", "scaling_step", "max_undo_steps", "no_creator",
-      "infinite_health"
+      "overwrite_health", "repair_anything", "repair_range"
     };
     private static string State(bool value) => value ? "enabled" : "disabled";
     private static void Toggle(Terminal context, ConfigEntry<bool> setting, string name, bool reverse = false) {
@@ -87,7 +93,6 @@ namespace InfinityHammer {
     }
     public static void UpdateValue(Terminal context, string key, string value) {
       if (key == "enabled") Toggle(context, configEnabled, "Infinity Hammer");
-      if (key == "infinite_health") Toggle(context, configInfiniteHealth, "Infinite health");
       if (key == "enable_undo") Toggle(context, configEnableUndo, "Undo");
       if (key == "copy_rotation") Toggle(context, configCopyRotation, "Copy rotation");
       if (key == "no_build_cost") Toggle(context, configNoBuildCost, "Build costs", true);
@@ -98,12 +103,17 @@ namespace InfinityHammer {
       if (key == "all_objects") Toggle(context, configAllObjects, "All objects");
       if (key == "copy_state") Toggle(context, configCopyState, "Copy state");
       if (key == "allow_in_dungeons") Toggle(context, configAllowInDungeons, "Building in dungeons");
-      if (key == "remove_anything") Toggle(context, configRemoveAnything, "Removing anything");
+      if (key == "remove_anything") Toggle(context, configRemoveAnything, "Remove anything");
+      if (key == "repair_anything") Toggle(context, configRepairAnything, "Repair anything");
       if (key == "ignore_other_restrictions") Toggle(context, configIgnoreOtherRestrictions, "Other build restrictions", true);
       if (key == "no_creator") Toggle(context, configNoCreator, "Creator", true);
       if (key == "select_range") {
         configSelectRange.Value = value;
         Helper.AddMessage(context, $"Select range set to {value} meters.");
+      }
+      if (key == "repair_range") {
+        configRepairRange.Value = value;
+        Helper.AddMessage(context, $"Repair range set to {value} meters.");
       }
       if (key == "remove_range") {
         configRemoveRange.Value = value;
@@ -120,6 +130,10 @@ namespace InfinityHammer {
       if (key == "max_undo_steps") {
         configUndoLimit.Value = value;
         Helper.AddMessage(context, $"Max undo steps set to {value}%.");
+      }
+      if (key == "overwrite_health") {
+        configOverwriteHealth.Value = value;
+        Helper.AddMessage(context, $"Overwrite health set to {value}%.");
       }
     }
   }

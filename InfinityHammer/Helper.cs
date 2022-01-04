@@ -1,4 +1,6 @@
 using System.Globalization;
+using UnityEngine;
+using System;
 
 namespace InfinityHammer {
   public static class Helper {
@@ -28,9 +30,33 @@ namespace InfinityHammer {
       return defaultValue;
     }
 
-    public static void AddMessage(Terminal context, string message) {
+    public static void AddMessage(Terminal context, string message, bool priority = true) {
       context.AddString(message);
-      Player.m_localPlayer?.Message(MessageHud.MessageType.TopLeft, message);
+      var hud = MessageHud.instance;
+      if (!hud) return;
+      if (priority) {
+        var items = hud.m_msgQeue.ToArray();
+        hud.m_msgQeue.Clear();
+        Player.m_localPlayer?.Message(MessageHud.MessageType.TopLeft, message);
+        foreach (var item in items)
+          hud.m_msgQeue.Enqueue(item);
+        hud.m_msgQueueTimer = 10f;
+      } else {
+        Player.m_localPlayer?.Message(MessageHud.MessageType.TopLeft, message);
+      }
+    }
+
+    public static ZNetView GetHovered(Player obj) {
+      var hits = Physics.RaycastAll(GameCamera.instance.transform.position, GameCamera.instance.transform.forward, 50f, obj.m_interactMask);
+      Array.Sort<RaycastHit>(hits, (RaycastHit x, RaycastHit y) => x.distance.CompareTo(y.distance));
+      foreach (var hit in hits) {
+        if (Vector3.Distance(hit.point, obj.m_eye.position) >= obj.m_maxPlaceDistance) continue;
+        var netView = hit.collider.GetComponentInParent<ZNetView>();
+        if (!netView) continue;
+        if (netView.GetComponentInChildren<Player>()) continue;
+        return netView;
+      }
+      return null;
     }
   }
 }
