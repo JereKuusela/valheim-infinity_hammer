@@ -30,8 +30,10 @@ namespace InfinityHammer {
     public static bool EnableUndo => configEnableUndo.Value && IsCheats;
     public static ConfigEntry<bool> configNoCreator;
     public static bool NoCreator => configNoCreator.Value && IsCheats;
-    public static ConfigEntry<bool> configAutoRotate;
-    public static bool AutoRotate => configAutoRotate.Value;
+    public static ConfigEntry<bool> configInfiniteHealth;
+    public static bool InfiniteHealth => configInfiniteHealth.Value && IsCheats;
+    public static ConfigEntry<bool> configCopyRotation;
+    public static bool CopyRotation => configCopyRotation.Value;
     public static ConfigEntry<string> configUndoLimit;
     public static int UndoLimit => (int)Helper.ParseFloat(configUndoLimit.Value, 0f);
     public static ConfigEntry<string> configSelectRange;
@@ -53,7 +55,7 @@ namespace InfinityHammer {
       configRemoveRange = config.Bind(section, "Remove range", "0", "Range for removing objects (0 = default).");
       configBuildRange = config.Bind(section, "Build range", "0", "Range for placing objects (0 = default)");
       configEnableUndo = config.Bind(section, "Enable undo", true, "Enabled undo and redo for placing/removing.");
-      configAutoRotate = config.Bind(section, "Auto rotate", true, "Automatically rotates the selected object.");
+      configCopyRotation = config.Bind(section, "Copy rotation", true, "Copies rotation of the selected object.");
       configNoBuildCost = config.Bind(section, "No build cost", true, "Removes build costs and requirements.");
       configIgnoreWards = config.Bind(section, "Ignore wards", true, "Ignores ward restrictions.");
       configIgnoreNoBuild = config.Bind(section, "Ignore no build", true, "Ignores no build areas.");
@@ -63,6 +65,7 @@ namespace InfinityHammer {
       configCopyState = config.Bind(section, "Copy state", true, "Copies object's internal state.");
       configAllowInDungeons = config.Bind(section, "Allow in dungeons", true, "Allows building in dungeons.");
       configRemoveAnything = config.Bind(section, "Remove anything", false, "Allows removing anything.");
+      configInfiniteHealth = config.Bind(section, "Max health", false, "Built and repaired objects are set to very high health.");
       configNoCreator = config.Bind(section, "No creator", false, "Build without setting the creator (ignored by enemies).");
       configIgnoreOtherRestrictions = config.Bind(section, "Ignore other restrictions", true, "Ignores any other restrictions (material, biome, etc.)");
       configScaleStep = config.Bind(section, "Scaling step", "0.05", "How much each scale up/down affects the size");
@@ -71,9 +74,10 @@ namespace InfinityHammer {
     }
 
     public static List<string> Options = new List<string>() {
-      "enabled", "select_range", "remove_range", "build_range", "enable_undo", "auto_rotate", "no_build_cost",
+      "enabled", "select_range", "remove_range", "build_range", "enable_undo", "copy_rotation", "no_build_cost",
       "ignore_wards", "ignore_no_build", "no_stamina_cost", "no_durability_loss", "all_objects", "copy_state",
-      "allow_in_dungeons", "remove_anything", "ignore_other_restrictions", "scaling_step", "max_undo_steps", "no_creator"
+      "allow_in_dungeons", "remove_anything", "ignore_other_restrictions", "scaling_step", "max_undo_steps", "no_creator",
+      "infinite_health"
     };
     private static string State(bool value) => value ? "enabled" : "disabled";
     private static void Toggle(Terminal context, ConfigEntry<bool> setting, string name, bool reverse = false) {
@@ -83,8 +87,9 @@ namespace InfinityHammer {
     }
     public static void UpdateValue(Terminal context, string key, string value) {
       if (key == "enabled") Toggle(context, configEnabled, "Infinity Hammer");
+      if (key == "infinite_health") Toggle(context, configInfiniteHealth, "Infinite health");
       if (key == "enable_undo") Toggle(context, configEnableUndo, "Undo");
-      if (key == "auto_rotate") Toggle(context, configAutoRotate, "Auto rotate");
+      if (key == "copy_rotation") Toggle(context, configCopyRotation, "Copy rotation");
       if (key == "no_build_cost") Toggle(context, configNoBuildCost, "Build costs", true);
       if (key == "ignore_wards") Toggle(context, configIgnoreWards, "Building inside wards", true);
       if (key == "ignore_no_build") Toggle(context, configIgnoreNoBuild, "No build areas", true);

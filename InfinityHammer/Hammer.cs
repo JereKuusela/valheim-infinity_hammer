@@ -71,8 +71,15 @@ namespace InfinityHammer {
       CopyState(piece);
       piece.m_canBeRemoved = true;
       piece.m_nview?.SetLocalScale(Scale);
+      var zdo = piece.m_nview.GetZDO();
       if (Settings.NoCreator)
-        piece.m_nview.GetZDO().Set("creator", 0L);
+        zdo.Set("creator", 0L);
+      else
+        piece.SetCreator(Game.instance.GetPlayerProfile().GetPlayerID());
+      if (Settings.InfiniteHealth) {
+        if (piece.GetComponent<WearNTear>())
+          zdo.Set("health", float.MaxValue / 2f);
+      }
       piece.GetComponentInChildren<ArmorStand>()?.UpdateVisual();
       piece.GetComponentInChildren<VisEquipment>()?.UpdateVisuals();
       piece.GetComponentInChildren<ItemStand>()?.UpdateVisual();
@@ -123,7 +130,7 @@ namespace InfinityHammer {
     }
     ///<summary>Copies the selected object rotation.</summary>
     public static void Rotate(GameObject obj) {
-      if (!Settings.AutoRotate) return;
+      if (!Settings.CopyRotation) return;
       var player = Player.m_localPlayer;
       if (!player) return;
       var rotation = obj.transform.rotation;
@@ -152,11 +159,10 @@ namespace InfinityHammer {
       return UpdateScale();
     }
     private static GameObject UpdateScale() {
-      if (!Sample) return null;
       var ghost = Player.m_localPlayer?.m_placementGhost;
       if (!ghost) return null;
-      var view = Sample.GetComponent<ZNetView>();
-      if (view.m_syncInitialScale) {
+      var view = Player.m_localPlayer?.GetSelectedPiece()?.GetComponent<ZNetView>();
+      if (view && view.m_syncInitialScale) {
         ghost.transform.localScale = Scale;
         return ghost;
       }

@@ -35,26 +35,41 @@ namespace InfinityHammer {
       else
         Helper.AddMessage(terminal, "Selected object doesn't support scaling.");
     }
+    private static void PrintSelected(Terminal terminal, GameObject obj) {
+      var view = obj?.GetComponent<ZNetView>();
+      var name = obj ? Utils.GetPrefabName(obj) : "";
+      if (view == null)
+        Helper.AddMessage(terminal, "Invalid object.");
+      else if (view && view.m_syncInitialScale)
+        Helper.AddMessage(terminal, $"Selected {name} (size {obj.transform.localScale.y.ToString("P0")}).");
+      else
+        Helper.AddMessage(terminal, $"Selected {name}.");
+    }
+    private static GameObject SetItem(Terminal terminal, string name) {
+      var prefab = GetPrefab(name);
+      if (!prefab) return null;
+      if (!Hammer.Set(Player.m_localPlayer, prefab, null)) return null;
+      return prefab;
+    }
+    private static GameObject SetHoveredItem(Terminal terminal) {
+      var view = GetHovered(terminal);
+      if (!view) return null;
+      var name = Utils.GetPrefabName(view.gameObject);
+      if (!Hammer.Set(Player.m_localPlayer, view.gameObject, view.GetZDO())) return null;
+      Hammer.Rotate(view.gameObject);
+      return view.gameObject;
+
+    }
     public HammerCommand() {
       new Terminal.ConsoleCommand("hammer", "[item id] - Adds an object to the hammer placement (hovered object by default).", delegate (Terminal.ConsoleEventArgs args) {
         if (!Player.m_localPlayer) return;
         if (!Settings.Enabled) return;
-        if (args.Length > 1) {
-          var name = args[1];
-          var prefab = GetPrefab(name);
-          if (prefab)
-            Hammer.Set(Player.m_localPlayer, prefab, null);
-        } else {
-          var view = GetHovered(args.Context);
-          if (!view) return;
-          var name = Utils.GetPrefabName(view.gameObject);
-          if (Hammer.Set(Player.m_localPlayer, view.gameObject, view.GetZDO())) {
-            Hammer.Rotate(view.gameObject);
-            Helper.AddMessage(args.Context, $"Selected {name} (size {view.transform.localScale.y.ToString("P0")}).");
-          } else {
-            Helper.AddMessage(args.Context, "Invalid object.");
-          }
-        }
+        GameObject selected = null;
+        if (args.Length > 1)
+          selected = SetItem(args.Context, args[1]);
+        else
+          selected = SetHoveredItem(args.Context);
+        PrintSelected(args.Context, selected);
       }, optionsFetcher: () => ZNetScene.instance.GetPrefabNames());
       new Terminal.ConsoleCommand("hammer_undo", "Reverts object placing or removing.", delegate (Terminal.ConsoleEventArgs args) {
         if (!Player.m_localPlayer) return;

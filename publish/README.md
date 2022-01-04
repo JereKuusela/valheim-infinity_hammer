@@ -42,7 +42,7 @@ Following powers are available and can be disabled from the config file:
 
 - All objects: Hammer can select and place any object. Placed objects can be removed with the hammer until the area is reloaded.
 - Allow in dungeons: Building is allowed in dungeons.
-- Auto rotate: Selected object is automatically rotated.
+- Copy rotation: Copies rotation of the selected object.
 - Build range: Range for building (capped at about 50 meters).
 - Copy state: Object state is copied (for example chest contents or itemstand items).
 - Ignore no build: "Mystical power" no longer prevents building.
@@ -61,6 +61,12 @@ Following powers are available and can be disabled from the config file:
 On servers, above features are disabled without cheat access (except Auto rotate and Select range).
 
 # Changelog
+
+- v1.1.0: 
+	- Size is no longer shown for objects that don't support changing it.
+	- Slightly better support when selecting pieces from the build window.
+	- Creator is now properly set for copied objects (unless "No Creator" is on).
+	- Auto rotate setting renamed to Copy rotation.
 
 - v1.0.0: 
 	- Initial release
