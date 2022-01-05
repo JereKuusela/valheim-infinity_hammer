@@ -65,6 +65,17 @@ namespace InfinityHammer {
       }
       return null;
     }
+
+    ///<summary>Removes scripts that try to run (for example placement needs only the model and Piece component).</summary>
+    public static void CleanObject(GameObject obj) {
+      if (!obj || !Settings.Enabled) return;
+      UnityEngine.Object.Destroy(obj.GetComponent<Humanoid>());
+      UnityEngine.Object.Destroy(obj.GetComponent<MonsterAI>());
+      UnityEngine.Object.Destroy(obj.GetComponent<BaseAI>());
+      UnityEngine.Object.Destroy(obj.GetComponent<Character>());
+      UnityEngine.Object.Destroy(obj.GetComponent<TombStone>());
+      UnityEngine.Object.Destroy(obj.GetComponent<MineRock5>());
+    }
   }
   public class Hovered {
     public ZNetView Obj;

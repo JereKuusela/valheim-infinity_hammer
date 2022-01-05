@@ -69,11 +69,4 @@ namespace InfinityHammer {
         RemovePiece.SetTarget(__instance.m_nview);
     }
   }
-  ///<summary>Resets the sample if it's removed.</summary>
-  [HarmonyPatch(typeof(ZNetScene), "OnZDODestroyed")]
-  public class ResetSampleTarget {
-    public static void Prefix(ZDO zdo) {
-      if (Hammer.SampleZDO == zdo) Hammer.Remove(Player.m_localPlayer);
-    }
-  }
 }

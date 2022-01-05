@@ -20,8 +20,8 @@ namespace InfinityHammer {
     public static bool Prefix() => !Settings.NoBuildCost;
   }
   [HarmonyPatch(typeof(Player), "UpdatePlacementGhost")]
-  public class UpdatePlacementGhost {
-    public static void Postfix(Player __instance) => Hammer.ForceValidPlacement(__instance);
+  public class UnlockPlacement {
+    public static void Postfix(Player __instance) => Placing.ForceValidPlacement(__instance);
   }
   [HarmonyPatch(typeof(Location), "IsInsideNoBuildLocation")]
   public class IsInsideNoBuildLocation {

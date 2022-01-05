@@ -1,24 +1,48 @@
 using HarmonyLib;
 using Service;
+using UnityEngine;
 
 // Code related to adding objects.
 namespace InfinityHammer {
 
+  public static class Placing {
+
+    ///<summary>Removes placement checks.</summary>
+    public static void ForceValidPlacement(Player obj) {
+      if (obj.m_placementGhost == null) return;
+      if (obj.m_placementStatus == Player.PlacementStatus.NotInDungeon) {
+        if (!Settings.AllowInDungeons) return;
+      } else if (obj.m_placementStatus == Player.PlacementStatus.NoBuildZone) {
+        if (!Settings.IgnoreNoBuild) return;
+      } else if (obj.m_placementStatus == Player.PlacementStatus.PrivateZone) {
+        if (!Settings.IgnoreWards) return;
+      } else if (!Settings.IgnoreOtherRestrictions) return;
+      obj.m_placementStatus = Player.PlacementStatus.Valid;
+      obj.SetPlacementGhostValid(true);
+    }
+  }
+
   ///<summary>Overrides the piece selection.</summary>
   [HarmonyPatch(typeof(PieceTable), "GetSelectedPiece")]
   public class GetSelectedPiece {
-    public static bool Prefix(ref Piece __result) => !Hammer.ReplacePiece(ref __result);
+    public static bool Prefix(ref Piece __result) {
+      __result = Hammer.GetPrefab()?.GetComponent<Piece>();
+      if (__result) return false;
+      return true;
+    }
   }
 
   ///<summary>Selecting a piece normally removes the override.</summary>
   [HarmonyPatch(typeof(Player), "SetSelectedPiece")]
   public class SetSelectedPiece {
-    public static void Prefix(Player __instance) => Hammer.Remove(__instance);
+    public static void Prefix(Player __instance) {
+      Hammer.RemoveSelection();
+      __instance.SetupPlacementGhost();
+    }
   }
 
   [HarmonyPatch(typeof(Player), "PlacePiece")]
   public class PlacePiece {
-    public static void Prefix(ref Piece piece) => Hammer.CleanPlacePrefab(ref piece);
     public static void Postfix(bool __result) {
       if (__result && Piece.m_allPieces.Count > 0) {
         var added = Piece.m_allPieces[Piece.m_allPieces.Count - 1];
@@ -49,6 +73,22 @@ namespace InfinityHammer {
 
   [HarmonyPatch(typeof(Player), "SetupPlacementGhost")]
   public class SetupPlacementGhost {
-    public static void Postfix(Player __instance) => Hammer.PostProcessPlacementGhost(__instance.m_placementGhost);
+    public static void Prefix() {
+      Hammer.UseSelectedObject = true;
+    }
+    public static void Postfix(Player __instance) {
+      Helper.CleanObject(__instance.m_placementGhost);
+      // When copying an existing object, the copy is inactive.
+      // So the ghost must be manually activated while disabling ZNet stuff.
+      if (__instance.m_placementGhost && !__instance.m_placementGhost.activeSelf) {
+        ZNetView.m_forceDisableInit = true;
+        __instance.m_placementGhost.SetActive(true);
+        ZNetView.m_forceDisableInit = false;
+      }
+    }
+  }
+  [HarmonyPatch(typeof(Player), "UpdatePlacementGhost")]
+  public class UpdatePlacementGhost {
+    public static void Postfix() => Scaling.UpdatePlacementScale();
   }
 }

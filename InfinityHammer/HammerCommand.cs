@@ -22,12 +22,6 @@ namespace InfinityHammer {
       }
       return view;
     }
-    private static void PrintScale(Terminal terminal, GameObject obj) {
-      if (obj)
-        Helper.AddMessage(terminal, $"Scale set to {obj.transform.localScale.y.ToString("P0")}.");
-      else
-        Helper.AddMessage(terminal, "Selected object doesn't support scaling.");
-    }
     private static void PrintSelected(Terminal terminal, GameObject obj) {
       var view = obj?.GetComponent<ZNetView>();
       var name = obj ? Utils.GetPrefabName(obj) : "";
@@ -49,7 +43,7 @@ namespace InfinityHammer {
       if (!view) return null;
       var name = Utils.GetPrefabName(view.gameObject);
       if (!Hammer.Set(Player.m_localPlayer, view.gameObject, view.GetZDO())) return null;
-      Hammer.Rotate(view.gameObject);
+      Rotating.UpdatePlacementRotation(view.gameObject);
       return view.gameObject;
 
     }
@@ -76,17 +70,18 @@ namespace InfinityHammer {
       });
       new Terminal.ConsoleCommand("hammer_scale_up", "Scales up the selection (if the object supports it).", delegate (Terminal.ConsoleEventArgs args) {
         if (Settings.ScaleStep <= 0f) return;
-        PrintScale(args.Context, Hammer.ScaleUp());
+        Scaling.ScaleUp();
+        Scaling.PrintScale(args.Context);
       });
       new Terminal.ConsoleCommand("hammer_scale_down", "Scales down the selection (if the object supports it).", delegate (Terminal.ConsoleEventArgs args) {
         if (Settings.ScaleStep <= 0f) return;
-        PrintScale(args.Context, Hammer.ScaleDown());
+        Scaling.ScaleDown();
+        Scaling.PrintScale(args.Context);
       });
       new Terminal.ConsoleCommand("hammer_scale", "[value=1] - Sets scale of the selection (if the object supports it).", delegate (Terminal.ConsoleEventArgs args) {
         if (Settings.ScaleStep <= 0f) return;
-        GameObject scaled = null;
         if (args.Length < 2)
-          scaled = Hammer.SetScale(1f);
+          Scaling.SetScale(1f);
         else if (args[1].Contains(",")) {
           var scale = Vector3.one;
           var split = args[1].Split(',');
@@ -96,10 +91,10 @@ namespace InfinityHammer {
           if (scale.x == 0f) scale.x = 1f;
           if (scale.y == 0f) scale.y = 1f;
           if (scale.z == 0f) scale.z = 1f;
-          scaled = Hammer.SetScale(scale);
+          Scaling.SetScale(scale);
         } else
-          scaled = Hammer.SetScale(Helper.ParseFloat(args[1], 1f));
-        PrintScale(args.Context, scaled);
+          Scaling.SetScale(Helper.ParseFloat(args[1], 1f));
+        Scaling.PrintScale(args.Context);
       });
       new Terminal.ConsoleCommand("hammer_config", "[key] [value] - Toggles or sets config value.", delegate (Terminal.ConsoleEventArgs args) {
         if (args.Length < 2) return;

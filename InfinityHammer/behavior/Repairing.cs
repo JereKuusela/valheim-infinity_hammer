@@ -27,11 +27,13 @@ namespace InfinityHammer {
     }
     public static bool RepairStructure(ZNetView obj) {
       var wearNTear = obj.GetComponent<WearNTear>();
-      if (!wearNTear) return false;
+      if (!wearNTear || Time.time - wearNTear.m_lastRepair < 1f) return false;
       var result = RepairShared(obj, wearNTear.m_health);
-      if (result)
+      if (result) {
+        wearNTear.m_lastRepair = Time.time;
         obj.InvokeRPC(ZNetView.Everybody, "WNTHealthChanged", new object[] { obj.GetZDO().GetFloat("health", wearNTear.m_health) });
-      return true;
+      }
+      return result;
     }
     private static bool RepairDestructible(ZNetView obj) {
       var destructible = obj.GetComponent<Destructible>();

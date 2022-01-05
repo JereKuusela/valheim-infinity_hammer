@@ -109,6 +109,8 @@ If "Destroy anything" is enabled, all objects can be removed. Removing non-stand
 	- Added new setting to change repair range.
 	- Added new setting to repair anything (including creatures).
 	- Added support for non-uniform scaling with hammer_scale command.
+	- Fixed placement selection keeping the hover color when copying a structure.
+	- Fixed selectiong being removed when the selected objects is destroyed.
 
 - v1.0.0: 
 	- Initial release

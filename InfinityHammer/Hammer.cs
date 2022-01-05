@@ -3,30 +3,30 @@ using UnityEngine;
 
 namespace InfinityHammer {
   public static class Hammer {
-    ///<summary>The entity sampled by the hammer (can be an actual entity or a named prefab)</summary>
-    private static GameObject Sample = null;
+    ///<summary>Copy of the selected entity. Only needed for the placement ghost because armor and item stands have a different model depending on their state.</summary>
+    private static GameObject Selected = null;
+    ///<summary>Copy of the state.</summary>
+    private static ZDO State = null;
+    ///<summary>The actual named prefab used for creating the object.</summary>
+    private static GameObject Prefab = null;
 
-    ///<summary>Current scale (separate variable to not affect the sample).</summary>
-    private static Vector3 Scale = Vector3.one;
-    ///<summary>ZDO of actual entities.</summary>
-    public static ZDO SampleZDO = null;
+    ///<summary>Hack to only return the selected when creating the placement ghost.</summary>
+    public static bool UseSelectedObject = false;
+    public static GameObject GetPrefab() {
+      if (UseSelectedObject) {
+        UseSelectedObject = false;
+        return Selected ?? Prefab;
+      }
+      return Prefab;
+    }
 
-    ///<summary>Copies ZDO data</summary>
     public static void CopyState(Piece obj) {
-      if (SampleZDO == null || !Settings.CopyState || !obj.m_nview) return;
+      if (State == null || !Settings.CopyState || !obj.m_nview) return;
       var zdo = obj.m_nview.GetZDO();
-      if (!SampleZDO.IsValid() || !zdo.IsValid()) return;
-      var clone = SampleZDO.Clone();
-      Helper.CopyData(clone, zdo);
+      if (!zdo.IsValid()) return;
+      Helper.CopyData(State.Clone(), zdo);
     }
-    ///<summary>Replaces the placement piece with a clean prefab (prevents attached objects being copied).</summary>
-    public static void CleanPlacePrefab(ref Piece piece) {
-      if (Sample == null) return;
-      var prefab = ZNetScene.instance.GetPrefab(Utils.GetPrefabName(Sample));
-      piece = prefab.GetComponent<Piece>();
-      if (!piece)
-        piece = prefab.AddComponent<Piece>();
-    }
+
     private static bool IsBuildPiece(Player player, GameObject obj)
       => player.m_buildPieces.m_pieces.Any(piece => Utils.GetPrefabName(obj) == Utils.GetPrefabName(piece));
 
@@ -35,42 +35,43 @@ namespace InfinityHammer {
       if (!player || !obj) return false;
       if (obj.GetComponent<Player>()) return false;
       if (!Settings.AllObjects && !IsBuildPiece(player, obj)) return false;
-      Scale = obj.transform.localScale;
-      // Without state, the clean should be used immediatelly (so itemstands won't show the item).
-      if (!Settings.CopyState) obj = ZNetScene.instance.GetPrefab(Utils.GetPrefabName(obj));
-      if (!obj) return false;
-      var piece = obj.GetComponent<Piece>();
-      if (!piece) {
-        piece = obj.AddComponent<Piece>();
+      Scaling.SetScale(obj.transform.localScale);
+      RemoveSelection();
+      State = null;
+      Prefab = ZNetScene.instance.GetPrefab(Utils.GetPrefabName(obj));
+      if (Settings.CopyState) {
+        obj.GetComponent<WearNTear>()?.ResetHighlight();
+        // Initializing the copy as inactive is the best way to avoid any script errors.
+        // ZNet stuff also won't run.
+        obj.SetActive(false);
+        Selected = Object.Instantiate(obj);
+        obj.SetActive(true);
+        State = state == null ? null : state.Clone();
+      }
+      if (Selected && !Selected.GetComponent<Piece>()) {
+        var piece = Selected.AddComponent<Piece>();
         piece.m_clipEverything = true;
       }
-      Sample = obj;
-      SampleZDO = state;
+      if (Prefab && !Prefab.GetComponent<Piece>()) {
+        var piece = Prefab.AddComponent<Piece>();
+        piece.m_clipEverything = true;
+      }
       player.SetupPlacementGhost();
       return true;
     }
-    ///<summary>Removes the sample object.</summary>
-    public static void Remove(Player player) {
-      Sample = null;
-      SampleZDO = null;
-      player?.SetupPlacementGhost();
-    }
-    ///<summary>Overrides the given piece with the sample object. Returns if overridden.</summary>
-    public static bool ReplacePiece(ref Piece piece) {
-      if (Sample) {
-        piece = Sample.GetComponent<Piece>();
-        if (piece)
-          return true;
-      }
-      return false;
+    public static void RemoveSelection() {
+      if (Selected) ZNetScene.instance.Destroy(Selected);
+      Selected = null;
+      State = null;
+      Prefab = null;
     }
 
     ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
     public static void PostProcessPlaced(Piece piece) {
-      if (!Sample) return;
+      if (!Prefab) return;
       CopyState(piece);
       piece.m_canBeRemoved = true;
-      piece.m_nview?.SetLocalScale(Scale);
+      Scaling.SetPieceScale(piece);
       var zdo = piece.m_nview.GetZDO();
       if (Settings.NoCreator)
         zdo.Set("creator", 0L);
@@ -96,21 +97,6 @@ namespace InfinityHammer {
       piece.GetComponentInChildren<Sign>()?.UpdateText();
     }
 
-    ///<summary>Removes placement checks.</summary>
-    public static void ForceValidPlacement(Player obj) {
-      if (obj.m_placementGhost == null) return;
-      if (obj.m_placementStatus == Player.PlacementStatus.NotInDungeon) {
-        if (!Settings.AllowInDungeons) return;
-      } else if (obj.m_placementStatus == Player.PlacementStatus.NoBuildZone) {
-        if (!Settings.IgnoreNoBuild) return;
-      } else if (obj.m_placementStatus == Player.PlacementStatus.PrivateZone) {
-        if (!Settings.IgnoreWards) return;
-      } else if (!Settings.IgnoreOtherRestrictions) return;
-      obj.m_placementStatus = Player.PlacementStatus.Valid;
-      obj.SetPlacementGhostValid(true);
-    }
-
-
     ///<summary>Restores durability and stamina to counter the usage.</summary>
     public static void PostProcessTool(Player obj) {
       var item = obj.GetRightItem();
@@ -119,66 +105,6 @@ namespace InfinityHammer {
         obj.UseStamina(-item.m_shared.m_attack.m_attackStamina);
       if (Settings.NoDurabilityLoss && item.m_shared.m_useDurability)
         item.m_durability += item.m_shared.m_useDurabilityDrain;
-    }
-
-    ///<summary>Disables problematic scripts and sets free placement.</summary>
-    public static void PostProcessPlacementGhost(GameObject obj) {
-      if (!obj || !Sample) return;
-      var baseAI = obj.GetComponent<BaseAI>();
-      var monsterAI = obj.GetComponent<MonsterAI>();
-      var humanoid = obj.GetComponent<Humanoid>();
-      var character = obj.GetComponent<Character>();
-      var tombStone = obj.GetComponent<TombStone>();
-      if (baseAI) baseAI.enabled = false;
-      if (monsterAI) monsterAI.enabled = false;
-      if (humanoid) humanoid.enabled = false;
-      if (character) character.enabled = false;
-      if (tombStone) tombStone.enabled = false;
-      obj.transform.localScale = Scale;
-    }
-    ///<summary>Copies the selected object rotation.</summary>
-    public static void Rotate(GameObject obj) {
-      if (!Settings.CopyRotation) return;
-      var player = Player.m_localPlayer;
-      if (!player) return;
-      var rotation = obj.transform.rotation;
-      player.m_placeRotation = Mathf.RoundToInt(rotation.eulerAngles.y / 22.5f);
-
-      var gizmo = GameObject.Find("GizmoRoot(Clone)");
-      if (!gizmo) {
-        // Gizmo needs these to ensure that it is initialized properly.
-        player.UpdatePlacementGhost(false);
-        player.UpdatePlacement(false, 0);
-      }
-      gizmo = GameObject.Find("GizmoRoot(Clone)");
-      if (gizmo)
-        gizmo.transform.rotation = rotation;
-    }
-    public static GameObject ScaleUp() {
-      Scale *= (1f + Settings.ScaleStep);
-      return UpdateScale();
-    }
-    public static GameObject ScaleDown() {
-      Scale /= (1f + Settings.ScaleStep);
-      return UpdateScale();
-    }
-    public static GameObject SetScale(float value) {
-      Scale = value * Vector3.one;
-      return UpdateScale();
-    }
-    public static GameObject SetScale(Vector3 value) {
-      Scale = value;
-      return UpdateScale();
-    }
-    private static GameObject UpdateScale() {
-      var ghost = Player.m_localPlayer?.m_placementGhost;
-      if (!ghost) return null;
-      var view = Player.m_localPlayer?.GetSelectedPiece()?.GetComponent<ZNetView>();
-      if (view && view.m_syncInitialScale) {
-        ghost.transform.localScale = Scale;
-        return ghost;
-      }
-      return null;
     }
   }
 }
