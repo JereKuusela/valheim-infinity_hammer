@@ -13,7 +13,7 @@ namespace InfinityHammer {
 
     private static bool RepairCharacter(ZNetView obj) {
       var character = obj.GetComponent<Character>();
-      if (!character) return false;
+      if (!character || character.IsPlayer()) return false;
       obj.ClaimOwnership();
       var zdo = obj.GetZDO();
       var current = zdo.GetFloat("health", character.GetMaxHealth());
@@ -23,6 +23,14 @@ namespace InfinityHammer {
       if (heal == 0f) return false;
       zdo.Set("health", max);
       DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, character.GetTopPoint(), Mathf.Abs(heal));
+      return true;
+    }
+    private static bool RepairPlayer(ZNetView obj) {
+      var player = obj.GetComponent<Player>();
+      if (!player) return false;
+      var heal = player.GetMaxHealth() - player.GetHealth();
+      if (heal == 0f) return false;
+      player.Heal(heal, true);
       return true;
     }
     public static bool RepairStructure(ZNetView obj) {
@@ -88,13 +96,15 @@ namespace InfinityHammer {
 
 
     private static bool RepairAnything(Player player) {
-      var hovered = Helper.GetHovered(player);
+      var hovered = Helper.GetHovered(player, player.m_maxPlaceDistance, true);
       if (hovered == null) return false;
       var obj = hovered.Obj;
       var repaired = false;
       if (RepairStructure(obj))
         repaired = true;
       if (RepairCharacter(obj))
+        repaired = true;
+      if (RepairPlayer(obj))
         repaired = true;
       if (RepairDestructible(obj))
         repaired = true;

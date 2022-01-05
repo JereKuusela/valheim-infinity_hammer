@@ -1,4 +1,3 @@
-using System;
 using HarmonyLib;
 using Service;
 using UnityEngine;
@@ -16,7 +15,7 @@ namespace InfinityHammer {
     }
 
     private static bool RemoveAnything(Player obj) {
-      var hovered = Helper.GetHovered(obj);
+      var hovered = Helper.GetHovered(obj, obj.m_maxPlaceDistance);
       if (hovered == null) return false;
       obj.m_removeEffects.Create(hovered.Obj.transform.position, Quaternion.identity, null, 1f, -1);
       SetTarget(hovered.Obj);

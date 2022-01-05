@@ -15,55 +15,55 @@ Client-side mod that is compatible with unmodded clients.
 
 # Usage
 
-- hammer: Selects the currently hovered object.
+- hammer: Selects the hovered object.
 - hammer [item id]: Selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)).
-- hammer_undo: Reverts building or removing actions.
+- hammer_undo: Reverts building or destroying.
 - hammer_redo: Restores reverted actions.
-- hammer_scale [value=1]: Scales the selection (only for supported objects). Number or x,y,z.
-- hammer_scale_up: Scales up the selection (only for supported objects).
-- hammer_scale_down: Scales down the selection (only for supported objects).
+- hammer_scale [value=1]: Sets the object scale (if supported). Number or x,y,z.
+- hammer_scale_up: Scales up the object (if supported).
+- hammer_scale_down: Scales down the object (if supported).
 - hammer_config [key] [value]: Toggles or sets configuration values.
 
-Note: Some interactions are quite complicated so plesae report any issues!
+Note: Some interactions are quite complicated so please report any issues!
 
 Bind commands to [keys](https://docs.unity3d.com/ScriptReference/KeyCode.html).
 
 For example:
 
-- bind KeyPad0 hammer
+- bind KeyPad0 hammer (Mouse4 or Mouse5 also work nicely)
 - bind KeyPad1 hammer_scale_down
-- bind KeyPad2 hammer_scale
+- bind KeyPad2 hammer_scale (resets scaling)
 - bind KeyPad3 hammer_scale_up
 - bind KeyPad7 hammer_undo
-- bind KeyPad8 hammer_config enabled
+- bind KeyPad8 hammer_config enabled (toggles all features on/off)
 - bind KeyPad9 hammer_redo
 
 # Configuration
 
-Following powers are available and can be disabled from the config file:
+Following powers are available:
 
-- All objects: Hammer can select and place any object. Placed objects can be removed with the hammer until the area is reloaded.
+- All objects: Hammer can select and place any object. Any placed object can be removed with the hammer until the area is reloaded.
 - Allow in dungeons: Building is allowed in dungeons.
 - Copy rotation: Copies rotation of the selected object.
 - Build range: Range for building (capped at about 50 meters).
-- Copy state: Object state is copied (for example chest contents or itemstand items).
+- Copy state: Object state is copied (for example chest contents or item stand items).
 - Ignore no build: "Mystical power" no longer prevents building.
 - Ignore other restrictions: Removes any other restrictions (for example campfires can be built on wood floors).
 - Ignore wards: Wards no longer prevent building.
 - Max undo steps: How many undo actions are stored.
 - No build cost: Removes resource cost and crafting station requirement.
 - No creator: Builds without setting the creator information (won't be targeted by the enemies). Disabled by default.
-- No durability loss: Hammer autorepairs used durability.
+- No durability loss: Hammer auto-repairs used durability.
 - No stamina cost: Hammer auto-regens used stamina.
 - Overwrite health: Sets the health of built or repaired objects (0 reverts to the default max health, except for creatures).
 - Remove anything: Allows removing any object. Disabled by default.
 - Remove range: Range for removing (capped at about 50 meters).
-- Repair anything: Allows repairing any object. Disabled by default.
+- Repair anything: Allows healing or repairing any object. Disabled by default.
 - Repair range: Range for repairing (capped at about 50 meters).
-- Scaling step: How much the selection scales up/down.
+- Scaling step: How much the object is scaled up/down.
 - Select range: Range for selecting (capped at about 50 meters).
 
-On servers, above features are disabled without cheat access (except Auto rotate and Select range).
+On servers, above features are disabled without cheat access (except Copy rotate and Select range).
 
 # Building
 
@@ -75,13 +75,15 @@ Object scaling only works for some objects (mostly trees and rocks). This is res
 
 If "Overwrite health" is enabled, objects have a specified health (including creatures). For minerocks, the health is applied to the individual parts (the outer shell stays at 1 health). Repairing can be used to modify the shell health if needed.
 
-"Copy state" only applies when selecting existing objects since structures from the build menu are stateless. However the creator ID is always set bsaed on the "No creator" setting, even for non-standard structures.
+"Copy state" only applies when selecting existing objects since structures from the build menu are stateless. However the creator ID is always set based on the "No creator" setting, even for non-standard structures.
+
+Locations (Points of Interest) can also be copied. However only static parts are included in the actual location. For example in the start temple, each boss stone is a separate object and can be copied separately if needed.
 
 # Repairing
 
 By default, only change is that the UI shows how much damage was repaired.
 
-If "Repair anything" is enabled, most destructible objects can be repaired or healed. This includes creatures.
+If "Repair anything" is enabled, most destructible objects can be repaired or healed. This includes creatures and players.
 
 For minerocks, if the targeted part is already at full health, a random part is restored instead. This is not very practical but can be used to restore any accidental changes to minerocks.
 
@@ -91,7 +93,7 @@ For creatures, the maximum health value is also set. So they will keep their max
 
 # Destroying
 
-By default, destroying only works for standard structures and placed objects. Placed objects can only be removed temporarily since the required informatin is lost when the area is reloaded.
+By default, destroying only works for standard structures and placed objects. Placed objects can only be removed temporarily since the required information is lost when the area is reloaded.
 
 If "Destroy anything" is enabled, all objects can be removed. Removing non-standard objects will instantly destroy them without triggering any effects like drops.
 
@@ -101,7 +103,6 @@ If "Destroy anything" is enabled, all objects can be removed. Removing non-stand
 - v1.1.0: 
 	- Size is no longer shown for objects that don't support changing it.
 	- Messages now have a high priority (fixes scaling messages lagging behind).
-	- Slightly better support when selecting pieces from the build window.
 	- Creator is now properly set for copied objects (unless "No Creator" is on).
 	- Auto rotate setting renamed to Copy rotation.
 	- Added new setting to overwrite the health of built and repaired objects (including creatures).
@@ -109,8 +110,8 @@ If "Destroy anything" is enabled, all objects can be removed. Removing non-stand
 	- Added new setting to change repair range.
 	- Added new setting to repair anything (including creatures).
 	- Added support for non-uniform scaling with hammer_scale command.
-	- Fixed placement selection keeping the hover color when copying a structure.
-	- Fixed selectiong being removed when the selected objects is destroyed.
+	- Fixed selection keeping the hover color when selecting a structure.
+	- Fixed selection being removed when the selected objects is destroyed.
 
 - v1.0.0: 
 	- Initial release

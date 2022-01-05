@@ -7,20 +7,13 @@ namespace InfinityHammer {
     ///<summary>Returns the hovered object within 50 meters.</summary>
     public static ZNetView GetHovered(Terminal context) {
       if (Player.m_localPlayer == null) return null;
-      var interact = Player.m_localPlayer.m_maxInteractDistance;
-      Player.m_localPlayer.m_maxInteractDistance = Settings.SelectRange;
-      Player.m_localPlayer.FindHoverObject(out var obj, out var creature);
-      Player.m_localPlayer.m_maxInteractDistance = interact;
-      if (obj == null) {
+      var range = Settings.SelectRange == 0 ? Player.m_localPlayer.m_maxInteractDistance : Settings.SelectRange;
+      var hovered = Helper.GetHovered(Player.m_localPlayer, range);
+      if (hovered == null) {
         Helper.AddMessage(context, "Nothing is being hovered.");
         return null;
       }
-      var view = obj.GetComponentInParent<ZNetView>();
-      if (view == null) {
-        Helper.AddMessage(context, "Nothing is being hovered.");
-        return null;
-      }
-      return view;
+      return hovered.Obj;
     }
     private static void PrintSelected(Terminal terminal, GameObject obj) {
       var view = obj?.GetComponent<ZNetView>();

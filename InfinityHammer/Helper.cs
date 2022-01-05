@@ -1,6 +1,6 @@
+using System;
 using System.Globalization;
 using UnityEngine;
-using System;
 
 namespace InfinityHammer {
   public static class Helper {
@@ -46,14 +46,16 @@ namespace InfinityHammer {
       }
     }
 
-    public static Hovered GetHovered(Player obj) {
+    public static Hovered GetHovered(Player obj, float maxDistance, bool allowOtherPlayers = false) {
       var hits = Physics.RaycastAll(GameCamera.instance.transform.position, GameCamera.instance.transform.forward, 50f, obj.m_interactMask);
       Array.Sort<RaycastHit>(hits, (RaycastHit x, RaycastHit y) => x.distance.CompareTo(y.distance));
       foreach (var hit in hits) {
         if (Vector3.Distance(hit.point, obj.m_eye.position) >= obj.m_maxPlaceDistance) continue;
         var netView = hit.collider.GetComponentInParent<ZNetView>();
         if (!netView) continue;
-        if (netView.GetComponentInChildren<Player>()) continue;
+        var player = netView.GetComponentInChildren<Player>();
+        if (player == obj) continue;
+        if (!allowOtherPlayers && player) continue;
         var mineRock = netView.GetComponent<MineRock5>();
         var index = 0;
         if (mineRock)
