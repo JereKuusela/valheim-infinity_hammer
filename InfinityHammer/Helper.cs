@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using HarmonyLib;
 using UnityEngine;
 
 namespace InfinityHammer {
@@ -71,6 +72,8 @@ namespace InfinityHammer {
     ///<summary>Removes scripts that try to run (for example placement needs only the model and Piece component).</summary>
     public static void CleanObject(GameObject obj) {
       if (!obj || !Settings.Enabled) return;
+      UnityEngine.Object.Destroy(obj.GetComponent<FootStep>());
+      UnityEngine.Object.Destroy(obj.GetComponent<CharacterDrop>());
       UnityEngine.Object.Destroy(obj.GetComponent<Humanoid>());
       UnityEngine.Object.Destroy(obj.GetComponent<MonsterAI>());
       UnityEngine.Object.Destroy(obj.GetComponent<BaseAI>());
@@ -82,5 +85,15 @@ namespace InfinityHammer {
   public class Hovered {
     public ZNetView Obj;
     public int Index;
+  }
+  [HarmonyPatch(typeof(Player), "Message")]
+  public class ReplaceMessage {
+    public static string Message = "";
+    public static void Prefix(ref string msg) {
+      if (Message != "") {
+        msg = Message;
+        Message = "";
+      }
+    }
   }
 }

@@ -1,6 +1,5 @@
 using HarmonyLib;
 using Service;
-using UnityEngine;
 
 // Code related to adding objects.
 namespace InfinityHammer {
@@ -43,7 +42,11 @@ namespace InfinityHammer {
 
   [HarmonyPatch(typeof(Player), "PlacePiece")]
   public class PlacePiece {
+    public static void Prefix() {
+      DisableEffects.Active = true;
+    }
     public static void Postfix(bool __result) {
+      DisableEffects.Active = false;
       if (__result && Piece.m_allPieces.Count > 0) {
         var added = Piece.m_allPieces[Piece.m_allPieces.Count - 1];
         Hammer.PostProcessPlaced(added);

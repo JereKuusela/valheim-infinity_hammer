@@ -48,6 +48,10 @@ namespace InfinityHammer {
     public static float BuildRange => IsCheats ? Helper.ParseFloat(configBuildRange.Value, 0f) : 0f;
     public static ConfigEntry<string> configScaleStep;
     public static float ScaleStep => IsCheats ? Helper.ParseFloat(configScaleStep.Value, 0f) : 0f;
+    public static ConfigEntry<bool> configRemoveEffects;
+    public static bool RemoveEffects => configRemoveEffects.Value;
+    public static ConfigEntry<bool> configRepairTaming;
+    public static bool RepairTaming => configRepairTaming.Value && IsCheats;
     public static ConfigEntry<bool> configEnabled;
     public static bool Enabled => configEnabled.Value;
 
@@ -59,6 +63,8 @@ namespace InfinityHammer {
       configRemoveRange = config.Bind(section, "Remove range", "0", "Range for removing objects (0 = default).");
       configRepairRange = config.Bind(section, "Repair range", "0", "Range for repairing objects (0 = default).");
       configBuildRange = config.Bind(section, "Build range", "0", "Range for placing objects (0 = default)");
+      configRepairTaming = config.Bind(section, "Repair taming", false, "Repairing full health creatures tames/untames them.");
+      configRemoveEffects = config.Bind(section, "Remove effects", false, "Removes visual effects of building, etc.");
       configEnableUndo = config.Bind(section, "Enable undo", true, "Enabled undo and redo for placing/removing.");
       configCopyRotation = config.Bind(section, "Copy rotation", true, "Copies rotation of the selected object.");
       configNoBuildCost = config.Bind(section, "No build cost", true, "Removes build costs and requirements.");
@@ -83,7 +89,7 @@ namespace InfinityHammer {
       "enabled", "select_range", "remove_range", "build_range", "enable_undo", "copy_rotation", "no_build_cost",
       "ignore_wards", "ignore_no_build", "no_stamina_cost", "no_durability_loss", "all_objects", "copy_state",
       "allow_in_dungeons", "remove_anything", "ignore_other_restrictions", "scaling_step", "max_undo_steps", "no_creator",
-      "overwrite_health", "repair_anything", "repair_range"
+      "overwrite_health", "repair_anything", "repair_range", "remove_effects", "repair_taming"
     };
     private static string State(bool value) => value ? "enabled" : "disabled";
     private static void Toggle(Terminal context, ConfigEntry<bool> setting, string name, bool reverse = false) {
@@ -94,6 +100,8 @@ namespace InfinityHammer {
     public static void UpdateValue(Terminal context, string key, string value) {
       if (key == "enabled") Toggle(context, configEnabled, "Infinity Hammer");
       if (key == "enable_undo") Toggle(context, configEnableUndo, "Undo");
+      if (key == "repair_taming") Toggle(context, configRepairTaming, "Taming", true);
+      if (key == "remove_effects") Toggle(context, configRemoveEffects, "Effects", true);
       if (key == "copy_rotation") Toggle(context, configCopyRotation, "Copy rotation");
       if (key == "no_build_cost") Toggle(context, configNoBuildCost, "Build costs", true);
       if (key == "ignore_wards") Toggle(context, configIgnoreWards, "Building inside wards", true);

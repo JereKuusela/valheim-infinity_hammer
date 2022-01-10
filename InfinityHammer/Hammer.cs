@@ -1,4 +1,5 @@
 using System.Linq;
+using HarmonyLib;
 using UnityEngine;
 
 namespace InfinityHammer {
@@ -50,10 +51,12 @@ namespace InfinityHammer {
       }
       if (Selected && !Selected.GetComponent<Piece>()) {
         var piece = Selected.AddComponent<Piece>();
+        piece.m_name = Utils.GetPrefabName(piece.gameObject);
         piece.m_clipEverything = true;
       }
       if (Prefab && !Prefab.GetComponent<Piece>()) {
         var piece = Prefab.AddComponent<Piece>();
+        piece.m_name = Utils.GetPrefabName(piece.gameObject);
         piece.m_clipEverything = true;
       }
       player.SetupPlacementGhost();
@@ -73,12 +76,16 @@ namespace InfinityHammer {
       piece.m_canBeRemoved = true;
       Scaling.SetPieceScale(piece);
       var zdo = piece.m_nview.GetZDO();
-      if (Settings.NoCreator)
-        zdo.Set("creator", 0L);
-      else
-        piece.SetCreator(Game.instance.GetPlayerProfile().GetPlayerID());
+      // Creator data is only interesting for actual targets. Dummy components will have these both as false.
+      if (piece.m_randomTarget || piece.m_primaryTarget) {
+        if (Settings.NoCreator)
+          zdo.Set("creator", 0L);
+        else
+          piece.SetCreator(Game.instance.GetPlayerProfile().GetPlayerID());
+      }
+      var character = piece.GetComponent<Character>();
+      if (character) character.SetLevel(zdo.GetInt("level", 1));
       if (Settings.OverwriteHealth > 0f) {
-        var character = piece.GetComponent<Character>();
         if (character)
           zdo.Set("max_health", Settings.OverwriteHealth);
         if (piece.GetComponent<TreeLog>() || piece.GetComponent<WearNTear>() || piece.GetComponent<Destructible>() || piece.GetComponent<TreeBase>() || character)
@@ -89,7 +96,11 @@ namespace InfinityHammer {
           mineRock.SaveHealth();
         }
       }
-      piece.GetComponentInChildren<ArmorStand>()?.UpdateVisual();
+      var stand = piece.GetComponentInChildren<ArmorStand>();
+      if (stand) {
+        stand.UpdateVisual();
+        //piece.m_nview.InvokeRPC(ZNetView.Everybody, "RPC_SetPose", new object[] { stand.m_pose });
+      }
       piece.GetComponentInChildren<VisEquipment>()?.UpdateVisuals();
       piece.GetComponentInChildren<ItemStand>()?.UpdateVisual();
       piece.GetComponentInChildren<CookingStation>()?.UpdateCooking();
@@ -106,5 +117,12 @@ namespace InfinityHammer {
       if (Settings.NoDurabilityLoss && item.m_shared.m_useDurability)
         item.m_durability += item.m_shared.m_useDurabilityDrain;
     }
+  }
+
+
+  [HarmonyPatch(typeof(EffectList), "Create")]
+  public class DisableEffects {
+    public static bool Active = false;
+    public static bool Prefix() => !Active || !Settings.RemoveEffects;
   }
 }

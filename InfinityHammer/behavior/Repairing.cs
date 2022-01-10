@@ -20,10 +20,20 @@ namespace InfinityHammer {
       var max = Settings.OverwriteHealth > 0f ? Settings.OverwriteHealth : character.GetMaxHealth();
       zdo.Set("max_health", max);
       var heal = max - current;
-      if (heal == 0f) return false;
-      zdo.Set("health", max);
-      DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, character.GetTopPoint(), Mathf.Abs(heal));
-      return true;
+      if (heal != 0f) {
+        zdo.Set("health", max);
+        DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, character.GetTopPoint(), Mathf.Abs(heal));
+        return true;
+      }
+      if (Settings.RepairTaming) {
+        Taming.SetTame(character, !character.IsTamed());
+        if (character.IsTamed())
+          ReplaceMessage.Message = "Tamed " + Localization.instance.Localize(character.m_name);
+        else
+          ReplaceMessage.Message = "Untamed " + Localization.instance.Localize(character.m_name);
+        return true;
+      }
+      return false;
     }
     private static bool RepairPlayer(ZNetView obj) {
       var player = obj.GetComponent<Player>();
@@ -131,10 +141,12 @@ namespace InfinityHammer {
       return true;
     }
     public static void Prefix(Player __instance) {
+      DisableEffects.Active = true;
       IsRepairing = true;
       Repaired = false;
     }
     public static void Postfix(Player __instance) {
+      DisableEffects.Active = false;
       IsRepairing = false;
       if (!__instance.InPlaceMode()) return;
       if (!Repaired && Settings.RepairAnything)
@@ -156,12 +168,14 @@ namespace InfinityHammer {
     }
 
   }
+
   [HarmonyPatch(typeof(Character), "UseStamina")]
   public class CheckRepair {
     public static void Prefix() {
       if (Repair.IsRepairing) Repair.Repaired = true;
     }
   }
+
   [HarmonyPatch(typeof(WearNTear), "Repair")]
   public class AdvancedRepair {
     public static bool Prefix(WearNTear __instance, ref bool __result) {

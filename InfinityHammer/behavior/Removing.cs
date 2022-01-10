@@ -27,19 +27,24 @@ namespace InfinityHammer {
       }
       return true;
     }
-
-    public static void Prefix(Player __instance) {
-      Removing = true;
-    }
-    public static void Postfix(Player __instance, ref bool __result) {
-      if (!__result && Settings.RemoveAnything) {
-        __result = RemoveAnything(__instance);
-      }
-      if (__result && Target != null && Settings.EnableUndo)
+    private static void End(bool result) {
+      DisableEffects.Active = false;
+      if (result && Target != null && Settings.EnableUndo)
         UndoManager.Add(new UndoRemove(Target));
       Removing = false;
       Target = null;
     }
+    public static bool Prefix(Player __instance, ref bool __result) {
+      DisableEffects.Active = true;
+      Removing = true;
+      if (Settings.RemoveAnything) {
+        __result = RemoveAnything(__instance);
+        End(__result);
+        return false;
+      }
+      return true;
+    }
+    public static void Postfix(ref bool __result) => End(__result);
   }
 
   [HarmonyPatch(typeof(Player), "RemovePiece")]

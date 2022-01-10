@@ -52,18 +52,20 @@ Following powers are available:
 - Ignore wards: Wards no longer prevent building.
 - Max undo steps: How many undo actions are stored.
 - No build cost: Removes resource cost and crafting station requirement.
-- No creator: Builds without setting the creator information (won't be targeted by the enemies). Disabled by default.
+- No creator: Builds without setting the creator information. Disabled by default.
 - No durability loss: Hammer auto-repairs used durability.
 - No stamina cost: Hammer auto-regens used stamina.
 - Overwrite health: Sets the health of built or repaired objects (0 reverts to the default max health, except for creatures).
 - Remove anything: Allows removing any object. Disabled by default.
+- Remove effects: Removes visual effects of building, repairing and destroying.
 - Remove range: Range for removing (capped at about 50 meters).
 - Repair anything: Allows healing or repairing any object. Disabled by default.
 - Repair range: Range for repairing (capped at about 50 meters).
+- Repair taming: Repairing full health creatures will tame/untame them (works for all creatures).
 - Scaling step: How much the object is scaled up/down.
 - Select range: Range for selecting (capped at about 50 meters).
 
-On servers, above features are disabled without cheat access (except Copy rotate and Select range).
+On servers, above features are disabled without cheat access (except Copy rotate, Remove effects and Select range).
 
 # Building
 
@@ -76,6 +78,8 @@ Object scaling only works for some objects (mostly trees and rocks). This is res
 If "Overwrite health" is enabled, objects have a specified health (including creatures). For minerocks, the health is applied to the individual parts (the outer shell stays at 1 health). Repairing can be used to modify the shell health if needed.
 
 "Copy state" only applies when selecting existing objects since structures from the build menu are stateless. However the creator ID is always set based on the "No creator" setting, even for non-standard structures.
+
+"No creator" is currently quite pointless since most structures ignore the value and will get targeted by the enemies regardless of the value. But maybe someone can find some use for it.
 
 Locations (Points of Interest) can also be copied. However only static parts are included in the actual location. For example in the start temple, each boss stone is a separate object and can be copied separately if needed.
 
@@ -100,7 +104,16 @@ If "Destroy anything" is enabled, all objects can be removed. Removing non-stand
 
 # Changelog
 
-- v1.1.0: 
+- v1.2:
+	- Added object names to the build overlay.
+	- Added setting to disable build, repair and destroy effects.
+	- Added setting to tame/untame creatures with repair.
+	- Fixed creature stars not getting copied.
+	- Fixed error when copying creatures.
+	- Fixed "creator" data being added to non-piece objects.
+	- Fixed structures having a higher destroy priority even with "Destroy anything" enabled.
+
+- v1.1: 
 	- Size is no longer shown for objects that don't support changing it.
 	- Messages now have a high priority (fixes scaling messages lagging behind).
 	- Creator is now properly set for copied objects (unless "No Creator" is on).
@@ -113,7 +126,7 @@ If "Destroy anything" is enabled, all objects can be removed. Removing non-stand
 	- Fixed selection keeping the hover color when selecting a structure.
 	- Fixed selection being removed when the selected objects is destroyed.
 
-- v1.0.0: 
+- v1.0: 
 	- Initial release
 
 Thanks for Azumatt for creating the mod icon!
