@@ -1,8 +1,18 @@
 # Infinity Hammer
 
-Bend the rules of building! Construct any object anywhere, destroy anything and more...
+Bend the rules of building! Copy any object, make structures indestructible, remove all restrictions, destroy anything and more...
 
 Client-side mod that is compatible with unmodded clients.
+
+# Features
+
+- Build anything. Trees, rocks, creatures... All can be placed with the hammer.
+- Copy anything. Armor stands, chests and item stands with their contents. Even boss altars!
+- Make structures indestructible, even the gravity can't bring them down.
+- Remove anything. Something unremovable messing up your grand design? No more!
+- Build without restrictions. Dungeons and even the start temple become valid for building.
+- QoL improvements: Extended range, no resouce costs, no item drops, no visual effects and more!
+- Tame anything. Powerful creatures, or even bosses can become your protectors. Or just pit them against each other!
 
 # Manual Installation:
 
@@ -47,6 +57,7 @@ Following powers are available:
 - Copy rotation: Copies rotation of the selected object.
 - Build range: Range for building (capped at about 50 meters).
 - Copy state: Object state is copied (for example chest contents or item stand items).
+- Disable loot: Creatures and structures won't drop loot when destroyed with the hammer.
 - Ignore no build: "Mystical power" no longer prevents building.
 - Ignore other restrictions: Removes any other restrictions (for example campfires can be built on wood floors).
 - Ignore wards: Wards no longer prevent building.
@@ -77,6 +88,8 @@ Object scaling only works for some objects (mostly trees and rocks). This is res
 
 If "Overwrite health" is enabled, objects have a specified health (including creatures). For minerocks, the health is applied to the individual parts (the outer shell stays at 1 health). Repairing can be used to modify the shell health if needed.
 
+Setting a very high health (like "1E30") can be used to make object indestructible because the damage taken is rounded down to zero. This also prevents structures collapsing from lack of support.
+
 "Copy state" only applies when selecting existing objects since structures from the build menu are stateless. However the creator ID is always set based on the "No creator" setting, even for non-standard structures.
 
 "No creator" is currently quite pointless since most structures ignore the value and will get targeted by the enemies regardless of the value. But maybe someone can find some use for it.
@@ -101,17 +114,23 @@ By default, destroying only works for standard structures and placed objects. Pl
 
 If "Destroy anything" is enabled, all objects can be removed. Removing non-standard objects will instantly destroy them without triggering any effects like drops.
 
+IF "Disable loot" is enabled, destroying creatures or structures won't drop loot.
 
 # Changelog
+
+- v1.3:
+	- Fixed health not being copied for creatures (got overwritten by stars).
 
 - v1.2:
 	- Added object names to the build overlay.
 	- Added setting to disable build, repair and destroy effects.
 	- Added setting to tame/untame creatures with repair.
+	- Added setting to disable creature and structure loot when destroyed with the hammer.
 	- Fixed creature stars not getting copied.
 	- Fixed error when copying creatures.
 	- Fixed "creator" data being added to non-piece objects.
 	- Fixed structures having a higher destroy priority even with "Destroy anything" enabled.
+	- Fixed "Overwrite health" not working when selecting a piece from the build menu.
 
 - v1.1: 
 	- Size is no longer shown for objects that don't support changing it.

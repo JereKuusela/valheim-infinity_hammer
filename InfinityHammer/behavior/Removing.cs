@@ -19,6 +19,8 @@ namespace InfinityHammer {
       if (hovered == null) return false;
       obj.m_removeEffects.Create(hovered.Obj.transform.position, Quaternion.identity, null, 1f, -1);
       SetTarget(hovered.Obj);
+      hovered.Obj.GetComponent<CharacterDrop>()?.OnDeath();
+      hovered.Obj.GetComponent<Piece>()?.DropResources();
       Helper.RemoveZDO(hovered.Obj.GetZDO());
       var tool = obj.GetRightItem();
       if (tool != null) {
@@ -33,10 +35,14 @@ namespace InfinityHammer {
         UndoManager.Add(new UndoRemove(Target));
       Removing = false;
       Target = null;
+      PreventPieceDrops.Active = false;
+      PreventCreaturerops.Active = false;
     }
     public static bool Prefix(Player __instance, ref bool __result) {
       DisableEffects.Active = true;
       Removing = true;
+      PreventPieceDrops.Active = Settings.DisableLoot;
+      PreventCreaturerops.Active = Settings.DisableLoot;
       if (Settings.RemoveAnything) {
         __result = RemoveAnything(__instance);
         End(__result);
@@ -47,6 +53,16 @@ namespace InfinityHammer {
     public static void Postfix(ref bool __result) => End(__result);
   }
 
+  [HarmonyPatch(typeof(Piece), "DropResources")]
+  public class PreventPieceDrops {
+    public static bool Active = false;
+    public static bool Prefix() => !Active;
+  }
+  [HarmonyPatch(typeof(CharacterDrop), "OnDeath")]
+  public class PreventCreaturerops {
+    public static bool Active = false;
+    public static bool Prefix() => !Active;
+  }
   [HarmonyPatch(typeof(Player), "RemovePiece")]
   public class PostProcessToolOnRemove {
     public static void Postfix(Player __instance, ref bool __result) {

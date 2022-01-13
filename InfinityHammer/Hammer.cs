@@ -71,7 +71,7 @@ namespace InfinityHammer {
 
     ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
     public static void PostProcessPlaced(Piece piece) {
-      if (!Prefab) return;
+      if (!Settings.Enabled) return;
       CopyState(piece);
       piece.m_canBeRemoved = true;
       Scaling.SetPieceScale(piece);
@@ -84,7 +84,15 @@ namespace InfinityHammer {
           piece.SetCreator(Game.instance.GetPlayerProfile().GetPlayerID());
       }
       var character = piece.GetComponent<Character>();
-      if (character) character.SetLevel(zdo.GetInt("level", 1));
+      if (character) {
+        // SetLevel would also overwrite the health (when copying a creature with a custom health).
+        var level = zdo.GetInt("level", 1);
+        character.m_level = level;
+        character.m_nview.GetZDO().Set("level", level);
+        if (character.m_onLevelSet != null) {
+          character.m_onLevelSet(character.m_level);
+        }
+      }
       if (Settings.OverwriteHealth > 0f) {
         if (character)
           zdo.Set("max_health", Settings.OverwriteHealth);
@@ -96,11 +104,7 @@ namespace InfinityHammer {
           mineRock.SaveHealth();
         }
       }
-      var stand = piece.GetComponentInChildren<ArmorStand>();
-      if (stand) {
-        stand.UpdateVisual();
-        //piece.m_nview.InvokeRPC(ZNetView.Everybody, "RPC_SetPose", new object[] { stand.m_pose });
-      }
+      piece.GetComponentInChildren<ArmorStand>()?.UpdateVisual();
       piece.GetComponentInChildren<VisEquipment>()?.UpdateVisuals();
       piece.GetComponentInChildren<ItemStand>()?.UpdateVisual();
       piece.GetComponentInChildren<CookingStation>()?.UpdateCooking();
