@@ -48,10 +48,11 @@ namespace InfinityHammer {
     }
 
     public static Hovered GetHovered(Player obj, float maxDistance, bool allowOtherPlayers = false) {
-      var hits = Physics.RaycastAll(GameCamera.instance.transform.position, GameCamera.instance.transform.forward, 50f, obj.m_interactMask);
+      var raycast = Math.Max(maxDistance + 5f, 50f);
+      var hits = Physics.RaycastAll(GameCamera.instance.transform.position, GameCamera.instance.transform.forward, raycast, obj.m_interactMask);
       Array.Sort<RaycastHit>(hits, (RaycastHit x, RaycastHit y) => x.distance.CompareTo(y.distance));
       foreach (var hit in hits) {
-        if (Vector3.Distance(hit.point, obj.m_eye.position) >= obj.m_maxPlaceDistance) continue;
+        if (Vector3.Distance(hit.point, obj.m_eye.position) >= maxDistance) continue;
         var netView = hit.collider.GetComponentInParent<ZNetView>();
         if (!netView) continue;
         var player = netView.GetComponentInChildren<Player>();

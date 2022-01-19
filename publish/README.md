@@ -25,14 +25,15 @@ Client-side mod that is compatible with unmodded clients.
 
 # Usage
 
-- hammer: Selects the hovered object.
-- hammer [item id]: Selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)).
-- hammer_undo: Reverts building or destroying.
-- hammer_redo: Restores reverted actions.
-- hammer_scale [value=1]: Sets the object scale (if supported). Number or x,y,z.
-- hammer_scale_up: Scales up the object (if supported).
-- hammer_scale_down: Scales down the object (if supported).
-- hammer_config [key] [value]: Toggles or sets configuration values.
+- `hammer`: Selects the hovered object.
+- `hammer [item id]`: Selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)).
+- `hammer [item id] [scale=1]`: Selects an object by id while setting the initial scale (if supported). Number or x,y,z.
+- `hammer_und`: Reverts building or destroying.
+- `hammer_redo`: Restores reverted actions.
+- `hammer_scale [scale=1]`: Sets the object scale (if supported). Number or x,y,z.
+- `hammer_scale_up`: Scales up the object (if supported).
+- `hammer_scale_down`: Scales down the object (if supported).
+- `hammer_config [key] [value]`: Toggles or sets configuration values.
 
 Note: Some interactions are quite complicated so please report any issues!
 
@@ -117,6 +118,13 @@ If "Destroy anything" is enabled, all objects can be removed. Removing non-stand
 IF "Disable loot" is enabled, destroying creatures or structures won't drop loot.
 
 # Changelog
+
+- v1.4:
+	- Added new parameter to hammer command to set initial scale.
+	- Fixed scale being applied to objects that don't support it.
+	- Fixed tamed status not being copied for creatures.
+	- Fixed hammer_scale not working with different scales per axis.
+	- Fixed "Select range" setting not working.
 
 - v1.3:
 	- Fixed health not being copied for creatures (got overwritten by stars).

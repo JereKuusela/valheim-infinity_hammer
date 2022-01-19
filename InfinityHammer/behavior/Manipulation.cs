@@ -3,7 +3,7 @@ using UnityEngine;
 namespace InfinityHammer {
 
   public static class Scaling {
-    private static Vector3 Scale = Vector3.one;
+    public static Vector3 Scale = Vector3.one;
     public static void ScaleUp() {
       Scale *= (1f + Settings.ScaleStep);
     }
@@ -36,7 +36,9 @@ namespace InfinityHammer {
         Helper.AddMessage(terminal, "Selected object doesn't support scaling.");
     }
     public static void SetPieceScale(Piece obj) {
-      obj.m_nview?.SetLocalScale(Scale);
+      var view = obj.m_nview;
+      if (view && view.m_syncInitialScale)
+        view.SetLocalScale(Scale);
     }
   }
   public static class Rotating {

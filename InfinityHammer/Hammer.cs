@@ -88,10 +88,9 @@ namespace InfinityHammer {
         // SetLevel would also overwrite the health (when copying a creature with a custom health).
         var level = zdo.GetInt("level", 1);
         character.m_level = level;
-        character.m_nview.GetZDO().Set("level", level);
-        if (character.m_onLevelSet != null) {
-          character.m_onLevelSet(character.m_level);
-        }
+        zdo.Set("level", level);
+        if (character.m_onLevelSet != null) character.m_onLevelSet(character.m_level);
+        character.SetTamed(zdo.GetBool("tamed", false));
       }
       if (Settings.OverwriteHealth > 0f) {
         if (character)
