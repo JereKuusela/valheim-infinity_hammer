@@ -6,7 +6,7 @@ Client-side mod that is compatible with unmodded clients.
 
 # Features
 
-- Build anything. Trees, rocks, creatures... All can be placed with the hammer.
+- Build anything. Trees, rocks, creatures... All can be placed with the hammer, with a precise placement!
 - Copy anything. Armor stands, chests and item stands with their contents. Even boss altars!
 - Make structures indestructible, even the gravity can't bring them down.
 - Remove anything. Something unremovable messing up your grand design? No more!
@@ -28,26 +28,56 @@ Client-side mod that is compatible with unmodded clients.
 - `hammer`: Selects the hovered object.
 - `hammer [item id]`: Selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)).
 - `hammer [item id] [scale=1]`: Selects an object by id while setting the initial scale (if supported). Number or x,y,z.
-- `hammer_und`: Reverts building or destroying.
+- `hammer_undo`: Reverts placing or removing.
 - `hammer_redo`: Restores reverted actions.
 - `hammer_scale [scale=1]`: Sets the object scale (if supported). Number or x,y,z.
 - `hammer_scale_up`: Scales up the object (if supported).
 - `hammer_scale_down`: Scales down the object (if supported).
+- `hammer_move_x [value]`: Moves the X offset.
+- `hammer_move_Y [value]`: Moves the Y offset.
+- `hammer_move_Z [value]`: Moves the Z offset.
+- `hammer_move [x,y,z]`: Moves the offset.
+- `hammer_offset_x [value]`: Sets the X offset.
+- `hammer_offset_Y [value]`: Sets the Y offset.
+- `hammer_offset_Z [value]`: Sets the Z offset.
+- `hammer_offset [x,y,z]`: Sets the offset.
+- `hammer_setup_binds`: Sets recommended key bindings.
+- `hammer_setup_binds_DEV`: Sets recommended key bindings (with Dedicated Server Devcommands mod).
 - `hammer_config [key] [value]`: Toggles or sets configuration values.
 
 Note: Some interactions are quite complicated so please report any issues!
 
-Bind commands to [keys](https://docs.unity3d.com/ScriptReference/KeyCode.html).
+## Recommended bindings
 
-For example:
+`hammer_setup_binds` command can be used to quickly set recommended key bindings that work with the Gizmo mod.
 
-- bind KeyPad0 hammer (Mouse4 or Mouse5 also work nicely)
-- bind KeyPad1 hammer_scale_down
-- bind KeyPad2 hammer_scale (resets scaling)
-- bind KeyPad3 hammer_scale_up
-- bind KeyPad7 hammer_undo
-- bind KeyPad8 hammer_config enabled (toggles all features on/off)
-- bind KeyPad9 hammer_redo
+For advanced users, it's recommended to make own bindings ([key codes](https://docs.unity3d.com/ScriptReference/KeyCode.html)).
+
+Following bindings are added:
+
+- `bind keypad0 hammer`: Quickly selects the hovered object.
+- `bind keypad1 hammer_scale_down`
+- `bind keypad2 hammer_scale`: Resets the scaling.
+- `bind keypad3 hammer_scale_up`
+- `bind keypad7 hammer_undo`
+- `bind keypad8 hammer_config enabled`: Toggles all features on/off.
+- `bind rightcontrol hammer_redo`
+- `bind KeyPad9 hammer_offset 0,0,0`: Resets the offset.
+- `bind rightarrow hammer_move_z -0.1`
+- `bind leftarrow hammer_move_z 0.1`
+- `bind downarrow hammer_move_y -0.1`
+- `bind uparrow hammer_move_y 0.1`
+
+If you have Dedicated Server Devcommands installed, you should use `hammer_setup_binds_DEV` instead. This provides a different offset amount when holding the LeftAlt key down:
+
+- `bind rightarrow hammer_move_z -0.1 keys=-leftalt`
+- `bind rightarrow hammer_move_z -1 keys=leftalt`
+- `bind leftarrow hammer_move_z 0.1 keys=-leftalt`
+- `bind leftarrow hammer_move_z 1 keys=leftalt`
+- `bind downarrow hammer_move_y -0.1 keys=-leftalt`
+- `bind downarrow hammer_move_y -1 keys=leftalt`
+- `bind uparrow hammer_move_y 0.1 keys=-leftalt`
+- `bind uparrow hammer_move_y 1 keys=leftalt`
 
 # Configuration
 
@@ -66,6 +96,7 @@ Following powers are available:
 - No build cost: Removes resource cost and crafting station requirement.
 - No creator: Builds without setting the creator information. Disabled by default.
 - No durability loss: Hammer auto-repairs used durability.
+- No placement marker: Removes the placement marker (and Gizmo too). Disabled by default.
 - No stamina cost: Hammer auto-regens used stamina.
 - Overwrite health: Sets the health of built or repaired objects (0 reverts to the default max health, except for creatures).
 - Remove anything: Allows removing any object. Disabled by default.
@@ -77,7 +108,7 @@ Following powers are available:
 - Scaling step: How much the object is scaled up/down.
 - Select range: Range for selecting (capped at about 50 meters).
 
-On servers, above features are disabled without cheat access (except Copy rotate, Remove effects and Select range).
+On servers, above features are disabled without cheat access (except Copy rotate, No placement marker, Remove effects, Select range and offsetting).
 
 # Building
 
@@ -90,6 +121,8 @@ Object scaling only works for some objects (mostly trees and rocks). This is res
 If "Overwrite health" is enabled, objects have a specified health (including creatures). For minerocks, the health is applied to the individual parts (the outer shell stays at 1 health). Repairing can be used to modify the shell health if needed.
 
 Setting a very high health (like "1E30") can be used to make object indestructible because the damage taken is rounded down to zero. This also prevents structures collapsing from lack of support.
+
+For creatures, the max health resets when the area is reloaded if the current health equals the max health. For this reason, the current health is set slightly higher than the max health.
 
 "Copy state" only applies when selecting existing objects since structures from the build menu are stateless. However the creator ID is always set based on the "No creator" setting, even for non-standard structures.
 
@@ -109,22 +142,33 @@ If "Overwrite health" is enabled, the object is repaired or damaged to the speci
 
 For creatures, the maximum health value is also set. So they will keep their max health even when disabling "Overwrite health". Other objects will revert to the original max health when repaired.
 
+Unfortunately, the max health resets when the area is reloaded if the current health equals the max health. For this reason, the current health is set slightly higher than the max health.
+
 # Destroying
 
 By default, destroying only works for standard structures and placed objects. Placed objects can only be removed temporarily since the required information is lost when the area is reloaded.
 
-If "Destroy anything" is enabled, all objects can be removed. Removing non-standard objects will instantly destroy them without triggering any effects like drops.
+If "Destroy anything" is enabled, all objects can be removed.
 
-IF "Disable loot" is enabled, destroying creatures or structures won't drop loot.
+IF "Disable loot" is enabled, destroying creatures or structures won't drop loot. This can be useful to get rid of very high starred creatures that crash the game when killed.
 
 # Changelog
 
+- v1.5:
+	- Fixed some error messages appearing when placing spawners and other objects.
+
 - v1.4:
-	- Added new parameter to hammer command to set initial scale.
+	- New commands to offset the placement to precisely set the position.
+	- New commands to set recommended key bindings.
+	- Added new setting to disable the placement marker.
+	- Added new parameter to hammer command to set the initial scale.
+	- Added messages for undo and redo actions.
+	- Overwrite health changed to set the current health slightly higher than the maximum (makes it less likely to reset).
 	- Fixed scale being applied to objects that don't support it.
 	- Fixed tamed status not being copied for creatures.
 	- Fixed hammer_scale not working with different scales per axis.
 	- Fixed "Select range" setting not working.
+	- Fixed "Remove range" setting not working.
 
 - v1.3:
 	- Fixed health not being copied for creatures (got overwritten by stars).

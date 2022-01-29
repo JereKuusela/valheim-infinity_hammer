@@ -92,6 +92,11 @@ namespace InfinityHammer {
   }
   [HarmonyPatch(typeof(Player), "UpdatePlacementGhost")]
   public class UpdatePlacementGhost {
-    public static void Postfix() => Scaling.UpdatePlacementScale();
+    public static void Postfix(Player __instance) {
+      Scaling.UpdatePlacement();
+      Offset.UpdatePlacement();
+      if (Settings.HidePlacementMarker)
+        __instance.m_placementMarkerInstance?.SetActive(false);
+    }
   }
 }

@@ -6,6 +6,18 @@ using UnityEngine;
 namespace InfinityHammer {
 
   [HarmonyPatch(typeof(Player), "RemovePiece")]
+  public class UnlockRemoveDistance {
+    public static void Prefix(Player __instance, ref float __state) {
+      __state = __instance.m_maxPlaceDistance;
+      if (Settings.RemoveRange > 0f)
+        __instance.m_maxPlaceDistance = Settings.RemoveRange;
+    }
+    public static void Postfix(Player __instance, float __state) {
+      __instance.m_maxPlaceDistance = __state;
+    }
+  }
+
+  [HarmonyPatch(typeof(Player), "RemovePiece")]
   public class RemovePiece {
     public static bool Removing = false;
     public static UndoData Target;
@@ -70,17 +82,6 @@ namespace InfinityHammer {
     }
   }
 
-  [HarmonyPatch(typeof(Player), "RemovePiece")]
-  public class UnlockRemoveDistance {
-    public static void Prefix(Player __instance, ref float __state) {
-      __state = __instance.m_maxPlaceDistance;
-      if (Settings.RemoveRange > 0f)
-        __instance.m_maxPlaceDistance = Settings.RemoveRange;
-    }
-    public static void Postfix(Player __instance, float __state) {
-      __instance.m_maxPlaceDistance = __state;
-    }
-  }
   ///<summary>Game code doesn't give direct access to the removed object.</summary>
   [HarmonyPatch(typeof(Piece), "CanBeRemoved")]
   public class AccessTargetedObject {

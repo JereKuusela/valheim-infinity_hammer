@@ -4,7 +4,7 @@ using Service;
 
 namespace InfinityHammer {
   public class Settings {
-    private static bool IsCheats => Enabled && ((ZNet.instance && ZNet.instance.IsServer()) || Console.instance.IsCheatsEnabled());
+    public static bool IsCheats => Enabled && ((ZNet.instance && ZNet.instance.IsServer()) || Console.instance.IsCheatsEnabled());
 
     public static ConfigEntry<bool> configNoBuildCost;
     public static bool NoBuildCost => configNoBuildCost.Value && IsCheats;
@@ -37,11 +37,11 @@ namespace InfinityHammer {
     public static ConfigEntry<string> configOverwriteHealth;
     public static float OverwriteHealth => IsCheats ? Helper.ParseFloat(configOverwriteHealth.Value, 0f) : 0f;
     public static ConfigEntry<bool> configCopyRotation;
-    public static bool CopyRotation => configCopyRotation.Value;
+    public static bool CopyRotation => configCopyRotation.Value && Enabled;
     public static ConfigEntry<string> configUndoLimit;
     public static int UndoLimit => (int)Helper.ParseFloat(configUndoLimit.Value, 0f);
     public static ConfigEntry<string> configSelectRange;
-    public static float SelectRange => Helper.ParseFloat(configSelectRange.Value, 0f);
+    public static float SelectRange => Enabled ? Helper.ParseFloat(configSelectRange.Value, 0f) : 0f;
     public static ConfigEntry<string> configRemoveRange;
     public static float RemoveRange => IsCheats ? Helper.ParseFloat(configRemoveRange.Value, 0f) : 0f;
     public static ConfigEntry<string> configRepairRange;
@@ -51,9 +51,11 @@ namespace InfinityHammer {
     public static ConfigEntry<string> configScaleStep;
     public static float ScaleStep => IsCheats ? Helper.ParseFloat(configScaleStep.Value, 0f) : 0f;
     public static ConfigEntry<bool> configRemoveEffects;
-    public static bool RemoveEffects => configRemoveEffects.Value;
+    public static bool RemoveEffects => configRemoveEffects.Value && Enabled;
     public static ConfigEntry<bool> configRepairTaming;
     public static bool RepairTaming => configRepairTaming.Value && IsCheats;
+    public static ConfigEntry<bool> configHidePlacementMarker;
+    public static bool HidePlacementMarker => configHidePlacementMarker.Value && Enabled;
     public static ConfigEntry<bool> configEnabled;
     public static bool Enabled => configEnabled.Value;
 
@@ -82,6 +84,7 @@ namespace InfinityHammer {
       configRepairAnything = config.Bind(section, "Repair anything", false, "Allows reparing anything.");
       configOverwriteHealth = config.Bind(section, "Overwrite health", "0", "Overwrites the health of built or repaired objects.");
       configNoCreator = config.Bind(section, "No creator", false, "Build without setting the creator (ignored by enemies).");
+      configHidePlacementMarker = config.Bind(section, "No placement marker", false, "Hides the yellow placement marker (also affects Gizmo mod).");
       configIgnoreOtherRestrictions = config.Bind(section, "Ignore other restrictions", true, "Ignores any other restrictions (material, biome, etc.)");
       configScaleStep = config.Bind(section, "Scaling step", "0.05", "How much each scale up/down affects the size");
       configUndoLimit = config.Bind(section, "Max undo steps", "50", "How many undo actions are stored.");
@@ -92,7 +95,7 @@ namespace InfinityHammer {
       "enabled", "select_range", "remove_range", "build_range", "enable_undo", "copy_rotation", "no_build_cost",
       "ignore_wards", "ignore_no_build", "no_stamina_cost", "no_durability_loss", "all_objects", "copy_state",
       "allow_in_dungeons", "remove_anything", "ignore_other_restrictions", "scaling_step", "max_undo_steps", "no_creator",
-      "overwrite_health", "repair_anything", "repair_range", "remove_effects", "repair_taming", "disable_loot"
+      "overwrite_health", "repair_anything", "repair_range", "remove_effects", "repair_taming", "disable_loot", "disable_marker"
     };
     private static string State(bool value) => value ? "enabled" : "disabled";
     private static void Toggle(Terminal context, ConfigEntry<bool> setting, string name, bool reverse = false) {
@@ -103,6 +106,7 @@ namespace InfinityHammer {
     public static void UpdateValue(Terminal context, string key, string value) {
       if (key == "enabled") Toggle(context, configEnabled, "Infinity Hammer");
       if (key == "enable_undo") Toggle(context, configEnableUndo, "Undo");
+      if (key == "disable_marker") Toggle(context, configHidePlacementMarker, "Placement marker", true);
       if (key == "disable_loot") Toggle(context, configDisableLoot, "Loot", true);
       if (key == "repair_taming") Toggle(context, configRepairTaming, "Taming", true);
       if (key == "remove_effects") Toggle(context, configRemoveEffects, "Effects", true);

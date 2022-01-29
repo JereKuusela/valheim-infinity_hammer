@@ -73,14 +73,28 @@ namespace InfinityHammer {
     ///<summary>Removes scripts that try to run (for example placement needs only the model and Piece component).</summary>
     public static void CleanObject(GameObject obj) {
       if (!obj || !Settings.Enabled) return;
+      // Creature behavior.
+      UnityEngine.Object.Destroy(obj.GetComponent<BaseAI>());
+      UnityEngine.Object.Destroy(obj.GetComponent<MonsterAI>());
+      UnityEngine.Object.Destroy(obj.GetComponent<Character>());
+      UnityEngine.Object.Destroy(obj.GetComponent<Tameable>());
+      UnityEngine.Object.Destroy(obj.GetComponent<Procreation>());
+      UnityEngine.Object.Destroy(obj.GetComponent<Growup>());
       UnityEngine.Object.Destroy(obj.GetComponent<FootStep>());
       UnityEngine.Object.Destroy(obj.GetComponent<CharacterDrop>());
       UnityEngine.Object.Destroy(obj.GetComponent<Humanoid>());
-      UnityEngine.Object.Destroy(obj.GetComponent<MonsterAI>());
-      UnityEngine.Object.Destroy(obj.GetComponent<BaseAI>());
-      UnityEngine.Object.Destroy(obj.GetComponent<Character>());
+      // Destructible behavior.
+      UnityEngine.Object.Destroy(obj.GetComponent<TreeLog>());
+      UnityEngine.Object.Destroy(obj.GetComponent<TreeBase>());
+      UnityEngine.Object.Destroy(obj.GetComponent<MineRock>());
+      UnityEngine.Object.Destroy(obj.GetComponent<Windmill>());
+      UnityEngine.Object.Destroy(obj.GetComponent<SpawnArea>());
+      UnityEngine.Object.Destroy(obj.GetComponent<CreatureSpawner>());
       UnityEngine.Object.Destroy(obj.GetComponent<TombStone>());
       UnityEngine.Object.Destroy(obj.GetComponent<MineRock5>());
+      // Other
+      UnityEngine.Object.Destroy(obj.GetComponent<HoverText>());
+      UnityEngine.Object.Destroy(obj.GetComponent<Aoe>());
     }
   }
   public class Hovered {

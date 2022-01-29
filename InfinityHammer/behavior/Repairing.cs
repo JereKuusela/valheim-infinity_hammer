@@ -21,7 +21,8 @@ namespace InfinityHammer {
       zdo.Set("max_health", max);
       var heal = max - current;
       if (heal != 0f) {
-        zdo.Set("health", max);
+        // Max health resets on awake if health is equal to max.
+        zdo.Set("health", max * 1.000001f);
         DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, character.GetTopPoint(), Mathf.Abs(heal));
         return true;
       }

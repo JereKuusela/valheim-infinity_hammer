@@ -8,6 +8,7 @@ namespace InfinityHammer {
     public Quaternion Rotation;
     public Vector3 Scale;
     public ZDO Data = null;
+    public string Name => Utils.GetPrefabName(ZNetScene.instance.GetPrefab(Prefab));
   }
 
   public class UndoHelper {
@@ -51,10 +52,14 @@ namespace InfinityHammer {
     }
     public void Undo() {
       Added = UndoHelper.Place(Data);
+      if (Data != null)
+        Helper.AddMessage(Console.instance, $"Undo: Restored {Data.Name}");
     }
 
     public void Redo() {
       UndoHelper.Remove(Added);
+      if (Data != null)
+        Helper.AddMessage(Console.instance, $"Redo: Removed {Data.Name}");
       Added = null;
     }
   }
@@ -69,11 +74,15 @@ namespace InfinityHammer {
     }
     public void Undo() {
       UndoHelper.Remove(Added);
+      if (Data != null)
+        Helper.AddMessage(Console.instance, $"Undo: Removed {Data.Name}");
       Added = null;
     }
 
     public void Redo() {
       Added = UndoHelper.Place(Data);
+      if (Data != null)
+        Helper.AddMessage(Console.instance, $"Redo: Restored {Data.Name}");
     }
   }
 

@@ -24,7 +24,7 @@ namespace InfinityHammer {
       var view = Player.m_localPlayer?.GetSelectedPiece()?.GetComponent<ZNetView>();
       return view && view.m_syncInitialScale;
     }
-    public static void UpdatePlacementScale() {
+    public static void UpdatePlacement() {
       var ghost = Player.m_localPlayer?.m_placementGhost;
       if (Settings.Enabled && ghost && IsScalingSupported())
         ghost.transform.localScale = Scale;
@@ -39,6 +39,45 @@ namespace InfinityHammer {
       var view = obj.m_nview;
       if (view && view.m_syncInitialScale)
         view.SetLocalScale(Scale);
+    }
+  }
+
+  public static class Offset {
+    public static Vector3 Value = Vector3.zero;
+    public static void SetX(float value) {
+      Value.x = value;
+    }
+    public static void SetY(float value) {
+      Value.y = value;
+    }
+    public static void SetZ(float value) {
+      Value.z = value;
+    }
+    public static void MoveX(float value) {
+      Value.x += value;
+    }
+    public static void MoveY(float value) {
+      Value.y += value;
+    }
+    public static void MoveZ(float value) {
+      Value.z += value;
+    }
+    public static void Set(Vector3 value) {
+      Value = value;
+    }
+    public static void Move(Vector3 value) {
+      Value += value;
+    }
+    public static void UpdatePlacement() {
+      var ghost = Player.m_localPlayer?.m_placementGhost;
+      if (!ghost) return;
+      var rotation = ghost.transform.rotation;
+      ghost.transform.position += rotation * Vector3.forward * Value.x;
+      ghost.transform.position += rotation * Vector3.right * Value.z;
+      ghost.transform.position += rotation * Vector3.up * Value.y;
+    }
+    public static void Print(Terminal terminal) {
+      Helper.AddMessage(terminal, $"Offset set to {Value.ToString("F1")}.");
     }
   }
   public static class Rotating {
