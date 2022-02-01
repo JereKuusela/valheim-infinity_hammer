@@ -1,4 +1,3 @@
-using Service;
 using UnityEngine;
 
 namespace InfinityHammer {
@@ -52,16 +51,16 @@ namespace InfinityHammer {
     }
     public void Undo() {
       Added = UndoHelper.Place(Data);
-      if (Data != null)
-        Helper.AddMessage(Console.instance, $"Undo: Restored {Data.Name}");
     }
 
     public void Redo() {
       UndoHelper.Remove(Added);
-      if (Data != null)
-        Helper.AddMessage(Console.instance, $"Redo: Removed {Data.Name}");
       Added = null;
     }
+
+    public string UndoMessage() => $"Undo: Restored {Data.Name}";
+
+    public string RedoMessage() => $"Redo: Removed {Data.Name}";
   }
 
   public class UndoPlace : MonoBehaviour, UndoAction {
@@ -74,16 +73,17 @@ namespace InfinityHammer {
     }
     public void Undo() {
       UndoHelper.Remove(Added);
-      if (Data != null)
-        Helper.AddMessage(Console.instance, $"Undo: Removed {Data.Name}");
       Added = null;
     }
+
+    public string UndoMessage() => $"Undo: Removed {Data.Name}";
 
     public void Redo() {
       Added = UndoHelper.Place(Data);
       if (Data != null)
         Helper.AddMessage(Console.instance, $"Redo: Restored {Data.Name}");
     }
+    public string RedoMessage() => $"Redo: Restored {Data.Name}";
   }
 
 }

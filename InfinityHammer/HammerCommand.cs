@@ -1,4 +1,3 @@
-using Service;
 using UnityEngine;
 
 namespace InfinityHammer {
@@ -91,12 +90,13 @@ namespace InfinityHammer {
       new Terminal.ConsoleCommand("hammer_undo", "Reverts object placing or removing.", delegate (Terminal.ConsoleEventArgs args) {
         if (!Player.m_localPlayer) return;
         if (!Settings.EnableUndo) return;
-        UndoManager.Undo();
+        UndoWrapper.Undo(args.Context);
       });
       new Terminal.ConsoleCommand("hammer_redo", "Restores reverted object placing or removing.", delegate (Terminal.ConsoleEventArgs args) {
         if (!Player.m_localPlayer) return;
         if (!Settings.EnableUndo) return;
-        UndoManager.Redo();
+        UndoWrapper.Redo(args.Context);
+
       });
       new Terminal.ConsoleCommand("hammer_scale_up", "Scales up the selection (if the object supports it).", delegate (Terminal.ConsoleEventArgs args) {
         if (Settings.ScaleStep <= 0f) return;
@@ -185,34 +185,22 @@ namespace InfinityHammer {
       }, optionsFetcher: () => Settings.Options);
       new Terminal.ConsoleCommand("hammer_setup_binds", "Sets recommended key bindings.", delegate (Terminal.ConsoleEventArgs args) {
         BindGeneral(args.Context);
+        var isDev = InfinityHammer.IsDev;
+        var modifier = (isDev ? " keys=-leftalt" : "");
         args.Context.TryRunCommand("unbind rightcontrol");
         args.Context.TryRunCommand("bind rightcontrol hammer_offset 0,0,0");
         args.Context.TryRunCommand("unbind rightarrow");
-        args.Context.TryRunCommand("bind rightarrow hammer_move_z -0.1");
+        args.Context.TryRunCommand("bind rightarrow hammer_move_z -0.1" + modifier);
+        if (isDev) args.Context.TryRunCommand("bind rightarrow hammer_move_z -1 keys=leftalt");
         args.Context.TryRunCommand("unbind leftarrow");
-        args.Context.TryRunCommand("bind leftarrow hammer_move_z 0.1");
+        args.Context.TryRunCommand("bind leftarrow hammer_move_z 0.1" + modifier);
+        if (isDev) args.Context.TryRunCommand("bind leftarrow hammer_move_z 1 keys=leftalt");
         args.Context.TryRunCommand("unbind downarrow");
-        args.Context.TryRunCommand("bind downarrow hammer_move_y -0.1");
+        args.Context.TryRunCommand("bind downarrow hammer_move_y -0.1" + modifier);
+        if (isDev) args.Context.TryRunCommand("bind downarrow hammer_move_y -1 keys=leftalt");
         args.Context.TryRunCommand("unbind uparrow");
-        args.Context.TryRunCommand("bind uparrow hammer_move_y 0.1");
-        Helper.AddMessage(args.Context, "Keybindings set for Infinity Hammer.");
-      });
-      new Terminal.ConsoleCommand("hammer_setup_binds_DEV", "Sets recommended key bindings (with Dedicated Server Devcommands mod).", delegate (Terminal.ConsoleEventArgs args) {
-        BindGeneral(args.Context);
-        args.Context.TryRunCommand("unbind rightcontrol");
-        args.Context.TryRunCommand("bind rightcontrol hammer_offset 0,0,0");
-        args.Context.TryRunCommand("unbind rightarrow");
-        args.Context.TryRunCommand("bind rightarrow hammer_move_z -0.1 keys=-leftalt");
-        args.Context.TryRunCommand("bind rightarrow hammer_move_z -1 keys=leftalt");
-        args.Context.TryRunCommand("unbind leftarrow");
-        args.Context.TryRunCommand("bind leftarrow hammer_move_z 0.1 keys=-leftalt");
-        args.Context.TryRunCommand("bind leftarrow hammer_move_z 1 keys=leftalt");
-        args.Context.TryRunCommand("unbind downarrow");
-        args.Context.TryRunCommand("bind downarrow hammer_move_y -0.1 keys=-leftalt");
-        args.Context.TryRunCommand("bind downarrow hammer_move_y -1 keys=leftalt");
-        args.Context.TryRunCommand("unbind uparrow");
-        args.Context.TryRunCommand("bind uparrow hammer_move_y 0.1 keys=-leftalt");
-        args.Context.TryRunCommand("bind uparrow hammer_move_y 1 keys=leftalt");
+        args.Context.TryRunCommand("bind uparrow hammer_move_y 0.1" + modifier);
+        if (isDev) args.Context.TryRunCommand("bind uparrow hammer_move_y 1 keys=leftalt");
         Helper.AddMessage(args.Context, "Keybindings set for Infinity Hammer (with Dedicated Server Devcommands mod).");
       });
       new Terminal.ConsoleCommand("hammer_add_piece_components", "Adds the Piece component to every prefab to allow copying them with PlanBuild.", delegate (Terminal.ConsoleEventArgs args) {
@@ -224,6 +212,12 @@ namespace InfinityHammer {
         foreach (var prefab in ZNetScene.instance.m_prefabs) {
           if (prefab.GetComponent<Piece>()) continue;
           var piece = prefab.AddComponent<Piece>();
+          piece.m_name = Utils.GetPrefabName(piece.gameObject);
+          piece.m_clipEverything = true;
+        }
+        foreach (var instance in ZNetScene.instance.m_instances.Values) {
+          if (instance.gameObject.GetComponent<Piece>()) continue;
+          var piece = instance.gameObject.AddComponent<Piece>();
           piece.m_name = Utils.GetPrefabName(piece.gameObject);
           piece.m_clipEverything = true;
         }

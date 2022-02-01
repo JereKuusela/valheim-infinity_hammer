@@ -1,5 +1,4 @@
 using HarmonyLib;
-using Service;
 using UnityEngine;
 
 // Code related to removing objects.
@@ -43,8 +42,7 @@ namespace InfinityHammer {
     }
     private static void End(bool result) {
       DisableEffects.Active = false;
-      if (result && Target != null && Settings.EnableUndo)
-        UndoManager.Add(new UndoRemove(Target));
+      if (result) UndoWrapper.Remove(Target);
       Removing = false;
       Target = null;
       PreventPieceDrops.Active = false;
@@ -86,7 +84,7 @@ namespace InfinityHammer {
   [HarmonyPatch(typeof(Piece), "CanBeRemoved")]
   public class AccessTargetedObject {
     public static void Prefix(Piece __instance) {
-      if (RemovePiece.Removing)
+      if (RemovePiece.Removing && __instance.m_nview)
         RemovePiece.SetTarget(__instance.m_nview);
     }
   }

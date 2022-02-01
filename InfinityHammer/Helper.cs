@@ -74,6 +74,7 @@ namespace InfinityHammer {
     public static void CleanObject(GameObject obj) {
       if (!obj || !Settings.Enabled) return;
       // Creature behavior.
+      UnityEngine.Object.Destroy(obj.GetComponent<CharacterDrop>());
       UnityEngine.Object.Destroy(obj.GetComponent<BaseAI>());
       UnityEngine.Object.Destroy(obj.GetComponent<MonsterAI>());
       UnityEngine.Object.Destroy(obj.GetComponent<Character>());
@@ -81,7 +82,6 @@ namespace InfinityHammer {
       UnityEngine.Object.Destroy(obj.GetComponent<Procreation>());
       UnityEngine.Object.Destroy(obj.GetComponent<Growup>());
       UnityEngine.Object.Destroy(obj.GetComponent<FootStep>());
-      UnityEngine.Object.Destroy(obj.GetComponent<CharacterDrop>());
       UnityEngine.Object.Destroy(obj.GetComponent<Humanoid>());
       // Destructible behavior.
       UnityEngine.Object.Destroy(obj.GetComponent<TreeLog>());

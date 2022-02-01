@@ -180,9 +180,8 @@ namespace InfinityHammer {
   [HarmonyPatch(typeof(WearNTear), "Repair")]
   public class AdvancedRepair {
     public static bool Prefix(WearNTear __instance, ref bool __result) {
-      if (!Settings.Enabled) return true;
-      var netView = __instance.m_nview;
-      __result = Repair.RepairStructure(netView);
+      if (!Settings.Enabled || !__instance.m_nview) return true;
+      __result = Repair.RepairStructure(__instance.m_nview);
       return false;
     }
   }

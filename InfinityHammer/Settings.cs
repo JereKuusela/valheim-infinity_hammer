@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using BepInEx.Configuration;
-using Service;
 
 namespace InfinityHammer {
   public class Settings {

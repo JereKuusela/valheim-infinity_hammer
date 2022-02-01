@@ -21,15 +21,15 @@ Client-side mod that is compatible with unmodded clients.
 3. Extract it in the \<GameDirectory\>\BepInEx\plugins\ folder.
 4. Recommended to also install [Gizmo Reloaded](https://www.nexusmods.com/valheim/mods/1293) for better rotating.
 5. Optionally also install the [Configuration manager](https://github.com/BepInEx/BepInEx.ConfigurationManager/releases/tag/v16.4) to configure the hammer more easily.
-6. For servers, install [Dedicated server devcommands](https://valheim.thunderstore.io/package/JereKuusela/Dedicated_server_devcommands/) to use it as an admin.
+6. For servers, install [Server devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) to use it as an admin.
 
 # Usage
 
 - `hammer`: Selects the hovered object.
 - `hammer [item id]`: Selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)).
 - `hammer [item id] [scale=1]`: Selects an object by id while setting the initial scale (if supported). Number or x,y,z.
-- `hammer_undo`: Reverts placing or removing.
-- `hammer_redo`: Restores reverted actions.
+- `hammer_undo`: Reverts placing or removing. Uses Server devcommands undo system if installed.
+- `hammer_redo`: Restores reverted actions. Uses Server devcommands undo system if installed.
 - `hammer_scale [scale=1]`: Sets the object scale (if supported). Number or x,y,z.
 - `hammer_scale_up`: Scales up the object (if supported).
 - `hammer_scale_down`: Scales down the object (if supported).
@@ -42,8 +42,8 @@ Client-side mod that is compatible with unmodded clients.
 - `hammer_offset_Z [value]`: Sets the Z offset.
 - `hammer_offset [x,y,z]`: Sets the offset.
 - `hammer_setup_binds`: Sets recommended key bindings.
-- `hammer_setup_binds_DEV`: Sets recommended key bindings (with Dedicated Server Devcommands mod).
 - `hammer_config [key] [value]`: Toggles or sets configuration values.
+- `hammer_add_piece_components`: Adds the Piece component to every object which allows copying them with PlanBuild mod.
 
 Note: Some interactions are quite complicated so please report any issues!
 
@@ -68,7 +68,7 @@ Following bindings are added:
 - `bind downarrow hammer_move_y -0.1`
 - `bind uparrow hammer_move_y 0.1`
 
-If you have Dedicated Server Devcommands installed, you should use `hammer_setup_binds_DEV` instead. This provides a different offset amount when holding the LeftAlt key down:
+If you have Server devcommands installed, following binds are added instead (to provide a different offset when Alt-key is down):
 
 - `bind rightarrow hammer_move_z -0.1 keys=-leftalt`
 - `bind rightarrow hammer_move_z -1 keys=leftalt`
@@ -92,7 +92,7 @@ Following powers are available:
 - Ignore no build: "Mystical power" no longer prevents building.
 - Ignore other restrictions: Removes any other restrictions (for example campfires can be built on wood floors).
 - Ignore wards: Wards no longer prevent building.
-- Max undo steps: How many undo actions are stored.
+- Max undo steps: How many undo actions are stored (ignored if Server devcommands is installed).
 - No build cost: Removes resource cost and crafting station requirement.
 - No creator: Builds without setting the creator information. Disabled by default.
 - No durability loss: Hammer auto-repairs used durability.
@@ -155,49 +155,53 @@ IF "Disable loot" is enabled, destroying creatures or structures won't drop loot
 # Changelog
 
 - v1.5:
-	- Fixed some error messages appearing when placing spawners and other objects.
+	- Adds support for the undo system of Server devcommands mod (if installed).
+	- Adds a new command `hammer_add_piece_components` to allow copying anything with PlanBuild.
+	- Removes the `hammer_setup_binds_DEV` command as obsolete (Server devcommands mod is used automatically, if installed).
+	- Fixes some error messages appearing when placing spawners and other objects.
+	- Fixes error messages when using the hoe.
 
 - v1.4:
-	- New commands to offset the placement to precisely set the position.
-	- New commands to set recommended key bindings.
-	- Added new setting to disable the placement marker.
-	- Added new parameter to hammer command to set the initial scale.
-	- Added messages for undo and redo actions.
-	- Overwrite health changed to set the current health slightly higher than the maximum (makes it less likely to reset).
-	- Fixed scale being applied to objects that don't support it.
-	- Fixed tamed status not being copied for creatures.
-	- Fixed hammer_scale not working with different scales per axis.
-	- Fixed "Select range" setting not working.
-	- Fixed "Remove range" setting not working.
+	- Adds new commands to offset the placement to precisely set the position.
+	- Adds new commands to set recommended key bindings.
+	- Adds new setting to disable the placement marker.
+	- Adds new parameter to hammer command to set the initial scale.
+	- Adds messages for undo and redo actions.
+	- Changes overwrite health to set the current health slightly higher than the maximum (makes it less likely to reset).
+	- Fixes scale being applied to objects that don't support it.
+	- Fixes tamed status not being copied for creatures.
+	- Fixes hammer_scale not working with different scales per axis.
+	- Fixes "Select range" setting not working.
+	- Fixes "Remove range" setting not working.
 
 - v1.3:
-	- Fixed health not being copied for creatures (got overwritten by stars).
+	- Fixes health not being copied for creatures (got overwritten by stars).
 
 - v1.2:
-	- Added object names to the build overlay.
-	- Added setting to disable build, repair and destroy effects.
-	- Added setting to tame/untame creatures with repair.
-	- Added setting to disable creature and structure loot when destroyed with the hammer.
-	- Fixed creature stars not getting copied.
-	- Fixed error when copying creatures.
+	- Adds object names to the build overlay.
+	- Adds setting to disable build, repair and destroy effects.
+	- Adds setting to tame/untame creatures with repair.
+	- Adds setting to disable creature and structure loot when destroyed with the hammer.
+	- Fixes creature stars not getting copied.
+	- Fixes error when copying creatures.
 	- Fixed "creator" data being added to non-piece objects.
-	- Fixed structures having a higher destroy priority even with "Destroy anything" enabled.
-	- Fixed "Overwrite health" not working when selecting a piece from the build menu.
+	- Fixes structures having a higher destroy priority even with "Destroy anything" enabled.
+	- Fixes "Overwrite health" not working when selecting a piece from the build menu.
 
 - v1.1: 
-	- Size is no longer shown for objects that don't support changing it.
-	- Messages now have a high priority (fixes scaling messages lagging behind).
-	- Creator is now properly set for copied objects (unless "No Creator" is on).
-	- Auto rotate setting renamed to Copy rotation.
-	- Added new setting to overwrite the health of built and repaired objects (including creatures).
-	- Added no stamina and durability cost to also affect repairing.
-	- Added new setting to change repair range.
-	- Added new setting to repair anything (including creatures).
-	- Added support for non-uniform scaling with hammer_scale command.
-	- Fixed selection keeping the hover color when selecting a structure.
-	- Fixed selection being removed when the selected objects is destroyed.
+	- Adds new setting to overwrite the health of built and repaired objects (including creatures).
+	- Adds no stamina and durability cost to also affect repairing.
+	- Adds new setting to change repair range.
+	- Adds new setting to repair anything (including creatures).
+	- Adds support for non-uniform scaling with hammer_scale command.
+	- Changes Auto rotate setting to Copy rotation.
+	- Changes messages to have a high priority (fixes scaling messages lagging behind).
+	- Fixes size being shown for objects that don't support changing it.
+	- Fixes creator not being set for copied objects (unless "No Creator" is on).
+	- Fixes selection keeping the hover color when selecting a structure.
+	- Fixes selection being removed when the selected objects is destroyed.
 
 - v1.0: 
-	- Initial release
+	- Initial release.
 
 Thanks for Azumatt for creating the mod icon!

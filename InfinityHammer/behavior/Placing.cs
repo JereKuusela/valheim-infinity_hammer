@@ -1,9 +1,7 @@
 using HarmonyLib;
-using Service;
 
 // Code related to adding objects.
 namespace InfinityHammer {
-
   public static class Placing {
 
     ///<summary>Removes placement checks.</summary>
@@ -45,13 +43,13 @@ namespace InfinityHammer {
     public static void Prefix() {
       DisableEffects.Active = true;
     }
+
     public static void Postfix(bool __result) {
       DisableEffects.Active = false;
       if (__result && Piece.m_allPieces.Count > 0) {
         var added = Piece.m_allPieces[Piece.m_allPieces.Count - 1];
         Hammer.PostProcessPlaced(added);
-        if (Settings.EnableUndo)
-          UndoManager.Add(new UndoPlace(added.m_nview));
+        UndoWrapper.Place(added.m_nview);
       }
     }
   }

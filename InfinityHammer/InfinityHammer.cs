@@ -1,4 +1,7 @@
-﻿using BepInEx;
+﻿using System.Reflection;
+using BepInEx;
+using BepInEx.Bootstrap;
+using BepInEx.Logging;
 using HarmonyLib;
 
 namespace InfinityHammer {
@@ -6,10 +9,19 @@ namespace InfinityHammer {
   [BepInDependency("m3to.mods.GizmoReloaded", BepInDependency.DependencyFlags.SoftDependency)]
   [BepInDependency("valheim.jerekuusela.dev", BepInDependency.DependencyFlags.SoftDependency)]
   public class InfinityHammer : BaseUnityPlugin {
+    public static ManualLogSource Log;
+    public static bool IsDev => DEV != null;
+    public static Assembly DEV = null;
     public void Awake() {
+      Log = Logger;
       Harmony harmony = new Harmony("valheim.jerekuusela.infinity_hammer");
       harmony.PatchAll();
       Settings.Init(Config);
+    }
+
+    public void Start() {
+      if (Chainloader.PluginInfos.ContainsKey("valheim.jerekuusela.dev"))
+        DEV = Chainloader.PluginInfos["valheim.jerekuusela.dev"].Instance.GetType().Assembly;
     }
   }
 
