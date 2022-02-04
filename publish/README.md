@@ -85,6 +85,7 @@ Following powers are available:
 
 - All objects: Hammer can select and place any object. Any placed object can be removed with the hammer until the area is reloaded.
 - Allow in dungeons: Building is allowed in dungeons.
+- Auto equip: Automatically equips the hammer when selecting an object.
 - Copy rotation: Copies rotation of the selected object.
 - Build range: Range for building (capped at about 50 meters).
 - Copy state: Object state is copied (for example chest contents or item stand items).
@@ -154,6 +155,11 @@ IF "Disable loot" is enabled, destroying creatures or structures won't drop loot
 
 # Changelog
 
+- v1.6:
+	- Adds a new setting `auto_equip` to automatically equip the hammer when selecting an object (enabled by default).
+	- Fixes `disable_marker` setting also disabling the Gizmo visual.
+	- Fixes scale not being set when selecting objects from the build menu (better compatibility with some mods).
+
 - v1.5:
 	- Adds support for the undo system of Server devcommands mod (if installed).
 	- Adds a new command `hammer_add_piece_components` to allow copying anything with PlanBuild.
@@ -171,8 +177,8 @@ IF "Disable loot" is enabled, destroying creatures or structures won't drop loot
 	- Fixes scale being applied to objects that don't support it.
 	- Fixes tamed status not being copied for creatures.
 	- Fixes hammer_scale not working with different scales per axis.
-	- Fixes "Select range" setting not working.
-	- Fixes "Remove range" setting not working.
+	- Fixes `Select range" setting not working.
+	- Fixes `Remove range" setting not working.
 
 - v1.3:
 	- Fixes health not being copied for creatures (got overwritten by stars).

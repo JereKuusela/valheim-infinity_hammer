@@ -25,6 +25,8 @@ namespace InfinityHammer {
     public static bool IgnoreOtherRestrictions => configIgnoreOtherRestrictions.Value && IsCheats;
     public static ConfigEntry<bool> configRemoveAnything;
     public static bool RemoveAnything => configRemoveAnything.Value && IsCheats;
+    public static ConfigEntry<bool> configAutoEquip;
+    public static bool AutoEquip => configAutoEquip.Value;
     public static ConfigEntry<bool> configDisableLoot;
     public static bool DisableLoot => configDisableLoot.Value && IsCheats;
     public static ConfigEntry<bool> configRepairAnything;
@@ -66,6 +68,7 @@ namespace InfinityHammer {
       configRemoveRange = config.Bind(section, "Remove range", "0", "Range for removing objects (0 = default).");
       configRepairRange = config.Bind(section, "Repair range", "0", "Range for repairing objects (0 = default).");
       configBuildRange = config.Bind(section, "Build range", "0", "Range for placing objects (0 = default)");
+      configAutoEquip = config.Bind(section, "Automatically equips the hammer", true, "Selecting an object automatically equips the hammer.");
       configRepairTaming = config.Bind(section, "Repair taming", false, "Repairing full health creatures tames/untames them.");
       configRemoveEffects = config.Bind(section, "Remove effects", false, "Removes visual effects of building, etc.");
       configEnableUndo = config.Bind(section, "Enable undo", true, "Enabled undo and redo for placing/removing.");
@@ -94,7 +97,8 @@ namespace InfinityHammer {
       "enabled", "select_range", "remove_range", "build_range", "enable_undo", "copy_rotation", "no_build_cost",
       "ignore_wards", "ignore_no_build", "no_stamina_cost", "no_durability_loss", "all_objects", "copy_state",
       "allow_in_dungeons", "remove_anything", "ignore_other_restrictions", "scaling_step", "max_undo_steps", "no_creator",
-      "overwrite_health", "repair_anything", "repair_range", "remove_effects", "repair_taming", "disable_loot", "disable_marker"
+      "overwrite_health", "repair_anything", "repair_range", "remove_effects", "repair_taming", "disable_loot", "disable_marker",
+      "auto_equip"
     };
     private static string State(bool value) => value ? "enabled" : "disabled";
     private static void Toggle(Terminal context, ConfigEntry<bool> setting, string name, bool reverse = false) {
@@ -104,6 +108,7 @@ namespace InfinityHammer {
     }
     public static void UpdateValue(Terminal context, string key, string value) {
       if (key == "enabled") Toggle(context, configEnabled, "Infinity Hammer");
+      if (key == "auto_equip") Toggle(context, configAutoEquip, "Auto equip");
       if (key == "enable_undo") Toggle(context, configEnableUndo, "Undo");
       if (key == "disable_marker") Toggle(context, configHidePlacementMarker, "Placement marker", true);
       if (key == "disable_loot") Toggle(context, configDisableLoot, "Loot", true);

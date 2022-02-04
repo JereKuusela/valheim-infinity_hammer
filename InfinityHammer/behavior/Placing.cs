@@ -74,10 +74,12 @@ namespace InfinityHammer {
 
   [HarmonyPatch(typeof(Player), "SetupPlacementGhost")]
   public class SetupPlacementGhost {
-    public static void Prefix() {
+    public static void Prefix(Player __instance) {
       Hammer.UseSelectedObject = true;
     }
     public static void Postfix(Player __instance) {
+      if (!__instance.m_placementGhost) return;
+      Scaling.SetScale(__instance.m_placementGhost.transform.localScale);
       Helper.CleanObject(__instance.m_placementGhost);
       // When copying an existing object, the copy is inactive.
       // So the ghost must be manually activated while disabling ZNet stuff.
@@ -93,8 +95,11 @@ namespace InfinityHammer {
     public static void Postfix(Player __instance) {
       Scaling.UpdatePlacement();
       Offset.UpdatePlacement();
-      if (Settings.HidePlacementMarker)
-        __instance.m_placementMarkerInstance?.SetActive(false);
+      var marker = __instance.m_placementMarkerInstance;
+      if (Settings.HidePlacementMarker && marker) {
+        for (var i = 0; i < marker.transform.childCount; i++)
+          marker.transform.GetChild(i).gameObject.SetActive(false);
+      }
     }
   }
 }

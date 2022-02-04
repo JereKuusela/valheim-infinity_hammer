@@ -36,7 +36,6 @@ namespace InfinityHammer {
       if (!player || !obj) return false;
       if (obj.GetComponent<Player>()) return false;
       if (!Settings.AllObjects && !IsBuildPiece(player, obj)) return false;
-      Scaling.SetScale(obj.transform.localScale);
       RemoveSelection();
       State = null;
       Prefab = ZNetScene.instance.GetPrefab(Utils.GetPrefabName(obj));
@@ -67,6 +66,14 @@ namespace InfinityHammer {
       Selected = null;
       State = null;
       Prefab = null;
+    }
+    public static void Equip() {
+      var player = Player.m_localPlayer;
+      if (!Settings.AutoEquip || !player) return;
+      var inventory = player.GetInventory();
+      var hammer = inventory.m_inventory.Find(item => item.m_dropPrefab.gameObject.name == "Hammer");
+      if (hammer == null) return;
+      player.EquipItem(hammer);
     }
 
     ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
