@@ -69,7 +69,13 @@ namespace InfinityHammer {
       }
       return null;
     }
-
+    ///<summary>Initializing the copy as inactive is the best way to avoid any script errors. ZNet stuff also won't run.</summary>
+    public static GameObject SafeInstantiante(GameObject obj) {
+      obj.SetActive(false);
+      var ret = UnityEngine.Object.Instantiate(obj);
+      obj.SetActive(true);
+      return ret;
+    }
     ///<summary>Removes scripts that try to run (for example placement needs only the model and Piece component).</summary>
     public static void CleanObject(GameObject obj) {
       if (!obj || !Settings.Enabled) return;
@@ -95,6 +101,14 @@ namespace InfinityHammer {
       // Other
       UnityEngine.Object.Destroy(obj.GetComponent<HoverText>());
       UnityEngine.Object.Destroy(obj.GetComponent<Aoe>());
+    }
+
+    ///<summary>Placement requires the Piece component.</summary>
+    public static void EnsurePiece(GameObject obj) {
+      if (obj.GetComponent<Piece>()) return;
+      var piece = obj.AddComponent<Piece>();
+      piece.m_name = Utils.GetPrefabName(obj);
+      piece.m_clipEverything = true;
     }
   }
   public class Hovered {

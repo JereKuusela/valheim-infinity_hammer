@@ -26,7 +26,7 @@ namespace InfinityHammer {
     public static ConfigEntry<bool> configRemoveAnything;
     public static bool RemoveAnything => configRemoveAnything.Value && IsCheats;
     public static ConfigEntry<bool> configAutoEquip;
-    public static bool AutoEquip => configAutoEquip.Value;
+    public static bool AutoEquip => configAutoEquip.Value && Enabled;
     public static ConfigEntry<bool> configDisableLoot;
     public static bool DisableLoot => configDisableLoot.Value && IsCheats;
     public static ConfigEntry<bool> configRepairAnything;
@@ -68,7 +68,7 @@ namespace InfinityHammer {
       configRemoveRange = config.Bind(section, "Remove range", "0", "Range for removing objects (0 = default).");
       configRepairRange = config.Bind(section, "Repair range", "0", "Range for repairing objects (0 = default).");
       configBuildRange = config.Bind(section, "Build range", "0", "Range for placing objects (0 = default)");
-      configAutoEquip = config.Bind(section, "Automatically equips the hammer", true, "Selecting an object automatically equips the hammer.");
+      configAutoEquip = config.Bind(section, "Auto equip", true, "Automatically equips the hammer when selecting an object.");
       configRepairTaming = config.Bind(section, "Repair taming", false, "Repairing full health creatures tames/untames them.");
       configRemoveEffects = config.Bind(section, "Remove effects", false, "Removes visual effects of building, etc.");
       configEnableUndo = config.Bind(section, "Enable undo", true, "Enabled undo and redo for placing/removing.");

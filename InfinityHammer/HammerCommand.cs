@@ -63,6 +63,7 @@ namespace InfinityHammer {
         if (!Player.m_localPlayer) return;
         if (!Settings.Enabled) return;
         GameObject selected = null;
+        Hammer.Equip();
         if (args.Length > 1) {
           selected = SetItem(args.Context, args[1]);
 
@@ -86,7 +87,6 @@ namespace InfinityHammer {
           if (selected != null)
             PrintSelected(args.Context, selected);
         }
-        Hammer.Equip();
       }, optionsFetcher: () => ZNetScene.instance.GetPrefabNames());
       new Terminal.ConsoleCommand("hammer_undo", "Reverts object placing or removing.", delegate (Terminal.ConsoleEventArgs args) {
         if (!Player.m_localPlayer) return;

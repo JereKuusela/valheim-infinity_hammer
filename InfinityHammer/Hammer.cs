@@ -5,21 +5,9 @@ using UnityEngine;
 namespace InfinityHammer {
   public static class Hammer {
     ///<summary>Copy of the selected entity. Only needed for the placement ghost because armor and item stands have a different model depending on their state.</summary>
-    private static GameObject Selected = null;
+    public static GameObject GhostPrefab = null;
     ///<summary>Copy of the state.</summary>
     private static ZDO State = null;
-    ///<summary>The actual named prefab used for creating the object.</summary>
-    private static GameObject Prefab = null;
-
-    ///<summary>Hack to only return the selected when creating the placement ghost.</summary>
-    public static bool UseSelectedObject = false;
-    public static GameObject GetPrefab() {
-      if (UseSelectedObject) {
-        UseSelectedObject = false;
-        return Selected ?? Prefab;
-      }
-      return Prefab;
-    }
 
     public static void CopyState(Piece obj) {
       if (State == null || !Settings.CopyState || !obj.m_nview) return;
@@ -37,42 +25,32 @@ namespace InfinityHammer {
       if (obj.GetComponent<Player>()) return false;
       if (!Settings.AllObjects && !IsBuildPiece(player, obj)) return false;
       RemoveSelection();
-      State = null;
-      Prefab = ZNetScene.instance.GetPrefab(Utils.GetPrefabName(obj));
       if (Settings.CopyState) {
-        obj.GetComponent<WearNTear>()?.ResetHighlight();
-        // Initializing the copy as inactive is the best way to avoid any script errors.
-        // ZNet stuff also won't run.
-        obj.SetActive(false);
-        Selected = Object.Instantiate(obj);
-        obj.SetActive(true);
+        GhostPrefab = Helper.SafeInstantiante(obj);
         State = state == null ? null : state.Clone();
+      } else {
+        var basePrefab = ZNetScene.instance.GetPrefab(Utils.GetPrefabName(obj));
+        GhostPrefab = Helper.SafeInstantiante(basePrefab);
+        GhostPrefab.transform.localScale = obj.transform.localScale;
+        State = null;
       }
-      if (Selected && !Selected.GetComponent<Piece>()) {
-        var piece = Selected.AddComponent<Piece>();
-        piece.m_name = Utils.GetPrefabName(piece.gameObject);
-        piece.m_clipEverything = true;
-      }
-      if (Prefab && !Prefab.GetComponent<Piece>()) {
-        var piece = Prefab.AddComponent<Piece>();
-        piece.m_name = Utils.GetPrefabName(piece.gameObject);
-        piece.m_clipEverything = true;
-      }
+      Helper.EnsurePiece(GhostPrefab);
       player.SetupPlacementGhost();
       return true;
     }
     public static void RemoveSelection() {
-      if (Selected) ZNetScene.instance.Destroy(Selected);
-      Selected = null;
+      if (GhostPrefab) ZNetScene.instance.Destroy(GhostPrefab);
+      GhostPrefab = null;
       State = null;
-      Prefab = null;
     }
     public static void Equip() {
       var player = Player.m_localPlayer;
       if (!Settings.AutoEquip || !player) return;
+      if (player.GetRightItem()?.m_dropPrefab?.gameObject.name == "Hammer") return;
       var inventory = player.GetInventory();
       var hammer = inventory.m_inventory.Find(item => item.m_dropPrefab.gameObject.name == "Hammer");
       if (hammer == null) return;
+
       player.EquipItem(hammer);
     }
 
