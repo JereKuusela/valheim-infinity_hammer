@@ -1,6 +1,6 @@
-# valheim-esp
+# valheim-infinity_hammer
 
-This project is an utility mod to game called Valheim.
+This project is a creative building mod to game called Valheim.
 
 To compile, you need to manually add correct libraries to Libs folder. Check project file for needed ones.
 

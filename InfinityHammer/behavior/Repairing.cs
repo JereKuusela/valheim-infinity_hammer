@@ -19,7 +19,7 @@ namespace InfinityHammer {
       var current = zdo.GetFloat("health", character.GetMaxHealth());
       var max = Settings.OverwriteHealth > 0f ? Settings.OverwriteHealth : character.GetMaxHealth();
       zdo.Set("max_health", max);
-      var heal = max - current;
+      var heal = max * 1.000001f - current;
       if (heal != 0f) {
         // Max health resets on awake if health is equal to max.
         zdo.Set("health", max * 1.000001f);

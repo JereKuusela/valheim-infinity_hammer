@@ -155,6 +155,12 @@ IF "Disable loot" is enabled, destroying creatures or structures won't drop loot
 
 # Changelog
 
+- v1.7:
+	- Changes Server devcommands compatibility to work with the newest version (old versions won't work anymore as the name was changed).
+	- TODO: Fix mystical power being ignored with "invalid placement".
+	- TODO: Fix enemy weapons not being copied.
+	- Fixes taming and untaming not working with the repair.
+
 - v1.6:
 	- Adds a new setting `auto_equip` to automatically equip the hammer when selecting an object (enabled by default).
 	- Adds a version number check to the Server devcommands mod compatibility.

@@ -186,7 +186,7 @@ namespace InfinityHammer {
       }, optionsFetcher: () => Settings.Options);
       new Terminal.ConsoleCommand("hammer_setup_binds", "Sets recommended key bindings.", delegate (Terminal.ConsoleEventArgs args) {
         BindGeneral(args.Context);
-        var isDev = InfinityHammer.IsDev;
+        var isDev = InfinityHammer.IsServerDevcommands;
         var modifier = (isDev ? " keys=-leftalt" : "");
         args.Context.TryRunCommand("unbind rightcontrol");
         args.Context.TryRunCommand("bind rightcontrol hammer_offset 0,0,0");
