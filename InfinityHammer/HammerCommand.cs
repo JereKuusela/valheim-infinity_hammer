@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace InfinityHammer {
@@ -212,12 +213,20 @@ namespace InfinityHammer {
         }
         foreach (var prefab in ZNetScene.instance.m_prefabs) {
           if (prefab.GetComponent<Piece>()) continue;
+          if (prefab.name == "Player") continue;
+          if (prefab.name.StartsWith("_", StringComparison.Ordinal)) continue;
+          if (prefab.name.StartsWith("fx_", StringComparison.Ordinal)) continue;
+          if (prefab.name.StartsWith("sfx_", StringComparison.Ordinal)) continue;
           var piece = prefab.AddComponent<Piece>();
           piece.m_name = Utils.GetPrefabName(piece.gameObject);
           piece.m_clipEverything = true;
         }
         foreach (var instance in ZNetScene.instance.m_instances.Values) {
           if (instance.gameObject.GetComponent<Piece>()) continue;
+          if (instance.gameObject.name == "Player(Clone)") continue;
+          if (instance.gameObject.name.StartsWith("_", StringComparison.Ordinal)) continue;
+          if (instance.gameObject.name.StartsWith("fx_", StringComparison.Ordinal)) continue;
+          if (instance.gameObject.name.StartsWith("sfx_", StringComparison.Ordinal)) continue;
           var piece = instance.gameObject.AddComponent<Piece>();
           piece.m_name = Utils.GetPrefabName(piece.gameObject);
           piece.m_clipEverything = true;

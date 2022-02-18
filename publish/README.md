@@ -160,6 +160,7 @@ IF "Disable loot" is enabled, destroying creatures or structures won't drop loot
 	- TODO: Fix mystical power being ignored with "invalid placement".
 	- TODO: Fix enemy weapons not being copied.
 	- Fixes taming and untaming not working with the repair.
+	- TEST: Fixes `hammer_add_piece_components` affecting players.
 
 - v1.6:
 	- Adds a new setting `auto_equip` to automatically equip the hammer when selecting an object (enabled by default).
