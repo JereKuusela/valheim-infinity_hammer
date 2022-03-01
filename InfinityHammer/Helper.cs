@@ -116,7 +116,7 @@ namespace InfinityHammer {
     public ZNetView Obj;
     public int Index;
   }
-  [HarmonyPatch(typeof(Player), "Message")]
+  [HarmonyPatch(typeof(Player), nameof(Player.Message))]
   public class ReplaceMessage {
     public static string Message = "";
     public static void Prefix(ref string msg) {

@@ -20,7 +20,7 @@ namespace InfinityHammer {
   }
 
   ///<summary>Overrides the piece selection.</summary>
-  [HarmonyPatch(typeof(PieceTable), "GetSelectedPiece")]
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.GetSelectedPiece))]
   public class GetSelectedPiece {
     public static bool Prefix(ref Piece __result) {
       if (Hammer.GhostPrefab)
@@ -31,7 +31,7 @@ namespace InfinityHammer {
   }
 
   ///<summary>Selecting a piece normally removes the override.</summary>
-  [HarmonyPatch(typeof(Player), "SetSelectedPiece")]
+  [HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece))]
   public class SetSelectedPiece {
     public static void Prefix(Player __instance) {
       Hammer.RemoveSelection();
@@ -39,7 +39,7 @@ namespace InfinityHammer {
     }
   }
 
-  [HarmonyPatch(typeof(Player), "PlacePiece")]
+  [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
   public class PlacePiece {
     public static void Prefix(ref Piece piece, ref bool __state) {
       DisableEffects.Active = true;
@@ -71,14 +71,14 @@ namespace InfinityHammer {
       }
     }
   }
-  [HarmonyPatch(typeof(Player), "PlacePiece")]
+  [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
   public class PostProcessToolOnPlace {
     public static void Postfix(Player __instance, ref bool __result) {
       if (__result) Hammer.PostProcessTool(__instance);
     }
   }
 
-  [HarmonyPatch(typeof(Player), "UpdatePlacementGhost")]
+  [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
   public class UnlockBuildDistance {
     public static void Prefix(Player __instance, ref float __state) {
       __state = __instance.m_maxPlaceDistance;
@@ -90,7 +90,7 @@ namespace InfinityHammer {
     }
   }
 
-  [HarmonyPatch(typeof(Player), "SetupPlacementGhost")]
+  [HarmonyPatch(typeof(Player), nameof(Player.SetupPlacementGhost))]
   public class SetupPlacementGhost {
     public static void Postfix(Player __instance) {
       if (!__instance.m_placementGhost) return;
@@ -106,7 +106,7 @@ namespace InfinityHammer {
       }
     }
   }
-  [HarmonyPatch(typeof(Player), "UpdatePlacementGhost")]
+  [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
   public class UpdatePlacementGhost {
     public static void Postfix(Player __instance) {
       Scaling.UpdatePlacement();

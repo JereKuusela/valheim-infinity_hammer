@@ -4,7 +4,7 @@ using HarmonyLib;
 namespace InfinityHammer {
 
   ///<summary>Disables the resource check.</summary>
-  [HarmonyPatch(typeof(Player), "HaveRequirements", new Type[] { typeof(Piece), typeof(Player.RequirementMode) })]
+  [HarmonyPatch(typeof(Player), nameof(Player.HaveRequirements), new Type[] { typeof(Piece), typeof(Player.RequirementMode) })]
   public class HaveRequirements {
     public static bool Prefix(ref bool __result) {
       if (Settings.NoBuildCost) {
@@ -15,15 +15,15 @@ namespace InfinityHammer {
     }
   }
   ///<summary>Removes resource usage.</summary>
-  [HarmonyPatch(typeof(Player), "ConsumeResources")]
+  [HarmonyPatch(typeof(Player), nameof(Player.ConsumeResources))]
   public class ConsumeResources {
     public static bool Prefix() => !Settings.NoBuildCost;
   }
-  [HarmonyPatch(typeof(Player), "UpdatePlacementGhost")]
+  [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
   public class UnlockPlacement {
     public static void Postfix(Player __instance) => Placing.ForceValidPlacement(__instance);
   }
-  [HarmonyPatch(typeof(Location), "IsInsideNoBuildLocation")]
+  [HarmonyPatch(typeof(Location), nameof(Location.IsInsideNoBuildLocation))]
   public class IsInsideNoBuildLocation {
     public static bool Prefix(ref bool __result) {
       if (Settings.IgnoreNoBuild) {
@@ -33,7 +33,7 @@ namespace InfinityHammer {
       return true;
     }
   }
-  [HarmonyPatch(typeof(PrivateArea), "CheckAccess")]
+  [HarmonyPatch(typeof(PrivateArea), nameof(PrivateArea.CheckAccess))]
   public class CheckAccess {
     public static bool Prefix(ref bool __result) {
       if (Settings.IgnoreWards) {
@@ -43,7 +43,7 @@ namespace InfinityHammer {
       return true;
     }
   }
-  [HarmonyPatch(typeof(Player), "CheckCanRemovePiece")]
+  [HarmonyPatch(typeof(Player), nameof(Player.CheckCanRemovePiece))]
   public class CheckCanRemovePiece {
     public static bool Prefix(ref bool __result) {
       if (Settings.NoBuildCost) {

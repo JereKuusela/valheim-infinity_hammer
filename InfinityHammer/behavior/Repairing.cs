@@ -6,7 +6,7 @@ namespace InfinityHammer {
 
 
 
-  [HarmonyPatch(typeof(Player), "Repair")]
+  [HarmonyPatch(typeof(Player), nameof(Player.Repair))]
   public class Repair {
     public static bool IsRepairing = false;
     public static bool Repaired = false;
@@ -157,7 +157,7 @@ namespace InfinityHammer {
   }
 
 
-  [HarmonyPatch(typeof(Player), "UpdateWearNTearHover")]
+  [HarmonyPatch(typeof(Player), nameof(Player.UpdateWearNTearHover))]
   public class UnlockRepairDistance {
     public static void Prefix(Player __instance, ref float __state) {
       __state = __instance.m_maxPlaceDistance;
@@ -170,14 +170,14 @@ namespace InfinityHammer {
 
   }
 
-  [HarmonyPatch(typeof(Character), "UseStamina")]
+  [HarmonyPatch(typeof(Character), nameof(Character.UseStamina))]
   public class CheckRepair {
     public static void Prefix() {
       if (Repair.IsRepairing) Repair.Repaired = true;
     }
   }
 
-  [HarmonyPatch(typeof(WearNTear), "Repair")]
+  [HarmonyPatch(typeof(WearNTear), nameof(WearNTear.Repair))]
   public class AdvancedRepair {
     public static bool Prefix(WearNTear __instance, ref bool __result) {
       if (!Settings.Enabled || !__instance.m_nview) return true;

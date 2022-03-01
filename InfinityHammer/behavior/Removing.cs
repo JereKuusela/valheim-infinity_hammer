@@ -4,7 +4,7 @@ using UnityEngine;
 // Code related to removing objects.
 namespace InfinityHammer {
 
-  [HarmonyPatch(typeof(Player), "RemovePiece")]
+  [HarmonyPatch(typeof(Player), nameof(Player.RemovePiece))]
   public class UnlockRemoveDistance {
     public static void Prefix(Player __instance, ref float __state) {
       __state = __instance.m_maxPlaceDistance;
@@ -16,7 +16,7 @@ namespace InfinityHammer {
     }
   }
 
-  [HarmonyPatch(typeof(Player), "RemovePiece")]
+  [HarmonyPatch(typeof(Player), nameof(Player.RemovePiece))]
   public class RemovePiece {
     public static bool Removing = false;
     public static UndoData Target;
@@ -63,17 +63,17 @@ namespace InfinityHammer {
     public static void Postfix(ref bool __result) => End(__result);
   }
 
-  [HarmonyPatch(typeof(Piece), "DropResources")]
+  [HarmonyPatch(typeof(Piece), nameof(Piece.DropResources))]
   public class PreventPieceDrops {
     public static bool Active = false;
     public static bool Prefix() => !Active;
   }
-  [HarmonyPatch(typeof(CharacterDrop), "OnDeath")]
+  [HarmonyPatch(typeof(CharacterDrop), nameof(CharacterDrop.OnDeath))]
   public class PreventCreaturerops {
     public static bool Active = false;
     public static bool Prefix() => !Active;
   }
-  [HarmonyPatch(typeof(Player), "RemovePiece")]
+  [HarmonyPatch(typeof(Player), nameof(Player.RemovePiece))]
   public class PostProcessToolOnRemove {
     public static void Postfix(Player __instance, ref bool __result) {
       if (__result) Hammer.PostProcessTool(__instance);
@@ -81,7 +81,7 @@ namespace InfinityHammer {
   }
 
   ///<summary>Game code doesn't give direct access to the removed object.</summary>
-  [HarmonyPatch(typeof(Piece), "CanBeRemoved")]
+  [HarmonyPatch(typeof(Piece), nameof(Piece.CanBeRemoved))]
   public class AccessTargetedObject {
     public static void Prefix(Piece __instance) {
       if (RemovePiece.Removing && __instance.m_nview)
