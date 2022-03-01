@@ -7,6 +7,7 @@ namespace InfinityHammer {
   public static class Helper {
 
     public static void RemoveZDO(ZDO zdo) {
+      if (zdo == null || !zdo.IsValid()) return;
       if (!zdo.IsOwner())
         zdo.SetOwner(ZDOMan.instance.GetMyID());
       if (ZNetScene.instance.m_instances.TryGetValue(zdo, out var view))
@@ -54,7 +55,7 @@ namespace InfinityHammer {
       foreach (var hit in hits) {
         if (Vector3.Distance(hit.point, obj.m_eye.position) >= maxDistance) continue;
         var netView = hit.collider.GetComponentInParent<ZNetView>();
-        if (!netView) continue;
+        if (!netView || netView.GetZDO() == null) continue;
         var player = netView.GetComponentInChildren<Player>();
         if (player == obj) continue;
         if (!allowOtherPlayers && player) continue;

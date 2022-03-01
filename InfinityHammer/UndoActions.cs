@@ -31,9 +31,9 @@ namespace InfinityHammer {
         Helper.RemoveZDO(added);
     }
 
-    public static UndoData CreateDate(ZNetView obj) {
+    public static UndoData CreateData(ZNetView obj) {
       var zdo = obj.GetZDO();
-      return new UndoData() {
+      return new UndoData {
         Prefab = zdo.GetPrefab(),
         Data = zdo.Clone(),
         Position = zdo.GetPosition(),
@@ -68,7 +68,7 @@ namespace InfinityHammer {
     private UndoData Data = null;
     private ZDO Added = null;
     public UndoPlace(ZNetView obj) {
-      Data = UndoHelper.CreateDate(obj);
+      Data = UndoHelper.CreateData(obj);
       Added = obj.GetZDO();
     }
     public void Undo() {

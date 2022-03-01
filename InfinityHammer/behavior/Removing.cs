@@ -22,7 +22,7 @@ namespace InfinityHammer {
     public static UndoData Target;
 
     public static void SetTarget(ZNetView obj) {
-      Target = UndoHelper.CreateDate(obj);
+      Target = UndoHelper.CreateData(obj);
     }
 
     private static bool RemoveAnything(Player obj) {
