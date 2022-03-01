@@ -2,23 +2,6 @@ using HarmonyLib;
 
 // Code related to adding objects.
 namespace InfinityHammer {
-  public static class Placing {
-
-    ///<summary>Removes placement checks.</summary>
-    public static void ForceValidPlacement(Player obj) {
-      if (obj.m_placementGhost == null) return;
-      if (obj.m_placementStatus == Player.PlacementStatus.NotInDungeon) {
-        if (!Settings.AllowInDungeons) return;
-      } else if (obj.m_placementStatus == Player.PlacementStatus.NoBuildZone) {
-        if (!Settings.IgnoreNoBuild) return;
-      } else if (obj.m_placementStatus == Player.PlacementStatus.PrivateZone) {
-        if (!Settings.IgnoreWards) return;
-      } else if (!Settings.IgnoreOtherRestrictions) return;
-      obj.m_placementStatus = Player.PlacementStatus.Valid;
-      obj.SetPlacementGhostValid(true);
-    }
-  }
-
   ///<summary>Overrides the piece selection.</summary>
   [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.GetSelectedPiece))]
   public class GetSelectedPiece {

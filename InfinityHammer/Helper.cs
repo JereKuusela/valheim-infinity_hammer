@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using HarmonyLib;
 using UnityEngine;
@@ -7,7 +8,7 @@ namespace InfinityHammer {
   public static class Helper {
 
     public static void RemoveZDO(ZDO zdo) {
-      if (zdo == null || !zdo.IsValid()) return;
+      if (!IsValid(zdo)) return;
       if (!zdo.IsOwner())
         zdo.SetOwner(ZDOMan.instance.GetMyID());
       if (ZNetScene.instance.m_instances.TryGetValue(zdo, out var view))
@@ -48,14 +49,15 @@ namespace InfinityHammer {
       }
     }
 
-    public static Hovered GetHovered(Player obj, float maxDistance, bool allowOtherPlayers = false) {
+    public static Hovered GetHovered(Player obj, float maxDistance, HashSet<string> blacklist, bool allowOtherPlayers = false) {
       var raycast = Math.Max(maxDistance + 5f, 50f);
       var hits = Physics.RaycastAll(GameCamera.instance.transform.position, GameCamera.instance.transform.forward, raycast, obj.m_interactMask);
       Array.Sort<RaycastHit>(hits, (RaycastHit x, RaycastHit y) => x.distance.CompareTo(y.distance));
       foreach (var hit in hits) {
         if (Vector3.Distance(hit.point, obj.m_eye.position) >= maxDistance) continue;
         var netView = hit.collider.GetComponentInParent<ZNetView>();
-        if (!netView || netView.GetZDO() == null) continue;
+        if (!IsValid(netView)) continue;
+        if (blacklist != null && blacklist.Contains(Utils.GetPrefabName(netView.gameObject).ToLower())) continue;
         var player = netView.GetComponentInChildren<Player>();
         if (player == obj) continue;
         if (!allowOtherPlayers && player) continue;
@@ -71,7 +73,7 @@ namespace InfinityHammer {
       return null;
     }
     ///<summary>Initializing the copy as inactive is the best way to avoid any script errors. ZNet stuff also won't run.</summary>
-    public static GameObject SafeInstantiante(GameObject obj) {
+    public static GameObject SafeInstantiate(GameObject obj) {
       obj.SetActive(false);
       var ret = UnityEngine.Object.Instantiate(obj);
       obj.SetActive(true);
@@ -111,6 +113,10 @@ namespace InfinityHammer {
       piece.m_name = Utils.GetPrefabName(obj);
       piece.m_clipEverything = true;
     }
+    ///<summary>Helper to check object validity.</summary>
+    public static bool IsValid(ZNetView view) => view && IsValid(view.GetZDO());
+    ///<summary>Helper to check object validity.</summary>
+    public static bool IsValid(ZDO zdo) => zdo != null && zdo.IsValid();
   }
   public class Hovered {
     public ZNetView Obj;

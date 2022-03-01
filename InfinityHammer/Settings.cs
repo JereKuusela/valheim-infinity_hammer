@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using BepInEx.Configuration;
 
 namespace InfinityHammer {
@@ -59,7 +60,11 @@ namespace InfinityHammer {
     public static bool HidePlacementMarker => configHidePlacementMarker.Value && Enabled;
     public static ConfigEntry<bool> configEnabled;
     public static bool Enabled => configEnabled.Value;
-
+    private static HashSet<string> ParseList(string value) => value.Split(',').Select(s => s.Trim().ToLower()).ToHashSet();
+    public static ConfigEntry<string> configRemoveBlacklist;
+    public static HashSet<string> RemoveBlacklist => ParseList(configRemoveBlacklist.Value);
+    public static ConfigEntry<string> configSelectBlacklist;
+    public static HashSet<string> SelectBlacklist => ParseList(configSelectBlacklist.Value);
     public static void Init(ConfigFile config) {
       var section = "General";
       configEnabled = config.Bind(section, "Enabled", true, "Whether this mod is enabled at all.");
@@ -91,6 +96,9 @@ namespace InfinityHammer {
       configScaleStep = config.Bind(section, "Scaling step", "0.05", "How much each scale up/down affects the size");
       configUndoLimit = config.Bind(section, "Max undo steps", "50", "How many undo actions are stored.");
       configUndoLimit.SettingChanged += (s, e) => UndoManager.MaxSteps = UndoLimit;
+      section = "Items";
+      configRemoveBlacklist = config.Bind(section, "Remove blacklist", "", "Object ids separated by , that can't be removed.");
+      configSelectBlacklist = config.Bind(section, "Select blacklist", "", "Object ids separated by , that can't be selected.");
     }
 
     public static List<string> Options = new List<string>() {
@@ -98,13 +106,22 @@ namespace InfinityHammer {
       "ignore_wards", "ignore_no_build", "no_stamina_cost", "no_durability_loss", "all_objects", "copy_state",
       "allow_in_dungeons", "remove_anything", "ignore_other_restrictions", "scaling_step", "max_undo_steps", "no_creator",
       "overwrite_health", "repair_anything", "repair_range", "remove_effects", "repair_taming", "disable_loot", "disable_marker",
-      "auto_equip"
+      "auto_equip", "remove_blacklist", "select_blacklist"
     };
     private static string State(bool value) => value ? "enabled" : "disabled";
+    private static string Flag(bool value) => value ? "removed" : "added";
     private static void Toggle(Terminal context, ConfigEntry<bool> setting, string name, bool reverse = false) {
       setting.Value = !setting.Value;
       Helper.AddMessage(context, $"{name} {State(reverse ? !setting.Value : setting.Value)}.");
-
+    }
+    private static void ToggleFlag(Terminal context, ConfigEntry<string> setting, string name, string value) {
+      var list = ParseList(setting.Value);
+      var valueLower = value.ToLower();
+      var remove = list.Contains(valueLower);
+      if (remove) list.Remove(valueLower);
+      else list.Add(valueLower);
+      setting.Value = string.Join(",", list);
+      Helper.AddMessage(context, $"{name} {Flag(remove)} {value}.");
     }
     public static void UpdateValue(Terminal context, string key, string value) {
       if (key == "enabled") Toggle(context, configEnabled, "Infinity Hammer");
@@ -155,6 +172,8 @@ namespace InfinityHammer {
         configOverwriteHealth.Value = value;
         Helper.AddMessage(context, $"Overwrite health set to {value}.");
       }
+      if (key == "remove_blacklist") ToggleFlag(context, configRemoveBlacklist, "Remove blacklist", value);
+      if (key == "select_blacklist") ToggleFlag(context, configSelectBlacklist, "Select blacklist", value);
     }
   }
 }

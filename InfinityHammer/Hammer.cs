@@ -26,11 +26,11 @@ namespace InfinityHammer {
       if (!Settings.AllObjects && !IsBuildPiece(player, obj)) return false;
       RemoveSelection();
       if (Settings.CopyState) {
-        GhostPrefab = Helper.SafeInstantiante(obj);
+        GhostPrefab = Helper.SafeInstantiate(obj);
         State = state == null ? null : state.Clone();
       } else {
         var basePrefab = ZNetScene.instance.GetPrefab(Utils.GetPrefabName(obj));
-        GhostPrefab = Helper.SafeInstantiante(basePrefab);
+        GhostPrefab = Helper.SafeInstantiate(basePrefab);
         GhostPrefab.transform.localScale = obj.transform.localScale;
         State = null;
       }
@@ -54,6 +54,27 @@ namespace InfinityHammer {
       player.EquipItem(hammer);
     }
 
+
+
+    ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
+    public static void FixData(ZNetView obj) {
+      var zdo = obj.GetZDO();
+      var character = obj.GetComponent<Character>();
+      if (character) {
+        // SetLevel would also overwrite the health (when copying a creature with a custom health).
+        var level = zdo.GetInt("level", 1);
+        character.m_level = level;
+        zdo.Set("level", level);
+        if (character.m_onLevelSet != null) character.m_onLevelSet(character.m_level);
+        character.SetTamed(zdo.GetBool("tamed", false));
+      }
+      obj.GetComponentInChildren<ArmorStand>()?.UpdateVisual();
+      obj.GetComponentInChildren<VisEquipment>()?.UpdateVisuals();
+      obj.GetComponentInChildren<ItemStand>()?.UpdateVisual();
+      obj.GetComponentInChildren<CookingStation>()?.UpdateCooking();
+      obj.GetComponentInChildren<LocationProxy>()?.SpawnLocation();
+      obj.GetComponentInChildren<Sign>()?.UpdateText();
+    }
     ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
     public static void PostProcessPlaced(Piece piece) {
       // Hoe also creates pieces.
@@ -70,14 +91,6 @@ namespace InfinityHammer {
           piece.SetCreator(Game.instance.GetPlayerProfile().GetPlayerID());
       }
       var character = piece.GetComponent<Character>();
-      if (character) {
-        // SetLevel would also overwrite the health (when copying a creature with a custom health).
-        var level = zdo.GetInt("level", 1);
-        character.m_level = level;
-        zdo.Set("level", level);
-        if (character.m_onLevelSet != null) character.m_onLevelSet(character.m_level);
-        character.SetTamed(zdo.GetBool("tamed", false));
-      }
       if (Settings.OverwriteHealth > 0f) {
         if (character)
           zdo.Set("max_health", Settings.OverwriteHealth);
@@ -89,12 +102,7 @@ namespace InfinityHammer {
           mineRock.SaveHealth();
         }
       }
-      piece.GetComponentInChildren<ArmorStand>()?.UpdateVisual();
-      piece.GetComponentInChildren<VisEquipment>()?.UpdateVisuals();
-      piece.GetComponentInChildren<ItemStand>()?.UpdateVisual();
-      piece.GetComponentInChildren<CookingStation>()?.UpdateCooking();
-      piece.GetComponentInChildren<LocationProxy>()?.SpawnLocation();
-      piece.GetComponentInChildren<Sign>()?.UpdateText();
+      FixData(piece.m_nview);
     }
 
     ///<summary>Restores durability and stamina to counter the usage.</summary>

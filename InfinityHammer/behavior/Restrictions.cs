@@ -21,7 +21,23 @@ namespace InfinityHammer {
   }
   [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
   public class UnlockPlacement {
-    public static void Postfix(Player __instance) => Placing.ForceValidPlacement(__instance);
+    public static void Prefix(Player __instance) {
+      if (!__instance.m_placementGhost) return;
+      var piece = __instance.m_placementGhost.GetComponent<Piece>();
+      if (Settings.AllowInDungeons) piece.m_allowedInDungeons = true;
+    }
+    public static void Postfix(Player __instance) {
+      if (!__instance.m_placementGhost) return;
+      if (!__instance.m_placementGhost.activeSelf) return;
+      // These three are handled by other settings in other places.
+      var status = __instance.m_placementStatus;
+      if (status == Player.PlacementStatus.NoBuildZone) return;
+      if (status == Player.PlacementStatus.NotInDungeon) return;
+      if (status == Player.PlacementStatus.PrivateZone) return;
+      if (!Settings.IgnoreOtherRestrictions) return;
+      __instance.m_placementStatus = Player.PlacementStatus.Valid;
+      __instance.SetPlacementGhostValid(true);
+    }
   }
   [HarmonyPatch(typeof(Location), nameof(Location.IsInsideNoBuildLocation))]
   public class IsInsideNoBuildLocation {

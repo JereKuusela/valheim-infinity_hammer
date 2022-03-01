@@ -26,7 +26,7 @@ namespace InfinityHammer {
     }
 
     private static bool RemoveAnything(Player obj) {
-      var hovered = Helper.GetHovered(obj, obj.m_maxPlaceDistance);
+      var hovered = Helper.GetHovered(obj, obj.m_maxPlaceDistance, Settings.RemoveBlacklist);
       if (hovered == null) return false;
       obj.m_removeEffects.Create(hovered.Obj.transform.position, Quaternion.identity, null, 1f, -1);
       SetTarget(hovered.Obj);
@@ -84,7 +84,7 @@ namespace InfinityHammer {
   [HarmonyPatch(typeof(Piece), nameof(Piece.CanBeRemoved))]
   public class AccessTargetedObject {
     public static void Prefix(Piece __instance) {
-      if (RemovePiece.Removing && __instance.m_nview)
+      if (RemovePiece.Removing && Helper.IsValid(__instance.m_nview))
         RemovePiece.SetTarget(__instance.m_nview);
     }
   }

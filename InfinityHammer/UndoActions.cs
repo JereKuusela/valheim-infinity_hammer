@@ -19,7 +19,8 @@ namespace InfinityHammer {
         if (netView) {
           var added = netView.GetZDO();
           netView.SetLocalScale(data.Scale);
-          Helper.CopyData(data.Data, added);
+          Helper.CopyData(data.Data.Clone(), added);
+          Hammer.FixData(netView);
           return added;
         }
       }

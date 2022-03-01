@@ -8,7 +8,7 @@ namespace InfinityHammer {
     public static ZNetView GetHovered(Terminal context) {
       if (Player.m_localPlayer == null) return null;
       var range = Settings.SelectRange == 0 ? Player.m_localPlayer.m_maxInteractDistance : Settings.SelectRange;
-      var hovered = Helper.GetHovered(Player.m_localPlayer, range);
+      var hovered = Helper.GetHovered(Player.m_localPlayer, range, Settings.SelectBlacklist);
       if (hovered == null) {
         Helper.AddMessage(context, "Nothing is being hovered.");
         return null;

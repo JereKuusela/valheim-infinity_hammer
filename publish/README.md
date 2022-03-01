@@ -43,6 +43,7 @@ Client-side mod that is compatible with unmodded clients.
 - `hammer_offset [x,y,z]`: Sets the offset.
 - `hammer_setup_binds`: Sets recommended key bindings.
 - `hammer_config [key] [value]`: Toggles or sets configuration values.
+ - For lists, the given value is toggled on or off (`remove_blacklist` or `select_blacklist`).
 - `hammer_add_piece_components`: Adds the Piece component to every object which allows copying them with PlanBuild mod.
 
 Note: Some interactions are quite complicated so please report any issues!
@@ -101,12 +102,14 @@ Following powers are available:
 - No stamina cost: Hammer auto-regens used stamina.
 - Overwrite health: Sets the health of built or repaired objects (0 reverts to the default max health, except for creatures).
 - Remove anything: Allows removing any object. Disabled by default.
+- Remove blacklist: Allows disabling remove for given objects (ids separated by ,). Only works if remove anything is enabled.
 - Remove effects: Removes visual effects of building, repairing and destroying.
 - Remove range: Range for removing (capped at about 50 meters).
 - Repair anything: Allows healing or repairing any object. Disabled by default.
 - Repair range: Range for repairing (capped at about 50 meters).
 - Repair taming: Repairing full health creatures will tame/untame them (works for all creatures).
 - Scaling step: How much the object is scaled up/down.
+- Select blacklist: Allows disabling select for given objects (ids separated by ,).
 - Select range: Range for selecting (capped at about 50 meters).
 
 On servers, above features are disabled without cheat access (except Copy rotate, No placement marker, Remove effects, Select range and offsetting).
@@ -156,9 +159,12 @@ IF "Disable loot" is enabled, destroying creatures or structures won't drop loot
 # Changelog
 
 - v1.7:
+	- Adds new setting `remove_blacklist` that allows disabling remove for some objects.
+	- Adds new setting `select_blacklist` that allows disabling select for some objects.
 	- Changes Server devcommands compatibility to work with the newest version (old versions won't work anymore as the name was changed).
-	- TODO: Fix mystical power being ignored with "invalid placement".
-	- TODO: Fix enemy weapons not being copied.
+	- Fixes `ignore_other_restrictions` being able to ignore no build zones, etc.
+	- Fixes `ignore_other_restrictions` allowing placement to arbitrary position when the placement ghost is not active.
+	- Fixes undo/redo not working for locations and creature stars.
 	- Fixes taming and untaming not working with the repair.
 	- Fixes `hammer_add_piece_components` affecting players.
 	- Fixes incompatibility with some remove mods.
