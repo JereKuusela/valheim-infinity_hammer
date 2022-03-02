@@ -4,6 +4,6 @@
   "website_url": "https://github.com/JereKuusela/valheim-infinity_hammer",
   "description": "Bend the rules of building! Copy any object, make structures indestructible, remove all restrictions, destroy anything and more... Compatible with unmodded clients.",
   "dependencies": [
-    "denikson-BepInExPack_Valheim-5.4.1700"
+    "denikson-BepInExPack_Valheim-5.4.1900"
   ]
 }

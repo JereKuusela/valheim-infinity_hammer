@@ -154,7 +154,9 @@ By default, destroying only works for standard structures and placed objects. Pl
 
 If "Destroy anything" is enabled, all objects can be removed.
 
-IF "Disable loot" is enabled, destroying creatures or structures won't drop loot. This can be useful to get rid of very high starred creatures that crash the game when killed.
+If "Disable loot" is enabled, destroying creatures or structures won't drop loot. This can be useful to get rid of very high starred creatures that crash the game when killed.
+
+Blacklist can be used to avoid destroying critical objects like locations. For example `hammer_config remove_blacklist LocationProxy`.
 
 # Changelog
 
