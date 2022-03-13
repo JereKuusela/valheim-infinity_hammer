@@ -12,7 +12,6 @@ namespace InfinityHammer {
     public static ManualLogSource Log;
     public static bool IsServerDevcommands = false;
     public static Assembly ServerDevcommands = null;
-    public static bool IsComfyGizmo = false;
     public void Awake() {
       Log = Logger;
       Harmony harmony = new Harmony("valheim.jerekuusela.infinity_hammer");
@@ -29,7 +28,8 @@ namespace InfinityHammer {
           ServerDevcommands = info.Instance.GetType().Assembly;
         }
       }
-      IsComfyGizmo = Chainloader.PluginInfos.ContainsKey("com.rolopogo.gizmo.comfy");
+      if (Chainloader.PluginInfos.TryGetValue("com.rolopogo.gizmo.comfy", out info))
+        GizmoWrapper.InitComfy(info.Instance.GetType().Assembly);
     }
   }
 

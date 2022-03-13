@@ -87,18 +87,7 @@ namespace InfinityHammer {
       if (!player) return;
       var rotation = obj.transform.rotation;
       player.m_placeRotation = Mathf.RoundToInt(rotation.eulerAngles.y / 22.5f);
-
-      var gizmo = GameObject.Find("GizmoRoot(Clone)");
-      if (!gizmo) {
-        // Gizmo needs these to ensure that it is initialized properly.
-        player.UpdatePlacementGhost(false);
-        player.UpdatePlacement(false, 0);
-      }
-      gizmo = GameObject.Find("GizmoRoot(Clone)");
-      if (gizmo) {
-        if (InfinityHammer.IsComfyGizmo) gizmo.transform.localRotation = rotation;
-        else gizmo.transform.rotation = rotation;
-      }
+      GizmoWrapper.SetRotation(player, rotation);
     }
   }
 }
