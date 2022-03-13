@@ -54,8 +54,6 @@ namespace InfinityHammer {
       player.EquipItem(hammer);
     }
 
-
-
     ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
     public static void FixData(ZNetView obj) {
       var zdo = obj.GetZDO();

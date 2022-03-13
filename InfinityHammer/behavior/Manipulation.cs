@@ -95,8 +95,10 @@ namespace InfinityHammer {
         player.UpdatePlacement(false, 0);
       }
       gizmo = GameObject.Find("GizmoRoot(Clone)");
-      if (gizmo)
-        gizmo.transform.rotation = rotation;
+      if (gizmo) {
+        if (InfinityHammer.IsComfyGizmo) gizmo.transform.localRotation = rotation;
+        else gizmo.transform.rotation = rotation;
+      }
     }
   }
 }

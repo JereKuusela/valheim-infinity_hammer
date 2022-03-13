@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace InfinityHammer {
@@ -60,6 +61,13 @@ namespace InfinityHammer {
       terminal.TryRunCommand("bind keypad9 hammer_redo");
     }
     public HammerCommand() {
+      CommandWrapper.Register("hammer", (int index, int subIndex) => {
+        if (index == 0) return CommandWrapper.ObjectIds();
+        if (index == 1) return CommandWrapper.Scale("Size of the object (if the object supports it).", subIndex);
+        return null;
+      }, new Dictionary<string, Func<int, List<string>>>{
+        { "scale", (int index) => CommandWrapper.Scale("scale", "Size of the object (if the object supports it).", index)}
+      });
       new Terminal.ConsoleCommand("hammer", "[item id] [scale=1] - Adds an object to the hammer placement (hovered object by default).", delegate (Terminal.ConsoleEventArgs args) {
         if (!Player.m_localPlayer) return;
         if (!Settings.Enabled) return;
@@ -88,42 +96,61 @@ namespace InfinityHammer {
           if (selected != null)
             PrintSelected(args.Context, selected);
         }
-      }, optionsFetcher: () => ZNetScene.instance.GetPrefabNames());
+      }, optionsFetcher: CommandWrapper.ObjectIds);
+      CommandWrapper.RegisterEmpty("hammer_undo");
       new Terminal.ConsoleCommand("hammer_undo", "Reverts object placing or removing.", delegate (Terminal.ConsoleEventArgs args) {
         if (!Player.m_localPlayer) return;
         if (!Settings.EnableUndo) return;
         UndoWrapper.Undo(args.Context);
       });
+      CommandWrapper.RegisterEmpty("hammer_redo");
       new Terminal.ConsoleCommand("hammer_redo", "Restores reverted object placing or removing.", delegate (Terminal.ConsoleEventArgs args) {
         if (!Player.m_localPlayer) return;
         if (!Settings.EnableUndo) return;
         UndoWrapper.Redo(args.Context);
-
       });
+      CommandWrapper.RegisterEmpty("hammer_scale_up");
       new Terminal.ConsoleCommand("hammer_scale_up", "Scales up the selection (if the object supports it).", delegate (Terminal.ConsoleEventArgs args) {
         if (Settings.ScaleStep <= 0f) return;
         Scaling.ScaleUp();
         Scaling.PrintScale(args.Context);
       });
+      CommandWrapper.RegisterEmpty("hammer_scale_down");
       new Terminal.ConsoleCommand("hammer_scale_down", "Scales down the selection (if the object supports it).", delegate (Terminal.ConsoleEventArgs args) {
         if (Settings.ScaleStep <= 0f) return;
         Scaling.ScaleDown();
         Scaling.PrintScale(args.Context);
+      });
+      CommandWrapper.Register("hammer_move_x", (int index) => {
+        if (index == 0) return CommandWrapper.Info("Moves the X offset.");
+        return null;
       });
       new Terminal.ConsoleCommand("hammer_move_x", "[value] - Moves the X offset.", delegate (Terminal.ConsoleEventArgs args) {
         if (args.Length < 2) return;
         Offset.MoveX(Helper.ParseFloat(args[1], 0f));
         Offset.Print(args.Context);
       });
+      CommandWrapper.Register("hammer_move_y", (int index) => {
+        if (index == 0) return CommandWrapper.Info("Moves the Y offset.");
+        return null;
+      });
       new Terminal.ConsoleCommand("hammer_move_y", "[value] - Moves the Y offset.", delegate (Terminal.ConsoleEventArgs args) {
         if (args.Length < 2) return;
         Offset.MoveY(Helper.ParseFloat(args[1], 0f));
         Offset.Print(args.Context);
       });
+      CommandWrapper.Register("hammer_move_z", (int index) => {
+        if (index == 0) return CommandWrapper.Info("Moves the Z offset.");
+        return null;
+      });
       new Terminal.ConsoleCommand("hammer_move_z", "[value] - Moves the Z offset.", delegate (Terminal.ConsoleEventArgs args) {
         if (args.Length < 2) return;
         Offset.MoveZ(Helper.ParseFloat(args[1], 0f));
         Offset.Print(args.Context);
+      });
+      CommandWrapper.Register("hammer_move", (int index) => {
+        if (index < 3) return CommandWrapper.XYZ("Moves the offset.", index);
+        return null;
       });
       new Terminal.ConsoleCommand("hammer_move", "[x,y,z] - Moves the offset.", delegate (Terminal.ConsoleEventArgs args) {
         if (args.Length < 2) return;
@@ -135,20 +162,36 @@ namespace InfinityHammer {
         Offset.Move(value);
         Offset.Print(args.Context);
       });
+      CommandWrapper.Register("hammer_offset_x", (int index) => {
+        if (index == 0) return CommandWrapper.Info("Sets the X offset.");
+        return null;
+      });
       new Terminal.ConsoleCommand("hammer_offset_x", "[value] - Sets the X offset.", delegate (Terminal.ConsoleEventArgs args) {
         if (args.Length < 2) return;
         Offset.SetX(Helper.ParseFloat(args[1], 0f));
         Offset.Print(args.Context);
+      });
+      CommandWrapper.Register("hammer_offset_y", (int index) => {
+        if (index == 0) return CommandWrapper.Info("Sets the Y offset.");
+        return null;
       });
       new Terminal.ConsoleCommand("hammer_offset_y", "[value] - Sets the Y offset.", delegate (Terminal.ConsoleEventArgs args) {
         if (args.Length < 2) return;
         Offset.SetY(Helper.ParseFloat(args[1], 0f));
         Offset.Print(args.Context);
       });
+      CommandWrapper.Register("hammer_offset_z", (int index) => {
+        if (index == 0) return CommandWrapper.Info("Sets the Z offset.");
+        return null;
+      });
       new Terminal.ConsoleCommand("hammer_offset_z", "[value] - Sets the Z offset.", delegate (Terminal.ConsoleEventArgs args) {
         if (args.Length < 2) return;
         Offset.SetZ(Helper.ParseFloat(args[1], 0f));
         Offset.Print(args.Context);
+      });
+      CommandWrapper.Register("hammer_offset", (int index, int subIndex) => {
+        if (index == 0) return CommandWrapper.XYZ("Sets the offset.", subIndex);
+        return null;
       });
       new Terminal.ConsoleCommand("hammer_offset", "[x,y,z] - Sets the offset.", delegate (Terminal.ConsoleEventArgs args) {
         if (args.Length < 2) return;
@@ -160,7 +203,11 @@ namespace InfinityHammer {
         Offset.Set(value);
         Offset.Print(args.Context);
       });
-      new Terminal.ConsoleCommand("hammer_scale", "[scale=1] - Sets scale of the selection (if the object supports it).", delegate (Terminal.ConsoleEventArgs args) {
+      CommandWrapper.Register("hammer_scale", (int index, int subIndex) => {
+        if (index == 0) return CommandWrapper.Scale("Sets the size (if the object supports it).", subIndex);
+        return null;
+      });
+      new Terminal.ConsoleCommand("hammer_scale", "[scale=1] - Sets the size (if the object supports it).", delegate (Terminal.ConsoleEventArgs args) {
         if (Settings.ScaleStep <= 0f) return;
         if (args.Length < 2)
           Scaling.SetScale(1f);
@@ -178,6 +225,11 @@ namespace InfinityHammer {
           Scaling.SetScale(Helper.ParseFloat(args[1].Replace("scale=", ""), 1f));
         Scaling.PrintScale(args.Context);
       });
+      CommandWrapper.Register("hammer_config", (int index) => {
+        if (index == 0) return Settings.Options;
+        if (index == 1) return CommandWrapper.Info("Value.");
+        return null;
+      });
       new Terminal.ConsoleCommand("hammer_config", "[key] [value] - Toggles or sets config value.", delegate (Terminal.ConsoleEventArgs args) {
         if (args.Length < 2) return;
         if (args.Length == 2)
@@ -185,6 +237,7 @@ namespace InfinityHammer {
         else
           Settings.UpdateValue(args.Context, args[1], args[2]);
       }, optionsFetcher: () => Settings.Options);
+      CommandWrapper.RegisterEmpty("hammer_setup_binds");
       new Terminal.ConsoleCommand("hammer_setup_binds", "Sets recommended key bindings.", delegate (Terminal.ConsoleEventArgs args) {
         BindGeneral(args.Context);
         var isDev = InfinityHammer.IsServerDevcommands;
@@ -205,6 +258,7 @@ namespace InfinityHammer {
         if (isDev) args.Context.TryRunCommand("bind uparrow hammer_move_y 1 keys=leftalt");
         Helper.AddMessage(args.Context, "Keybindings set for Infinity Hammer (with Dedicated Server Devcommands mod).");
       });
+      CommandWrapper.RegisterEmpty("hammer_add_piece_components");
       new Terminal.ConsoleCommand("hammer_add_piece_components", "Adds the Piece component to every prefab to allow copying them with PlanBuild.", delegate (Terminal.ConsoleEventArgs args) {
         if (!ZNetScene.instance) return;
         if (!Settings.IsCheats) {

@@ -19,7 +19,7 @@ Client-side mod that is compatible with unmodded clients.
 1. Install the [BepInExPack Valheim](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim).
 2. Download the latest zip.
 3. Extract it in the \<GameDirectory\>\BepInEx\plugins\ folder.
-4. Recommended to also install [Gizmo Reloaded](https://www.nexusmods.com/valheim/mods/1293) for better rotating.
+4. Recommended to also install [Comfy Gizmo](https://github.com/redseiko/ValheimMods/releases/tag/ComfyGizmo-v1.2.0) for better rotating.
 5. Optionally also install the [Configuration manager](https://github.com/BepInEx/BepInEx.ConfigurationManager/releases/tag/v16.4) to configure the hammer more easily.
 6. For servers, install [Server devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) to use it as an admin.
 
@@ -159,6 +159,10 @@ If "Disable loot" is enabled, destroying creatures or structures won't drop loot
 Blacklist can be used to avoid destroying critical objects like locations. For example `hammer_config remove_blacklist LocationProxy`.
 
 # Changelog
+
+- v1.8:
+	- Adds compatibility with Comfy Gizmo.
+	- Improves autocomplete with Server Devcommands.
 
 - v1.7:
 	- Adds new setting `remove_blacklist` that allows disabling remove for some objects.
