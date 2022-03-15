@@ -30,7 +30,7 @@ namespace InfinityHammer {
     }
     public static List<string> Info(string value) {
       if (!InfinityHammer.IsServerDevcommands) return null;
-      return InfoType().GetMethod("Create", PublicBinding).Invoke(null, new[] { value }) as List<string>;
+      return GetMethod(InfoType(), "Create", new[] { typeof(string) }).Invoke(null, new[] { value }) as List<string>;
     }
     public static List<string> ObjectIds() {
       if (!InfinityHammer.IsServerDevcommands) return ZNetScene.instance.GetPrefabNames();

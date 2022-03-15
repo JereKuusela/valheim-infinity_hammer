@@ -121,31 +121,61 @@ namespace InfinityHammer {
         Scaling.ScaleDown();
         Scaling.PrintScale(args.Context);
       });
-      CommandWrapper.Register("hammer_move_x", (int index) => {
-        if (index == 0) return CommandWrapper.Info("Moves the X offset.");
+      CommandWrapper.Register("hammer_rotate_x", (int index) => {
+        if (index == 0) return CommandWrapper.Info("Rotates around the X axis.");
+        if (index == 1) return CommandWrapper.Info("Direction (1 or -1).");
         return null;
       });
-      new Terminal.ConsoleCommand("hammer_move_x", "[value] - Moves the X offset.", delegate (Terminal.ConsoleEventArgs args) {
+      new Terminal.ConsoleCommand("hammer_rotate_x", "[value] [direction=1] - Rotates around the X axis.", delegate (Terminal.ConsoleEventArgs args) {
         if (args.Length < 2) return;
-        Offset.MoveX(Helper.ParseFloat(args[1], 0f));
+        Rotating.RotateX(Helper.ParseDirection(args.Args, 2) * Helper.ParseFloat(args[1], 0f));
+      });
+      CommandWrapper.Register("hammer_rotate_y", (int index) => {
+        if (index == 0) return CommandWrapper.Info("Rotates around the Y axis.");
+        if (index == 1) return CommandWrapper.Info("Direction (1 or -1).");
+        return null;
+      });
+      new Terminal.ConsoleCommand("hammer_rotate_y", "[value] [direction=1] - Rotates around the Y axis.", delegate (Terminal.ConsoleEventArgs args) {
+        if (args.Length < 2) return;
+        Rotating.RotateY(Helper.ParseDirection(args.Args, 2) * Helper.ParseFloat(args[1], 0f));
+      });
+      CommandWrapper.Register("hammer_rotate_z", (int index) => {
+        if (index == 0) return CommandWrapper.Info("Rotates around the Z axis.");
+        if (index == 1) return CommandWrapper.Info("Direction (1 or -1).");
+        return null;
+      });
+      new Terminal.ConsoleCommand("hammer_rotate_z", "[value] [direction=1] - Rotates around the Z axis.", delegate (Terminal.ConsoleEventArgs args) {
+        if (args.Length < 2) return;
+        Rotating.RotateZ(Helper.ParseDirection(args.Args, 2) * Helper.ParseFloat(args[1], 0f));
+      });
+      CommandWrapper.Register("hammer_move_x", (int index) => {
+        if (index == 0) return CommandWrapper.Info("Moves the X offset.");
+        if (index == 1) return CommandWrapper.Info("Direction (1 or -1).");
+        return null;
+      });
+      new Terminal.ConsoleCommand("hammer_move_x", "[value] [direction=1] - Moves the X offset.", delegate (Terminal.ConsoleEventArgs args) {
+        if (args.Length < 2) return;
+        Offset.MoveX(Helper.ParseDirection(args.Args, 2) * Helper.ParseFloat(args[1], 0f));
         Offset.Print(args.Context);
       });
       CommandWrapper.Register("hammer_move_y", (int index) => {
         if (index == 0) return CommandWrapper.Info("Moves the Y offset.");
+        if (index == 1) return CommandWrapper.Info("Direction (1 or -1).");
         return null;
       });
-      new Terminal.ConsoleCommand("hammer_move_y", "[value] - Moves the Y offset.", delegate (Terminal.ConsoleEventArgs args) {
+      new Terminal.ConsoleCommand("hammer_move_y", "[value] [direction=1] - Moves the Y offset.", delegate (Terminal.ConsoleEventArgs args) {
         if (args.Length < 2) return;
-        Offset.MoveY(Helper.ParseFloat(args[1], 0f));
+        Offset.MoveY(Helper.ParseDirection(args.Args, 2) * Helper.ParseFloat(args[1], 0f));
         Offset.Print(args.Context);
       });
       CommandWrapper.Register("hammer_move_z", (int index) => {
         if (index == 0) return CommandWrapper.Info("Moves the Z offset.");
+        if (index == 1) return CommandWrapper.Info("Direction (1 or -1).");
         return null;
       });
-      new Terminal.ConsoleCommand("hammer_move_z", "[value] - Moves the Z offset.", delegate (Terminal.ConsoleEventArgs args) {
+      new Terminal.ConsoleCommand("hammer_move_z", "[value] [direction=1] - Moves the Z offset.", delegate (Terminal.ConsoleEventArgs args) {
         if (args.Length < 2) return;
-        Offset.MoveZ(Helper.ParseFloat(args[1], 0f));
+        Offset.MoveZ(Helper.ParseDirection(args.Args, 2) * Helper.ParseFloat(args[1], 0f));
         Offset.Print(args.Context);
       });
       CommandWrapper.Register("hammer_move", (int index) => {
@@ -237,6 +267,12 @@ namespace InfinityHammer {
         else
           Settings.UpdateValue(args.Context, args[1], args[2]);
       }, optionsFetcher: () => Settings.Options);
+      CommandWrapper.RegisterEmpty("hammer_place");
+      new Terminal.ConsoleCommand("hammer_place", "Places the current object with a command.", delegate (Terminal.ConsoleEventArgs args) {
+        if (!Player.m_localPlayer) return;
+        Player.m_localPlayer.m_placePressedTime = Time.time;
+        Player.m_localPlayer.m_lastToolUseTime = 0f;
+      });
       CommandWrapper.RegisterEmpty("hammer_setup_binds");
       new Terminal.ConsoleCommand("hammer_setup_binds", "Sets recommended key bindings.", delegate (Terminal.ConsoleEventArgs args) {
         BindGeneral(args.Context);

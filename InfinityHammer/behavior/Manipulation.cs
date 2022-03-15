@@ -87,7 +87,23 @@ namespace InfinityHammer {
       if (!player) return;
       var rotation = obj.transform.rotation;
       player.m_placeRotation = Mathf.RoundToInt(rotation.eulerAngles.y / 22.5f);
-      GizmoWrapper.SetRotation(player, rotation);
+      GizmoWrapper.SetRotation(rotation);
+    }
+    public static void RotateX(float value) {
+      var player = Player.m_localPlayer;
+      if (!player) return;
+      GizmoWrapper.RotateX(value);
+    }
+    public static void RotateY(float value) {
+      var player = Player.m_localPlayer;
+      if (!player) return;
+      player.m_placeRotation = Mathf.RoundToInt(((player.m_placeRotation * 22.5f) + value) / 22.5f);
+      GizmoWrapper.RotateY(value);
+    }
+    public static void RotateZ(float value) {
+      var player = Player.m_localPlayer;
+      if (!player) return;
+      GizmoWrapper.RotateZ(value);
     }
   }
 }

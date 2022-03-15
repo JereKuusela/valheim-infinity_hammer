@@ -162,6 +162,9 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 
 - v1.8:
 	- Adds compatibility with Comfy Gizmo.
+	- Adds direction parameter to the commands `hammer_move_x`, `hammer_move_y` and `hammer_move_z` for Server Devcommands mouse wheel binding.
+	- Adds new command `hammer_place` to place pieces with commands.
+	- Adds new command `hammer_rotate_x`, `hammer_rotate_y` and `hammer_rotate_z` to change rotation with commands.
 	- Improves autocomplete with Server Devcommands.
 	- Fixes repair taming.
 

@@ -32,6 +32,18 @@ namespace InfinityHammer {
       if (float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var result)) return result;
       return defaultValue;
     }
+    public static float ParseDirection(string value) {
+      var direction = ParseFloat(value, 1);
+      if (direction > 0) return 1f;
+      return -1f;
+    }
+
+    public static float ParseDirection(string[] args, int index) {
+      if (args.Length <= index) return 1f;
+      var direction = ParseFloat(args[index], 1);
+      if (direction > 0) return 1f;
+      return -1f;
+    }
 
     public static void AddMessage(Terminal context, string message, bool priority = true) {
       context.AddString(message);
