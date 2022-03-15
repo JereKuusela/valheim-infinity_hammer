@@ -17,12 +17,12 @@ namespace InfinityHammer {
       obj.ClaimOwnership();
       var zdo = obj.GetZDO();
       var current = zdo.GetFloat("health", character.GetMaxHealth());
-      var max = Settings.OverwriteHealth > 0f ? Settings.OverwriteHealth : character.GetMaxHealth();
+      var max = Settings.OverwriteHealth > 0f ? Settings.OverwriteHealth * 1.000001f : character.GetMaxHealth();
       zdo.Set("max_health", max);
-      var heal = max * 1.000001f - current;
+      var heal = max - current;
       if (heal != 0f) {
         // Max health resets on awake if health is equal to max.
-        zdo.Set("health", max * 1.000001f);
+        zdo.Set("health", max);
         DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, character.GetTopPoint(), Mathf.Abs(heal));
         return true;
       }

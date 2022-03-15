@@ -163,6 +163,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 - v1.8:
 	- Adds compatibility with Comfy Gizmo.
 	- Improves autocomplete with Server Devcommands.
+	- Fixes repair taming.
 
 - v1.7:
 	- Adds new setting `remove_blacklist` that allows disabling remove for some objects.
