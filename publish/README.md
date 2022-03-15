@@ -33,14 +33,18 @@ Client-side mod that is compatible with unmodded clients.
 - `hammer_scale [scale=1]`: Sets the object scale (if supported). Number or x,y,z.
 - `hammer_scale_up`: Scales up the object (if supported).
 - `hammer_scale_down`: Scales down the object (if supported).
-- `hammer_move_x [value]`: Moves the X offset.
-- `hammer_move_Y [value]`: Moves the Y offset.
-- `hammer_move_Z [value]`: Moves the Z offset.
+- `hammer_move_x [value] [direction=1]`: Moves the X offset.
+- `hammer_move_Y [value] [direction=1]`: Moves the Y offset.
+- `hammer_move_Z [value] [direction=1]`: Moves the Z offset.
 - `hammer_move [x,y,z]`: Moves the offset.
 - `hammer_offset_x [value]`: Sets the X offset.
 - `hammer_offset_Y [value]`: Sets the Y offset.
 - `hammer_offset_Z [value]`: Sets the Z offset.
 - `hammer_offset [x,y,z]`: Sets the offset.
+- `hammer_place`: Places the piece with a command (requires binding to a key).
+- `hammer_rotate_x [value] [direction=1]`: Rotates around the X axis.
+- `hammer_rotate_Y [value] [direction=1]`: Rotates around the Y axis.
+- `hammer_rotate_Z [value] [direction=1]`: Rotates around the Z axis.
 - `hammer_setup_binds`: Sets recommended key bindings.
 - `hammer_config [key] [value]`: Toggles or sets configuration values.
  - For lists, the given value is toggled on or off (`remove_blacklist` or `select_blacklist`).
