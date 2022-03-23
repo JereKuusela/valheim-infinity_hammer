@@ -124,44 +124,52 @@ namespace InfinityHammer {
     };
     private static string State(bool value) => value ? "enabled" : "disabled";
     private static string Flag(bool value) => value ? "removed" : "added";
-    private static void Toggle(Terminal context, ConfigEntry<bool> setting, string name, bool reverse = false) {
-      setting.Value = !setting.Value;
+    private static void Toggle(Terminal context, ConfigEntry<bool> setting, string name, string value, bool reverse = false) {
+      if (value == "") setting.Value = !setting.Value;
+      else if (value == "1") setting.Value = true;
+      else if (value == "0") setting.Value = false;
       Helper.AddMessage(context, $"{name} {State(reverse ? !setting.Value : setting.Value)}.");
     }
     private static void ToggleFlag(Terminal context, ConfigEntry<string> setting, string name, string value) {
+      if (value == "") {
+        Helper.AddMessage(context, $"{name}: {setting.Value}\".");
+        return;
+      }
       var list = ParseList(setting.Value);
-      var valueLower = value.ToLower();
-      var remove = list.Contains(valueLower);
-      if (remove) list.Remove(valueLower);
-      else list.Add(valueLower);
-      setting.Value = string.Join(",", list);
-      Helper.AddMessage(context, $"{name} {Flag(remove)} {value}.");
+      var newList = ParseList(value);
+      foreach (var flag in newList) {
+        var remove = list.Contains(flag);
+        if (remove) list.Remove(flag);
+        else list.Add(flag);
+        setting.Value = string.Join(",", list);
+        Helper.AddMessage(context, $"{name}: {Flag(remove)} \"{flag}\".");
+      }
     }
     public static void UpdateValue(Terminal context, string key, string value) {
-      if (key == "enabled") Toggle(context, configEnabled, "Infinity Hammer");
-      if (key == "disable_messages") Toggle(context, configDisableMessages, "All messages", true);
-      if (key == "disable_offset_messages") Toggle(context, configDisableOffsetMessages, "Offset messages", true);
-      if (key == "disable_scale_messages") Toggle(context, configDisableScaleMessages, "Scale messages", true);
-      if (key == "disable_select_messages") Toggle(context, configDisableSelectMessages, "Select messages", true);
-      if (key == "auto_equip") Toggle(context, configAutoEquip, "Auto equip");
-      if (key == "enable_undo") Toggle(context, configEnableUndo, "Undo");
-      if (key == "disable_marker") Toggle(context, configHidePlacementMarker, "Placement marker", true);
-      if (key == "disable_loot") Toggle(context, configDisableLoot, "Loot", true);
-      if (key == "repair_taming") Toggle(context, configRepairTaming, "Taming", true);
-      if (key == "remove_effects") Toggle(context, configRemoveEffects, "Effects", true);
-      if (key == "copy_rotation") Toggle(context, configCopyRotation, "Copy rotation");
-      if (key == "no_build_cost") Toggle(context, configNoBuildCost, "Build costs", true);
-      if (key == "ignore_wards") Toggle(context, configIgnoreWards, "Building inside wards", true);
-      if (key == "ignore_no_build") Toggle(context, configIgnoreNoBuild, "No build areas", true);
-      if (key == "no_stamina_cost") Toggle(context, configNoStaminaCost, "Hammer stamina cost", true);
-      if (key == "no_durability_loss") Toggle(context, configNoDurabilityLoss, "Hammer durability cost", true);
-      if (key == "all_objects") Toggle(context, configAllObjects, "All objects");
-      if (key == "copy_state") Toggle(context, configCopyState, "Copy state");
-      if (key == "allow_in_dungeons") Toggle(context, configAllowInDungeons, "Building in dungeons");
-      if (key == "remove_anything") Toggle(context, configRemoveAnything, "Remove anything");
-      if (key == "repair_anything") Toggle(context, configRepairAnything, "Repair anything");
-      if (key == "ignore_other_restrictions") Toggle(context, configIgnoreOtherRestrictions, "Other build restrictions", true);
-      if (key == "no_creator") Toggle(context, configNoCreator, "Creator", true);
+      if (key == "enabled") Toggle(context, configEnabled, "Infinity Hammer", value);
+      if (key == "disable_messages") Toggle(context, configDisableMessages, "All messages", value, true);
+      if (key == "disable_offset_messages") Toggle(context, configDisableOffsetMessages, "Offset messages", value, true);
+      if (key == "disable_scale_messages") Toggle(context, configDisableScaleMessages, "Scale messages", value, true);
+      if (key == "disable_select_messages") Toggle(context, configDisableSelectMessages, "Select messages", value, true);
+      if (key == "auto_equip") Toggle(context, configAutoEquip, "Auto equip", value);
+      if (key == "enable_undo") Toggle(context, configEnableUndo, "Undo", value);
+      if (key == "disable_marker") Toggle(context, configHidePlacementMarker, "Placement marker", value, true);
+      if (key == "disable_loot") Toggle(context, configDisableLoot, "Loot", value, true);
+      if (key == "repair_taming") Toggle(context, configRepairTaming, "Taming", value, true);
+      if (key == "remove_effects") Toggle(context, configRemoveEffects, "Effects", value, true);
+      if (key == "copy_rotation") Toggle(context, configCopyRotation, "Copy rotation", value);
+      if (key == "no_build_cost") Toggle(context, configNoBuildCost, "Build costs", value, true);
+      if (key == "ignore_wards") Toggle(context, configIgnoreWards, "Building inside wards", value, true);
+      if (key == "ignore_no_build") Toggle(context, configIgnoreNoBuild, "No build areas", value, true);
+      if (key == "no_stamina_cost") Toggle(context, configNoStaminaCost, "Hammer stamina cost", value, true);
+      if (key == "no_durability_loss") Toggle(context, configNoDurabilityLoss, "Hammer durability cost", value, true);
+      if (key == "all_objects") Toggle(context, configAllObjects, "All objects", value);
+      if (key == "copy_state") Toggle(context, configCopyState, "Copy state", value);
+      if (key == "allow_in_dungeons") Toggle(context, configAllowInDungeons, "Building in dungeons", value);
+      if (key == "remove_anything") Toggle(context, configRemoveAnything, "Remove anything", value);
+      if (key == "repair_anything") Toggle(context, configRepairAnything, "Repair anything", value);
+      if (key == "ignore_other_restrictions") Toggle(context, configIgnoreOtherRestrictions, "Other build restrictions", value, true);
+      if (key == "no_creator") Toggle(context, configNoCreator, "Creator", value, true);
       if (key == "select_range") {
         configSelectRange.Value = value;
         Helper.AddMessage(context, $"Select range set to {value} meters.");

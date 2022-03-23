@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 namespace InfinityHammer {
@@ -287,7 +288,7 @@ namespace InfinityHammer {
         if (args.Length == 2)
           Settings.UpdateValue(args.Context, args[1], "");
         else
-          Settings.UpdateValue(args.Context, args[1], args[2]);
+          Settings.UpdateValue(args.Context, args[1], string.Join(" ", args.Args.Skip(2)));
       }, optionsFetcher: () => Settings.Options);
       CommandWrapper.RegisterEmpty("hammer_place");
       new Terminal.ConsoleCommand("hammer_place", "Places the current object with a command.", delegate (Terminal.ConsoleEventArgs args) {

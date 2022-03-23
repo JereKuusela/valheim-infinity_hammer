@@ -183,6 +183,9 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds a new command `hammer_rotate_x`, `hammer_rotate_y` and `hammer_rotate_z` to change rotation with commands.
 	- Adds new settings `disable_messages`, `disable_offset_messages`, `disable_scale_messages` and `disable_select_messages` to configure the output.
 	- Improves autocomplete with Server Devcommands.
+	- Improves the `hammer_config` command to allow directly setting flags with values 1 and 0.
+	- Improves the `hammer_config` command to work better when giving multiple values to some commands.
+	- Improves the `hammer_config` command to print the current value for non-flags if no parameter is given.
 	- Fixes repair range not working for creatures and other non-piece objects.
 	- Fixes repair taming.
 
