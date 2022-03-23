@@ -1,7 +1,30 @@
 
+using System.Collections.Generic;
+using System.Linq;
+using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer {
 
+  [HarmonyPatch(typeof(ZNetView), "Awake")]
+  public static class Bounds {
+    private static int[] IgnoredLayers = new int[] { LayerMask.NameToLayer("character_trigger"), LayerMask.NameToLayer("viewblock"), LayerMask.NameToLayer("pathblocker") };
+
+    public static Dictionary<string, Vector3> Get = new Dictionary<string, Vector3>();
+    public static void Postfix(ZNetView __instance) {
+      var name = __instance.GetPrefabName();
+      if (Get.ContainsKey(name)) return;
+      if (__instance.transform.rotation != Quaternion.identity) return;
+      var colliders = __instance.GetComponentsInChildren<Collider>().Where(collider => !IgnoredLayers.Contains(collider.gameObject.layer)).ToArray();
+      if (colliders.Length == 0) {
+        Get[name] = Vector3.zero;
+        return;
+      }
+      var bounds = colliders[0].bounds;
+      foreach (var collider in colliders)
+        bounds.Encapsulate(collider.bounds);
+      Get[name] = bounds.size;
+    }
+  }
   public static class Scaling {
     public static Vector3 Scale = Vector3.one;
     public static void ScaleUp() {
@@ -30,6 +53,7 @@ namespace InfinityHammer {
         ghost.transform.localScale = Scale;
     }
     public static void PrintScale(Terminal terminal) {
+      if (Settings.DisableScaleMessages) return;
       if (IsScalingSupported())
         Helper.AddMessage(terminal, $"Scale set to {Scale.y.ToString("P0")}.");
       else
@@ -77,6 +101,7 @@ namespace InfinityHammer {
       ghost.transform.position += rotation * Vector3.up * Value.y;
     }
     public static void Print(Terminal terminal) {
+      if (Settings.DisableOffsetMessages) return;
       Helper.AddMessage(terminal, $"Offset set to {Value.ToString("F1")}.");
     }
   }

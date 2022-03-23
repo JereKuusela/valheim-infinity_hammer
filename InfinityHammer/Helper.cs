@@ -45,10 +45,18 @@ namespace InfinityHammer {
       return -1f;
     }
 
+    public static float ParseMultiplier(string[] args, int index) {
+      if (args.Length <= index) return 1f;
+      var multiplier = 1f;
+      var split = args[1].Split('*');
+      foreach (var str in split) multiplier *= Helper.ParseFloat(str, 1f);
+      return multiplier;
+    }
+
     public static void AddMessage(Terminal context, string message, bool priority = true) {
       context.AddString(message);
       var hud = MessageHud.instance;
-      if (!hud) return;
+      if (!hud || Settings.DisableMessages) return;
       if (priority) {
         var items = hud.m_msgQeue.ToArray();
         hud.m_msgQeue.Clear();

@@ -53,6 +53,11 @@ namespace InfinityHammer {
 
       player.EquipItem(hammer);
     }
+    public static void Clear() {
+      var player = Player.m_localPlayer;
+      if (!player) return;
+      player.SetSelectedPiece(new Vector2Int(0, 0));
+    }
 
     ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
     public static void FixData(ZNetView obj) {

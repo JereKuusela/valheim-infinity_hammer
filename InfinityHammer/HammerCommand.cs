@@ -17,6 +17,7 @@ namespace InfinityHammer {
       return hovered.Obj;
     }
     private static void PrintSelected(Terminal terminal, GameObject obj, Vector3 scale) {
+      if (Settings.DisableSelectMessages) return;
       var view = obj?.GetComponent<ZNetView>();
       var name = obj ? Utils.GetPrefabName(obj) : "";
       if (view == null)
@@ -97,6 +98,12 @@ namespace InfinityHammer {
             PrintSelected(args.Context, selected);
         }
       }, optionsFetcher: CommandWrapper.ObjectIds);
+      CommandWrapper.RegisterEmpty("hammer_repair");
+      new Terminal.ConsoleCommand("hammer_repair", "Selects the repair tool.", delegate (Terminal.ConsoleEventArgs args) {
+        if (!Player.m_localPlayer) return;
+        if (!Settings.Enabled) return;
+        Hammer.Clear();
+      });
       CommandWrapper.RegisterEmpty("hammer_undo");
       new Terminal.ConsoleCommand("hammer_undo", "Reverts object placing or removing.", delegate (Terminal.ConsoleEventArgs args) {
         if (!Player.m_localPlayer) return;
@@ -149,33 +156,48 @@ namespace InfinityHammer {
         Rotating.RotateZ(Helper.ParseDirection(args.Args, 2) * Helper.ParseFloat(args[1], 0f));
       });
       CommandWrapper.Register("hammer_move_x", (int index) => {
-        if (index == 0) return CommandWrapper.Info("Moves the X offset.");
-        if (index == 1) return CommandWrapper.Info("Direction (1 or -1).");
+        if (index == 0) return CommandWrapper.Info("Moves the X offset (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
+        if (index == 1) return CommandWrapper.Info("Direction (default 1 or -1).");
         return null;
       });
-      new Terminal.ConsoleCommand("hammer_move_x", "[value] [direction=1] - Moves the X offset.", delegate (Terminal.ConsoleEventArgs args) {
-        if (args.Length < 2) return;
-        Offset.MoveX(Helper.ParseDirection(args.Args, 2) * Helper.ParseFloat(args[1], 0f));
+      new Terminal.ConsoleCommand("hammer_move_x", "[value=auto] [direction=1] - Moves the X offset.", delegate (Terminal.ConsoleEventArgs args) {
+        var amount = 0f;
+        if (args.Length < 2 || args[1].Contains("auto")) {
+          amount = Bounds.Get[Utils.GetPrefabName(Player.m_localPlayer.m_placementGhost)].x;
+          amount *= Helper.ParseMultiplier(args.Args, 1);
+        } else
+          amount = Helper.ParseFloat(args[1], 0f);
+        Offset.MoveX(Helper.ParseDirection(args.Args, 2) * amount);
         Offset.Print(args.Context);
       });
       CommandWrapper.Register("hammer_move_y", (int index) => {
-        if (index == 0) return CommandWrapper.Info("Moves the Y offset.");
-        if (index == 1) return CommandWrapper.Info("Direction (1 or -1).");
+        if (index == 0) return CommandWrapper.Info("Moves the Y offset (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
+        if (index == 1) return CommandWrapper.Info("Direction (default 1 or -1).");
         return null;
       });
-      new Terminal.ConsoleCommand("hammer_move_y", "[value] [direction=1] - Moves the Y offset.", delegate (Terminal.ConsoleEventArgs args) {
-        if (args.Length < 2) return;
-        Offset.MoveY(Helper.ParseDirection(args.Args, 2) * Helper.ParseFloat(args[1], 0f));
+      new Terminal.ConsoleCommand("hammer_move_y", "[value=auto] [direction=1] - Moves the Y offset.", delegate (Terminal.ConsoleEventArgs args) {
+        var amount = 0f;
+        if (args.Length < 2 || args[1].Contains("auto")) {
+          amount = Bounds.Get[Utils.GetPrefabName(Player.m_localPlayer.m_placementGhost)].y;
+          amount *= Helper.ParseMultiplier(args.Args, 1);
+        } else
+          amount = Helper.ParseFloat(args[1], 0f);
+        Offset.MoveY(Helper.ParseDirection(args.Args, 2) * amount);
         Offset.Print(args.Context);
       });
       CommandWrapper.Register("hammer_move_z", (int index) => {
-        if (index == 0) return CommandWrapper.Info("Moves the Z offset.");
-        if (index == 1) return CommandWrapper.Info("Direction (1 or -1).");
+        if (index == 0) return CommandWrapper.Info("Moves the Z offset (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
+        if (index == 1) return CommandWrapper.Info("Direction (default 1 or -1).");
         return null;
       });
-      new Terminal.ConsoleCommand("hammer_move_z", "[value] [direction=1] - Moves the Z offset.", delegate (Terminal.ConsoleEventArgs args) {
-        if (args.Length < 2) return;
-        Offset.MoveZ(Helper.ParseDirection(args.Args, 2) * Helper.ParseFloat(args[1], 0f));
+      new Terminal.ConsoleCommand("hammer_move_z", "[value=auto] [direction=1] - Moves the Z offset.", delegate (Terminal.ConsoleEventArgs args) {
+        var amount = 0f;
+        if (args.Length < 2 || args[1].Contains("auto")) {
+          amount = Bounds.Get[Utils.GetPrefabName(Player.m_localPlayer.m_placementGhost)].z;
+          amount *= Helper.ParseMultiplier(args.Args, 1);
+        } else
+          amount = Helper.ParseFloat(args[1], 0f);
+        Offset.MoveZ(Helper.ParseDirection(args.Args, 2) * amount);
         Offset.Print(args.Context);
       });
       CommandWrapper.Register("hammer_move", (int index) => {
@@ -272,6 +294,7 @@ namespace InfinityHammer {
         if (!Player.m_localPlayer) return;
         Player.m_localPlayer.m_placePressedTime = Time.time;
         Player.m_localPlayer.m_lastToolUseTime = 0f;
+        Player.m_localPlayer.UpdatePlacement(true, 0f);
       });
       CommandWrapper.RegisterEmpty("hammer_setup_binds");
       new Terminal.ConsoleCommand("hammer_setup_binds", "Sets recommended key bindings.", delegate (Terminal.ConsoleEventArgs args) {

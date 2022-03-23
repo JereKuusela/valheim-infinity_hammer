@@ -107,7 +107,8 @@ namespace InfinityHammer {
 
 
     private static bool RepairAnything(Player player) {
-      var hovered = Helper.GetHovered(player, player.m_maxPlaceDistance, null, true);
+      var range = Settings.RepairRange > 0f ? Settings.RepairRange : player.m_maxPlaceDistance;
+      var hovered = Helper.GetHovered(player, range, null, true);
       if (hovered == null) return false;
       var obj = hovered.Obj;
       var repaired = false;

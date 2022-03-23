@@ -42,6 +42,7 @@ Client-side mod that is compatible with unmodded clients.
 - `hammer_offset_Z [value]`: Sets the Z offset.
 - `hammer_offset [x,y,z]`: Sets the offset.
 - `hammer_place`: Places the piece with a command (requires binding to a key).
+- `hammer_repair`: Selects the repair tool. Useful for clearing the selection.
 - `hammer_rotate_x [value] [direction=1]`: Rotates around the X axis.
 - `hammer_rotate_Y [value] [direction=1]`: Rotates around the Y axis.
 - `hammer_rotate_Z [value] [direction=1]`: Rotates around the Z axis.
@@ -86,37 +87,46 @@ If you have Server devcommands installed, following binds are added instead (to 
 
 # Configuration
 
-Following powers are available:
+Following powers are available with `hammer_config` command:
 
-- All objects: Hammer can select and place any object. Any placed object can be removed with the hammer until the area is reloaded.
-- Allow in dungeons: Building is allowed in dungeons.
-- Auto equip: Automatically equips the hammer when selecting an object.
-- Copy rotation: Copies rotation of the selected object.
-- Build range: Range for building (capped at about 50 meters).
-- Copy state: Object state is copied (for example chest contents or item stand items).
-- Disable loot: Creatures and structures won't drop loot when destroyed with the hammer.
-- Ignore no build: "Mystical power" no longer prevents building.
-- Ignore other restrictions: Removes any other restrictions (for example campfires can be built on wood floors).
-- Ignore wards: Wards no longer prevent building.
-- Max undo steps: How many undo actions are stored (ignored if Server devcommands is installed).
-- No build cost: Removes resource cost and crafting station requirement.
-- No creator: Builds without setting the creator information. Disabled by default.
-- No durability loss: Hammer auto-repairs used durability.
-- No placement marker: Removes the placement marker (and Gizmo too). Disabled by default.
-- No stamina cost: Hammer auto-regens used stamina.
-- Overwrite health: Sets the health of built or repaired objects (0 reverts to the default max health, except for creatures).
-- Remove anything: Allows removing any object. Disabled by default.
-- Remove blacklist: Allows disabling remove for given objects (ids separated by ,). Only works if remove anything is enabled.
-- Remove effects: Removes visual effects of building, repairing and destroying.
-- Remove range: Range for removing (capped at about 50 meters).
-- Repair anything: Allows healing or repairing any object. Disabled by default.
-- Repair range: Range for repairing (capped at about 50 meters).
-- Repair taming: Repairing full health creatures will tame/untame them (works for all creatures).
-- Scaling step: How much the object is scaled up/down.
-- Select blacklist: Allows disabling select for given objects (ids separated by ,).
-- Select range: Range for selecting (capped at about 50 meters).
+- Enabled (default: `true`, key: `enabled`): If false, disabled most features.
+- All objects (default: `true`, key: `all_objects`): Hammer can select and place any object. Any placed object can be removed with the hammer until the area is reloaded.
+- Allow in dungeons (default: `true`, key: `allow_in_dungeons`): Building is allowed in dungeons.
+- Auto equip (default: `true`, key: `auto_equip`): Automatically equips the hammer when selecting an object.
+- Copy rotation (default: `true`, key: `copy_rotation`): Copies rotation of the selected object.
+- Build range (default: `0`, key: `build_range`): Range for building (capped at about 50 meters).
+- Copy state (default: `true`, key: `copy_state`): Object state is copied (for example chest contents or item stand items).
+- Disable loot (default: `false`, key: `disable_loot`): Creatures and structures won't drop loot when destroyed with the hammer.
+- Disable marker (default: `false`, key: `disable_marker`): Whether the placement ghost is visualized.
+- Enable undo (default: `true`, key: `enable_undo`): Whether the undo/redo feature is enabled.
+- Ignore no build (default: `true`, key: `ignore_no_build`): "Mystical power" no longer prevents building.
+- Ignore other restrictions (default: `true`, key: `ignore_other_restrictions`): Removes any other restrictions (for example campfires can be built on wood floors).
+- Ignore wards (default: `true`, key: `ignore_wards`): Wards no longer prevent building.
+- Max undo steps (default: `50`, key: `max_undo_steps`): How many undo actions are stored (ignored if Server Devcommands is installed).
+- No build cost (default: `true`, key: `no_build_cost`): Removes resource cost and crafting station requirement.
+- No creator (default: `false`, key: `no_creator`): Builds without setting the creator information.
+- No durability loss (default: `true`, key: `no_durability_loss`): Hammer auto-repairs used durability.
+- No stamina cost (default: `true`, key: `no_stamina_cost`): Hammer auto-regens used stamina.
+- Overwrite health (default: `0`, key: `overwrite_health`): Sets the health of built or repaired objects (0 reverts to the default max health, except for creatures).
+- Remove anything (default: `false`, key: `remove_anything`): Allows removing any object.
+- Remove blacklist (default: ` `, key: `remove_blacklist`): Allows disabling remove for given objects (ids separated by ,). Only works if remove anything is enabled.
+- Remove effects (default: `false`, key: `remove_effects`): Removes visual effects of building, repairing and destroying.
+- Remove range (default: `0`, key: `remove_range`): Range for removing (capped at about 50 meters).
+- Repair anything (default: `false`, key: `repair_anything`): Allows healing or repairing any object.
+- Repair range (default: `0`, key: `repair_range`): Range for repairing (capped at about 50 meters).
+- Repair taming (default: `false`, key: `repair_taming`): Repairing full health creatures will tame/untame them (works for all creatures).
+- Scaling step (default: `0.05`, key: `scaling_step`): How much the object is scaled up/down.
+- Select blacklist (default: ` `, key: `select_blacklist`): Allows disabling select for given objects (ids separated by ,).
+- Select range (default: `0`, key: `select_range`): Range for selecting (capped at about 50 meters).
 
 On servers, above features are disabled without cheat access (except Copy rotate, No placement marker, Remove effects, Select range and offsetting).
+
+Messages from the mod can be configured with following settings:
+
+- `disable_messages`: Disables all messages from the mod (console output not affected).
+- `disable_offset_messages`: Disables messages from changing the placement offset.
+- `disable_scale_messages`: Disables messages from changing the object scale.
+- `disable_select_messages`: Disables messages from selecting objects.
 
 # Building
 
@@ -166,10 +176,14 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 
 - v1.8:
 	- Adds compatibility with Comfy Gizmo.
-	- Adds direction parameter to the commands `hammer_move_x`, `hammer_move_y` and `hammer_move_z` for Server Devcommands mouse wheel binding.
-	- Adds new command `hammer_place` to place pieces with commands.
-	- Adds new command `hammer_rotate_x`, `hammer_rotate_y` and `hammer_rotate_z` to change rotation with commands.
+	- Adds supports for `number*auto` value to the commands `hammer_move_x`, `hammer_move_y` and `hammer_move_z` (automatically sets the step size). 
+	- Adds a new direction parameter to the commands `hammer_move_x`, `hammer_move_y` and `hammer_move_z` for Server Devcommands mouse wheel binding.
+	- Adds a new command `hammer_repair` to select the repair tool.
+	- Adds a new command `hammer_place` to place pieces with commands.
+	- Adds a new command `hammer_rotate_x`, `hammer_rotate_y` and `hammer_rotate_z` to change rotation with commands.
+	- Adds new settings `disable_messages`, `disable_offset_messages`, `disable_scale_messages` and `disable_select_messages` to configure the output.
 	- Improves autocomplete with Server Devcommands.
+	- Fixes repair range not working for creatures and other non-piece objects.
 	- Fixes repair taming.
 
 - v1.7:

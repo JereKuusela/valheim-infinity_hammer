@@ -28,6 +28,14 @@ namespace InfinityHammer {
     public static bool RemoveAnything => configRemoveAnything.Value && IsCheats;
     public static ConfigEntry<bool> configAutoEquip;
     public static bool AutoEquip => configAutoEquip.Value && Enabled;
+    public static ConfigEntry<bool> configDisableMessages;
+    public static bool DisableMessages => configDisableMessages.Value;
+    public static ConfigEntry<bool> configDisableSelectMessages;
+    public static bool DisableSelectMessages => configDisableSelectMessages.Value;
+    public static ConfigEntry<bool> configDisableOffsetMessages;
+    public static bool DisableOffsetMessages => configDisableOffsetMessages.Value;
+    public static ConfigEntry<bool> configDisableScaleMessages;
+    public static bool DisableScaleMessages => configDisableScaleMessages.Value;
     public static ConfigEntry<bool> configDisableLoot;
     public static bool DisableLoot => configDisableLoot.Value && IsCheats;
     public static ConfigEntry<bool> configRepairAnything;
@@ -99,6 +107,11 @@ namespace InfinityHammer {
       section = "Items";
       configRemoveBlacklist = config.Bind(section, "Remove blacklist", "", "Object ids separated by , that can't be removed.");
       configSelectBlacklist = config.Bind(section, "Select blacklist", "", "Object ids separated by , that can't be selected.");
+      section = "Messages";
+      configDisableMessages = config.Bind(section, "Disable messages", false, "Disables all messages from this mod.");
+      configDisableOffsetMessages = config.Bind(section, "Disable offset messages", false, "Disables messages from changing placement offset.");
+      configDisableScaleMessages = config.Bind(section, "Disable scale messages", false, "Disables messages from changing the scale.");
+      configDisableSelectMessages = config.Bind(section, "Disable select messages", false, "Disables messages from selecting objects.");
     }
 
     public static List<string> Options = new List<string>() {
@@ -106,7 +119,8 @@ namespace InfinityHammer {
       "ignore_wards", "ignore_no_build", "no_stamina_cost", "no_durability_loss", "all_objects", "copy_state",
       "allow_in_dungeons", "remove_anything", "ignore_other_restrictions", "scaling_step", "max_undo_steps", "no_creator",
       "overwrite_health", "repair_anything", "repair_range", "remove_effects", "repair_taming", "disable_loot", "disable_marker",
-      "auto_equip", "remove_blacklist", "select_blacklist"
+      "auto_equip", "remove_blacklist", "select_blacklist", "disable_messages", "disable_offset_messages", "disable_scale_messages",
+      "disable_select_messages"
     };
     private static string State(bool value) => value ? "enabled" : "disabled";
     private static string Flag(bool value) => value ? "removed" : "added";
@@ -125,6 +139,10 @@ namespace InfinityHammer {
     }
     public static void UpdateValue(Terminal context, string key, string value) {
       if (key == "enabled") Toggle(context, configEnabled, "Infinity Hammer");
+      if (key == "disable_messages") Toggle(context, configDisableMessages, "All messages", true);
+      if (key == "disable_offset_messages") Toggle(context, configDisableOffsetMessages, "Offset messages", true);
+      if (key == "disable_scale_messages") Toggle(context, configDisableScaleMessages, "Scale messages", true);
+      if (key == "disable_select_messages") Toggle(context, configDisableSelectMessages, "Select messages", true);
       if (key == "auto_equip") Toggle(context, configAutoEquip, "Auto equip");
       if (key == "enable_undo") Toggle(context, configEnableUndo, "Undo");
       if (key == "disable_marker") Toggle(context, configHidePlacementMarker, "Placement marker", true);

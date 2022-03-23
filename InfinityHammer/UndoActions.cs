@@ -81,8 +81,6 @@ namespace InfinityHammer {
 
     public void Redo() {
       Added = UndoHelper.Place(Data);
-      if (Data != null)
-        Helper.AddMessage(Console.instance, $"Redo: Restored {Data.Name}");
     }
     public string RedoMessage() => $"Redo: Restored {Data.Name}";
   }
