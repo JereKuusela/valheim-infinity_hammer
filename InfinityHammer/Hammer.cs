@@ -58,6 +58,13 @@ namespace InfinityHammer {
       if (!player) return;
       player.SetSelectedPiece(new Vector2Int(0, 0));
     }
+    public static void Place() {
+      var player = Player.m_localPlayer;
+      if (!player) return;
+      player.m_placePressedTime = Time.time;
+      player.m_lastToolUseTime = 0f;
+      player.UpdatePlacement(true, 0f);
+    }
 
     ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
     public static void FixData(ZNetView obj) {

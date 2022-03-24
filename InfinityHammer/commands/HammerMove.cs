@@ -54,12 +54,7 @@ namespace InfinityHammer {
       });
       new Terminal.ConsoleCommand("hammer_move", "[x,y,z] - Moves the offset.", delegate (Terminal.ConsoleEventArgs args) {
         var value = Vector3.zero;
-        if (args.Length > 1) {
-          var split = args[1].Split(',');
-          if (split.Length > 0) value.x = Helper.ParseFloat(split[0], 1f);
-          if (split.Length > 1) value.y = Helper.ParseFloat(split[1], 1f);
-          if (split.Length > 2) value.z = Helper.ParseFloat(split[2], 1f);
-        }
+        if (args.Length > 1) value = Helper.ParseXYZ(args[1]);
         Offset.Move(value);
         Offset.Print(args.Context);
       });

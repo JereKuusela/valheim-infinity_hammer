@@ -46,6 +46,7 @@ namespace InfinityHammer {
       new HammerRotateCommand();
       new HammerScaleCommand();
       new HammerSetupBindsCommand();
+      new HammerStackCommand();
       new HammerUndoCommand();
     }
   }

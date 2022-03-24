@@ -1,10 +1,23 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 
 namespace InfinityHammer {
+  public class Range<T> {
+    public T Min;
+    public T Max;
+    public Range(T value) {
+      Min = value;
+      Max = value;
+    }
+    public Range(T min, T max) {
+      Min = min;
+      Max = max;
+    }
+  }
   public static class Helper {
 
     public static void RemoveZDO(ZDO zdo) {
@@ -31,6 +44,78 @@ namespace InfinityHammer {
     public static float ParseFloat(string value, float defaultValue = 0) {
       if (float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var result)) return result;
       return defaultValue;
+    }
+    public static int ParseInt(string value, int defaultValue = 0) {
+      if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result)) return result;
+      return defaultValue;
+    }
+    private static Range<string> ParseRange(string arg) {
+      var range = arg.Split('-').ToList();
+      if (range.Count > 1 && range[0] == "") {
+        range[0] = "-" + range[1];
+        range.RemoveAt(1);
+      }
+      if (range.Count > 2 && range[1] == "") {
+        range[1] = "-" + range[2];
+        range.RemoveAt(2);
+      }
+      if (range.Count == 1) return new Range<string>(range[0]);
+      else return new Range<string>(range[0], range[1]);
+
+    }
+    public static Range<int> ParseIntRange(string value, int defaultValue = 0) {
+      var range = ParseRange(value);
+      return ZeroIntRange(new Range<int>(ParseInt(range.Min, defaultValue), ParseInt(range.Max, defaultValue)));
+    }
+    public static Range<int> ZeroIntRange(Range<int> range) {
+      if (range.Max == range.Min) {
+        if (range.Max > 0) {
+          range.Max--;
+          range.Min = 0;
+        }
+        if (range.Max < 0) {
+          range.Max = 0;
+          range.Min++;
+        }
+      }
+      return range;
+    }
+    public static Vector3 ParseXYZ(string value) {
+      var vector = Vector3.zero;
+      var split = value.Split(',');
+      if (split.Length > 0) vector.x = Helper.ParseFloat(split[0]);
+      if (split.Length > 1) vector.y = Helper.ParseFloat(split[1]);
+      if (split.Length > 2) vector.z = Helper.ParseFloat(split[2]);
+      return vector;
+    }
+    public static Range<Vector3Int> ParseXYZRange(string value) {
+      var min = Vector3Int.zero;
+      var max = Vector3Int.zero;
+      var split = value.Split(',');
+      if (split.Length > 0) {
+        var range = Helper.ParseIntRange(split[0]);
+        min.x = range.Min;
+        max.x = range.Max;
+      }
+      if (split.Length > 1) {
+        var range = Helper.ParseIntRange(split[1]);
+        min.y = range.Min;
+        max.y = range.Max;
+      }
+      if (split.Length > 2) {
+        var range = Helper.ParseIntRange(split[2]);
+        min.z = range.Min;
+        max.z = range.Max;
+      }
+      return new Range<Vector3Int>(min, max);
+    }
+    public static Vector3Int ParseXYZInt(string value) {
+      var vector = Vector3Int.zero;
+      var split = value.Split(',');
+      if (split.Length > 0) vector.x = Helper.ParseInt(split[0]);
+      if (split.Length > 1) vector.y = Helper.ParseInt(split[1]);
+      if (split.Length > 2) vector.z = Helper.ParseInt(split[2]);
+      return vector;
     }
     public static float ParseDirection(string value) {
       var direction = ParseFloat(value, 1);

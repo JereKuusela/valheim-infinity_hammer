@@ -25,14 +25,13 @@ Client-side mod that is compatible with unmodded clients.
 
 # Usage
 
+Note: Some commands have a direction parameter. These are intended for mouse wheel binding and are something you probably don't have to use.
+
 - `hammer`: Selects the hovered object.
 - `hammer [item id]`: Selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)).
 - `hammer [item id] [scale=1]`: Selects an object by id while setting the initial scale (if supported). Number or x,y,z.
-- `hammer_undo`: Reverts placing or removing. Uses Server devcommands undo system if installed.
-- `hammer_redo`: Restores reverted actions. Uses Server devcommands undo system if installed.
-- `hammer_scale [scale=1]`: Sets the object scale (if supported). Number or x,y,z.
-- `hammer_scale_up`: Scales up the object (if supported).
-- `hammer_scale_down`: Scales down the object (if supported).
+- `hammer_config [key] [value]`: Toggles or sets configuration values.
+ - For lists, the given value is toggled on or off (`remove_blacklist` or `select_blacklist`).
 - `hammer_move_x [value] [direction=1]`: Moves the X offset.
 - `hammer_move_Y [value] [direction=1]`: Moves the Y offset.
 - `hammer_move_Z [value] [direction=1]`: Moves the Z offset.
@@ -42,13 +41,20 @@ Client-side mod that is compatible with unmodded clients.
 - `hammer_offset_Z [value]`: Sets the Z offset.
 - `hammer_offset [x,y,z]`: Sets the offset.
 - `hammer_place`: Places the piece with a command (requires binding to a key).
+- `hammer_redo`: Restores reverted actions. Uses Server devcommands undo system if installed.
 - `hammer_repair`: Selects the repair tool. Useful for clearing the selection.
 - `hammer_rotate_x [value] [direction=1]`: Rotates around the X axis.
 - `hammer_rotate_Y [value] [direction=1]`: Rotates around the Y axis.
 - `hammer_rotate_Z [value] [direction=1]`: Rotates around the Z axis.
+- `hammer_scale [scale=1]`: Sets the object scale (if supported). Number or x,y,z.
+- `hammer_scale_up`: Scales up the object (if supported).
+- `hammer_scale_down`: Scales down the object (if supported).
 - `hammer_setup_binds`: Sets recommended key bindings.
-- `hammer_config [key] [value]`: Toggles or sets configuration values.
- - For lists, the given value is toggled on or off (`remove_blacklist` or `select_blacklist`).
+- `hammer_stack_x [amount or min-max] [direction=1]`: Stacks multiple objects next to each other (forward / backward).
+- `hammer_stack_y [amount or min-max] [direction=1]`: Stacks multiple objects next to each other (up / down).
+- `hammer_stack_z [amount or min-max] [direction=1]`: Stacks multiple objects next to each other (left / right).
+- `hammer_stack [x,y,z or x1-x2,y1-y2,z1-z2] [direction=1]`: Stacks multiple objects next to each other.
+- `hammer_undo`: Reverts placing or removing. Uses Server devcommands undo system if installed.
 - `hammer_add_piece_components`: Adds the Piece component to every object which allows copying them with PlanBuild mod.
 
 Note: Some interactions are quite complicated so please report any issues!
@@ -180,7 +186,8 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds a new direction parameter to the commands `hammer_move_x`, `hammer_move_y` and `hammer_move_z` for Server Devcommands mouse wheel binding.
 	- Adds a new command `hammer_repair` to select the repair tool.
 	- Adds a new command `hammer_place` to place pieces with commands.
-	- Adds a new command `hammer_rotate_x`, `hammer_rotate_y` and `hammer_rotate_z` to change rotation with commands.
+	- Adds new commands `hammer_rotate_x`, `hammer_rotate_y` and `hammer_rotate_z` to change rotation with commands.
+	- Adds new commands `hammer_stack_x`, `hammer_stack_y`, `hammer_stack_z` and `hammer_stack` to place multiple objects next to each other.
 	- Adds new settings `disable_messages`, `disable_offset_messages`, `disable_scale_messages` and `disable_select_messages` to configure the output.
 	- Improves autocomplete with Server Devcommands.
 	- Improves the `hammer_config` command to allow directly setting flags with values 1 and 0.
