@@ -130,6 +130,6 @@ namespace InfinityHammer {
   [HarmonyPatch(typeof(EffectList), nameof(EffectList.Create))]
   public class DisableEffects {
     public static bool Active = false;
-    public static bool Prefix() => !Active || !Settings.RemoveEffects;
+    static bool Prefix() => !Active || !Settings.RemoveEffects;
   }
 }

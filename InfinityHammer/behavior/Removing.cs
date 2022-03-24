@@ -66,12 +66,12 @@ namespace InfinityHammer {
   [HarmonyPatch(typeof(Piece), nameof(Piece.DropResources))]
   public class PreventPieceDrops {
     public static bool Active = false;
-    public static bool Prefix() => !Active;
+    static bool Prefix() => !Active;
   }
   [HarmonyPatch(typeof(CharacterDrop), nameof(CharacterDrop.OnDeath))]
   public class PreventCreaturerops {
     public static bool Active = false;
-    public static bool Prefix() => !Active;
+    static bool Prefix() => !Active;
   }
   [HarmonyPatch(typeof(Player), nameof(Player.RemovePiece))]
   public class PostProcessToolOnRemove {

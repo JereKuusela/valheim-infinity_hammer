@@ -35,7 +35,7 @@ namespace InfinityHammer {
 
   [HarmonyPatch(typeof(Terminal), nameof(Terminal.InitTerminal))]
   public class SetCommands {
-    public static void Postfix() {
+    static void Postfix() {
       new HammerAddPieceComponentsCommand();
       new HammerCommand();
       new HammerConfigCommand();

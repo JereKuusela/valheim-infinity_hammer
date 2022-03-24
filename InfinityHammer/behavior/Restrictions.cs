@@ -17,7 +17,7 @@ namespace InfinityHammer {
   ///<summary>Removes resource usage.</summary>
   [HarmonyPatch(typeof(Player), nameof(Player.ConsumeResources))]
   public class ConsumeResources {
-    public static bool Prefix() => !Settings.NoBuildCost;
+    static bool Prefix() => !Settings.NoBuildCost;
   }
   [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
   public class UnlockPlacement {

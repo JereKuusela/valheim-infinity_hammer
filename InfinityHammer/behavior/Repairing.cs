@@ -173,7 +173,7 @@ namespace InfinityHammer {
 
   [HarmonyPatch(typeof(Character), nameof(Character.UseStamina))]
   public class CheckRepair {
-    public static void Prefix() {
+    static void Prefix() {
       if (Repair.IsRepairing) Repair.Repaired = true;
     }
   }
