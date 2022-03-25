@@ -19,7 +19,18 @@ namespace InfinityHammer {
     }
   }
   public static class Helper {
-
+    public static GameObject GetPlacementGhost(Terminal terminal) {
+      var player = Player.m_localPlayer;
+      if (!player) {
+        AddMessage(terminal, "Error: No active player.");
+        return null;
+      }
+      if (!player.m_placementGhost) {
+        AddMessage(terminal, "Error: No placement active.");
+        return null;
+      }
+      return player.m_placementGhost;
+    }
     public static void RemoveZDO(ZDO zdo) {
       if (!IsValid(zdo)) return;
       if (!zdo.IsOwner())
@@ -130,13 +141,41 @@ namespace InfinityHammer {
       return -1f;
     }
 
-    public static float ParseMultiplier(string[] args, int index) {
-      if (args.Length <= index) return 1f;
+    public static float ParseMultiplier(string value) {
       var multiplier = 1f;
-      var split = args[1].Split('*');
+      var split = value.Split('*');
       foreach (var str in split) multiplier *= Helper.ParseFloat(str, 1f);
       return multiplier;
     }
+    public static float TryParseMultiplier(string[] args, int index, float defaultValue = 1f) {
+      if (args.Length <= index) return defaultValue;
+      return ParseMultiplier(args[index]);
+    }
+    ///<summary>Parses a size which can be a constant number or based on the ghost size.</summary>
+    public static Vector3 ParseSize(GameObject ghost, string value) {
+      var multiplier = ParseMultiplier(value);
+      var size = Vector3.one;
+      if (value.Contains("auto")) {
+        if (!ghost) return Vector3.zero;
+        size = Bounds.Get[Utils.GetPrefabName(ghost)];
+      }
+      return multiplier * size;
+    }
+    ///<summary>Parses a size which can be a constant number or based on the ghost size.</summary>
+    public static Vector3 TryParseSize(GameObject ghost, string[] args, int index, string defaltValue = "auto") {
+      var value = defaltValue;
+      if (args.Length > index) value = args[index];
+      return ParseSize(ghost, value);
+    }
+    ///<summary>Parses a size which can be a constant number or based on the ghost size.</summary>
+    public static Vector3 ParseSizes(GameObject ghost, string[] args, int index, string defaltValue = "auto,auto,auto") {
+      var value = defaltValue;
+      if (args.Length > index) value = args[index];
+      var split = value.Split(',');
+      var size = new Vector3(TryParseSize(ghost, split, 0).x, TryParseSize(ghost, split, 1).y, TryParseSize(ghost, split, 2).z);
+      return size;
+    }
+
 
     public static void AddMessage(Terminal context, string message, bool priority = true) {
       context.AddString(message);

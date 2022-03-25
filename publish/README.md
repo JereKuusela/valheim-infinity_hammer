@@ -32,9 +32,9 @@ Note: Some commands have a direction parameter. These are intended for mouse whe
 - `hammer [item id] [scale=1]`: Selects an object by id while setting the initial scale (if supported). Number or x,y,z.
 - `hammer_config [key] [value]`: Toggles or sets configuration values.
  - For lists, the given value is toggled on or off (`remove_blacklist` or `select_blacklist`).
-- `hammer_move_x [value] [direction=1]`: Moves the X offset.
-- `hammer_move_Y [value] [direction=1]`: Moves the Y offset.
-- `hammer_move_Z [value] [direction=1]`: Moves the Z offset.
+- `hammer_move_x [meters or number*auto] [direction=1]`: Moves the X offset. Auto value can be used for the object size.
+- `hammer_move_Y [meters or number*auto] [direction=1]`: Moves the Y offset. Auto value can be used for the object size.
+- `hammer_move_Z [meters or number*auto] [direction=1]`: Moves the Z offset. Auto value can be used for the object size.
 - `hammer_move [x,y,z]`: Moves the offset.
 - `hammer_offset_x [value]`: Sets the X offset.
 - `hammer_offset_Y [value]`: Sets the Y offset.
@@ -43,17 +43,17 @@ Note: Some commands have a direction parameter. These are intended for mouse whe
 - `hammer_place`: Places the piece with a command (requires binding to a key).
 - `hammer_redo`: Restores reverted actions. Uses Server devcommands undo system if installed.
 - `hammer_repair`: Selects the repair tool. Useful for clearing the selection.
-- `hammer_rotate_x [value] [direction=1]`: Rotates around the X axis.
-- `hammer_rotate_Y [value] [direction=1]`: Rotates around the Y axis.
-- `hammer_rotate_Z [value] [direction=1]`: Rotates around the Z axis.
+- `hammer_rotate_x [degrees] [direction=1]`: Rotates around the X axis.
+- `hammer_rotate_Y [degrees] [direction=1]`: Rotates around the Y axis.
+- `hammer_rotate_Z [degrees] [direction=1]`: Rotates around the Z axis.
 - `hammer_scale [scale=1]`: Sets the object scale (if supported). Number or x,y,z.
 - `hammer_scale_up`: Scales up the object (if supported).
 - `hammer_scale_down`: Scales down the object (if supported).
 - `hammer_setup_binds`: Sets recommended key bindings.
-- `hammer_stack_x [amount or min-max] [direction=1]`: Stacks multiple objects next to each other (forward / backward).
-- `hammer_stack_y [amount or min-max] [direction=1]`: Stacks multiple objects next to each other (up / down).
-- `hammer_stack_z [amount or min-max] [direction=1]`: Stacks multiple objects next to each other (left / right).
-- `hammer_stack [x,y,z or x1-x2,y1-y2,z1-z2] [direction=1]`: Stacks multiple objects next to each other.
+- `hammer_stack_x [amount or min-max] [step=auto] [direction=1]`: Stacks multiple objects next to each other (forward / backward).
+- `hammer_stack_y [amount or min-max] [step=auto] [direction=1]`: Stacks multiple objects next to each other (up / down).
+- `hammer_stack_z [amount or min-max] [step=auto] [direction=1]`: Stacks multiple objects next to each other (left / right).
+- `hammer_stack [x,y,z or x1-x2,y1-y2,z1-z2] [step=auto,auto,auto] [direction=1]`: Stacks multiple objects next to each other.
 - `hammer_undo`: Reverts placing or removing. Uses Server devcommands undo system if installed.
 - `hammer_add_piece_components`: Adds the Piece component to every object which allows copying them with PlanBuild mod.
 

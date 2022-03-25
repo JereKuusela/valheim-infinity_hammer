@@ -7,8 +7,7 @@ namespace InfinityHammer {
         if (index == 0) return CommandWrapper.Info("Sets the X offset.");
         return null;
       });
-      new Terminal.ConsoleCommand("hammer_offset_x", "[value] - Sets the X offset.", delegate (Terminal.ConsoleEventArgs args) {
-        if (args.Length < 2) return;
+      new Terminal.ConsoleCommand("hammer_offset_x", "[value=0] - Sets the X offset.", delegate (Terminal.ConsoleEventArgs args) {
         Offset.SetX(Helper.ParseFloat(args[1], 0f));
         Offset.Print(args.Context);
       });
@@ -16,8 +15,7 @@ namespace InfinityHammer {
         if (index == 0) return CommandWrapper.Info("Sets the Y offset.");
         return null;
       });
-      new Terminal.ConsoleCommand("hammer_offset_y", "[value] - Sets the Y offset.", delegate (Terminal.ConsoleEventArgs args) {
-        if (args.Length < 2) return;
+      new Terminal.ConsoleCommand("hammer_offset_y", "[value=0] - Sets the Y offset.", delegate (Terminal.ConsoleEventArgs args) {
         Offset.SetY(Helper.ParseFloat(args[1], 0f));
         Offset.Print(args.Context);
       });
@@ -25,8 +23,7 @@ namespace InfinityHammer {
         if (index == 0) return CommandWrapper.Info("Sets the Z offset.");
         return null;
       });
-      new Terminal.ConsoleCommand("hammer_offset_z", "[value] - Sets the Z offset.", delegate (Terminal.ConsoleEventArgs args) {
-        if (args.Length < 2) return;
+      new Terminal.ConsoleCommand("hammer_offset_z", "[value = 0] - Sets the Z offset.", delegate (Terminal.ConsoleEventArgs args) {
         Offset.SetZ(Helper.ParseFloat(args[1], 0f));
         Offset.Print(args.Context);
       });
@@ -34,7 +31,7 @@ namespace InfinityHammer {
         if (index == 0) return CommandWrapper.XYZ("Sets the offset.", subIndex);
         return null;
       });
-      new Terminal.ConsoleCommand("hammer_offset", "[x,y,z] - Sets the offset.", delegate (Terminal.ConsoleEventArgs args) {
+      new Terminal.ConsoleCommand("hammer_offset", "[x,y,z=0,0,0] - Sets the offset.", delegate (Terminal.ConsoleEventArgs args) {
         var value = Vector3.zero;
         if (args.Length > 1) value = Helper.ParseXYZ(args[1]);
         Offset.Set(value);
