@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 
@@ -19,20 +21,21 @@ namespace InfinityHammer {
   [HarmonyPatch(typeof(Player), nameof(Player.RemovePiece))]
   public class RemovePiece {
     public static bool Removing = false;
-    public static UndoData[] Target;
+    public static List<UndoData> RemovedObjects;
 
-    public static void SetTarget(ZNetView obj) {
-      Target = new UndoData[] { UndoHelper.CreateData(obj) };
+    public static void SetRemovedObject(ZNetView obj) {
+      RemovedObjects = new List<UndoData> { UndoHelper.CreateData(obj) };
+    }
+    public static void AddRemovedObject(ZNetView obj) {
+      RemovedObjects.Add(UndoHelper.CreateData(obj));
     }
 
     private static bool RemoveAnything(Player obj) {
       var hovered = Helper.GetHovered(obj, obj.m_maxPlaceDistance, Settings.RemoveBlacklist);
       if (hovered == null) return false;
       obj.m_removeEffects.Create(hovered.Obj.transform.position, Quaternion.identity, null, 1f, -1);
-      SetTarget(hovered.Obj);
-      hovered.Obj.GetComponent<CharacterDrop>()?.OnDeath();
-      hovered.Obj.GetComponent<Piece>()?.DropResources();
-      Helper.RemoveZDO(hovered.Obj.GetZDO());
+      SetRemovedObject(hovered.Obj);
+      Remove(hovered.Obj);
       var tool = obj.GetRightItem();
       if (tool != null) {
         obj.FaceLookDirection();
@@ -40,11 +43,35 @@ namespace InfinityHammer {
       }
       return true;
     }
+    private static void Remove(ZNetView obj) {
+      obj.GetComponent<CharacterDrop>()?.OnDeath();
+      obj.GetComponent<Piece>()?.DropResources();
+      Helper.RemoveZDO(obj.GetZDO());
+    }
+    private static void RemoveInArea(ZDO zdo, float radius) {
+      if (radius == 0f) return;
+      var position = zdo.m_position;
+      var prefab = zdo.m_prefab;
+      var toRemove = ZNetScene.instance.m_instances.Values.Where(view =>
+        view
+        && view.IsValid()
+        && view.GetZDO().m_prefab == prefab
+        && Vector3.Distance(position, view.GetZDO().m_position) < radius
+        && view.GetZDO() != zdo
+      ).ToArray();
+      foreach (var obj in toRemove) {
+        AddRemovedObject(obj);
+        Remove(obj);
+      }
+    }
     private static void End(bool result) {
       DisableEffects.Active = false;
-      if (result) UndoWrapper.Remove(Target);
+      if (result && RemovedObjects != null && RemovedObjects.Count > 0) {
+        RemoveInArea(RemovedObjects[0].Data, Settings.RemoveArea);
+        UndoWrapper.Remove(RemovedObjects);
+      }
       Removing = false;
-      Target = null;
+      RemovedObjects = null;
       PreventPieceDrops.Active = false;
       PreventCreaturerops.Active = false;
     }
@@ -85,7 +112,7 @@ namespace InfinityHammer {
   public class AccessTargetedObject {
     public static void Prefix(Piece __instance) {
       if (RemovePiece.Removing && Helper.IsValid(__instance.m_nview))
-        RemovePiece.SetTarget(__instance.m_nview);
+        RemovePiece.SetRemovedObject(__instance.m_nview);
     }
   }
 }

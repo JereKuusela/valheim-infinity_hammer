@@ -50,6 +50,8 @@ namespace InfinityHammer {
     public static bool CopyRotation => configCopyRotation.Value && Enabled;
     public static ConfigEntry<string> configUndoLimit;
     public static int UndoLimit => (int)Helper.ParseFloat(configUndoLimit.Value, 0f);
+    public static ConfigEntry<string> configRemoveArea;
+    public static float RemoveArea => Enabled ? Helper.ParseFloat(configRemoveArea.Value, 0f) : 0f;
     public static ConfigEntry<string> configSelectRange;
     public static float SelectRange => Enabled ? Helper.ParseFloat(configSelectRange.Value, 0f) : 0f;
     public static ConfigEntry<string> configRemoveRange;
@@ -77,6 +79,7 @@ namespace InfinityHammer {
       var section = "General";
       configEnabled = config.Bind(section, "Enabled", true, "Whether this mod is enabled at all.");
       section = "Powers";
+      configRemoveArea = config.Bind(section, "Remove area", "0", "Removes same objects within the radius.");
       configSelectRange = config.Bind(section, "Select range", "50", "Range for selecting objects.");
       configRemoveRange = config.Bind(section, "Remove range", "0", "Range for removing objects (0 = default).");
       configRepairRange = config.Bind(section, "Repair range", "0", "Range for repairing objects (0 = default).");
@@ -120,7 +123,7 @@ namespace InfinityHammer {
       "allow_in_dungeons", "remove_anything", "ignore_other_restrictions", "scaling_step", "max_undo_steps", "no_creator",
       "overwrite_health", "repair_anything", "repair_range", "remove_effects", "repair_taming", "disable_loot", "disable_marker",
       "auto_equip", "remove_blacklist", "select_blacklist", "disable_messages", "disable_offset_messages", "disable_scale_messages",
-      "disable_select_messages"
+      "disable_select_messages", "remove_area"
     };
     private static string State(bool value) => value ? "enabled" : "disabled";
     private static string Flag(bool value) => value ? "removed" : "added";
@@ -170,6 +173,10 @@ namespace InfinityHammer {
       if (key == "repair_anything") Toggle(context, configRepairAnything, "Repair anything", value);
       if (key == "ignore_other_restrictions") Toggle(context, configIgnoreOtherRestrictions, "Other build restrictions", value, true);
       if (key == "no_creator") Toggle(context, configNoCreator, "Creator", value, true);
+      if (key == "remove_area") {
+        configRemoveArea.Value = value;
+        Helper.AddMessage(context, $"Remove area set to {value} meters.");
+      }
       if (key == "select_range") {
         configSelectRange.Value = value;
         Helper.AddMessage(context, $"Select range set to {value} meters.");

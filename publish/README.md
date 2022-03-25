@@ -115,6 +115,7 @@ Following powers are available with `hammer_config` command:
 - No stamina cost (default: `true`, key: `no_stamina_cost`): Hammer auto-regens used stamina.
 - Overwrite health (default: `0`, key: `overwrite_health`): Sets the health of built or repaired objects (0 reverts to the default max health, except for creatures).
 - Remove anything (default: `false`, key: `remove_anything`): Allows removing any object.
+- Remove area (default: `0`, key: `remove_area`): Removes same objects within the radius.
 - Remove blacklist (default: ` `, key: `remove_blacklist`): Allows disabling remove for given objects (ids separated by ,). Only works if remove anything is enabled.
 - Remove effects (default: `false`, key: `remove_effects`): Removes visual effects of building, repairing and destroying.
 - Remove range (default: `0`, key: `remove_range`): Range for removing (capped at about 50 meters).
@@ -189,6 +190,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds new commands `hammer_rotate_x`, `hammer_rotate_y` and `hammer_rotate_z` to change rotation with commands.
 	- Adds new commands `hammer_stack_x`, `hammer_stack_y`, `hammer_stack_z` and `hammer_stack` to place multiple objects next to each other.
 	- Adds new settings `disable_messages`, `disable_offset_messages`, `disable_scale_messages` and `disable_select_messages` to configure the output.
+	- Adds a new setting `remove_area` for removing the same objects within a radius.
 	- Improves autocomplete with Server Devcommands.
 	- Improves the `hammer_config` command to allow directly setting flags with values 1 and 0.
 	- Improves the `hammer_config` command to work better when giving multiple values to some commands.

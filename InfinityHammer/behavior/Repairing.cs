@@ -16,13 +16,14 @@ namespace InfinityHammer {
       if (!character || character.IsPlayer()) return false;
       obj.ClaimOwnership();
       var zdo = obj.GetZDO();
-      var current = zdo.GetFloat("health", character.GetMaxHealth());
-      var max = Settings.OverwriteHealth > 0f ? Settings.OverwriteHealth * 1.000001f : character.GetMaxHealth();
-      zdo.Set("max_health", max);
-      var heal = max - current;
+      var currentHealth = zdo.GetFloat("health", character.GetMaxHealth());
+      var maxHealth = Settings.OverwriteHealth > 0f ? Settings.OverwriteHealth : character.GetMaxHealth();
+      var newHealth = Settings.OverwriteHealth > 0f ? Settings.OverwriteHealth * 1.000001f : character.GetMaxHealth();
+      zdo.Set("max_health", maxHealth);
+      var heal = newHealth - currentHealth;
       if (heal != 0f) {
         // Max health resets on awake if health is equal to max.
-        zdo.Set("health", max);
+        zdo.Set("health", newHealth);
         DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, character.GetTopPoint(), Mathf.Abs(heal));
         return true;
       }
