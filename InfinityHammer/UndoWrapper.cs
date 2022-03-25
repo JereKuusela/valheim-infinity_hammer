@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 
 namespace InfinityHammer {
@@ -6,16 +8,17 @@ namespace InfinityHammer {
     private static BindingFlags PrivateBinding = BindingFlags.Static | BindingFlags.NonPublic;
     private static BindingFlags PublicBinding = BindingFlags.Static | BindingFlags.Public;
     private static Type Type() => InfinityHammer.ServerDevcommands.GetType("ServerDevcommands.UndoManager");
-    public static void Place(ZNetView obj) {
-      if (!Settings.EnableUndo || !obj) return;
-      var action = new UndoPlace(obj);
+
+    public static void Place(IEnumerable<ZNetView> objs) {
+      if (!Settings.EnableUndo || objs.Count() == 0) return;
+      var action = new UndoPlace(objs);
       if (InfinityHammer.IsServerDevcommands) {
         Type().GetMethod("Add", PrivateBinding).Invoke(null, new[] { action });
       } else UndoManager.Add(action);
     }
-    public static void Remove(UndoData obj) {
-      if (!Settings.EnableUndo || obj == null) return;
-      var action = new UndoRemove(obj);
+    public static void Remove(IEnumerable<UndoData> objs) {
+      if (!Settings.EnableUndo || objs.Count() == 0) return;
+      var action = new UndoRemove(objs);
       if (InfinityHammer.IsServerDevcommands) {
         Type().GetMethod("Add", PrivateBinding).Invoke(null, new[] { action });
       } else UndoManager.Add(action);

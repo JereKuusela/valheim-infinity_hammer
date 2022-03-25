@@ -19,10 +19,10 @@ namespace InfinityHammer {
   [HarmonyPatch(typeof(Player), nameof(Player.RemovePiece))]
   public class RemovePiece {
     public static bool Removing = false;
-    public static UndoData Target;
+    public static UndoData[] Target;
 
     public static void SetTarget(ZNetView obj) {
-      Target = UndoHelper.CreateData(obj);
+      Target = new UndoData[] { UndoHelper.CreateData(obj) };
     }
 
     private static bool RemoveAnything(Player obj) {

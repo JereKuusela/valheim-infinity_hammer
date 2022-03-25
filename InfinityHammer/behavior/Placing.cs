@@ -50,7 +50,7 @@ namespace InfinityHammer {
       if (__result && Piece.m_allPieces.Count > 0) {
         var added = Piece.m_allPieces[Piece.m_allPieces.Count - 1];
         Hammer.PostProcessPlaced(added);
-        UndoWrapper.Place(added.m_nview);
+        UndoHelper.CreateObject(added.m_nview);
       }
     }
   }

@@ -4,6 +4,7 @@ using UnityEngine;
 namespace InfinityHammer {
   public class HammerStackCommand {
     private static void Execute(Vector3 delta, Vector3Int min, Vector3Int max) {
+      UndoHelper.StartCreating();
       var ghostPosition = Player.m_localPlayer.m_placementGhost.transform.position;
       for (var x = min.x; x <= max.x; x++) {
         for (var y = min.y; y <= max.y; y++) {
@@ -18,6 +19,7 @@ namespace InfinityHammer {
         }
       }
       OverridePlacement.Override = null;
+      UndoHelper.FinishCreating();
     }
     public HammerStackCommand() {
       CommandWrapper.Register("hammer_stack_x", (int index) => {
