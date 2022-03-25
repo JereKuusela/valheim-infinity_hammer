@@ -19,9 +19,9 @@ Client-side mod that is compatible with unmodded clients.
 1. Install the [BepInExPack Valheim](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim).
 2. Download the latest zip.
 3. Extract it in the \<GameDirectory\>\BepInEx\plugins\ folder.
-4. Recommended to also install [Comfy Gizmo](https://github.com/redseiko/ValheimMods/releases/tag/ComfyGizmo-v1.2.0) for better rotating.
+4. Recommended to also install [Comfy Gizmo](https://github.com/redseiko/ValheimMods/releases/latest) for better rotating.
 5. Optionally also install the [Configuration manager](https://github.com/BepInEx/BepInEx.ConfigurationManager/releases/tag/v16.4) to configure the hammer more easily.
-6. For servers, install [Server devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) to use it as an admin.
+6. Recommended to also install [Server devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) for improved autocomplete and to use it as an admin on servers.
 
 # Usage
 
@@ -29,32 +29,32 @@ Note: Some commands have a direction parameter. These are intended for mouse whe
 
 - `hammer`: Selects the hovered object.
 - `hammer [item id]`: Selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)).
-- `hammer [item id] [scale=1]`: Selects an object by id while setting the initial scale (if supported). Number or x,y,z.
+- `hammer [item id] [scale=1]`: Selects an object by id while setting the initial scale (if the object can be scaled). Number or x,y,z.
 - `hammer_config [key] [value]`: Toggles or sets configuration values.
  - For lists, the given value is toggled on or off (`remove_blacklist` or `select_blacklist`).
-- `hammer_move_x [meters or number*auto] [direction=1]`: Moves the X offset. Auto value can be used for the object size.
-- `hammer_move_Y [meters or number*auto] [direction=1]`: Moves the Y offset. Auto value can be used for the object size.
-- `hammer_move_Z [meters or number*auto] [direction=1]`: Moves the Z offset. Auto value can be used for the object size.
-- `hammer_move [x,y,z]`: Moves the offset.
-- `hammer_offset_x [value]`: Sets the X offset.
-- `hammer_offset_Y [value]`: Sets the Y offset.
-- `hammer_offset_Z [value]`: Sets the Z offset.
-- `hammer_offset [x,y,z]`: Sets the offset.
-- `hammer_place`: Places the piece with a command (requires binding to a key).
-- `hammer_redo`: Restores reverted actions. Uses Server devcommands undo system if installed.
+- `hammer_move [x,y,z]`: Moves the placement ghost offset for precise placement. Auto value can be used for the object size.
+- `hammer_move_x [meters or number*auto] [direction=1]`: Moves in the forward / backward direction.
+- `hammer_move_y [meters or number*auto] [direction=1]`: Moves in the up / down direction.
+- `hammer_move_z [meters or number*auto] [direction=1]`: Moves in the left / right direction.
+- `hammer_offset [x,y,z]`: Sets the placement ghost offset.
+- `hammer_offset_x [value]`: Sets the offset in the forward / backward direction.
+- `hammer_offset_y [value]`: Sets the offset in the up / down direction.
+- `hammer_offset_z [value]`: Sets the offset in the left / right direction.
+- `hammer_place`: Allows placing with a key press (for command bindings).
+- `hammer_redo`: Restores reverted actions. Uses Server Devcommands undo system if installed.
 - `hammer_repair`: Selects the repair tool. Useful for clearing the selection.
 - `hammer_rotate_x [degrees] [direction=1]`: Rotates around the X axis.
-- `hammer_rotate_Y [degrees] [direction=1]`: Rotates around the Y axis.
-- `hammer_rotate_Z [degrees] [direction=1]`: Rotates around the Z axis.
-- `hammer_scale [scale=1]`: Sets the object scale (if supported). Number or x,y,z.
-- `hammer_scale_up`: Scales up the object (if supported).
-- `hammer_scale_down`: Scales down the object (if supported).
-- `hammer_setup_binds`: Sets recommended key bindings.
+- `hammer_rotate_y [degrees] [direction=1]`: Rotates around the Y axis.
+- `hammer_rotate_z [degrees] [direction=1]`: Rotates around the Z axis.
+- `hammer_scale [scale=1]`: Sets the object scale (if the object can be scaled). Number or x,y,z.
+- `hammer_scale_up`: Scales up the object (if the object can be scaled).
+- `hammer_scale_down`: Scales down the object (if the object can be scaled).
+- `hammer_setup_binds`: Sets some recommended key bindings.
+- `hammer_stack [x,y,z or x1-x2,y1-y2,z1-z2] [step=auto,auto,auto] [direction=1]`: Stacks multiple objects next to each other.
 - `hammer_stack_x [amount or min-max] [step=auto] [direction=1]`: Stacks multiple objects next to each other (forward / backward).
 - `hammer_stack_y [amount or min-max] [step=auto] [direction=1]`: Stacks multiple objects next to each other (up / down).
 - `hammer_stack_z [amount or min-max] [step=auto] [direction=1]`: Stacks multiple objects next to each other (left / right).
-- `hammer_stack [x,y,z or x1-x2,y1-y2,z1-z2] [step=auto,auto,auto] [direction=1]`: Stacks multiple objects next to each other.
-- `hammer_undo`: Reverts placing or removing. Uses Server devcommands undo system if installed.
+- `hammer_undo`: Reverts placing or removing. Uses Server Devcommands undo system if installed.
 - `hammer_add_piece_components`: Adds the Piece component to every object which allows copying them with PlanBuild mod.
 
 Note: Some interactions are quite complicated so please report any issues!
@@ -80,7 +80,7 @@ Following bindings are added:
 - `bind downarrow hammer_move_y -0.1`
 - `bind uparrow hammer_move_y 0.1`
 
-If you have Server devcommands installed, following binds are added instead (to provide a different offset when Alt-key is down):
+If you have Server Devcommands installed, following binds are added instead (to provide a different offset when Alt-key is down):
 
 - `bind rightarrow hammer_move_z -0.1 keys=-leftalt`
 - `bind rightarrow hammer_move_z -1 keys=leftalt`
