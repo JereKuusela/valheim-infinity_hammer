@@ -23,7 +23,7 @@ Client-side mod that is compatible with unmodded clients.
 5. Optionally also install the [Configuration manager](https://github.com/BepInEx/BepInEx.ConfigurationManager/releases/tag/v16.4) to configure the hammer more easily.
 6. Recommended to also install [Server devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) for improved autocomplete and to use it as an admin on servers.
 
-# Usage
+# Commands
 
 Note: Some commands have a direction parameter. These are intended for mouse wheel binding and are something you probably don't have to use.
 
