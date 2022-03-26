@@ -168,7 +168,7 @@ namespace InfinityHammer {
       return ParseSize(ghost, value);
     }
     ///<summary>Parses a size which can be a constant number or based on the ghost size.</summary>
-    public static Vector3 ParseSizes(GameObject ghost, string[] args, int index, string defaltValue = "auto,auto,auto") {
+    public static Vector3 TryParseSizes(GameObject ghost, string[] args, int index, string defaltValue = "auto,auto,auto") {
       var value = defaltValue;
       if (args.Length > index) value = args[index];
       var split = value.Split(',');

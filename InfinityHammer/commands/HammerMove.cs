@@ -9,7 +9,7 @@ namespace InfinityHammer {
       new Terminal.ConsoleCommand("hammer_move_x", "[value=auto] [direction=1] - Moves the X offset.", delegate (Terminal.ConsoleEventArgs args) {
         var ghost = Helper.GetPlacementGhost(args.Context);
         if (!ghost) return;
-        var amount = Helper.ParseSizes(ghost, args.Args, 1).x;
+        var amount = Helper.TryParseSize(ghost, args.Args, 1).x;
         Offset.MoveX(Helper.ParseDirection(args.Args, 2) * amount);
         Offset.Print(args.Context);
       });
@@ -21,7 +21,7 @@ namespace InfinityHammer {
       new Terminal.ConsoleCommand("hammer_move_y", "[value=auto] [direction=1] - Moves the Y offset.", delegate (Terminal.ConsoleEventArgs args) {
         var ghost = Helper.GetPlacementGhost(args.Context);
         if (!ghost) return;
-        var amount = Helper.ParseSizes(ghost, args.Args, 1).y;
+        var amount = Helper.TryParseSize(ghost, args.Args, 1).y;
         Offset.MoveY(Helper.ParseDirection(args.Args, 2) * amount);
         Offset.Print(args.Context);
       });
@@ -33,7 +33,7 @@ namespace InfinityHammer {
       new Terminal.ConsoleCommand("hammer_move_z", "[value=auto] [direction=1] - Moves the Z offset.", delegate (Terminal.ConsoleEventArgs args) {
         var ghost = Helper.GetPlacementGhost(args.Context);
         if (!ghost) return;
-        var amount = Helper.ParseSizes(ghost, args.Args, 1).z;
+        var amount = Helper.TryParseSize(ghost, args.Args, 1).z;
         Offset.MoveZ(Helper.ParseDirection(args.Args, 2) * amount);
         Offset.Print(args.Context);
       });
@@ -44,7 +44,7 @@ namespace InfinityHammer {
       new Terminal.ConsoleCommand("hammer_move", "[x,y,z] - Moves the offset.", delegate (Terminal.ConsoleEventArgs args) {
         var ghost = Helper.GetPlacementGhost(args.Context);
         if (!ghost) return;
-        var amount = Helper.ParseSizes(ghost, args.Args, 1, "0,0,0");
+        var amount = Helper.TryParseSizes(ghost, args.Args, 1, "0,0,0");
         Offset.Move(amount);
         Offset.Print(args.Context);
       });

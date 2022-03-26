@@ -6,19 +6,22 @@ namespace InfinityHammer {
     private static void Execute(Vector3 delta, Vector3Int min, Vector3Int max) {
       UndoHelper.StartCreating();
       var ghostPosition = Player.m_localPlayer.m_placementGhost.transform.position;
+      var ghostRotation = Player.m_localPlayer.m_placementGhost.transform.rotation;
       for (var x = min.x; x <= max.x; x++) {
         for (var y = min.y; y <= max.y; y++) {
           for (var z = min.z; z <= max.z; z++) {
             var position = ghostPosition;
-            position.x += x * delta.x;
-            position.y += y * delta.y;
-            position.z += z * delta.z;
-            OverridePlacement.Override = position;
+            position += ghostRotation * Vector3.forward * x * delta.x;
+            position += ghostRotation * Vector3.up * y * delta.y;
+            position += ghostRotation * Vector3.right * z * delta.z;
+            OverridePlacement.OverridePosition = position;
+            OverridePlacement.OverrideRotation = ghostRotation;
             Hammer.Place();
           }
         }
       }
-      OverridePlacement.Override = null;
+      OverridePlacement.OverridePosition = null;
+      OverridePlacement.OverrideRotation = null;
       UndoHelper.FinishCreating();
     }
     public HammerStackCommand() {
@@ -36,7 +39,7 @@ namespace InfinityHammer {
         var ghost = Helper.GetPlacementGhost(args.Context);
         if (!ghost) return;
         var amount = Helper.ParseIntRange(args[1]);
-        var size = Helper.ParseSizes(ghost, args.Args, 2).x;
+        var size = Helper.TryParseSize(ghost, args.Args, 2).x;
         var direction = Helper.ParseDirection(args.Args, 3);
         var delta = new Vector3(direction * size, 0f, 0f);
         Execute(delta, new Vector3Int(amount.Min, 0, 0), new Vector3Int(amount.Max, 0, 0));
@@ -55,7 +58,7 @@ namespace InfinityHammer {
         var ghost = Helper.GetPlacementGhost(args.Context);
         if (!ghost) return;
         var amount = Helper.ParseIntRange(args[1]);
-        var size = Helper.ParseSizes(ghost, args.Args, 2).y;
+        var size = Helper.TryParseSize(ghost, args.Args, 2).y;
         var direction = Helper.ParseDirection(args.Args, 3);
         var delta = new Vector3(0f, direction * size, 0f);
         Execute(delta, new Vector3Int(0, amount.Min, 0), new Vector3Int(0, amount.Max, 0));
@@ -74,7 +77,7 @@ namespace InfinityHammer {
         var ghost = Helper.GetPlacementGhost(args.Context);
         if (!ghost) return;
         var amount = Helper.ParseIntRange(args[1]);
-        var size = Helper.ParseSizes(ghost, args.Args, 2).z;
+        var size = Helper.TryParseSize(ghost, args.Args, 2).z;
         var direction = Helper.ParseDirection(args.Args, 3);
         var delta = new Vector3(0f, 0f, direction * size);
         Execute(delta, new Vector3Int(0, 0, amount.Min), new Vector3Int(0, 0, amount.Max));
@@ -93,7 +96,7 @@ namespace InfinityHammer {
         var ghost = Helper.GetPlacementGhost(args.Context);
         if (!ghost) return;
         var amount = Helper.ParseXYZRange(args[1]);
-        var size = Helper.ParseSizes(ghost, args.Args, 2);
+        var size = Helper.TryParseSizes(ghost, args.Args, 2);
         var direction = Helper.ParseDirection(args.Args, 3);
         var delta = direction * size;
         Execute(delta, amount.Min, amount.Max);
@@ -103,11 +106,13 @@ namespace InfinityHammer {
 
   [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
   public class OverridePlacement {
-    public static Vector3? Override = null;
+    public static Vector3? OverridePosition = null;
+    public static Quaternion? OverrideRotation = null;
     public static bool Prefix(Player __instance) {
       if (!__instance.m_placementGhost) return true;
-      if (Override.HasValue) __instance.m_placementGhost.transform.position = Override.Value;
-      return !Override.HasValue;
+      if (OverridePosition.HasValue) __instance.m_placementGhost.transform.position = OverridePosition.Value;
+      if (OverrideRotation.HasValue) __instance.m_placementGhost.transform.rotation = OverrideRotation.Value;
+      return !OverridePosition.HasValue && !OverrideRotation.HasValue;
     }
   }
 }

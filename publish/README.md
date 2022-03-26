@@ -181,6 +181,10 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 
 # Changelog
 
+- v1.9:
+	- Fixes `hammer_move_*` commands not working properly.
+	- Fixes `hammer_stack_*` not working with rotated objects.
+
 - v1.8:
 	- Adds compatibility with Comfy Gizmo.
 	- Adds supports for `number*auto` value to the commands `hammer_move_x`, `hammer_move_y` and `hammer_move_z` (automatically sets the step size). 
