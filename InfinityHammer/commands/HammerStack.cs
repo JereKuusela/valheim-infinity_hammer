@@ -13,7 +13,7 @@ namespace InfinityHammer {
             var position = ghostPosition;
             position += ghostRotation * Vector3.forward * x * delta.x;
             position += ghostRotation * Vector3.up * y * delta.y;
-            position += ghostRotation * Vector3.right * z * delta.z;
+            position += ghostRotation * Vector3.left * z * delta.z;
             OverridePlacement.OverridePosition = position;
             OverridePlacement.OverrideRotation = ghostRotation;
             Hammer.Place();

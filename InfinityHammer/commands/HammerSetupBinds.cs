@@ -23,20 +23,23 @@ namespace InfinityHammer {
         var isDev = InfinityHammer.IsServerDevcommands;
         var modifier = (isDev ? " keys=-leftalt" : "");
         args.Context.TryRunCommand("unbind rightcontrol");
-        args.Context.TryRunCommand("bind rightcontrol hammer_offset 0,0,0");
+        args.Context.TryRunCommand("bind rightcontrol hammer_offset");
         args.Context.TryRunCommand("unbind rightarrow");
-        args.Context.TryRunCommand("bind rightarrow hammer_move_z -0.1" + modifier);
-        if (isDev) args.Context.TryRunCommand("bind rightarrow hammer_move_z -1 keys=leftalt");
+        args.Context.TryRunCommand("bind rightarrow hammer_move_right 0.1" + modifier);
+        if (isDev) args.Context.TryRunCommand("bind rightarrow hammer_move_right 1 keys=leftalt");
         args.Context.TryRunCommand("unbind leftarrow");
-        args.Context.TryRunCommand("bind leftarrow hammer_move_z 0.1" + modifier);
-        if (isDev) args.Context.TryRunCommand("bind leftarrow hammer_move_z 1 keys=leftalt");
+        args.Context.TryRunCommand("bind leftarrow hammer_move_left 0.1" + modifier);
+        if (isDev) args.Context.TryRunCommand("bind leftarrow hammer_move_left 1 keys=leftalt");
         args.Context.TryRunCommand("unbind downarrow");
-        args.Context.TryRunCommand("bind downarrow hammer_move_y -0.1" + modifier);
-        if (isDev) args.Context.TryRunCommand("bind downarrow hammer_move_y -1 keys=leftalt");
+        args.Context.TryRunCommand("bind downarrow hammer_move_down 0.1" + modifier);
+        if (isDev) args.Context.TryRunCommand("bind downarrow hammer_move_down 1 keys=leftalt");
         args.Context.TryRunCommand("unbind uparrow");
-        args.Context.TryRunCommand("bind uparrow hammer_move_y 0.1" + modifier);
-        if (isDev) args.Context.TryRunCommand("bind uparrow hammer_move_y 1 keys=leftalt");
-        Helper.AddMessage(args.Context, "Keybindings set for Infinity Hammer (with Dedicated Server Devcommands mod).");
+        args.Context.TryRunCommand("bind uparrow hammer_move_up 0.1" + modifier);
+        if (isDev) args.Context.TryRunCommand("bind uparrow hammer_move_up 1 keys=leftalt");
+        if (isDev)
+          Helper.AddMessage(args.Context, "Keybindings set for Infinity Hammer (with Dedicated Server Devcommands mod).");
+        else
+          Helper.AddMessage(args.Context, "Keybindings set for Infinity Hammer.");
       });
     }
   }

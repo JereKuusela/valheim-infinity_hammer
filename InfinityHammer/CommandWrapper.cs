@@ -52,5 +52,12 @@ namespace InfinityHammer {
       if (!InfinityHammer.IsServerDevcommands) return ZNetScene.instance.GetPrefabNames();
       return GetMethod(InfoType(), "XYZ", new[] { typeof(string), typeof(int) }).Invoke(null, new object[] { description, index }) as List<string>;
     }
+    public static List<string> DirectionZYX(string description, int index) {
+      if (index == 0) return Info($"<color=yellow>forward</color>,up,right | {description}.");
+      if (index == 1) return Info($"forward,<color=yellow>up</color>,right | {description}.");
+      if (index == 2) return Info($"forward,up,<color=yellow>right</color> | {description}.");
+      return null;
+
+    }
   }
 }

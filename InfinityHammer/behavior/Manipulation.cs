@@ -77,13 +77,22 @@ namespace InfinityHammer {
     public static void SetZ(float value) {
       Value.z = value;
     }
-    public static void MoveX(float value) {
+    public static void MoveLeft(float value) {
+      Value.x -= value;
+    }
+    public static void MoveRight(float value) {
       Value.x += value;
     }
-    public static void MoveY(float value) {
+    public static void MoveDown(float value) {
+      Value.y -= value;
+    }
+    public static void MoveUp(float value) {
       Value.y += value;
     }
-    public static void MoveZ(float value) {
+    public static void MoveBackward(float value) {
+      Value.z -= value;
+    }
+    public static void MoveForward(float value) {
       Value.z += value;
     }
     public static void Set(Vector3 value) {
@@ -96,9 +105,9 @@ namespace InfinityHammer {
       var ghost = Player.m_localPlayer?.m_placementGhost;
       if (!ghost) return;
       var rotation = ghost.transform.rotation;
-      ghost.transform.position += rotation * Vector3.forward * Value.x;
-      ghost.transform.position += rotation * Vector3.right * Value.z;
+      ghost.transform.position += rotation * Vector3.right * Value.x;
       ghost.transform.position += rotation * Vector3.up * Value.y;
+      ghost.transform.position += rotation * Vector3.forward * Value.z;
     }
     public static void Print(Terminal terminal) {
       if (Settings.DisableOffsetMessages) return;

@@ -182,6 +182,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 # Changelog
 
 - v1.10:
+	- Splits commands `hammer_move_x`, `hammer_move_y` and `hammer_move_z` to `hammer_move_right`, `hammer_move_left`, `hammer_move_up`, `hammer_move_down`, `hammer_move_forward`, `hammer_move_backward`.
 	- Fixes the undo feature breaking hoe usage.
 
 - v1.9:

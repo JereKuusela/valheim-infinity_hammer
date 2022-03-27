@@ -172,7 +172,7 @@ namespace InfinityHammer {
       var value = defaltValue;
       if (args.Length > index) value = args[index];
       var split = value.Split(',');
-      var size = new Vector3(TryParseSize(ghost, split, 0).x, TryParseSize(ghost, split, 1).y, TryParseSize(ghost, split, 2).z);
+      var size = new Vector3(TryParseSize(ghost, split, 0).z, TryParseSize(ghost, split, 1).y, TryParseSize(ghost, split, 2).x);
       return size;
     }
 
