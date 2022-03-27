@@ -21,14 +21,14 @@ Client-side mod that is compatible with unmodded clients.
 3. Extract it in the \<GameDirectory\>\BepInEx\plugins\ folder.
 4. Recommended to also install [Comfy Gizmo](https://github.com/redseiko/ValheimMods/releases/latest) for better rotating.
 5. Optionally also install the [Configuration manager](https://github.com/BepInEx/BepInEx.ConfigurationManager/releases/tag/v16.4) to configure the hammer more easily.
-6. Recommended to also install [Server devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) for improved autocomplete and to use it as an admin on servers.
+6. Recommended to also install [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) for improved autocomplete and to use it as an admin on servers.
 
 # Commands
 
 Note: Some commands have a direction parameter. These are intended for mouse wheel binding and are something you probably don't have to use.
 
-- `hammer`: Selects the hovered object.
-- `hammer [item id]`: Selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)).
+- `hammer`: Selects the hovered object to be placed.
+- `hammer [item id]`: Selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)) to be placed.
 - `hammer [item id] [scale=1]`: Selects an object by id while setting the initial scale (if the object can be scaled). Number or x,y,z.
 - `hammer_add_piece_components`: Adds the Piece component to every object which allows copying them with PlanBuild mod.
 - `hammer_config [key] [value]`: Toggles or sets configuration values. For lists, the given value is toggled on or off (`remove_blacklist` or `select_blacklist`).
@@ -187,9 +187,9 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 # Changelog
 
 - v1.10:
-	- Renames commands `hammer_move_*` to be more clear about the direction.
-	- Renames commands `hammer_stack_*` to be more clear about the direction.
-	- Improves autocomplete and output for `hammer_move_*`, `hammer_offset_*` and `hammer_stack_*` commands.
+	- Renames and splits commands `hammer_move_*` to be more clear about the direction.
+	- Renames and splits commands `hammer_stack_*` to be more clear about the direction.
+	- Improves autocomplete and output for most commands.
 	- Fixes the undo feature breaking hoe usage.
 
 - v1.9:

@@ -1,5 +1,6 @@
 
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using HarmonyLib;
 using UnityEngine;
@@ -111,7 +112,7 @@ namespace InfinityHammer {
     }
     public static void Print(Terminal terminal) {
       if (Settings.DisableOffsetMessages) return;
-      Helper.AddMessage(terminal, $"Offset set to (forward: {Value.z.ToString("F1")}, up: {Value.y.ToString("F1")}, right: {Value.x.ToString("F1")}).");
+      Helper.AddMessage(terminal, $"Offset set to forward: {Value.z.ToString("F1", CultureInfo.InvariantCulture)}, up: {Value.y.ToString("F1", CultureInfo.InvariantCulture)}, right: {Value.x.ToString("F1", CultureInfo.InvariantCulture)}.");
     }
   }
   public static class Rotating {

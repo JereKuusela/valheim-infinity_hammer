@@ -49,12 +49,12 @@ namespace InfinityHammer {
     public HammerCommand() {
       CommandWrapper.Register("hammer", (int index, int subIndex) => {
         if (index == 0) return CommandWrapper.ObjectIds();
-        if (index == 1) return CommandWrapper.Scale("Size of the object (if the object supports it).", subIndex);
+        if (index == 1) return CommandWrapper.Scale("Size of the object (if the object can be scaled).", subIndex);
         return null;
       }, new Dictionary<string, Func<int, List<string>>>{
-        { "scale", (int index) => CommandWrapper.Scale("scale", "Size of the object (if the object supports it).", index)}
+        { "scale", (int index) => CommandWrapper.Scale("scale", "Size of the object (if the object can be scaled).", index)}
       });
-      new Terminal.ConsoleCommand("hammer", "[item id] [scale=1] - Adds an object to the hammer placement (hovered object by default).", delegate (Terminal.ConsoleEventArgs args) {
+      new Terminal.ConsoleCommand("hammer", "[item id] [scale=1] - Selects the object to be placed (the hovered object by default).", delegate (Terminal.ConsoleEventArgs args) {
         if (!Player.m_localPlayer) return;
         if (!Settings.Enabled) return;
         GameObject selected = null;

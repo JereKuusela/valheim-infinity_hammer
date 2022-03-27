@@ -26,7 +26,7 @@ namespace InfinityHammer {
         return null;
       }
       if (!player.m_placementGhost) {
-        AddMessage(terminal, "Error: No placement active.");
+        AddMessage(terminal, "Error: Not currently placing anything.");
         return null;
       }
       return player.m_placementGhost;

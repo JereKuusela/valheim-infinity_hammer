@@ -4,7 +4,7 @@ namespace InfinityHammer {
   public class HammerOffsetCommand {
     public HammerOffsetCommand() {
       CommandWrapper.Register("hammer_offset_x", (int index) => {
-        if (index == 0) return CommandWrapper.Info("Sets the X offset.");
+        if (index == 0) return CommandWrapper.Info("Meters in the right / left direction.");
         return null;
       });
       new Terminal.ConsoleCommand("hammer_offset_x", "[value=0] - Sets the right / left offset.", delegate (Terminal.ConsoleEventArgs args) {
@@ -12,7 +12,7 @@ namespace InfinityHammer {
         Offset.Print(args.Context);
       });
       CommandWrapper.Register("hammer_offset_y", (int index) => {
-        if (index == 0) return CommandWrapper.Info("Sets the Y offset.");
+        if (index == 0) return CommandWrapper.Info("Meters in the up / down direction.");
         return null;
       });
       new Terminal.ConsoleCommand("hammer_offset_y", "[value=0] - Sets the up / down offset.", delegate (Terminal.ConsoleEventArgs args) {
@@ -20,10 +20,10 @@ namespace InfinityHammer {
         Offset.Print(args.Context);
       });
       CommandWrapper.Register("hammer_offset_z", (int index) => {
-        if (index == 0) return CommandWrapper.Info("Sets the Z offset.");
+        if (index == 0) return CommandWrapper.Info("Meters in the forward / backward direction.");
         return null;
       });
-      new Terminal.ConsoleCommand("hammer_offset_z", "[value = 0] - Sets the forward / backward offset.", delegate (Terminal.ConsoleEventArgs args) {
+      new Terminal.ConsoleCommand("hammer_offset_z", "[value=0] - Sets the forward / backward offset.", delegate (Terminal.ConsoleEventArgs args) {
         Offset.SetZ(Helper.ParseFloat(args[1], 0f));
         Offset.Print(args.Context);
       });
