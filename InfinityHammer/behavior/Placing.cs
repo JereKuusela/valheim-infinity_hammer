@@ -49,8 +49,12 @@ namespace InfinityHammer {
       if (Hammer.GhostPrefab) piece = Hammer.GhostPrefab.GetComponent<Piece>();
       if (__result && Piece.m_allPieces.Count > 0) {
         var added = Piece.m_allPieces[Piece.m_allPieces.Count - 1];
-        Hammer.PostProcessPlaced(added);
-        UndoHelper.CreateObject(added.m_nview);
+        // Hoe also creates pieces.
+        if (added.m_nview) {
+          Hammer.PostProcessPlaced(added);
+          UndoHelper.CreateObject(added.m_nview);
+
+        }
       }
     }
   }

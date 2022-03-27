@@ -87,7 +87,6 @@ namespace InfinityHammer {
     }
     ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
     public static void PostProcessPlaced(Piece piece) {
-      // Hoe also creates pieces.
       if (!Settings.Enabled || !piece.m_nview) return;
       CopyState(piece);
       piece.m_canBeRemoved = true;

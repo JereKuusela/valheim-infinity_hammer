@@ -181,6 +181,9 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 
 # Changelog
 
+- v1.10:
+	- Fixes the undo feature breaking hoe usage.
+
 - v1.9:
 	- Fixes `hammer_move_*` commands not working properly.
 	- Fixes `hammer_stack_*` not working with rotated objects.

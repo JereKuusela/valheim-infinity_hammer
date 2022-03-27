@@ -5,7 +5,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 
 namespace InfinityHammer {
-  [BepInPlugin("valheim.jerekuusela.infinity_hammer", "Infinity Hammer", "1.9.0.0")]
+  [BepInPlugin("valheim.jerekuusela.infinity_hammer", "Infinity Hammer", "1.10.0.0")]
   [BepInDependency("com.rolopogo.gizmo.comfy", BepInDependency.DependencyFlags.SoftDependency)]
   [BepInDependency("valheim.jerekuusela.server_devcommands", BepInDependency.DependencyFlags.SoftDependency)]
   public class InfinityHammer : BaseUnityPlugin {

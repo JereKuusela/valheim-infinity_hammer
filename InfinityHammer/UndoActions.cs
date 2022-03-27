@@ -16,6 +16,7 @@ namespace InfinityHammer {
     private static bool GroupCreating = false;
     private static List<ZNetView> Objects = new List<ZNetView>();
     public static void CreateObject(ZNetView obj) {
+      if (!obj) return;
       Objects.Add(obj);
       if (!GroupCreating) FinishCreating();
     }
