@@ -53,7 +53,6 @@ namespace InfinityHammer {
         if (added.m_nview) {
           Hammer.PostProcessPlaced(added);
           UndoHelper.CreateObject(added.m_nview);
-
         }
       }
     }

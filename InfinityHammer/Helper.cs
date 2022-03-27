@@ -91,22 +91,22 @@ namespace InfinityHammer {
       }
       return range;
     }
-    public static Vector3 ParseXYZ(string value) {
+    public static Vector3 ParseZYX(string value) {
       var vector = Vector3.zero;
       var split = value.Split(',');
-      if (split.Length > 0) vector.x = Helper.ParseFloat(split[0]);
+      if (split.Length > 0) vector.z = Helper.ParseFloat(split[0]);
       if (split.Length > 1) vector.y = Helper.ParseFloat(split[1]);
-      if (split.Length > 2) vector.z = Helper.ParseFloat(split[2]);
+      if (split.Length > 2) vector.x = Helper.ParseFloat(split[2]);
       return vector;
     }
-    public static Range<Vector3Int> ParseXYZRange(string value) {
+    public static Range<Vector3Int> ParseZYXRange(string value) {
       var min = Vector3Int.zero;
       var max = Vector3Int.zero;
       var split = value.Split(',');
       if (split.Length > 0) {
         var range = Helper.ParseIntRange(split[0]);
-        min.x = range.Min;
-        max.x = range.Max;
+        min.z = range.Min;
+        max.z = range.Max;
       }
       if (split.Length > 1) {
         var range = Helper.ParseIntRange(split[1]);
@@ -115,8 +115,8 @@ namespace InfinityHammer {
       }
       if (split.Length > 2) {
         var range = Helper.ParseIntRange(split[2]);
-        min.z = range.Min;
-        max.z = range.Max;
+        min.x = range.Min;
+        max.x = range.Max;
       }
       return new Range<Vector3Int>(min, max);
     }
@@ -168,11 +168,11 @@ namespace InfinityHammer {
       return ParseSize(ghost, value);
     }
     ///<summary>Parses a size which can be a constant number or based on the ghost size.</summary>
-    public static Vector3 TryParseSizes(GameObject ghost, string[] args, int index, string defaltValue = "auto,auto,auto") {
+    public static Vector3 TryParseSizesZYX(GameObject ghost, string[] args, int index, string defaltValue = "auto") {
       var value = defaltValue;
       if (args.Length > index) value = args[index];
       var split = value.Split(',');
-      var size = new Vector3(TryParseSize(ghost, split, 0).z, TryParseSize(ghost, split, 1).y, TryParseSize(ghost, split, 2).x);
+      var size = new Vector3(TryParseSize(ghost, split, 2, defaltValue).x, TryParseSize(ghost, split, 1, defaltValue).y, TryParseSize(ghost, split, 0, defaltValue).z);
       return size;
     }
 

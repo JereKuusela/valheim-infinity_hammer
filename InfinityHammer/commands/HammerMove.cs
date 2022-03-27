@@ -74,13 +74,13 @@ namespace InfinityHammer {
         Offset.Print(args.Context);
       });
       CommandWrapper.Register("hammer_move", (int index) => {
-        if (index < 3) return CommandWrapper.DirectionZYX("Meters to move the placement.", index);
+        if (index < 3) return CommandWrapper.DirectionZYX("Meters to move the placement", index);
         return null;
       });
       new Terminal.ConsoleCommand("hammer_move", "[forward,up,right] - Moves the placement.", delegate (Terminal.ConsoleEventArgs args) {
         var ghost = Helper.GetPlacementGhost(args.Context);
         if (!ghost) return;
-        var amount = Helper.TryParseSizes(ghost, args.Args, 1, "0,0,0");
+        var amount = Helper.TryParseSizesZYX(ghost, args.Args, 1, "0");
         Offset.Move(amount);
         Offset.Print(args.Context);
       });

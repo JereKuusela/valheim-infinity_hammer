@@ -7,7 +7,7 @@ namespace InfinityHammer {
         if (index == 0) return CommandWrapper.Info("Sets the X offset.");
         return null;
       });
-      new Terminal.ConsoleCommand("hammer_offset_x", "[value=0] - Sets the X offset.", delegate (Terminal.ConsoleEventArgs args) {
+      new Terminal.ConsoleCommand("hammer_offset_x", "[value=0] - Sets the right / left offset.", delegate (Terminal.ConsoleEventArgs args) {
         Offset.SetX(Helper.ParseFloat(args[1], 0f));
         Offset.Print(args.Context);
       });
@@ -15,7 +15,7 @@ namespace InfinityHammer {
         if (index == 0) return CommandWrapper.Info("Sets the Y offset.");
         return null;
       });
-      new Terminal.ConsoleCommand("hammer_offset_y", "[value=0] - Sets the Y offset.", delegate (Terminal.ConsoleEventArgs args) {
+      new Terminal.ConsoleCommand("hammer_offset_y", "[value=0] - Sets the up / down offset.", delegate (Terminal.ConsoleEventArgs args) {
         Offset.SetY(Helper.ParseFloat(args[1], 0f));
         Offset.Print(args.Context);
       });
@@ -23,17 +23,17 @@ namespace InfinityHammer {
         if (index == 0) return CommandWrapper.Info("Sets the Z offset.");
         return null;
       });
-      new Terminal.ConsoleCommand("hammer_offset_z", "[value = 0] - Sets the Z offset.", delegate (Terminal.ConsoleEventArgs args) {
+      new Terminal.ConsoleCommand("hammer_offset_z", "[value = 0] - Sets the forward / backward offset.", delegate (Terminal.ConsoleEventArgs args) {
         Offset.SetZ(Helper.ParseFloat(args[1], 0f));
         Offset.Print(args.Context);
       });
       CommandWrapper.Register("hammer_offset", (int index, int subIndex) => {
-        if (index == 0) return CommandWrapper.XYZ("Sets the offset.", subIndex);
+        if (index == 0) return CommandWrapper.DirectionZYX("Sets the offset", subIndex);
         return null;
       });
-      new Terminal.ConsoleCommand("hammer_offset", "[x,y,z=0,0,0] - Sets the offset.", delegate (Terminal.ConsoleEventArgs args) {
+      new Terminal.ConsoleCommand("hammer_offset", "[forward,up,right=0,0,0] - Sets the offset.", delegate (Terminal.ConsoleEventArgs args) {
         var value = Vector3.zero;
-        if (args.Length > 1) value = Helper.ParseXYZ(args[1]);
+        if (args.Length > 1) value = Helper.ParseZYX(args[1]);
         Offset.Set(value);
         Offset.Print(args.Context);
       });

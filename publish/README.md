@@ -30,16 +30,19 @@ Note: Some commands have a direction parameter. These are intended for mouse whe
 - `hammer`: Selects the hovered object.
 - `hammer [item id]`: Selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)).
 - `hammer [item id] [scale=1]`: Selects an object by id while setting the initial scale (if the object can be scaled). Number or x,y,z.
-- `hammer_config [key] [value]`: Toggles or sets configuration values.
- - For lists, the given value is toggled on or off (`remove_blacklist` or `select_blacklist`).
-- `hammer_move [x,y,z]`: Moves the placement ghost offset for precise placement. Auto value can be used for the object size.
-- `hammer_move_x [meters or number*auto] [direction=1]`: Moves in the forward / backward direction.
-- `hammer_move_y [meters or number*auto] [direction=1]`: Moves in the up / down direction.
-- `hammer_move_z [meters or number*auto] [direction=1]`: Moves in the left / right direction.
-- `hammer_offset [x,y,z]`: Sets the placement ghost offset.
-- `hammer_offset_x [value]`: Sets the offset in the forward / backward direction.
+- `hammer_add_piece_components`: Adds the Piece component to every object which allows copying them with PlanBuild mod.
+- `hammer_config [key] [value]`: Toggles or sets configuration values. For lists, the given value is toggled on or off (`remove_blacklist` or `select_blacklist`).
+- `hammer_move [forward,up,right]`: Moves the placement ghost offset for precise placement. Auto value can be used for the object size.
+- `hammer_move_backward [meters or number*auto] [direction=1]`: Moves the placement towards the backward direction.
+- `hammer_move_down [meters or number*auto] [direction=1]`: Moves the placement towards the down direction.
+- `hammer_move_forward [meters or number*auto] [direction=1]`: Moves the placement towards the forward direction.
+- `hammer_move_left [meters or number*auto] [direction=1]`: Moves the placement towards the left direction.
+- `hammer_move_right [meters or number*auto] [direction=1]`: Moves the placement towards right left direction.
+- `hammer_move_up [meters or number*auto] [direction=1]`: Moves the placement towards the up direction.
+- `hammer_offset [forward,up,right]`: Sets the placement ghost offset.
+- `hammer_offset_x [value]`: Sets the offset in the right / left direction.
 - `hammer_offset_y [value]`: Sets the offset in the up / down direction.
-- `hammer_offset_z [value]`: Sets the offset in the left / right direction.
+- `hammer_offset_z [value]`: Sets the offset in the forward / backward direction.
 - `hammer_place`: Allows placing with a key press (for command bindings).
 - `hammer_redo`: Restores reverted actions. Uses Server Devcommands undo system if installed.
 - `hammer_repair`: Selects the repair tool. Useful for clearing the selection.
@@ -50,12 +53,14 @@ Note: Some commands have a direction parameter. These are intended for mouse whe
 - `hammer_scale_up`: Scales up the object (if the object can be scaled).
 - `hammer_scale_down`: Scales down the object (if the object can be scaled).
 - `hammer_setup_binds`: Sets some recommended key bindings.
-- `hammer_stack [x,y,z or x1-x2,y1-y2,z1-z2] [step=auto,auto,auto] [direction=1]`: Stacks multiple objects next to each other.
-- `hammer_stack_x [amount or min-max] [step=auto] [direction=1]`: Stacks multiple objects next to each other (forward / backward).
-- `hammer_stack_y [amount or min-max] [step=auto] [direction=1]`: Stacks multiple objects next to each other (up / down).
-- `hammer_stack_z [amount or min-max] [step=auto] [direction=1]`: Stacks multiple objects next to each other (left / right).
+- `hammer_stack [forward,up,right or z1-z2,y1-y2,x1-x2] [step=auto,auto,auto] [direction=1]`: Places multiple objects next to each other.
+- `hammer_stack_backward [amount or min-max] [step=auto] [direction=1]`: Places multiple objects towards the backward direction.
+- `hammer_stack_down [amount or min-max] [step=auto] [direction=1]`: Places multiple objects towards the down direction.
+- `hammer_stack_forward [amount or min-max] [step=auto] [direction=1]`: Places multiple objects towards the forward direction.
+- `hammer_stack_left [amount or min-max] [step=auto] [direction=1]`: Places multiple objects towards the left direction.
+- `hammer_stack_right [amount or min-max] [step=auto] [direction=1]`: Places multiple objects towards the right direction.
+- `hammer_stack_up [amount or min-max] [step=auto] [direction=1]`: Places multiple objects towards the up direction.
 - `hammer_undo`: Reverts placing or removing. Uses Server Devcommands undo system if installed.
-- `hammer_add_piece_components`: Adds the Piece component to every object which allows copying them with PlanBuild mod.
 
 Note: Some interactions are quite complicated so please report any issues!
 
@@ -74,22 +79,22 @@ Following bindings are added:
 - `bind keypad7 hammer_undo`
 - `bind keypad8 hammer_config enabled`: Toggles all features on/off.
 - `bind rightcontrol hammer_redo`
-- `bind KeyPad9 hammer_offset 0,0,0`: Resets the offset.
-- `bind rightarrow hammer_move_z -0.1`
-- `bind leftarrow hammer_move_z 0.1`
-- `bind downarrow hammer_move_y -0.1`
-- `bind uparrow hammer_move_y 0.1`
+- `bind keypad9 hammer_offset`: Resets the offset.
+- `bind rightarrow hammer_move_right 0.1`
+- `bind leftarrow hammer_move_left 0.1`
+- `bind downarrow hammer_move_down 0.1`
+- `bind uparrow hammer_move_up 0.1`
 
 If you have Server Devcommands installed, following binds are added instead (to provide a different offset when Alt-key is down):
 
-- `bind rightarrow hammer_move_z -0.1 keys=-leftalt`
-- `bind rightarrow hammer_move_z -1 keys=leftalt`
-- `bind leftarrow hammer_move_z 0.1 keys=-leftalt`
-- `bind leftarrow hammer_move_z 1 keys=leftalt`
-- `bind downarrow hammer_move_y -0.1 keys=-leftalt`
-- `bind downarrow hammer_move_y -1 keys=leftalt`
-- `bind uparrow hammer_move_y 0.1 keys=-leftalt`
-- `bind uparrow hammer_move_y 1 keys=leftalt`
+- `bind rightarrow hammer_move_right 0.1 keys=-leftalt`
+- `bind rightarrow hammer_move_right 1 keys=leftalt`
+- `bind leftarrow hammer_move_left 0.1 keys=-leftalt`
+- `bind leftarrow hammer_move_left 1 keys=leftalt`
+- `bind downarrow hammer_move_down 0.1 keys=-leftalt`
+- `bind downarrow hammer_move_down 1 keys=leftalt`
+- `bind uparrow hammer_move_up 0.1 keys=-leftalt`
+- `bind uparrow hammer_move_up 1 keys=leftalt`
 
 # Configuration
 
@@ -182,7 +187,9 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 # Changelog
 
 - v1.10:
-	- Splits commands `hammer_move_x`, `hammer_move_y` and `hammer_move_z` to `hammer_move_right`, `hammer_move_left`, `hammer_move_up`, `hammer_move_down`, `hammer_move_forward`, `hammer_move_backward`.
+	- Renames commands `hammer_move_*` to be more clear about the direction.
+	- Renames commands `hammer_stack_*` to be more clear about the direction.
+	- Improves autocomplete and output for `hammer_move_*`, `hammer_offset_*` and `hammer_stack_*` commands.
 	- Fixes the undo feature breaking hoe usage.
 
 - v1.9:

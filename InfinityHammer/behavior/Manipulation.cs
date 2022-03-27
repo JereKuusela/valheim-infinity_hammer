@@ -111,7 +111,7 @@ namespace InfinityHammer {
     }
     public static void Print(Terminal terminal) {
       if (Settings.DisableOffsetMessages) return;
-      Helper.AddMessage(terminal, $"Offset set to {Value.ToString("F1")}.");
+      Helper.AddMessage(terminal, $"Offset set to (forward: {Value.z.ToString("F1")}, up: {Value.y.ToString("F1")}, right: {Value.x.ToString("F1")}).");
     }
   }
   public static class Rotating {
