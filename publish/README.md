@@ -74,7 +74,7 @@ Note: Some interactions are quite complicated so please report any issues!
 
 It's recommended to make own bindings ([key codes](https://docs.unity3d.com/ScriptReference/KeyCode.html)).
 
-If you are sharing the config file, put bindings to the `auto_exec` setting. Remember to unbind keys first. For example `unbind o;bind o hammer_place`.
+If you are sharing the config file, put bindings to the `binds` setting with format `keycode1 command1;keycode2 commant2`. For example `keypad0 hammer;keypad7 hammer_undo;keypad9 hammer_redo`.
 
 `hammer_setup_binds` command can be used to quickly set some key bindings that work with the Gizmo mod.
 
@@ -112,7 +112,7 @@ Following powers are available with `hammer_config` command:
 - All objects (default: `true`, key: `all_objects`): Hammer can select and place any object. Any placed object can be removed with the hammer until the area is reloaded.
 - Allow in dungeons (default: `true`, key: `allow_in_dungeons`): Building is allowed in dungeons.
 - Auto equip (default: `true`, key: `auto_equip`): Automatically equips the hammer when selecting an object.
-- Auto exec (default: ` `, key: `auto_exec`): Executes commands at start up (separated by ;). Can be used to share key binds with the config.
+- Binds (default: ` `, key: `binds`): Sets binds at the game start up. Any existing binds are cleared from those keys.
 - Copy rotation (default: `true`, key: `copy_rotation`): Copies rotation of the selected object.
 - Build range (default: `0`, key: `build_range`): Range for building (capped at about 50 meters).
 - Copy state (default: `true`, key: `copy_state`): Object state is copied (for example chest contents or item stand items).
@@ -197,7 +197,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 
 - v1.11:
 	- Adds compatibility with Gizmo Reloaded.
-	- Adds a new setting `auto_exec` to automatically execute commands at the start up (for sharing bindings with the config).
+	- Adds a new setting `binds` to automatically set binds at the game start up.
 	- Adds support for random rotation to `hammer_rotate_*` commands.
 
 - v1.10:

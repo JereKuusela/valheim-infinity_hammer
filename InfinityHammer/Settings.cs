@@ -5,8 +5,8 @@ namespace InfinityHammer;
 public class Settings {
   public static bool IsCheats => Enabled && ((ZNet.instance && ZNet.instance.IsServer()) || Console.instance.IsCheatsEnabled());
 
-  public static ConfigEntry<string> configAutoExec;
-  public static string AutoExec => configAutoExec.Value;
+  public static ConfigEntry<string> configBinds;
+  public static string Binds => configBinds.Value;
 
   public static ConfigEntry<bool> configNoBuildCost;
   public static bool NoBuildCost => configNoBuildCost.Value && IsCheats;
@@ -80,7 +80,7 @@ public class Settings {
   public static void Init(ConfigFile config) {
     var section = "General";
     configEnabled = config.Bind(section, "Enabled", true, "Whether this mod is enabled at all.");
-    configAutoExec = config.Bind(section, "Auto exec", "", "Executes commands at start up (separated by ;). Can be used to share key binds with the config.");
+    configBinds = config.Bind(section, "Binds", "", "Binds separated by ; that are set on the game start.");
     section = "Powers";
     configRemoveArea = config.Bind(section, "Remove area", "0", "Removes same objects within the radius.");
     configSelectRange = config.Bind(section, "Select range", "50", "Range for selecting objects.");
@@ -126,7 +126,7 @@ public class Settings {
       "allow_in_dungeons", "remove_anything", "ignore_other_restrictions", "scaling_step", "max_undo_steps", "no_creator",
       "overwrite_health", "repair_anything", "repair_range", "remove_effects", "repair_taming", "disable_loot", "disable_marker",
       "auto_equip", "remove_blacklist", "select_blacklist", "disable_messages", "disable_offset_messages", "disable_scale_messages",
-      "disable_select_messages", "remove_area", "auto_exec"
+      "disable_select_messages", "remove_area", "binds"
     };
   private static string State(bool value) => value ? "enabled" : "disabled";
   private static string Flag(bool value) => value ? "removed" : "added";
@@ -176,9 +176,9 @@ public class Settings {
     if (key == "repair_anything") Toggle(context, configRepairAnything, "Repair anything", value);
     if (key == "ignore_other_restrictions") Toggle(context, configIgnoreOtherRestrictions, "Other build restrictions", value, true);
     if (key == "no_creator") Toggle(context, configNoCreator, "Creator", value, true);
-    if (key == "auto_exec") {
-      configAutoExec.Value = value;
-      Helper.AddMessage(context, $"Auto exec set to {value}.");
+    if (key == "binds") {
+      configBinds.Value = value;
+      Helper.AddMessage(context, $"Binds set to {value}.");
     }
     if (key == "remove_area") {
       configRemoveArea.Value = value;
