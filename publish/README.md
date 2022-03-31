@@ -104,6 +104,7 @@ Following powers are available with `hammer_config` command:
 - All objects (default: `true`, key: `all_objects`): Hammer can select and place any object. Any placed object can be removed with the hammer until the area is reloaded.
 - Allow in dungeons (default: `true`, key: `allow_in_dungeons`): Building is allowed in dungeons.
 - Auto equip (default: `true`, key: `auto_equip`): Automatically equips the hammer when selecting an object.
+- Auto exec (default: ` `, key: `auto_exec`): Executes commands at start up (separated by ;). Can be used to share key binds with the config.
 - Copy rotation (default: `true`, key: `copy_rotation`): Copies rotation of the selected object.
 - Build range (default: `0`, key: `build_range`): Range for building (capped at about 50 meters).
 - Copy state (default: `true`, key: `copy_state`): Object state is copied (for example chest contents or item stand items).
@@ -185,6 +186,9 @@ If "Disable loot" is enabled, destroying creatures or structures won't drop loot
 Blacklist can be used to avoid destroying critical objects like locations. For example `hammer_config remove_blacklist LocationProxy`.
 
 # Changelog
+
+- v1.11:
+	- Adds a new setting `auto_exec` to automatically execute commands at the start up (for sharing bindings with the config).
 
 - v1.10:
 	- Renames and splits commands `hammer_move_*` to be more clear about the direction.

@@ -176,6 +176,12 @@ namespace InfinityHammer {
       return size;
     }
 
+    ///<summary>Returns whether the ghost x and z dimensions are the same.</summary>
+    public static bool IsSquare(GameObject ghost) {
+      if (!ghost) return false;
+      var size = Bounds.Get[Utils.GetPrefabName(ghost)];
+      return size.x - size.z < 0.01f;
+    }
 
     public static void AddMessage(Terminal context, string message, bool priority = true) {
       context.AddString(message);
