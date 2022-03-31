@@ -47,8 +47,14 @@ Note: Some commands have a direction parameter. These are intended for mouse whe
 - `hammer_redo`: Restores reverted actions. Uses Server Devcommands undo system if installed.
 - `hammer_repair`: Selects the repair tool. Useful for clearing the selection.
 - `hammer_rotate_x [degrees] [direction=1]`: Rotates around the X axis.
-- `hammer_rotate_y [degrees] [direction=1]`: Rotates around the Y axis.
-- `hammer_rotate_z [degrees] [direction=1]`: Rotates around the Z axis.
+- `hammer_rotate_x [number*random] [direction=1]`: Randomly rotates around the X axis with a given step size. For example `3*random` would randomly rotate 0, 120 or 240 degrees.
+- `hammer_rotate_x [random] [direction=1]`: Randomly rotates around the X axis depending on the object shape (90 or 180 degrees precision).
+- `hammer_rotate_y [degrees/number*random/random] [direction=1]`: Rotates around the Y axis.
+- `hammer_rotate_y [number*random] [direction=1]`: Randomly rotates around the Y axis with a given step size. For example `3*random` would randomly rotate 0, 120 or 240 degrees.
+- `hammer_rotate_y [random] [direction=1]`: Randomly rotates around the Y axis depending on the object shape (90 or 180 degrees precision).
+- `hammer_rotate_z [degrees/number*random/random] [direction=1]`: Rotates around the Z axis.
+- `hammer_rotate_z [number*random] [direction=1]`: Randomly rotates around the Z axis with a given step size. For example `3*random` would randomly rotate 0, 120 or 240 degrees.
+- `hammer_rotate_z [random] [direction=1]`: Randomly rotates around the Z axis depending on the object shape (90 or 180 degrees precision).
 - `hammer_scale [scale=1]`: Sets the object scale (if the object can be scaled). Number or x,y,z.
 - `hammer_scale_up`: Scales up the object (if the object can be scaled).
 - `hammer_scale_down`: Scales down the object (if the object can be scaled).
@@ -189,6 +195,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 
 - v1.11:
 	- Adds a new setting `auto_exec` to automatically execute commands at the start up (for sharing bindings with the config).
+	- Adds support for random rotation to `hammer_rotate_*` commands.
 
 - v1.10:
 	- Renames and splits commands `hammer_move_*` to be more clear about the direction.
