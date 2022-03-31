@@ -19,7 +19,7 @@ Client-side mod that is compatible with unmodded clients.
 1. Install the [BepInExPack Valheim](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim).
 2. Download the latest zip.
 3. Extract it in the \<GameDirectory\>\BepInEx\plugins\ folder.
-4. Recommended to also install [Comfy Gizmo](https://github.com/redseiko/ValheimMods/releases/latest) for better rotating.
+4. Recommended to also install [Comfy Gizmo](https://github.com/redseiko/ValheimMods/releases/latest) or [Gizmo Reloaded](https://valheim.thunderstore.io/package/Tyrenheim/M3TO_Gizmo_Reloaded/) for better rotating.
 5. Optionally also install the [Configuration manager](https://github.com/BepInEx/BepInEx.ConfigurationManager/releases/tag/v16.4) to configure the hammer more easily.
 6. Recommended to also install [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) for improved autocomplete and to use it as an admin on servers.
 
@@ -113,8 +113,8 @@ Following powers are available with `hammer_config` command:
 - Allow in dungeons (default: `true`, key: `allow_in_dungeons`): Building is allowed in dungeons.
 - Auto equip (default: `true`, key: `auto_equip`): Automatically equips the hammer when selecting an object.
 - Binds (default: ` `, key: `binds`): Sets binds at the game start up. Any existing binds are cleared from those keys.
-- Copy rotation (default: `true`, key: `copy_rotation`): Copies rotation of the selected object.
 - Build range (default: `0`, key: `build_range`): Range for building (capped at about 50 meters).
+- Copy rotation (default: `true`, key: `copy_rotation`): Copies rotation of the selected object.
 - Copy state (default: `true`, key: `copy_state`): Object state is copied (for example chest contents or item stand items).
 - Disable loot (default: `false`, key: `disable_loot`): Creatures and structures won't drop loot when destroyed with the hammer.
 - Disable marker (default: `false`, key: `disable_marker`): Whether the placement ghost is visualized.

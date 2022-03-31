@@ -1,7 +1,7 @@
 using System.Linq;
 using HarmonyLib;
 namespace InfinityHammer;
-[HarmonyPatch(typeof(FejdStartup), nameof(FejdStartup.Awake))]
+[HarmonyPatch(typeof(Chat), nameof(Chat.Awake))]
 public class SetupBinds {
   public static void Setup() {
     if (Settings.Binds == "") return;
