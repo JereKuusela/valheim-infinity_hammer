@@ -70,11 +70,13 @@ Note: Some commands have a direction parameter. These are intended for mouse whe
 
 Note: Some interactions are quite complicated so please report any issues!
 
-## Recommended bindings
+## Key bindings
 
-`hammer_setup_binds` command can be used to quickly set recommended key bindings that work with the Gizmo mod.
+It's recommended to make own bindings ([key codes](https://docs.unity3d.com/ScriptReference/KeyCode.html)).
 
-For advanced users, it's recommended to make own bindings ([key codes](https://docs.unity3d.com/ScriptReference/KeyCode.html)).
+If you are sharing the config file, put bindings to the `auto_exec` setting. Remember to unbind keys first. For example `unbind o;bind o hammer_place`.
+
+`hammer_setup_binds` command can be used to quickly set some key bindings that work with the Gizmo mod.
 
 Following bindings are added:
 
@@ -194,6 +196,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 # Changelog
 
 - v1.11:
+	- Adds compatibility with Gizmo Reloaded.
 	- Adds a new setting `auto_exec` to automatically execute commands at the start up (for sharing bindings with the config).
 	- Adds support for random rotation to `hammer_rotate_*` commands.
 

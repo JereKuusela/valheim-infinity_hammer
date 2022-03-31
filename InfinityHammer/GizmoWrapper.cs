@@ -4,12 +4,16 @@ using UnityEngine;
 namespace InfinityHammer;
 public static class GizmoWrapper {
   private static Assembly Comfy = null;
+  private static Assembly Reloaded = null;
   private static BindingFlags PrivateBinding = BindingFlags.Static | BindingFlags.NonPublic;
-  private static Type Type() => Comfy.GetType("Gizmo.ComfyGizmo");
-  private static object Get(string field) => Type().GetField(field, PrivateBinding).GetValue(null);
-  private static void SetField(string field, int value) => Type().GetField(field, PrivateBinding).SetValue(null, value);
+  private static Type ComfyType() => Comfy.GetType("Gizmo.ComfyGizmo");
+  private static object Get(string field) => ComfyType().GetField(field, PrivateBinding).GetValue(null);
+  private static void SetField(string field, int value) => ComfyType().GetField(field, PrivateBinding).SetValue(null, value);
   public static void InitComfy(Assembly assembly) {
     Comfy = assembly;
+  }
+  public static void InitReloaded(Assembly assembly) {
+    Reloaded = assembly;
   }
   private static void SetComfyRotation(Quaternion rotation) {
     if (Comfy == null) return;
@@ -28,7 +32,7 @@ public static class GizmoWrapper {
   }
   private static void ComfyRotationZ(float rotation, int previous = 0) {
     if (Comfy == null) return;
-    Type().GetField("_zRot", PrivateBinding).SetValue(null, previous + ComfySnap(rotation));
+    ComfyType().GetField("_zRot", PrivateBinding).SetValue(null, previous + ComfySnap(rotation));
   }
   private static void ComfyRotateX(float rotation) {
     if (Comfy == null) return;
@@ -47,31 +51,59 @@ public static class GizmoWrapper {
   }
   private static int ComfySnap(float rotation) {
     if (Comfy == null) return 0;
-    var snapAngle = (float)Type().GetField("_snapAngle", PrivateBinding).GetValue(null);
+    var snapAngle = (float)ComfyType().GetField("_snapAngle", PrivateBinding).GetValue(null);
     return (int)Math.Round(rotation / snapAngle);
   }
-  // Reloaded currently doesn't work so not in use.
-  private static void SetReloadedRotation(Player player, Quaternion rotation) {
+  private static void ReloadedRotateX(float rotation) {
+    var gizmo = GetReloaded();
+    if (!gizmo) return;
+    var rot = gizmo.transform.rotation.eulerAngles;
+    rot.x += rotation;
+    gizmo.transform.rotation = Quaternion.Euler(rot);
+  }
+  private static void ReloadedRotateY(float rotation) {
+    var gizmo = GetReloaded();
+    if (!gizmo) return;
+    var rot = gizmo.transform.rotation.eulerAngles;
+    rot.y += rotation;
+    gizmo.transform.rotation = Quaternion.Euler(rot);
+  }
+  private static void ReloadedRotateZ(float rotation) {
+    var gizmo = GetReloaded();
+    if (!gizmo) return;
+    var rot = gizmo.transform.rotation.eulerAngles;
+    rot.z += rotation;
+    gizmo.transform.rotation = Quaternion.Euler(rot);
+  }
+  private static GameObject GetReloaded() {
+    if (Reloaded == null) return null;
+    var player = Player.m_localPlayer;
+    if (!player) return null;
     var gizmo = GameObject.Find("GizmoRoot(Clone)");
-    if (!gizmo) {
-      // Gizmo needs these to ensure that it is initialized properly.
-      player.UpdatePlacementGhost(false);
-      player.UpdatePlacement(false, 0);
-    }
-    gizmo = GameObject.Find("GizmoRoot(Clone)");
-    if (gizmo)
-      gizmo.transform.rotation = rotation;
+    if (gizmo) return gizmo;
+    // Gizmo needs these to ensure that it is initialized properly.
+    player.UpdatePlacementGhost(false);
+    player.UpdatePlacement(false, 0);
+    return GameObject.Find("GizmoRoot(Clone)");
+  }
+  private static void SetReloadedRotation(Quaternion rotation) {
+    var gizmo = GetReloaded();
+    if (gizmo) gizmo.transform.rotation = rotation;
   }
   public static void SetRotation(Quaternion rotation) {
     SetComfyRotation(rotation);
+    SetReloadedRotation(rotation);
   }
   public static void RotateX(float rotation) {
     ComfyRotateX(rotation);
+    ReloadedRotateX(rotation);
   }
   public static void RotateY(float rotation) {
     ComfyRotateY(rotation);
+    ReloadedRotateY(rotation);
   }
   public static void RotateZ(float rotation) {
     ComfyRotateZ(rotation);
+    ReloadedRotateZ(rotation);
   }
 }

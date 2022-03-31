@@ -6,6 +6,7 @@ using HarmonyLib;
 namespace InfinityHammer;
 [BepInPlugin("valheim.jerekuusela.infinity_hammer", "Infinity Hammer", "1.11.0.0")]
 [BepInDependency("com.rolopogo.gizmo.comfy", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("m3to.mods.GizmoReloaded", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("valheim.jerekuusela.server_devcommands", BepInDependency.DependencyFlags.SoftDependency)]
 public class InfinityHammer : BaseUnityPlugin {
   public static ManualLogSource Log;
@@ -29,6 +30,8 @@ public class InfinityHammer : BaseUnityPlugin {
     }
     if (Chainloader.PluginInfos.TryGetValue("com.rolopogo.gizmo.comfy", out info))
       GizmoWrapper.InitComfy(info.Instance.GetType().Assembly);
+    if (Chainloader.PluginInfos.TryGetValue("m3to.mods.GizmoReloaded", out info))
+      GizmoWrapper.InitReloaded(info.Instance.GetType().Assembly);
   }
 }
 
