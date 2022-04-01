@@ -23,7 +23,7 @@ public class RemovePiece {
   public static List<UndoData> RemovedObjects;
 
   public static void SetRemovedObject(ZNetView obj) {
-    RemovedObjects = new List<UndoData> { UndoHelper.CreateData(obj) };
+    RemovedObjects = new() { UndoHelper.CreateData(obj) };
   }
   public static void AddRemovedObject(ZNetView obj) {
     RemovedObjects.Add(UndoHelper.CreateData(obj));

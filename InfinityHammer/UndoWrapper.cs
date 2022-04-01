@@ -10,14 +10,14 @@ public static class UndoWrapper {
 
   public static void Place(IEnumerable<ZNetView> objs) {
     if (!Settings.EnableUndo || objs.Count() == 0) return;
-    var action = new UndoPlace(objs);
+    UndoPlace action = new(objs);
     if (InfinityHammer.IsServerDevcommands) {
       Type().GetMethod("Add", PrivateBinding).Invoke(null, new[] { action });
     } else UndoManager.Add(action);
   }
   public static void Remove(IEnumerable<UndoData> objs) {
     if (!Settings.EnableUndo || objs.Count() == 0) return;
-    var action = new UndoRemove(objs);
+    UndoRemove action = new(objs);
     if (InfinityHammer.IsServerDevcommands) {
       Type().GetMethod("Add", PrivateBinding).Invoke(null, new[] { action });
     } else UndoManager.Add(action);

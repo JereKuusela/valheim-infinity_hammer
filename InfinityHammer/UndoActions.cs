@@ -56,7 +56,7 @@ public class UndoHelper {
 
   public static UndoData CreateData(ZNetView obj) {
     var zdo = obj.GetZDO();
-    return new UndoData {
+    return new() {
       Prefab = zdo.GetPrefab(),
       Data = zdo.Clone(),
       Position = zdo.GetPosition(),

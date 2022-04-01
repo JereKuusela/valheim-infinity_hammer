@@ -43,8 +43,8 @@ public class HammerStackCommand {
       var amount = Helper.ParseIntRange(args[1]);
       var size = Helper.TryParseSize(ghost, args.Args, 2).x;
       var direction = Helper.ParseDirection(args.Args, 3);
-      var delta = new Vector3(-direction * size, 0f, 0f);
-      Execute(delta, new Vector3Int(amount.Min, 0, 0), new Vector3Int(amount.Max, 0, 0));
+      Vector3 delta = new(-direction * size, 0f, 0f);
+      Execute(delta, new(amount.Min, 0, 0), new(amount.Max, 0, 0));
     });
     CommandWrapper.Register("hammer_stack_right", AutoComplete);
     new Terminal.ConsoleCommand("hammer_stack_right", Description("right"), (Terminal.ConsoleEventArgs args) => {
@@ -71,8 +71,8 @@ public class HammerStackCommand {
       var amount = Helper.ParseIntRange(args[1]);
       var size = Helper.TryParseSize(ghost, args.Args, 2).y;
       var direction = Helper.ParseDirection(args.Args, 3);
-      var delta = new Vector3(0f, -direction * size, 0f);
-      Execute(delta, new Vector3Int(0, amount.Min, 0), new Vector3Int(0, amount.Max, 0));
+      Vector3 delta = new(0f, -direction * size, 0f);
+      Execute(delta, new(0, amount.Min, 0), new(0, amount.Max, 0));
     });
     CommandWrapper.Register("hammer_stack_up", AutoComplete);
     new Terminal.ConsoleCommand("hammer_stack_up", Description("up"), (Terminal.ConsoleEventArgs args) => {
@@ -85,8 +85,8 @@ public class HammerStackCommand {
       var amount = Helper.ParseIntRange(args[1]);
       var size = Helper.TryParseSize(ghost, args.Args, 2).y;
       var direction = Helper.ParseDirection(args.Args, 3);
-      var delta = new Vector3(0f, direction * size, 0f);
-      Execute(delta, new Vector3Int(0, amount.Min, 0), new Vector3Int(0, amount.Max, 0));
+      Vector3 delta = new(0f, direction * size, 0f);
+      Execute(delta, new(0, amount.Min, 0), new(0, amount.Max, 0));
     });
     CommandWrapper.Register("hammer_stack_backward", AutoComplete);
     new Terminal.ConsoleCommand("hammer_stack_backward", Description("backward"), (Terminal.ConsoleEventArgs args) => {
@@ -99,8 +99,8 @@ public class HammerStackCommand {
       var amount = Helper.ParseIntRange(args[1]);
       var size = Helper.TryParseSize(ghost, args.Args, 2).z;
       var direction = Helper.ParseDirection(args.Args, 3);
-      var delta = new Vector3(0f, 0f, -direction * size);
-      Execute(delta, new Vector3Int(0, 0, amount.Min), new Vector3Int(0, 0, amount.Max));
+      Vector3 delta = new(0f, 0f, -direction * size);
+      Execute(delta, new(0, 0, amount.Min), new(0, 0, amount.Max));
     });
     CommandWrapper.Register("hammer_stack_forward", AutoComplete);
     new Terminal.ConsoleCommand("hammer_stack_forward", Description("forward"), (Terminal.ConsoleEventArgs args) => {
@@ -113,8 +113,8 @@ public class HammerStackCommand {
       var amount = Helper.ParseIntRange(args[1]);
       var size = Helper.TryParseSize(ghost, args.Args, 2).z;
       var direction = Helper.ParseDirection(args.Args, 3);
-      var delta = new Vector3(0f, 0f, direction * size);
-      Execute(delta, new Vector3Int(0, 0, amount.Min), new Vector3Int(0, 0, amount.Max));
+      Vector3 delta = new(0f, 0f, direction * size);
+      Execute(delta, new(0, 0, amount.Min), new(0, 0, amount.Max));
     });
     CommandWrapper.Register("hammer_stack", (int index, int subIndex) => {
       if (index == 0) return CommandWrapper.DirectionZYX("Amounts", subIndex);

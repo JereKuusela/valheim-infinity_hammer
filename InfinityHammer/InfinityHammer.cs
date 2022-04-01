@@ -14,7 +14,7 @@ public class InfinityHammer : BaseUnityPlugin {
   public static Assembly ServerDevcommands = null;
   public void Awake() {
     Log = Logger;
-    Harmony harmony = new Harmony("valheim.jerekuusela.infinity_hammer");
+    Harmony harmony = new("valheim.jerekuusela.infinity_hammer");
     harmony.PatchAll();
     Settings.Init(Config);
   }

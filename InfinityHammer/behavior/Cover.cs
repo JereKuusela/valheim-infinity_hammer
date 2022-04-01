@@ -52,7 +52,7 @@ public static class CoverCheck {
     if (obj) GetCover(GetCoverPoint(obj), 0, false);
   }
   public static void GetCover(Vector3 position, float limit, bool checkRoof = true, bool minLimit = true) {
-    var lines = new List<string>();
+    List<string> lines = new();
     Cover.GetCoverForPoint(position, out var percent, out var roof);
     var text = $"{Percent(percent)} cover";
     if (limit > 0) {

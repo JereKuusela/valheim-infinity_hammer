@@ -69,13 +69,13 @@ public static class Helper {
       range[1] = "-" + range[2];
       range.RemoveAt(2);
     }
-    if (range.Count == 1) return new Range<string>(range[0]);
-    else return new Range<string>(range[0], range[1]);
+    if (range.Count == 1) return new(range[0]);
+    else return new(range[0], range[1]);
 
   }
   public static Range<int> ParseIntRange(string value, int defaultValue = 0) {
     var range = ParseRange(value);
-    return ZeroIntRange(new Range<int>(ParseInt(range.Min, defaultValue), ParseInt(range.Max, defaultValue)));
+    return ZeroIntRange(new(ParseInt(range.Min, defaultValue), ParseInt(range.Max, defaultValue)));
   }
   public static Range<int> ZeroIntRange(Range<int> range) {
     if (range.Max == range.Min) {
@@ -117,7 +117,7 @@ public static class Helper {
       min.x = range.Min;
       max.x = range.Max;
     }
-    return new Range<Vector3Int>(min, max);
+    return new(min, max);
   }
   public static Vector3Int ParseXYZInt(string value) {
     var vector = Vector3Int.zero;
@@ -171,8 +171,7 @@ public static class Helper {
     var value = defaltValue;
     if (args.Length > index) value = args[index];
     var split = value.Split(',');
-    var size = new Vector3(TryParseSize(ghost, split, 2, defaltValue).x, TryParseSize(ghost, split, 1, defaltValue).y, TryParseSize(ghost, split, 0, defaltValue).z);
-    return size;
+    return new(TryParseSize(ghost, split, 2, defaltValue).x, TryParseSize(ghost, split, 1, defaltValue).y, TryParseSize(ghost, split, 0, defaltValue).z);
   }
 
   ///<summary>Returns whether the ghost is square on x-axis.</summary>
@@ -226,7 +225,7 @@ public static class Helper {
       var index = 0;
       if (mineRock)
         index = mineRock.GetAreaIndex(hit.collider);
-      return new Hovered() {
+      return new() {
         Obj = netView,
         Index = index
       };

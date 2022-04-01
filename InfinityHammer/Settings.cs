@@ -120,14 +120,43 @@ public class Settings {
     configDisableSelectMessages = config.Bind(section, "Disable select messages", false, "Disables messages from selecting objects.");
   }
 
-  public static List<string> Options = new List<string>() {
-      "enabled", "select_range", "remove_range", "build_range", "enable_undo", "copy_rotation", "no_build_cost",
-      "ignore_wards", "ignore_no_build", "no_stamina_cost", "no_durability_loss", "all_objects", "copy_state",
-      "allow_in_dungeons", "remove_anything", "ignore_other_restrictions", "scaling_step", "max_undo_steps", "no_creator",
-      "overwrite_health", "repair_anything", "repair_range", "remove_effects", "repair_taming", "disable_loot", "disable_marker",
-      "auto_equip", "remove_blacklist", "select_blacklist", "disable_messages", "disable_offset_messages", "disable_scale_messages",
-      "disable_select_messages", "remove_area", "binds"
-    };
+  public static List<string> Options = new() {
+    "enabled",
+    "select_range",
+    "remove_range",
+    "build_range",
+    "enable_undo",
+    "copy_rotation",
+    "no_build_cost",
+    "ignore_wards",
+    "ignore_no_build",
+    "no_stamina_cost",
+    "no_durability_loss",
+    "all_objects",
+    "copy_state",
+    "allow_in_dungeons",
+    "remove_anything",
+    "ignore_other_restrictions",
+    "scaling_step",
+    "max_undo_steps",
+    "no_creator",
+    "overwrite_health",
+    "repair_anything",
+    "repair_range",
+    "remove_effects",
+    "repair_taming",
+    "disable_loot",
+    "disable_marker",
+    "auto_equip",
+    "remove_blacklist",
+    "select_blacklist",
+    "disable_messages",
+    "disable_offset_messages",
+    "disable_scale_messages",
+    "disable_select_messages",
+    "remove_area",
+    "binds"
+  };
   private static string State(bool value) => value ? "enabled" : "disabled";
   private static string Flag(bool value) => value ? "removed" : "added";
   private static void Toggle(Terminal context, ConfigEntry<bool> setting, string name, string value, bool reverse = false) {

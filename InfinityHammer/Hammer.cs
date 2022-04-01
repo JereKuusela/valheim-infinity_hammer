@@ -55,7 +55,7 @@ public static class Hammer {
   public static void Clear() {
     var player = Player.m_localPlayer;
     if (!player) return;
-    player.SetSelectedPiece(new Vector2Int(0, 0));
+    player.SetSelectedPiece(new(0, 0));
   }
   public static void Place() {
     var player = Player.m_localPlayer;

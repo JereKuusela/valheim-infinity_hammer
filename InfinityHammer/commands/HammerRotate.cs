@@ -7,7 +7,7 @@ public class HammerRotateCommand {
     if (values[1].Contains("random")) {
       var ghost = Helper.GetPlacementGhost(terminal);
       if (!ghost) return 0f;
-      var rng = new System.Random();
+      System.Random rng = new();
       var multiplier = (int)Helper.ParseMultiplier(values[1]);
       if (multiplier == 1) {
         var square = isSquare(ghost);

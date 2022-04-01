@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using UnityEngine;
 namespace InfinityHammer;
 public class HammerCommand {
@@ -49,9 +47,9 @@ public class HammerCommand {
       if (index == 0) return CommandWrapper.ObjectIds();
       if (index == 1) return CommandWrapper.Scale("Size of the object (if the object can be scaled).", subIndex);
       return null;
-    }, new Dictionary<string, Func<int, List<string>>>{
-        { "scale", (int index) => CommandWrapper.Scale("scale", "Size of the object (if the object can be scaled).", index)}
-      });
+    }, new() {
+      { "scale", (int index) => CommandWrapper.Scale("scale", "Size of the object (if the object can be scaled).", index) }
+    });
     new Terminal.ConsoleCommand("hammer", "[item id] [scale=1] - Selects the object to be placed (the hovered object by default).", (Terminal.ConsoleEventArgs args) => {
       if (!Player.m_localPlayer) return;
       if (!Settings.Enabled) return;
