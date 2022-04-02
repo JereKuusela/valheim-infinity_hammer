@@ -20,7 +20,7 @@ public class HammerSetupBindsCommand {
     CommandWrapper.RegisterEmpty("hammer_setup_binds");
     new Terminal.ConsoleCommand("hammer_setup_binds", "Sets recommended key bindings.", (Terminal.ConsoleEventArgs args) => {
       BindGeneral(args.Context);
-      var isDev = InfinityHammer.IsServerDevcommands;
+      var isDev = CommandWrapper.ServerDevcommands != null;
       var modifier = (isDev ? " keys=-leftalt" : "");
       args.Context.TryRunCommand("unbind rightcontrol");
       args.Context.TryRunCommand("bind rightcontrol hammer_offset");

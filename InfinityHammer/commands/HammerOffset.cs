@@ -27,7 +27,7 @@ public class HammerOffsetCommand {
       Offset.Print(args.Context);
     });
     CommandWrapper.Register("hammer_offset", (int index, int subIndex) => {
-      if (index == 0) return CommandWrapper.DirectionZYX("Sets the offset", subIndex);
+      if (index == 0) return CommandWrapper.FRU("Sets the offset", subIndex);
       return null;
     });
     new Terminal.ConsoleCommand("hammer_offset", "[forward,up,right=0,0,0] - Sets the offset.", (Terminal.ConsoleEventArgs args) => {

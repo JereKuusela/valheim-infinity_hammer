@@ -6,29 +6,29 @@ namespace InfinityHammer;
 public static class UndoWrapper {
   private static BindingFlags PrivateBinding = BindingFlags.Static | BindingFlags.NonPublic;
   private static BindingFlags PublicBinding = BindingFlags.Static | BindingFlags.Public;
-  private static Type Type() => InfinityHammer.ServerDevcommands.GetType("ServerDevcommands.UndoManager");
+  private static Type Type() => CommandWrapper.ServerDevcommands.GetType("ServerDevcommands.UndoManager");
 
   public static void Place(IEnumerable<ZNetView> objs) {
     if (!Settings.EnableUndo || objs.Count() == 0) return;
     UndoPlace action = new(objs);
-    if (InfinityHammer.IsServerDevcommands) {
+    if (CommandWrapper.ServerDevcommands != null) {
       Type().GetMethod("Add", PrivateBinding).Invoke(null, new[] { action });
     } else UndoManager.Add(action);
   }
   public static void Remove(IEnumerable<UndoData> objs) {
     if (!Settings.EnableUndo || objs.Count() == 0) return;
     UndoRemove action = new(objs);
-    if (InfinityHammer.IsServerDevcommands) {
+    if (CommandWrapper.ServerDevcommands != null) {
       Type().GetMethod("Add", PrivateBinding).Invoke(null, new[] { action });
     } else UndoManager.Add(action);
   }
   public static void Undo(Terminal terminal) {
-    if (InfinityHammer.IsServerDevcommands) {
+    if (CommandWrapper.ServerDevcommands != null) {
       Type().GetMethod("Undo", PublicBinding).Invoke(null, new[] { terminal });
     } else UndoManager.Undo(terminal);
   }
   public static void Redo(Terminal terminal) {
-    if (InfinityHammer.IsServerDevcommands) {
+    if (CommandWrapper.ServerDevcommands != null) {
       Type().GetMethod("Redo", PublicBinding).Invoke(null, new[] { terminal });
     } else UndoManager.Redo(terminal);
   }

@@ -73,8 +73,8 @@ public class HammerMoveCommand {
       Offset.MoveForward(Helper.ParseDirection(args.Args, 2) * amount);
       Offset.Print(args.Context);
     });
-    CommandWrapper.Register("hammer_move", (int index) => {
-      if (index < 3) return CommandWrapper.DirectionZYX("Meters to move the placement", index);
+    CommandWrapper.Register("hammer_move", (int index, int subIndex) => {
+      if (index == 0) return CommandWrapper.FRU("Meters to move the placement", subIndex);
       return null;
     });
     new Terminal.ConsoleCommand("hammer_move", "[forward,up,right] - Moves the placement.", (Terminal.ConsoleEventArgs args) => {

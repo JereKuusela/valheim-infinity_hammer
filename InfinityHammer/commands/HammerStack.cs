@@ -117,8 +117,8 @@ public class HammerStackCommand {
       Execute(delta, new(0, 0, amount.Min), new(0, 0, amount.Max));
     });
     CommandWrapper.Register("hammer_stack", (int index, int subIndex) => {
-      if (index == 0) return CommandWrapper.DirectionZYX("Amounts", subIndex);
-      if (index == 1) return CommandWrapper.DirectionZYX("Step size (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size)", subIndex);
+      if (index == 0) return CommandWrapper.FRU("Amounts", subIndex);
+      if (index == 1) return CommandWrapper.FRU("Step size (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size)", subIndex);
       if (index == 2) return CommandWrapper.Info("Direction (default 1 or -1).");
       return null;
     });

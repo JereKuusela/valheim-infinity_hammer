@@ -1,5 +1,4 @@
-﻿using System.Reflection;
-using BepInEx;
+﻿using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -10,8 +9,6 @@ namespace InfinityHammer;
 [BepInDependency("valheim.jerekuusela.server_devcommands", BepInDependency.DependencyFlags.SoftDependency)]
 public class InfinityHammer : BaseUnityPlugin {
   public static ManualLogSource Log;
-  public static bool IsServerDevcommands = false;
-  public static Assembly ServerDevcommands = null;
   public void Awake() {
     Log = Logger;
     Harmony harmony = new("valheim.jerekuusela.infinity_hammer");
@@ -20,15 +17,8 @@ public class InfinityHammer : BaseUnityPlugin {
   }
 
   public void Start() {
-    if (Chainloader.PluginInfos.TryGetValue("valheim.jerekuusela.server_devcommands", out var info)) {
-      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 12) {
-        Log.LogWarning($"Server devcommands v{info.Metadata.Version.Major}.{info.Metadata.Version.Minor} is outdated. Please update for better compatibility!");
-      } else {
-        IsServerDevcommands = true;
-        ServerDevcommands = info.Instance.GetType().Assembly;
-      }
-    }
-    if (Chainloader.PluginInfos.TryGetValue("com.rolopogo.gizmo.comfy", out info))
+    CommandWrapper.Init();
+    if (Chainloader.PluginInfos.TryGetValue("com.rolopogo.gizmo.comfy", out var info))
       GizmoWrapper.InitComfy(info.Instance.GetType().Assembly);
     if (Chainloader.PluginInfos.TryGetValue("m3to.mods.GizmoReloaded", out info))
       GizmoWrapper.InitReloaded(info.Instance.GetType().Assembly);
@@ -50,5 +40,18 @@ public class SetCommands {
     new HammerSetupBindsCommand();
     new HammerStackCommand();
     new HammerUndoCommand();
+  }
+}
+
+[HarmonyPatch(typeof(ZNetView), nameof(ZNetView.Awake))]
+public class PreventDoubleZNetView {
+  static bool Prefix(ZNetView __instance) {
+    if (ZNetView.m_forceDisableInit || ZDOMan.instance == null) return true;
+    if (ZNetView.m_useInitZDO && ZNetView.m_initZDO == null) {
+      ZLog.LogWarning($"Preventing double ZNetView for {__instance.gameObject.name}. Recommended to remove these objects.");
+      UnityEngine.Object.Destroy(__instance);
+      return false;
+    }
+    return true;
   }
 }
