@@ -2,21 +2,13 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 namespace InfinityHammer;
-public class UndoData {
-  public int Prefab = 0;
-  public Vector3 Position;
-  public Quaternion Rotation;
-  public Vector3 Scale;
-  public ZDO Data = null;
-  public string Name => Utils.GetPrefabName(ZNetScene.instance.GetPrefab(Prefab));
-}
 
 public class UndoHelper {
   private static bool GroupCreating = false;
-  private static List<ZNetView> Objects = new();
+  private static List<ZDO> Objects = new();
   public static void CreateObject(ZNetView obj) {
     if (!obj) return;
-    Objects.Add(obj);
+    Objects.Add(obj.GetZDO());
     if (!GroupCreating) FinishCreating();
   }
   public static void StartCreating() {
@@ -27,58 +19,51 @@ public class UndoHelper {
     Objects.Clear();
     GroupCreating = false;
   }
-  public static ZDO Place(UndoData data) {
-    var prefab = ZNetScene.instance.GetPrefab(data.Prefab);
+  public static ZDO Place(ZDO zdo) {
+    var prefab = ZNetScene.instance.GetPrefab(zdo.GetPrefab());
     if (prefab) {
-      var obj = UnityEngine.Object.Instantiate<GameObject>(prefab, data.Position, data.Rotation);
+      var obj = UnityEngine.Object.Instantiate<GameObject>(prefab, zdo.GetPosition(), zdo.GetRotation());
       var netView = obj.GetComponent<ZNetView>();
       if (netView) {
         var added = netView.GetZDO();
-        netView.SetLocalScale(data.Scale);
-        Helper.CopyData(data.Data.Clone(), added);
+        netView.SetLocalScale(zdo.GetVec3("scale", obj.transform.localScale));
+        Helper.CopyData(zdo.Clone(), added);
         Hammer.FixData(netView);
         return added;
       }
     }
     return null;
   }
-  public static IEnumerable<ZDO> Place(IEnumerable<UndoData> data) => data.Select(Place).Where(obj => obj != null);
-  public static string Print(IEnumerable<UndoData> data) {
-    if (data.Count() == 1) return data.First().Name;
-    var names = data.GroupBy(data => data.Name);
+  public static ZDO[] Place(ZDO[] data) => data.Select(Place).Where(obj => obj != null).ToArray();
+
+  public static string Name(ZDO zdo) => Utils.GetPrefabName(ZNetScene.instance.GetPrefab(zdo.GetPrefab()));
+  public static string Print(ZDO[] data) {
+    if (data.Count() == 1) return Name(data.First());
+    var names = data.GroupBy(Name);
     if (names.Count() == 1) return $"{names.First().Key} {names.First().Count()}x";
     return $" objects {data.Count()}x";
   }
-  public static void Remove(IEnumerable<ZDO> added) {
-    if (added == null) return;
-    foreach (var zdo in added) Helper.RemoveZDO(zdo);
+  public static ZDO[] Remove(ZDO[] toRemove) {
+    if (toRemove == null) return null;
+    var data = UndoHelper.Clone(toRemove);
+    foreach (var zdo in toRemove) Helper.RemoveZDO(zdo);
+    return data;
   }
 
-  public static UndoData CreateData(ZNetView obj) {
-    var zdo = obj.GetZDO();
-    return new() {
-      Prefab = zdo.GetPrefab(),
-      Data = zdo.Clone(),
-      Position = zdo.GetPosition(),
-      Rotation = zdo.GetRotation(),
-      Scale = obj.transform.localScale
-    };
-  }
+  public static ZDO[] Clone(IEnumerable<ZDO> data) => data.Select(zdo => zdo.Clone()).ToArray();
 }
 public class UndoRemove : MonoBehaviour, UndoAction {
 
-  private UndoData[] Data = null;
-  private ZDO[] Added = null;
-  public UndoRemove(IEnumerable<UndoData> data) {
-    Data = data.ToArray();
+  private ZDO[] Data = null;
+  public UndoRemove(IEnumerable<ZDO> data) {
+    Data = UndoHelper.Clone(data);
   }
   public void Undo() {
-    Added = UndoHelper.Place(Data).ToArray();
+    Data = UndoHelper.Place(Data);
   }
 
   public void Redo() {
-    UndoHelper.Remove(Added);
-    Added = null;
+    Data = UndoHelper.Remove(Data);
   }
 
   public string UndoMessage() => $"Undo: Restored {UndoHelper.Print(Data)}";
@@ -88,21 +73,18 @@ public class UndoRemove : MonoBehaviour, UndoAction {
 
 public class UndoPlace : MonoBehaviour, UndoAction {
 
-  private UndoData[] Data = null;
-  private ZDO[] Added = null;
-  public UndoPlace(IEnumerable<ZNetView> obj) {
-    Data = obj.Select(UndoHelper.CreateData).ToArray();
-    Added = obj.Select(obj => obj.GetZDO()).ToArray();
+  private ZDO[] Data = null;
+  public UndoPlace(IEnumerable<ZDO> data) {
+    Data = UndoHelper.Clone(data);
   }
   public void Undo() {
-    UndoHelper.Remove(Added);
-    Added = null;
+    Data = UndoHelper.Remove(Data);
   }
 
   public string UndoMessage() => $"Undo: Removed {UndoHelper.Print(Data)}";
 
   public void Redo() {
-    Added = UndoHelper.Place(Data).ToArray();
+    Data = UndoHelper.Place(Data);
   }
   public string RedoMessage() => $"Redo: Restored {UndoHelper.Print(Data)}";
 }

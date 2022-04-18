@@ -8,14 +8,14 @@ public static class UndoWrapper {
   private static BindingFlags PublicBinding = BindingFlags.Static | BindingFlags.Public;
   private static Type Type() => CommandWrapper.ServerDevcommands.GetType("ServerDevcommands.UndoManager");
 
-  public static void Place(IEnumerable<ZNetView> objs) {
+  public static void Place(IEnumerable<ZDO> objs) {
     if (!Settings.EnableUndo || objs.Count() == 0) return;
     UndoPlace action = new(objs);
     if (CommandWrapper.ServerDevcommands != null) {
       Type().GetMethod("Add", PrivateBinding).Invoke(null, new[] { action });
     } else UndoManager.Add(action);
   }
-  public static void Remove(IEnumerable<UndoData> objs) {
+  public static void Remove(IEnumerable<ZDO> objs) {
     if (!Settings.EnableUndo || objs.Count() == 0) return;
     UndoRemove action = new(objs);
     if (CommandWrapper.ServerDevcommands != null) {
