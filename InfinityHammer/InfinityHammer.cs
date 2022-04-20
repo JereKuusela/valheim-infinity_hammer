@@ -8,6 +8,7 @@ namespace InfinityHammer;
 [BepInDependency("m3to.mods.GizmoReloaded", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("valheim.jerekuusela.server_devcommands", BepInDependency.DependencyFlags.SoftDependency)]
 public class InfinityHammer : BaseUnityPlugin {
+#nullable disable
   public static ManualLogSource Log;
   public void Awake() {
     Log = Logger;
@@ -40,18 +41,5 @@ public class SetCommands {
     new HammerSetupBindsCommand();
     new HammerStackCommand();
     new HammerUndoCommand();
-  }
-}
-
-[HarmonyPatch(typeof(ZNetView), nameof(ZNetView.Awake))]
-public class PreventDoubleZNetView {
-  static bool Prefix(ZNetView __instance) {
-    if (ZNetView.m_forceDisableInit || ZDOMan.instance == null) return true;
-    if (ZNetView.m_useInitZDO && ZNetView.m_initZDO == null) {
-      ZLog.LogWarning($"Preventing double ZNetView for {__instance.gameObject.name}. Recommended to remove these objects.");
-      UnityEngine.Object.Destroy(__instance);
-      return false;
-    }
-    return true;
   }
 }

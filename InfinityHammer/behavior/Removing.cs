@@ -20,7 +20,7 @@ public class UnlockRemoveDistance {
 [HarmonyPatch(typeof(Player), nameof(Player.RemovePiece))]
 public class RemovePiece {
   public static bool Removing = false;
-  public static List<ZDO> RemovedObjects;
+  public static List<ZDO> RemovedObjects = new();
 
   public static void SetRemovedObject(ZNetView obj) {
     RemovedObjects = new() { obj.GetZDO() };
@@ -65,12 +65,12 @@ public class RemovePiece {
   }
   private static void End(bool result) {
     DisableEffects.Active = false;
-    if (result && RemovedObjects != null && RemovedObjects.Count > 0) {
+    if (result && RemovedObjects.Count > 0) {
       RemoveInArea(RemovedObjects[0], Settings.RemoveArea);
       UndoWrapper.Remove(RemovedObjects);
     }
     Removing = false;
-    RemovedObjects = null;
+    RemovedObjects.Clear();
     PreventPieceDrops.Active = false;
     PreventCreaturerops.Active = false;
   }

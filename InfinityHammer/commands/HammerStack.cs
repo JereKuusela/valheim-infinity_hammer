@@ -24,7 +24,7 @@ public class HammerStackCommand {
     OverridePlacement.OverrideRotation = null;
     UndoHelper.FinishCreating();
   }
-  private static List<string> AutoComplete(int index) {
+  private static List<string>? AutoComplete(int index) {
     if (index == 0) return CommandWrapper.Info("Amount of objects to be placed (number or min-max).");
     if (index == 1) return CommandWrapper.Info("Step size (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
     if (index == 2) return CommandWrapper.Info("Direction (default 1 or -1).");

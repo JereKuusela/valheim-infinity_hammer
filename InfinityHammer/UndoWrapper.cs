@@ -6,7 +6,7 @@ namespace InfinityHammer;
 public static class UndoWrapper {
   private static BindingFlags PrivateBinding = BindingFlags.Static | BindingFlags.NonPublic;
   private static BindingFlags PublicBinding = BindingFlags.Static | BindingFlags.Public;
-  private static Type Type() => CommandWrapper.ServerDevcommands.GetType("ServerDevcommands.UndoManager");
+  private static Type Type() => CommandWrapper.ServerDevcommands!.GetType("ServerDevcommands.UndoManager");
 
   public static void Place(IEnumerable<ZDO> objs) {
     if (!Settings.EnableUndo || objs.Count() == 0) return;

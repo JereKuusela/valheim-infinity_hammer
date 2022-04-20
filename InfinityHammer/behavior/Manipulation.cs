@@ -40,15 +40,16 @@ public static class Scaling {
     Scale = value;
   }
   private static bool IsScalingSupported() {
-    var ghost = Player.m_localPlayer?.m_placementGhost;
+    var player = Helper.GetPlayer();
+    var ghost = player.m_placementGhost;
     if (!ghost) return false;
     // Ghost won't have netview so the selected piece must be used.
     // This technically also works for the build window if other mods add scalable objects there.
-    var view = Player.m_localPlayer?.GetSelectedPiece()?.GetComponent<ZNetView>();
-    return view && view.m_syncInitialScale;
+    var view = player.GetSelectedPiece()?.GetComponent<ZNetView>();
+    return view && view != null && view.m_syncInitialScale;
   }
   public static void UpdatePlacement() {
-    var ghost = Player.m_localPlayer?.m_placementGhost;
+    var ghost = Helper.GetPlayer().m_placementGhost;
     if (Settings.Enabled && ghost && IsScalingSupported())
       ghost.transform.localScale = Scale;
   }
@@ -102,7 +103,7 @@ public static class Offset {
     Value += value;
   }
   public static void UpdatePlacement() {
-    var ghost = Player.m_localPlayer?.m_placementGhost;
+    var ghost = Helper.GetPlayer().m_placementGhost;
     if (!ghost) return;
     var rotation = ghost.transform.rotation;
     ghost.transform.position += rotation * Vector3.right * Value.x;
@@ -117,26 +118,22 @@ public static class Offset {
 public static class Rotating {
   public static void UpdatePlacementRotation(GameObject obj) {
     if (!Settings.CopyRotation) return;
-    var player = Player.m_localPlayer;
-    if (!player) return;
+    var player = Helper.GetPlayer();
     var rotation = obj.transform.rotation;
     player.m_placeRotation = Mathf.RoundToInt(rotation.eulerAngles.y / 22.5f);
     GizmoWrapper.SetRotation(rotation);
   }
   public static void RotateX(float value) {
-    var player = Player.m_localPlayer;
-    if (!player) return;
+    Helper.GetPlayer();
     GizmoWrapper.RotateX(value);
   }
   public static void RotateY(float value) {
-    var player = Player.m_localPlayer;
-    if (!player) return;
+    var player = Helper.GetPlayer();
     player.m_placeRotation = Mathf.RoundToInt(((player.m_placeRotation * 22.5f) + value) / 22.5f);
     GizmoWrapper.RotateY(value);
   }
   public static void RotateZ(float value) {
-    var player = Player.m_localPlayer;
-    if (!player) return;
+    Helper.GetPlayer();
     GizmoWrapper.RotateZ(value);
   }
 }

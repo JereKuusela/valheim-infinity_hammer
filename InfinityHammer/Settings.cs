@@ -3,6 +3,7 @@ using System.Linq;
 using BepInEx.Configuration;
 namespace InfinityHammer;
 public class Settings {
+#nullable disable
   public static bool IsCheats => Enabled && ((ZNet.instance && ZNet.instance.IsServer()) || Console.instance.IsCheatsEnabled());
 
   public static ConfigEntry<string> configBinds;

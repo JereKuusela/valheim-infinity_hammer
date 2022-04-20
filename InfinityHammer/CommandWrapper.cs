@@ -4,7 +4,7 @@ using System.Reflection;
 using BepInEx.Bootstrap;
 namespace InfinityHammer;
 public static class CommandWrapper {
-  public static Assembly ServerDevcommands = null;
+  public static Assembly? ServerDevcommands = null;
   public static void Init() {
     if (Chainloader.PluginInfos.TryGetValue("valheim.jerekuusela.server_devcommands", out var info)) {
       if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 13) {
@@ -14,6 +14,7 @@ public static class CommandWrapper {
       }
     }
   }
+#nullable disable
   private static BindingFlags PublicBinding = BindingFlags.Static | BindingFlags.Public;
   private static Type Type() => ServerDevcommands.GetType("ServerDevcommands.AutoComplete");
   private static Type InfoType() => ServerDevcommands.GetType("ServerDevcommands.ParameterInfo");

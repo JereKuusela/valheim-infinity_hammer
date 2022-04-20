@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System;
 using UnityEngine;
 namespace InfinityHammer;
 
@@ -21,18 +22,15 @@ public class UndoHelper {
   }
   public static ZDO Place(ZDO zdo) {
     var prefab = ZNetScene.instance.GetPrefab(zdo.GetPrefab());
-    if (prefab) {
-      var obj = UnityEngine.Object.Instantiate<GameObject>(prefab, zdo.GetPosition(), zdo.GetRotation());
-      var netView = obj.GetComponent<ZNetView>();
-      if (netView) {
-        var added = netView.GetZDO();
-        netView.SetLocalScale(zdo.GetVec3("scale", obj.transform.localScale));
-        Helper.CopyData(zdo.Clone(), added);
-        Hammer.FixData(netView);
-        return added;
-      }
-    }
-    return null;
+    if (!prefab) throw new InvalidOperationException("Error: Invalid prefab");
+    var obj = UnityEngine.Object.Instantiate<GameObject>(prefab, zdo.GetPosition(), zdo.GetRotation());
+    var netView = obj.GetComponent<ZNetView>();
+    if (!netView) throw new InvalidOperationException("Error: No view");
+    var added = netView.GetZDO();
+    netView.SetLocalScale(zdo.GetVec3("scale", obj.transform.localScale));
+    Helper.CopyData(zdo.Clone(), added);
+    Hammer.FixData(netView);
+    return added;
   }
   public static ZDO[] Place(ZDO[] data) => data.Select(Place).Where(obj => obj != null).ToArray();
 
@@ -44,7 +42,6 @@ public class UndoHelper {
     return $" objects {data.Count()}x";
   }
   public static ZDO[] Remove(ZDO[] toRemove) {
-    if (toRemove == null) return null;
     var data = UndoHelper.Clone(toRemove);
     foreach (var zdo in toRemove) Helper.RemoveZDO(zdo);
     return data;
@@ -54,7 +51,7 @@ public class UndoHelper {
 }
 public class UndoRemove : MonoBehaviour, UndoAction {
 
-  private ZDO[] Data = null;
+  private ZDO[] Data;
   public UndoRemove(IEnumerable<ZDO> data) {
     Data = UndoHelper.Clone(data);
   }
@@ -73,7 +70,7 @@ public class UndoRemove : MonoBehaviour, UndoAction {
 
 public class UndoPlace : MonoBehaviour, UndoAction {
 
-  private ZDO[] Data = null;
+  private ZDO[] Data;
   public UndoPlace(IEnumerable<ZDO> data) {
     Data = UndoHelper.Clone(data);
   }

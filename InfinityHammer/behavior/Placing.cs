@@ -5,7 +5,7 @@ namespace InfinityHammer;
 [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.GetSelectedPiece))]
 public class GetSelectedPiece {
   public static bool Prefix(ref Piece __result) {
-    if (Hammer.GhostPrefab)
+    if (Hammer.GhostPrefab && Hammer.GhostPrefab != null)
       __result = Hammer.GhostPrefab.GetComponent<Piece>();
     if (__result) return false;
     return true;
@@ -45,7 +45,7 @@ public class PlacePiece {
     // Revert the adding of Piece component.
     if (__state) ObjectDB.Destroy(piece);
     // Restore the actual selection.
-    if (Hammer.GhostPrefab) piece = Hammer.GhostPrefab.GetComponent<Piece>();
+    if (Hammer.GhostPrefab && Hammer.GhostPrefab != null) piece = Hammer.GhostPrefab.GetComponent<Piece>();
     if (__result && Piece.m_allPieces.Count > 0) {
       var added = Piece.m_allPieces[Piece.m_allPieces.Count - 1];
       // Hoe also creates pieces.

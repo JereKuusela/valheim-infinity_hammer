@@ -19,15 +19,8 @@ public class Range<T> {
 }
 public static class Helper {
   public static GameObject GetPlacementGhost(Terminal terminal) {
-    var player = Player.m_localPlayer;
-    if (!player) {
-      AddMessage(terminal, "Error: No active player.");
-      return null;
-    }
-    if (!player.m_placementGhost) {
-      AddMessage(terminal, "Error: Not currently placing anything.");
-      return null;
-    }
+    var player = GetPlayer();
+    if (!player.m_placementGhost) throw new InvalidOperationException("Error: Not currently placing anything.");
     return player.m_placementGhost;
   }
   public static void RemoveZDO(ZDO zdo) {
@@ -209,7 +202,7 @@ public static class Helper {
     }
   }
 
-  public static Hovered GetHovered(Player obj, float maxDistance, HashSet<string> blacklist, bool allowOtherPlayers = false) {
+  public static Hovered? GetHovered(Player obj, float maxDistance, HashSet<string>? blacklist, bool allowOtherPlayers = false) {
     var raycast = Math.Max(maxDistance + 5f, 50f);
     var hits = Physics.RaycastAll(GameCamera.instance.transform.position, GameCamera.instance.transform.forward, raycast, obj.m_interactMask);
     Array.Sort<RaycastHit>(hits, (RaycastHit x, RaycastHit y) => x.distance.CompareTo(y.distance));
@@ -225,12 +218,14 @@ public static class Helper {
       var index = 0;
       if (mineRock)
         index = mineRock.GetAreaIndex(hit.collider);
-      return new() {
-        Obj = netView,
-        Index = index
-      };
+      return new(netView, index);
     }
     return null;
+  }
+  public static Player GetPlayer() {
+    var player = Player.m_localPlayer;
+    if (!player) throw new InvalidOperationException("Error: No player.");
+    return player;
   }
   ///<summary>Initializing the copy as inactive is the best way to avoid any script errors. ZNet stuff also won't run.</summary>
   public static GameObject SafeInstantiate(GameObject obj) {
@@ -281,6 +276,10 @@ public static class Helper {
 public class Hovered {
   public ZNetView Obj;
   public int Index;
+  public Hovered(ZNetView obj, int index) {
+    Obj = obj;
+    Index = index;
+  }
 }
 [HarmonyPatch(typeof(Player), nameof(Player.Message))]
 public class ReplaceMessage {

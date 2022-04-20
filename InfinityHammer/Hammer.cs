@@ -4,9 +4,9 @@ using UnityEngine;
 namespace InfinityHammer;
 public static class Hammer {
   ///<summary>Copy of the selected entity. Only needed for the placement ghost because armor and item stands have a different model depending on their state.</summary>
-  public static GameObject GhostPrefab = null;
+  public static GameObject? GhostPrefab = null;
   ///<summary>Copy of the state.</summary>
-  private static ZDO State = null;
+  private static ZDO? State = null;
 
   public static void CopyState(Piece obj) {
     if (State == null || !Settings.CopyState || !obj.m_nview) return;
@@ -19,7 +19,7 @@ public static class Hammer {
     => player.m_buildPieces.m_pieces.Any(piece => Utils.GetPrefabName(obj) == Utils.GetPrefabName(piece));
 
   ///<summary>Sets the sample object while ensuring it has the needed Piece component.</summary>
-  public static bool Set(Player player, GameObject obj, ZDO state) {
+  public static bool Set(Player player, GameObject obj, ZDO? state) {
     if (!player || !obj) return false;
     if (obj.GetComponent<Player>()) return false;
     if (!Settings.AllObjects && !IsBuildPiece(player, obj)) return false;

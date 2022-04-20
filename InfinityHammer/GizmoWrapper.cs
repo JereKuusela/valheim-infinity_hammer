@@ -3,10 +3,10 @@ using System.Reflection;
 using UnityEngine;
 namespace InfinityHammer;
 public static class GizmoWrapper {
-  private static Assembly Comfy = null;
-  private static Assembly Reloaded = null;
+  private static Assembly? Comfy = null;
+  private static Assembly? Reloaded = null;
   private static BindingFlags PrivateBinding = BindingFlags.Static | BindingFlags.NonPublic;
-  private static Type ComfyType() => Comfy.GetType("Gizmo.ComfyGizmo");
+  private static Type ComfyType() => Comfy!.GetType("Gizmo.ComfyGizmo");
   private static object Get(string field) => ComfyType().GetField(field, PrivateBinding).GetValue(null);
   private static void SetField(string field, int value) => ComfyType().GetField(field, PrivateBinding).SetValue(null, value);
   public static void InitComfy(Assembly assembly) {
@@ -76,14 +76,17 @@ public static class GizmoWrapper {
     gizmo.transform.rotation = Quaternion.Euler(rot);
   }
   private static GameObject GetReloaded() {
+#nullable disable
     if (Reloaded == null) return null;
-    var player = Player.m_localPlayer;
-    if (!player) return null;
+#nullable enable
     var gizmo = GameObject.Find("GizmoRoot(Clone)");
     if (gizmo) return gizmo;
-    // Gizmo needs these to ensure that it is initialized properly.
-    player.UpdatePlacementGhost(false);
-    player.UpdatePlacement(false, 0);
+    var player = Player.m_localPlayer;
+    if (player) {
+      // Gizmo needs these to ensure that it is initialized properly.
+      player.UpdatePlacementGhost(false);
+      player.UpdatePlacement(false, 0);
+    }
     return GameObject.Find("GizmoRoot(Clone)");
   }
   private static void SetReloadedRotation(Quaternion rotation) {
