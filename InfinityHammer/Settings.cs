@@ -47,6 +47,12 @@ public class Settings {
   public static bool EnableUndo => configEnableUndo.Value && IsCheats;
   public static ConfigEntry<bool> configNoCreator;
   public static bool NoCreator => configNoCreator.Value && IsCheats;
+  public static ConfigEntry<bool> configResetOffsetOnUnfreeze;
+  public static bool ResetOffsetOnUnfreeze => configResetOffsetOnUnfreeze.Value;
+  public static ConfigEntry<bool> configUnfreezeOnUnequip;
+  public static bool UnfreezeOnUnequip => configUnfreezeOnUnequip.Value;
+  public static ConfigEntry<bool> configUnfreezeOnSelect;
+  public static bool UnfreezeOnSelect => configUnfreezeOnSelect.Value;
   public static ConfigEntry<string> configOverwriteHealth;
   public static float OverwriteHealth => IsCheats ? Helper.ParseFloat(configOverwriteHealth.Value, 0f) : 0f;
   public static ConfigEntry<bool> configCopyRotation;
@@ -106,6 +112,9 @@ public class Settings {
     configRepairAnything = config.Bind(section, "Repair anything", false, "Allows reparing anything.");
     configOverwriteHealth = config.Bind(section, "Overwrite health", "0", "Overwrites the health of built or repaired objects.");
     configNoCreator = config.Bind(section, "No creator", false, "Build without setting the creator (ignored by enemies).");
+    configUnfreezeOnSelect = config.Bind(section, "Unfreeze on select", false, "Removes the placement freeze when selecting a new object.");
+    configResetOffsetOnUnfreeze = config.Bind(section, "Reset offset on unfreeze", true, "Removes the placement offset when unfreezing the placement.");
+    configUnfreezeOnUnequip = config.Bind(section, "Unfreeze on unequip", true, "Removes the placement freeze when unequipping the hammer.");
     configHidePlacementMarker = config.Bind(section, "No placement marker", false, "Hides the yellow placement marker (also affects Gizmo mod).");
     configIgnoreOtherRestrictions = config.Bind(section, "Ignore other restrictions", true, "Ignores any other restrictions (material, biome, etc.)");
     configScaleStep = config.Bind(section, "Scaling step", "0.05", "How much each scale up/down affects the size");
@@ -156,7 +165,10 @@ public class Settings {
     "disable_scale_messages",
     "disable_select_messages",
     "remove_area",
-    "binds"
+    "binds",
+    "unfreeze_on_unequip",
+    "unfreeze_on_select",
+    "reset_offset_on_unfreeze"
   };
   private static string State(bool value) => value ? "enabled" : "disabled";
   private static string Flag(bool value) => value ? "removed" : "added";
@@ -206,6 +218,9 @@ public class Settings {
     if (key == "repair_anything") Toggle(context, configRepairAnything, "Repair anything", value);
     if (key == "ignore_other_restrictions") Toggle(context, configIgnoreOtherRestrictions, "Other build restrictions", value, true);
     if (key == "no_creator") Toggle(context, configNoCreator, "Creator", value, true);
+    if (key == "unfreeze_on_unequip") Toggle(context, configUnfreezeOnUnequip, "Unfreeze on unequip", value);
+    if (key == "unfreeze_on_select") Toggle(context, configUnfreezeOnSelect, "Unfreeze on select", value);
+    if (key == "reset_offset_on_unfreeze") Toggle(context, configUnfreezeOnSelect, "Reset offset on unfreeze", value);
     if (key == "binds") {
       configBinds.Value = value;
       Helper.AddMessage(context, $"Binds set to {value}.");

@@ -115,13 +115,20 @@ public class PlacementPosition2 {
 public static class Position {
   public static Vector3? Override = null;
   public static Vector3 Offset = Vector3.zero;
+  public static void ToggleFreeze() {
+    if (Override.HasValue)
+      Unfreeze();
+    else
+      Freeze();
+  }
   public static void Freeze() {
     var ghost = Helper.GetPlayer().m_placementGhost;
     if (!ghost) return;
-    if (Override.HasValue)
-      Override = null;
-    else
-      Override = ghost.transform.position;
+    Override = ghost.transform.position;
+  }
+  public static void Unfreeze() {
+    Override = null;
+    if (Settings.ResetOffsetOnUnfreeze) Offset = Vector3.zero;
   }
   public static Vector3 Apply(Vector3 point) {
     var ghost = Helper.GetPlayer().m_placementGhost;

@@ -41,6 +41,7 @@ public static class Hammer {
     if (GhostPrefab) ZNetScene.instance.Destroy(GhostPrefab);
     GhostPrefab = null;
     State = null;
+    if (Settings.UnfreezeOnSelect) Position.Unfreeze();
   }
   public static void Equip() {
     var player = Player.m_localPlayer;
@@ -129,4 +130,12 @@ public static class Hammer {
 public class DisableEffects {
   public static bool Active = false;
   static bool Prefix() => !Active || !Settings.RemoveEffects;
+}
+
+[HarmonyPatch(typeof(Humanoid), nameof(Humanoid.UnequipItem))]
+public class UnfreezeOnUnequip {
+  static void Prefix(Humanoid __instance, ItemDrop.ItemData item) {
+    if (__instance != Player.m_localPlayer || item == null) return;
+    if (Settings.UnfreezeOnUnequip) Position.Unfreeze();
+  }
 }

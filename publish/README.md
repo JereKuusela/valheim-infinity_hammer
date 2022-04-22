@@ -137,9 +137,12 @@ Following powers are available with `hammer_config` command:
 - Repair anything (default: `false`, key: `repair_anything`): Allows healing or repairing any object.
 - Repair range (default: `0`, key: `repair_range`): Range for repairing (capped at about 50 meters).
 - Repair taming (default: `false`, key: `repair_taming`): Repairing full health creatures will tame/untame them (works for all creatures).
+- Reset offset on unfreeze (defualt `true`, key: `reset_offset_on_unfreeze`): Removes the placement offset when unfreezing the placement.
 - Scaling step (default: `0.05`, key: `scaling_step`): How much the object is scaled up/down.
-- Select blacklist (default: ` `, key: `select_blacklist`): Allows disabling select for given objects (ids separated by ,).
+- Select blacklist (key: `select_blacklist`): Allows disabling select for given objects (ids separated by ,).
 - Select range (default: `0`, key: `select_range`): Range for selecting (capped at about 50 meters).
+- Unfreeze on select (defualt `false`, key: `unfreeze_on_select`): Removes the placement freeze when selecting a new object.
+- Unfreeze on unequip (defualt `true`, key: `unfreeze_on_unequip`): Removes the placement freeze when unequipping the hammer.
 
 On servers, above features are disabled without cheat access (except Copy rotate, No placement marker, Remove effects, Select range and offsetting).
 
@@ -198,6 +201,9 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 
 - v1.12:
 	- Adds a new command `hammer_freeze` to prevent mouse position affecting the placement (allows moving around).
+	- Adds a new setting `unfreeze_on_unequip` to automatically unfreeze the placement when unequipping the hammer (default `true`).
+	- Adds a new setting `unfreeze_on_select` to automatically unfreeze the placement when selecting a new piece (default `false`).
+	- Adds a new setting `reset_offset_on_unfreeze` to automatically reset the placement offset when a freeze is removed (default `true`).
 	- Improves how the placement rule are checked with the placement offset.
 
 - v1.11:
