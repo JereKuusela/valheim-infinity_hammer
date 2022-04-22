@@ -32,6 +32,7 @@ Note: Some commands have a direction parameter. These are intended for mouse whe
 - `hammer [item id] [scale=1]`: Selects an object by id while setting the initial scale (if the object can be scaled). Number or x,y,z.
 - `hammer_add_piece_components`: Adds the Piece component to every object which allows copying them with PlanBuild mod.
 - `hammer_config [key] [value]`: Toggles or sets configuration values. For lists, the given value is toggled on or off (`remove_blacklist` or `select_blacklist`).
+- `hammer_freeze`: Toggles whether the mouse affects placement position. Allows moving around while the object's position is frozen.
 - `hammer_move [forward,up,right]`: Moves the placement ghost offset for precise placement. Auto value can be used for the object size.
 - `hammer_move_backward [meters or number*auto] [direction=1]`: Moves the placement towards the backward direction.
 - `hammer_move_down [meters or number*auto] [direction=1]`: Moves the placement towards the down direction.
@@ -194,6 +195,10 @@ If "Disable loot" is enabled, destroying creatures or structures won't drop loot
 Blacklist can be used to avoid destroying critical objects like locations. For example `hammer_config remove_blacklist LocationProxy`.
 
 # Changelog
+
+- v1.12:
+	- Adds a new command `hammer_freeze` to prevent mouse position affecting the placement (allows moving around).
+	- Improves how the placement rule are checked with the placement offset.
 
 - v1.11:
 	- Adds compatibility with Gizmo Reloaded.

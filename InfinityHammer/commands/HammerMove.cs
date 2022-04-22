@@ -10,8 +10,8 @@ public class HammerMoveCommand {
       var ghost = Helper.GetPlacementGhost(args.Context);
       if (!ghost) return;
       var amount = Helper.TryParseSize(ghost, args.Args, 1).x;
-      Offset.MoveLeft(Helper.ParseDirection(args.Args, 2) * amount);
-      Offset.Print(args.Context);
+      Position.MoveLeft(Helper.ParseDirection(args.Args, 2) * amount);
+      Position.Print(args.Context);
     });
     CommandWrapper.Register("hammer_move_right", (int index) => {
       if (index == 0) return CommandWrapper.Info("Meters towards the right direction (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
@@ -22,8 +22,8 @@ public class HammerMoveCommand {
       var ghost = Helper.GetPlacementGhost(args.Context);
       if (!ghost) return;
       var amount = Helper.TryParseSize(ghost, args.Args, 1).x;
-      Offset.MoveRight(Helper.ParseDirection(args.Args, 2) * amount);
-      Offset.Print(args.Context);
+      Position.MoveRight(Helper.ParseDirection(args.Args, 2) * amount);
+      Position.Print(args.Context);
     });
     CommandWrapper.Register("hammer_move_down", (int index) => {
       if (index == 0) return CommandWrapper.Info("Meters towards the up direction (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
@@ -34,8 +34,8 @@ public class HammerMoveCommand {
       var ghost = Helper.GetPlacementGhost(args.Context);
       if (!ghost) return;
       var amount = Helper.TryParseSize(ghost, args.Args, 1).y;
-      Offset.MoveDown(Helper.ParseDirection(args.Args, 2) * amount);
-      Offset.Print(args.Context);
+      Position.MoveDown(Helper.ParseDirection(args.Args, 2) * amount);
+      Position.Print(args.Context);
     });
     CommandWrapper.Register("hammer_move_up", (int index) => {
       if (index == 0) return CommandWrapper.Info("Meters towards the up direction (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
@@ -46,8 +46,8 @@ public class HammerMoveCommand {
       var ghost = Helper.GetPlacementGhost(args.Context);
       if (!ghost) return;
       var amount = Helper.TryParseSize(ghost, args.Args, 1).y;
-      Offset.MoveUp(Helper.ParseDirection(args.Args, 2) * amount);
-      Offset.Print(args.Context);
+      Position.MoveUp(Helper.ParseDirection(args.Args, 2) * amount);
+      Position.Print(args.Context);
     });
     CommandWrapper.Register("hammer_move_backward", (int index) => {
       if (index == 0) return CommandWrapper.Info("Meters towards the backward direction (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
@@ -58,8 +58,8 @@ public class HammerMoveCommand {
       var ghost = Helper.GetPlacementGhost(args.Context);
       if (!ghost) return;
       var amount = Helper.TryParseSize(ghost, args.Args, 1).z;
-      Offset.MoveBackward(Helper.ParseDirection(args.Args, 2) * amount);
-      Offset.Print(args.Context);
+      Position.MoveBackward(Helper.ParseDirection(args.Args, 2) * amount);
+      Position.Print(args.Context);
     });
     CommandWrapper.Register("hammer_move_forward", (int index) => {
       if (index == 0) return CommandWrapper.Info("Meters towards the forward direction (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
@@ -70,8 +70,8 @@ public class HammerMoveCommand {
       var ghost = Helper.GetPlacementGhost(args.Context);
       if (!ghost) return;
       var amount = Helper.TryParseSize(ghost, args.Args, 1).z;
-      Offset.MoveForward(Helper.ParseDirection(args.Args, 2) * amount);
-      Offset.Print(args.Context);
+      Position.MoveForward(Helper.ParseDirection(args.Args, 2) * amount);
+      Position.Print(args.Context);
     });
     CommandWrapper.Register("hammer_move", (int index, int subIndex) => {
       if (index == 0) return CommandWrapper.FRU("Meters to move the placement", subIndex);
@@ -81,8 +81,8 @@ public class HammerMoveCommand {
       var ghost = Helper.GetPlacementGhost(args.Context);
       if (!ghost) return;
       var amount = Helper.TryParseSizesZYX(ghost, args.Args, 1, "0");
-      Offset.Move(amount);
-      Offset.Print(args.Context);
+      Position.Move(amount);
+      Position.Print(args.Context);
     });
   }
 }

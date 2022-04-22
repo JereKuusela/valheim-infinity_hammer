@@ -4,6 +4,9 @@ using System.Globalization;
 using System.Linq;
 using HarmonyLib;
 using UnityEngine;
+using System.Reflection.Emit;
+using System.Reflection;
+using System;
 namespace InfinityHammer;
 [HarmonyPatch(typeof(ZNetView), "Awake")]
 public static class Bounds {
@@ -67,52 +70,107 @@ public static class Scaling {
   }
 }
 
-public static class Offset {
-  public static Vector3 Value = Vector3.zero;
-  public static void SetX(float value) {
-    Value.x = value;
-  }
-  public static void SetY(float value) {
-    Value.y = value;
-  }
-  public static void SetZ(float value) {
-    Value.z = value;
-  }
-  public static void MoveLeft(float value) {
-    Value.x -= value;
-  }
-  public static void MoveRight(float value) {
-    Value.x += value;
-  }
-  public static void MoveDown(float value) {
-    Value.y -= value;
-  }
-  public static void MoveUp(float value) {
-    Value.y += value;
-  }
-  public static void MoveBackward(float value) {
-    Value.z -= value;
-  }
-  public static void MoveForward(float value) {
-    Value.z += value;
-  }
-  public static void Set(Vector3 value) {
-    Value = value;
-  }
-  public static void Move(Vector3 value) {
-    Value += value;
-  }
-  public static void UpdatePlacement() {
+
+[HarmonyPatch(typeof(Player), nameof(Player.PieceRayTest))]
+public class PlacementPosition1 {
+  static Vector3 Normal;
+
+  ///<summary>First override the initial position so that placement rules are checked on the actual position-</summary>
+  static void Postfix(ref Vector3 point, ref Vector3 normal, ref Piece piece, ref Heightmap heightmap, ref Collider waterSurface, ref bool __result) {
+    point = Position.Apply(point);
     var ghost = Helper.GetPlayer().m_placementGhost;
     if (!ghost) return;
-    var rotation = ghost.transform.rotation;
-    ghost.transform.position += rotation * Vector3.right * Value.x;
-    ghost.transform.position += rotation * Vector3.up * Value.y;
-    ghost.transform.position += rotation * Vector3.forward * Value.z;
+    if (Position.Override.HasValue) {
+      normal = Normal;
+      __result = true;
+#nullable disable
+      piece = null;
+      heightmap = null;
+      waterSurface = null;
+#nullable enable
+    } else Normal = normal;
   }
+}
+[HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
+public class PlacementPosition2 {
+  ///<summary>Then override snapping and other modifications for the final result (and some rules are checked too).</summary>
+  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+    return new CodeMatcher(instructions)
+          .MatchForward(
+              useEnd: false,
+              new CodeMatch(
+                  OpCodes.Call,
+                  AccessTools.Method(typeof(Location), nameof(Location.IsInsideNoBuildLocation))))
+          .Advance(-2)
+          // If-branches require using ops from the IsInsideBuildLocation so just duplicate the used ops afterwards.
+          .Insert(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate<Action<GameObject>>(
+                 (GameObject ghost) => ghost.transform.position = Position.Apply(ghost.transform.position)).operand),
+                new CodeInstruction(OpCodes.Ldarg_0),
+                new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(Player), nameof(Player.m_placementGhost)))
+          )
+          .InstructionEnumeration();
+  }
+}
+
+public static class Position {
+  public static Vector3? Override = null;
+  public static Vector3 Offset = Vector3.zero;
+  public static void Freeze() {
+    var ghost = Helper.GetPlayer().m_placementGhost;
+    if (!ghost) return;
+    if (Override.HasValue)
+      Override = null;
+    else
+      Override = ghost.transform.position;
+  }
+  public static Vector3 Apply(Vector3 point) {
+    var ghost = Helper.GetPlayer().m_placementGhost;
+    if (!ghost) return point;
+    if (Override.HasValue)
+      point = Override.Value;
+    var rotation = ghost.transform.rotation;
+    point += rotation * Vector3.right * Offset.x;
+    point += rotation * Vector3.up * Offset.y;
+    point += rotation * Vector3.forward * Offset.z;
+    return point;
+  }
+  public static void SetX(float value) {
+    Offset.x = value;
+  }
+  public static void SetY(float value) {
+    Offset.y = value;
+  }
+  public static void SetZ(float value) {
+    Offset.z = value;
+  }
+  public static void MoveLeft(float value) {
+    Offset.x -= value;
+  }
+  public static void MoveRight(float value) {
+    Offset.x += value;
+  }
+  public static void MoveDown(float value) {
+    Offset.y -= value;
+  }
+  public static void MoveUp(float value) {
+    Offset.y += value;
+  }
+  public static void MoveBackward(float value) {
+    Offset.z -= value;
+  }
+  public static void MoveForward(float value) {
+    Offset.z += value;
+  }
+  public static void Set(Vector3 value) {
+    Offset = value;
+  }
+  public static void Move(Vector3 value) {
+    Offset += value;
+  }
+
   public static void Print(Terminal terminal) {
     if (Settings.DisableOffsetMessages) return;
-    Helper.AddMessage(terminal, $"Offset set to forward: {Value.z.ToString("F1", CultureInfo.InvariantCulture)}, up: {Value.y.ToString("F1", CultureInfo.InvariantCulture)}, right: {Value.x.ToString("F1", CultureInfo.InvariantCulture)}.");
+    Helper.AddMessage(terminal, $"Offset set to forward: {Offset.z.ToString("F1", CultureInfo.InvariantCulture)}, up: {Offset.y.ToString("F1", CultureInfo.InvariantCulture)}, right: {Offset.x.ToString("F1", CultureInfo.InvariantCulture)}.");
   }
 }
 public static class Rotating {

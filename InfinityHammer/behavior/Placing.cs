@@ -95,7 +95,6 @@ public class SetupPlacementGhost {
 public class UpdatePlacementGhost {
   public static void Postfix(Player __instance) {
     Scaling.UpdatePlacement();
-    Offset.UpdatePlacement();
     var marker = __instance.m_placementMarkerInstance;
     if (marker) {
       // Max 2 to only affect default game markers.
