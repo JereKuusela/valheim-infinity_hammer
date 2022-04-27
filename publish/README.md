@@ -73,9 +73,57 @@ Note: Some interactions are quite complicated so please report any issues!
 
 ## Key bindings
 
-It's recommended to make own bindings ([key codes](https://docs.unity3d.com/ScriptReference/KeyCode.html)).
+Bind frequently used commands to ([key codes](https://docs.unity3d.com/ScriptReference/KeyCode.html)).
 
-If you are sharing the config file, put bindings to the `binds` setting with format `keycode1 command1;keycode2 commant2`. For example `keypad0 hammer;keypad7 hammer_undo;keypad9 hammer_redo`.
+When sharing the config file, put bindings to the `binds` setting with format `keycode1 command1;keycode2 command2`. For example `keypad0 hammer;keypad7 hammer_undo;keypad9 hammer_redo`.
+
+It's recommended to install Server Devcommands mod which allows using modifier keys on bindings.
+
+Remember that you can copy-paste commands to the console.
+
+### General usage
+
+
+
+### Precise placement / placement offset
+
+Bind movement to arrow keys:
+- `bind rightarrow hammer_move_right 0.1`
+- `bind leftarrow hammer_move_left 0.1`
+- `bind downarrow hammer_move_down 0.1`
+- `bind uparrow hammer_move_up 0.1`
+
+With Server Devcommands you can use modifier keys for the forward/backward direction:
+- `bind rightarrow hammer_move_right 0.1`
+- `bind leftarrow hammer_move_left 0.1`
+- `bind downarrow,-leftcontrol hammer_move_down 0.1`
+- `bind uparrow,-leftcontrol hammer_move_up 0.1`
+- `bind downarrow,leftcontrol hammer_move_backward 0.1`
+- `bind uparrow,leftcontrol hammer_move_forward 0.1`
+
+You can also use another modifier key for a bigger offset:
+
+- `bind rightarrow,-leftalt hammer_move_right 0.1`
+- `bind leftarrow,-leftalt hammer_move_left 0.1`
+- `bind downarrow,-leftalt,-leftcontrol hammer_move_down 0.1`
+- `bind uparrow,-leftalt,-leftcontrol hammer_move_up 0.1`
+- `bind downarrow,-leftalt,leftcontrol hammer_move_backward 0.1`
+- `bind uparrow,-leftalt,leftcontrol hammer_move_forward 0.1`
+- `bind rightarrow,leftalt hammer_move_right 1`
+- `bind leftarrow,leftalt hammer_move_left 1`
+- `bind downarrow,leftalt,-leftcontrol hammer_move_down 1`
+- `bind uparrow,leftalt,-leftcontrol hammer_move_up 1`
+- `bind downarrow,leftalt,leftcontrol hammer_move_backward 1`
+- `bind uparrow,leftalt,leftcontrol hammer_move_forward 1`
+
+Then bind freezing or offset reset near arrow keys:
+
+- `bind keypad0 hammer_freeze` or `bind keypad0 hammer_offset`
+
+
+
+
+
 
 `hammer_setup_binds` command can be used to quickly set some key bindings that work with the Gizmo mod.
 
@@ -96,14 +144,6 @@ Following bindings are added:
 
 If you have Server Devcommands installed, following binds are added instead (to provide a different offset when Alt-key is down):
 
-- `bind rightarrow hammer_move_right 0.1 keys=-leftalt`
-- `bind rightarrow hammer_move_right 1 keys=leftalt`
-- `bind leftarrow hammer_move_left 0.1 keys=-leftalt`
-- `bind leftarrow hammer_move_left 1 keys=leftalt`
-- `bind downarrow hammer_move_down 0.1 keys=-leftalt`
-- `bind downarrow hammer_move_down 1 keys=leftalt`
-- `bind uparrow hammer_move_up 0.1 keys=-leftalt`
-- `bind uparrow hammer_move_up 1 keys=leftalt`
 
 # Configuration
 

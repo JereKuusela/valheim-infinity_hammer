@@ -1,5 +1,6 @@
 using HarmonyLib;
 using UnityEngine;
+using System.Linq;
 // Code related to repairing objects.
 namespace InfinityHammer;
 [HarmonyPatch(typeof(Player), nameof(Player.Repair))]
@@ -101,13 +102,22 @@ public class Repair {
     DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, obj.transform.position, Mathf.Abs(heal));
     return true;
   }
-
-
-  private static bool RepairAnything(Player player) {
-    var range = Settings.RepairRange > 0f ? Settings.RepairRange : player.m_maxPlaceDistance;
-    var hovered = Helper.GetHovered(player, range, null, true);
-    if (hovered == null) return false;
-    var obj = hovered.Obj;
+  private static bool RepairInArea(ZDO zdo, float radius) {
+    if (radius == 0) return false;
+    var position = zdo.m_position;
+    var prefab = zdo.m_prefab;
+    var toRepair = ZNetScene.instance.m_instances.Values.Where(view =>
+      view
+      && view.IsValid()
+      && view.GetZDO().m_prefab == prefab
+      && Vector3.Distance(position, view.GetZDO().m_position) < radius
+    ).ToArray();
+    var repaired = false;
+    foreach (var obj in toRepair)
+      repaired |= RepairObject(obj, 0);
+    return repaired;
+  }
+  private static bool RepairObject(ZNetView obj, int index) {
     var repaired = false;
     if (RepairStructure(obj))
       repaired = true;
@@ -121,8 +131,17 @@ public class Repair {
       repaired = true;
     if (RepairTreeLog(obj))
       repaired = true;
-    if (RepairMineRock(obj, hovered.Index))
+    if (RepairMineRock(obj, index))
       repaired = true;
+    return repaired;
+  }
+
+  private static bool RepairAnything(Player player) {
+    var range = Settings.RepairRange > 0f ? Settings.RepairRange : player.m_maxPlaceDistance;
+    var hovered = Helper.GetHovered(player, range, null, true);
+    if (hovered == null) return false;
+    var obj = hovered.Obj;
+    var repaired = RepairObject(obj, hovered.Index);
     if (!repaired) return false;
     var piece = obj.GetComponent<Piece>();
     var name = piece ? piece.m_name : Utils.GetPrefabName(obj.gameObject);
