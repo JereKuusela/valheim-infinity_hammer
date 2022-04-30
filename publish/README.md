@@ -163,6 +163,7 @@ Following powers are available with `hammer_config` command:
 - Ignore no build (default: `true`, key: `ignore_no_build`): "Mystical power" no longer prevents building.
 - Ignore other restrictions (default: `true`, key: `ignore_other_restrictions`): Removes any other restrictions (for example campfires can be built on wood floors).
 - Ignore wards (default: `true`, key: `ignore_wards`): Wards no longer prevent building.
+- Infinite health (default: `false`, key: `infinite_health`): Sets the Overwrite health setting to 10E30.
 - Max undo steps (default: `50`, key: `max_undo_steps`): How many undo actions are stored (ignored if Server Devcommands is installed).
 - No build cost (default: `true`, key: `no_build_cost`): Removes resource cost and crafting station requirement.
 - No creator (default: `false`, key: `no_creator`): Builds without setting the creator information.
@@ -171,7 +172,7 @@ Following powers are available with `hammer_config` command:
 - Overwrite health (default: `0`, key: `overwrite_health`): Sets the health of built or repaired objects (0 reverts to the default max health, except for creatures).
 - Remove anything (default: `false`, key: `remove_anything`): Allows removing any object.
 - Remove area (default: `0`, key: `remove_area`): Removes same objects within the radius.
-- Remove blacklist (default: ` `, key: `remove_blacklist`): Allows disabling remove for given objects (ids separated by ,). Only works if remove anything is enabled.
+- Remove blacklist (key: `remove_blacklist`): Allows disabling remove for given objects (ids separated by ,). Only works if remove anything is enabled.
 - Remove effects (default: `false`, key: `remove_effects`): Removes visual effects of building, repairing and destroying.
 - Remove range (default: `0`, key: `remove_range`): Range for removing (capped at about 50 meters).
 - Repair anything (default: `false`, key: `repair_anything`): Allows healing or repairing any object.
@@ -244,6 +245,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds a new setting `unfreeze_on_unequip` to automatically unfreeze the placement when unequipping the hammer (default `true`).
 	- Adds a new setting `unfreeze_on_select` to automatically unfreeze the placement when selecting a new piece (default `false`).
 	- Adds a new setting `reset_offset_on_unfreeze` to automatically reset the placement offset when a freeze is removed (default `true`).
+	- Adds a new setting `infinite_health` to set a very high Overwrite health (default `false`).
 	- Improves how the placement rule are checked with the placement offset.
 
 - v1.11:

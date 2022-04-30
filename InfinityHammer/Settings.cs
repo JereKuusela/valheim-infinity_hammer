@@ -54,7 +54,9 @@ public class Settings {
   public static ConfigEntry<bool> configUnfreezeOnSelect;
   public static bool UnfreezeOnSelect => configUnfreezeOnSelect.Value;
   public static ConfigEntry<string> configOverwriteHealth;
-  public static float OverwriteHealth => IsCheats ? Helper.ParseFloat(configOverwriteHealth.Value, 0f) : 0f;
+  public static float OverwriteHealth => IsCheats ? InfiniteHealth ? 10E20f : Helper.ParseFloat(configOverwriteHealth.Value, 0f) : 0f;
+  public static ConfigEntry<bool> configInfiniteHealth;
+  public static bool InfiniteHealth => configInfiniteHealth.Value && IsCheats;
   public static ConfigEntry<bool> configCopyRotation;
   public static bool CopyRotation => configCopyRotation.Value && Enabled;
   public static ConfigEntry<string> configUndoLimit;
@@ -111,6 +113,7 @@ public class Settings {
     configDisableLoot = config.Bind(section, "Disable loot", false, "Prevents creatures and structures dropping loot when removed with the hammer.");
     configRepairAnything = config.Bind(section, "Repair anything", false, "Allows reparing anything.");
     configOverwriteHealth = config.Bind(section, "Overwrite health", "0", "Overwrites the health of built or repaired objects.");
+    configInfiniteHealth = config.Bind(section, "Infinite health", false, "Sets the Overwrite health to 10E30.");
     configNoCreator = config.Bind(section, "No creator", false, "Build without setting the creator (ignored by enemies).");
     configUnfreezeOnSelect = config.Bind(section, "Unfreeze on select", false, "Removes the placement freeze when selecting a new object.");
     configResetOffsetOnUnfreeze = config.Bind(section, "Reset offset on unfreeze", true, "Removes the placement offset when unfreezing the placement.");
@@ -168,7 +171,8 @@ public class Settings {
     "binds",
     "unfreeze_on_unequip",
     "unfreeze_on_select",
-    "reset_offset_on_unfreeze"
+    "reset_offset_on_unfreeze",
+    "infinite_health"
   };
   private static string State(bool value) => value ? "enabled" : "disabled";
   private static string Flag(bool value) => value ? "removed" : "added";
@@ -195,6 +199,7 @@ public class Settings {
   }
   public static void UpdateValue(Terminal context, string key, string value) {
     if (key == "enabled") Toggle(context, configEnabled, "Infinity Hammer", value);
+    if (key == "infinite_health") Toggle(context, configInfiniteHealth, "Infinity health", value);
     if (key == "disable_messages") Toggle(context, configDisableMessages, "All messages", value, true);
     if (key == "disable_offset_messages") Toggle(context, configDisableOffsetMessages, "Offset messages", value, true);
     if (key == "disable_scale_messages") Toggle(context, configDisableScaleMessages, "Scale messages", value, true);
