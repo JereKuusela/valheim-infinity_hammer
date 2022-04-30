@@ -247,6 +247,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds a new setting `reset_offset_on_unfreeze` to automatically reset the placement offset when a freeze is removed (default `true`).
 	- Adds a new setting `infinite_health` to set a very high Overwrite health (default `false`).
 	- Improves how the placement rule are checked with the placement offset.
+	- Fixes item drop data not being copied.
 
 - v1.11:
 	- Adds compatibility with Gizmo Reloaded.

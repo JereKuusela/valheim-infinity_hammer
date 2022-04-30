@@ -78,6 +78,7 @@ public static class Hammer {
       if (character.m_onLevelSet != null) character.m_onLevelSet(character.m_level);
       character.SetTamed(zdo.GetBool("tamed", false));
     }
+    obj.GetComponentInChildren<ItemDrop>()?.Load();
     obj.GetComponentInChildren<ArmorStand>()?.UpdateVisual();
     obj.GetComponentInChildren<VisEquipment>()?.UpdateVisuals();
     obj.GetComponentInChildren<ItemStand>()?.UpdateVisual();
