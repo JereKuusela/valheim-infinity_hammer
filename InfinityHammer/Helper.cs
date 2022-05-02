@@ -234,6 +234,17 @@ public static class Helper {
     obj.SetActive(true);
     return ret;
   }
+  ///<summary>Initializing the copy as inactive is the best way to avoid any script errors. ZNet stuff also won't run.</summary>
+  public static GameObject SafeInstantiateLocation(GameObject obj) {
+    foreach (var view in obj.GetComponentsInChildren<ZNetView>(true))
+      view.gameObject.SetActive(true);
+    var state = UnityEngine.Random.state;
+    UnityEngine.Random.InitState(Hammer.Seed);
+    foreach (var random in obj.GetComponentsInChildren<RandomSpawn>())
+      random.Randomize();
+    UnityEngine.Random.state = state;
+    return SafeInstantiate(obj);
+  }
   ///<summary>Removes scripts that try to run (for example placement needs only the model and Piece component).</summary>
   public static void CleanObject(GameObject obj) {
     if (!obj || !Settings.Enabled) return;
@@ -259,19 +270,27 @@ public static class Helper {
     // Other
     UnityEngine.Object.Destroy(obj.GetComponent<HoverText>());
     UnityEngine.Object.Destroy(obj.GetComponent<Aoe>());
+    UnityEngine.Object.Destroy(obj.GetComponentInChildren<MusicLocation>());
+    UnityEngine.Object.Destroy(obj.GetComponentInChildren<SpawnArea>());
   }
 
   ///<summary>Placement requires the Piece component.</summary>
   public static void EnsurePiece(GameObject obj) {
     if (obj.GetComponent<Piece>()) return;
     var piece = obj.AddComponent<Piece>();
-    piece.m_name = Utils.GetPrefabName(obj);
+    var proxy = obj.GetComponent<LocationProxy>();
+    if (proxy && proxy.m_instance)
+      piece.m_name = Utils.GetPrefabName(proxy.m_instance);
+    else
+      piece.m_name = Utils.GetPrefabName(obj);
     piece.m_clipEverything = true;
   }
   ///<summary>Helper to check object validity.</summary>
   public static bool IsValid(ZNetView view) => view && IsValid(view.GetZDO());
   ///<summary>Helper to check object validity.</summary>
   public static bool IsValid(ZDO zdo) => zdo != null && zdo.IsValid();
+
+  public static ZoneSystem.ZoneLocation GetLocation(string name) => ZoneSystem.instance.m_locations.Where(loc => loc.m_prefabName == name).FirstOrDefault();
 }
 public class Hovered {
   public ZNetView Obj;

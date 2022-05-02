@@ -1,6 +1,6 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System;
 using UnityEngine;
 namespace InfinityHammer;
 
@@ -9,7 +9,8 @@ public class UndoHelper {
   private static List<ZDO> Objects = new();
   public static void CreateObject(ZNetView obj) {
     if (!obj) return;
-    Objects.Add(obj.GetZDO());
+    foreach (var view in obj.GetComponentsInChildren<ZNetView>())
+      Objects.Add(view.GetZDO());
     if (!GroupCreating) FinishCreating();
   }
   public static void StartCreating() {

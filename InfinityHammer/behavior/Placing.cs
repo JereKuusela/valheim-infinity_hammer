@@ -23,15 +23,29 @@ public class SetSelectedPiece {
 
 [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
 public class PlacePiece {
-  public static void Prefix(ref Piece piece, ref bool __state) {
+  private static bool AddedPiece = false;
+  public static void Prefix(ref Piece piece) {
     DisableEffects.Active = true;
-    __state = false;
+    AddedPiece = false;
     if (!Hammer.GhostPrefab) return;
-    var basePrefab = ZNetScene.instance.GetPrefab(Utils.GetPrefabName(piece.gameObject));
+    var name = Utils.GetPrefabName(piece.gameObject);
+    var basePrefab = ZNetScene.instance.GetPrefab(name);
+    if (!basePrefab) {
+      var location = Helper.GetLocation(name);
+      foreach (var view in location.m_netViews)
+        view.gameObject.SetActive(true);
+      var state = UnityEngine.Random.state;
+      UnityEngine.Random.InitState(Hammer.Seed);
+      foreach (var random in location.m_randomSpawns)
+        random.Randomize();
+      UnityEngine.Random.state = state;
+      basePrefab = ZoneSystem.instance.m_locationProxyPrefab;
+    }
+    if (basePrefab == null || !basePrefab) return;
     var basePiece = basePrefab.GetComponent<Piece>();
     if (!basePiece) {
+      AddedPiece = true;
       // Not all prefabs have the piece component. So add it temporarily.
-      __state = true;
       Helper.EnsurePiece(basePrefab);
       basePiece = basePrefab.GetComponent<Piece>();
     }
@@ -40,18 +54,20 @@ public class PlacePiece {
     piece = basePiece;
   }
 
-  public static void Postfix(ref Piece piece, bool __state, bool __result) {
+  public static void Postfix(ref Piece piece, bool __result) {
     DisableEffects.Active = false;
     // Revert the adding of Piece component.
-    if (__state) ObjectDB.Destroy(piece);
+    if (AddedPiece) ObjectDB.Destroy(piece);
     // Restore the actual selection.
-    if (Hammer.GhostPrefab && Hammer.GhostPrefab != null) piece = Hammer.GhostPrefab.GetComponent<Piece>();
+    if (Hammer.GhostPrefab && Hammer.GhostPrefab != null)
+      piece = Hammer.GhostPrefab.GetComponent<Piece>();
     if (__result && Piece.m_allPieces.Count > 0) {
       var added = Piece.m_allPieces[Piece.m_allPieces.Count - 1];
       // Hoe also creates pieces.
       if (added.m_nview) {
         Hammer.PostProcessPlaced(added);
         UndoHelper.CreateObject(added.m_nview);
+        Hammer.SeparateObjects(added);
       }
     }
   }

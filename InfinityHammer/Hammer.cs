@@ -7,6 +7,7 @@ public static class Hammer {
   public static GameObject? GhostPrefab = null;
   ///<summary>Copy of the state.</summary>
   private static ZDO? State = null;
+  public static int Seed = 0;
 
   public static void CopyState(Piece obj) {
     if (State == null || !Settings.CopyState || !obj.m_nview) return;
@@ -34,6 +35,19 @@ public static class Hammer {
       State = null;
     }
     Helper.EnsurePiece(GhostPrefab);
+    player.SetupPlacementGhost();
+    return true;
+  }
+  ///<summary>Sets the sample object while ensuring it has the needed Piece component.</summary>
+  public static bool SetLocation(Player player, GameObject obj, int seed) {
+    if (!player || !obj) return false;
+    Seed = seed;
+    RemoveSelection();
+    GhostPrefab = Helper.SafeInstantiateLocation(obj);
+    GhostPrefab.transform.localScale = obj.transform.localScale;
+    Helper.EnsurePiece(GhostPrefab);
+    State = new ZDO();
+    State.Set("location", obj.name.GetStableHashCode());
     player.SetupPlacementGhost();
     return true;
   }
@@ -85,6 +99,23 @@ public static class Hammer {
     obj.GetComponentInChildren<CookingStation>()?.UpdateCooking();
     obj.GetComponentInChildren<LocationProxy>()?.SpawnLocation();
     obj.GetComponentInChildren<Sign>()?.UpdateText();
+    var proxy = obj.GetComponent<LocationProxy>();
+    if (proxy) {
+      if (!proxy.m_instance)
+        proxy.SpawnLocation();
+      foreach (var view in proxy.GetComponentsInChildren<ZNetView>(true))
+        view.gameObject.SetActive(true);
+      var state = UnityEngine.Random.state;
+      UnityEngine.Random.InitState(Seed);
+      foreach (var random in proxy.GetComponentsInChildren<RandomSpawn>())
+        random.Randomize();
+      UnityEngine.Random.state = state;
+    }
+  }
+  ///<summary>Each ZNetView/ZDO is supposed to be a separate object.</summary>
+  public static void SeparateObjects(Piece piece) {
+    foreach (var view in piece.GetComponentsInChildren<ZNetView>())
+      view.gameObject.transform.SetParent(null);
   }
   ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
   public static void PostProcessPlaced(Piece piece) {

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using BepInEx.Bootstrap;
 namespace InfinityHammer;
@@ -44,8 +45,12 @@ public static class CommandWrapper {
     return GetMethod(InfoType(), "Create", new[] { typeof(string) }).Invoke(null, new[] { value }) as List<string>;
   }
   public static List<string> ObjectIds() {
-    if (ServerDevcommands == null) return null;
+    if (ServerDevcommands == null) return ZNetScene.instance.GetPrefabNames();
     return InfoType().GetProperty("ObjectIds", PublicBinding).GetValue(null) as List<string>;
+  }
+  public static List<string> LocationIds() {
+    if (ServerDevcommands == null) return ZoneSystem.instance.m_locations.Select(loc => loc.m_prefabName).ToList();
+    return InfoType().GetProperty("LocationIds", PublicBinding).GetValue(null) as List<string>;
   }
   public static List<string> Scale(string name, string description, int index) {
     if (ServerDevcommands == null) return null;

@@ -31,6 +31,7 @@ public class SetCommands {
   static void Postfix() {
     new HammerAddPieceComponentsCommand();
     new HammerCommand();
+    new HammerLocationCommand();
     new HammerConfigCommand();
     new HammerMoveCommand();
     new HammerOffsetCommand();
