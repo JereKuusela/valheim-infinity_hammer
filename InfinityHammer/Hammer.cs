@@ -7,6 +7,8 @@ public static class Hammer {
   public static GameObject? GhostPrefab = null;
   ///<summary>Copy of the state.</summary>
   public static ZDO? State = null;
+  public static bool AllLocationsObjects = false;
+  public static bool RandomLocationDamage = false;
 
   public static void CopyState(Piece obj) {
     if (State == null || !Settings.CopyState || !obj.m_nview) return;
@@ -41,7 +43,7 @@ public static class Hammer {
   public static bool SetLocation(Player player, ZoneSystem.ZoneLocation location, int seed) {
     if (!player) return false;
     RemoveSelection();
-    GhostPrefab = Helper.SafeInstantiateLocation(location, seed);
+    GhostPrefab = Helper.SafeInstantiateLocation(location, AllLocationsObjects ? null : seed);
     Helper.EnsurePiece(GhostPrefab);
     State = new ZDO();
     State.Set("location", location.m_prefab.name.GetStableHashCode());
@@ -108,7 +110,11 @@ public static class Hammer {
     var ghost = Helper.GetPlacementGhost(Console.instance);
     var position = ghost.transform.position;
     var rotation = ghost.transform.rotation;
+    CustomizeSpawnLocation.AllViews = AllLocationsObjects;
+    CustomizeSpawnLocation.RandomDamage = RandomLocationDamage;
     ZoneSystem.instance.SpawnLocation(location, seed, position, rotation, ZoneSystem.SpawnMode.Full, new());
+    CustomizeSpawnLocation.RandomDamage = null;
+    CustomizeSpawnLocation.AllViews = false;
   }
   ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
   public static void PostProcessPlaced(Piece piece) {

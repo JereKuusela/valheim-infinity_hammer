@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Reflection.Emit;
 using HarmonyLib;
 // Code related to adding objects.
 namespace InfinityHammer;
@@ -105,7 +108,7 @@ public class SetupPlacementGhost {
 }
 [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
 public class UpdatePlacementGhost {
-  public static void Postfix(Player __instance) {
+  static void Postfix(Player __instance) {
     Scaling.UpdatePlacement();
     var marker = __instance.m_placementMarkerInstance;
     if (marker) {
@@ -113,5 +116,33 @@ public class UpdatePlacementGhost {
       for (var i = 0; i < marker.transform.childCount && i < 2; i++)
         marker.transform.GetChild(i).gameObject.SetActive(!Settings.HidePlacementMarker);
     }
+  }
+}
+[HarmonyPatch(typeof(ZoneSystem), nameof(ZoneSystem.SpawnLocation))]
+public class CustomizeSpawnLocation {
+  public static bool? RandomDamage = null;
+  public static bool AllViews = false;
+  static void Customize() {
+    if (RandomDamage.HasValue) {
+      WearNTear.m_randomInitialDamage = RandomDamage.Value;
+    }
+    if (AllViews && Hammer.State != null) {
+      var location = ZoneSystem.instance.GetLocation(Hammer.State.GetInt("location", 0));
+      if (location != null) {
+        foreach (var view in location.m_netViews)
+          view.gameObject.SetActive(true);
+      }
+    }
+  }
+  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+    return new CodeMatcher(instructions)
+          .MatchForward(
+              useEnd: false,
+              new CodeMatch(
+                  OpCodes.Stsfld,
+                  AccessTools.Field(typeof(WearNTear), nameof(WearNTear.m_randomInitialDamage))))
+          .Advance(1)
+          .Insert(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate<Action>(Customize).operand))
+          .InstructionEnumeration();
   }
 }

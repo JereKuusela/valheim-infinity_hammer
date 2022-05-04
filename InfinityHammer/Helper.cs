@@ -235,14 +235,16 @@ public static class Helper {
     return ret;
   }
   ///<summary>Initializing the copy as inactive is the best way to avoid any script errors. ZNet stuff also won't run.</summary>
-  public static GameObject SafeInstantiateLocation(ZoneSystem.ZoneLocation location, int seed) {
+  public static GameObject SafeInstantiateLocation(ZoneSystem.ZoneLocation location, int? seed) {
     foreach (var view in location.m_netViews)
       view.gameObject.SetActive(true);
-    var state = UnityEngine.Random.state;
-    UnityEngine.Random.InitState(seed);
-    foreach (var random in location.m_randomSpawns)
-      random.Randomize();
-    UnityEngine.Random.state = state;
+    if (seed.HasValue) {
+      var state = UnityEngine.Random.state;
+      UnityEngine.Random.InitState(seed.Value);
+      foreach (var random in location.m_randomSpawns)
+        random.Randomize();
+      UnityEngine.Random.state = state;
+    }
     return SafeInstantiate(location.m_prefab);
   }
   ///<summary>Removes scripts that try to run (for example placement needs only the model and Piece component).</summary>

@@ -20,18 +20,23 @@ public class UndoHelper {
     if (!obj) return;
     foreach (var view in obj.GetComponentsInChildren<ZNetView>())
       Objects.Add(view.GetZDO());
-    if (!GroupCreating && !Track) FinishCreating();
+    if (!GroupCreating && !Track) Finish();
   }
   public static void StartTracking() {
     Track = true;
   }
   public static void StopTracking() {
-    FinishCreating();
+    Track = false;
+    if (!GroupCreating && !Track) Finish();
   }
   public static void StartCreating() {
     GroupCreating = true;
   }
   public static void FinishCreating() {
+    GroupCreating = false;
+    if (!GroupCreating && !Track) Finish();
+  }
+  private static void Finish() {
     UndoWrapper.Place(Objects);
     Objects.Clear();
     GroupCreating = false;
