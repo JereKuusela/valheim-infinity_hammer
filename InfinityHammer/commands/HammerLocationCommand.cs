@@ -9,10 +9,11 @@ public class HammerLocationCommand {
   }
   private static void PrintSelected(Terminal terminal, GameObject obj) => PrintSelected(terminal, obj, obj?.transform.localScale ?? Vector3.one);
   private static GameObject SetItem(Terminal terminal, string name, int seed) {
-    var prefab = Helper.GetLocation(name).m_prefab;
-    if (!prefab) throw new InvalidOperationException("Error: Invalid prefab.");
-    if (!Hammer.SetLocation(Player.m_localPlayer, prefab, seed)) throw new InvalidOperationException("Error: Invalid prefab.");
-    return prefab;
+    var location = ZoneSystem.instance.GetLocation(name);
+    if (location == null) throw new InvalidOperationException("Error: Location not found.");
+    if (!location.m_prefab) throw new InvalidOperationException("Error: Invalid location");
+    if (!Hammer.SetLocation(Player.m_localPlayer, location, seed)) throw new InvalidOperationException("Error: Invalid location.");
+    return location.m_prefab;
   }
 
   public HammerLocationCommand() {

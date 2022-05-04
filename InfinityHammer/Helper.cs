@@ -235,15 +235,15 @@ public static class Helper {
     return ret;
   }
   ///<summary>Initializing the copy as inactive is the best way to avoid any script errors. ZNet stuff also won't run.</summary>
-  public static GameObject SafeInstantiateLocation(GameObject obj) {
-    foreach (var view in obj.GetComponentsInChildren<ZNetView>(true))
+  public static GameObject SafeInstantiateLocation(ZoneSystem.ZoneLocation location, int seed) {
+    foreach (var view in location.m_netViews)
       view.gameObject.SetActive(true);
     var state = UnityEngine.Random.state;
-    UnityEngine.Random.InitState(Hammer.Seed);
-    foreach (var random in obj.GetComponentsInChildren<RandomSpawn>())
+    UnityEngine.Random.InitState(seed);
+    foreach (var random in location.m_randomSpawns)
       random.Randomize();
     UnityEngine.Random.state = state;
-    return SafeInstantiate(obj);
+    return SafeInstantiate(location.m_prefab);
   }
   ///<summary>Removes scripts that try to run (for example placement needs only the model and Piece component).</summary>
   public static void CleanObject(GameObject obj) {
@@ -289,8 +289,6 @@ public static class Helper {
   public static bool IsValid(ZNetView view) => view && IsValid(view.GetZDO());
   ///<summary>Helper to check object validity.</summary>
   public static bool IsValid(ZDO zdo) => zdo != null && zdo.IsValid();
-
-  public static ZoneSystem.ZoneLocation GetLocation(string name) => ZoneSystem.instance.m_locations.Where(loc => loc.m_prefabName == name).FirstOrDefault();
 }
 public class Hovered {
   public ZNetView Obj;

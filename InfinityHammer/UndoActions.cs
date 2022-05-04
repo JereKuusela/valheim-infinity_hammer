@@ -1,17 +1,32 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer;
 
+[HarmonyPatch(typeof(ZNetView), "Awake")]
+public static class UndoTracker {
+  public static void Postfix(ZNetView __instance) {
+    if (UndoHelper.Track)
+      UndoHelper.CreateObject(__instance);
+  }
+}
 public class UndoHelper {
   private static bool GroupCreating = false;
   private static List<ZDO> Objects = new();
+  public static bool Track = false;
   public static void CreateObject(ZNetView obj) {
     if (!obj) return;
     foreach (var view in obj.GetComponentsInChildren<ZNetView>())
       Objects.Add(view.GetZDO());
-    if (!GroupCreating) FinishCreating();
+    if (!GroupCreating && !Track) FinishCreating();
+  }
+  public static void StartTracking() {
+    Track = true;
+  }
+  public static void StopTracking() {
+    FinishCreating();
   }
   public static void StartCreating() {
     GroupCreating = true;
@@ -20,6 +35,7 @@ public class UndoHelper {
     UndoWrapper.Place(Objects);
     Objects.Clear();
     GroupCreating = false;
+    Track = false;
   }
   public static ZDO Place(ZDO zdo) {
     var prefab = ZNetScene.instance.GetPrefab(zdo.GetPrefab());

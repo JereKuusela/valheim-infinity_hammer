@@ -33,6 +33,7 @@ Note: Some commands have a direction parameter. These are intended for mouse whe
 - `hammer_add_piece_components`: Adds the Piece component to every object which allows copying them with PlanBuild mod.
 - `hammer_config [key] [value]`: Toggles or sets configuration values. For lists, the given value is toggled on or off (`remove_blacklist` or `select_blacklist`).
 - `hammer_freeze`: Toggles whether the mouse affects placement position. Allows moving around while the object's position is frozen.
+- `hammer_location [location_id] [seed]`: Selects a location by id. Optionally the seed for random result can be set.
 - `hammer_move [forward,up,right]`: Moves the placement ghost offset for precise placement. Auto value can be used for the object size.
 - `hammer_move_backward [meters or number*auto] [direction=1]`: Moves the placement towards the backward direction.
 - `hammer_move_down [meters or number*auto] [direction=1]`: Moves the placement towards the down direction.
@@ -241,6 +242,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 # Changelog
 
 - v1.12:
+	- Adds a new command `hammer_location` to place new instances of locations.
 	- Adds a new command `hammer_freeze` to prevent mouse position affecting the placement (allows moving around).
 	- Adds a new setting `unfreeze_on_unequip` to automatically unfreeze the placement when unequipping the hammer (default `true`).
 	- Adds a new setting `unfreeze_on_select` to automatically unfreeze the placement when selecting a new piece (default `false`).

@@ -6,8 +6,7 @@ public static class Hammer {
   ///<summary>Copy of the selected entity. Only needed for the placement ghost because armor and item stands have a different model depending on their state.</summary>
   public static GameObject? GhostPrefab = null;
   ///<summary>Copy of the state.</summary>
-  private static ZDO? State = null;
-  public static int Seed = 0;
+  public static ZDO? State = null;
 
   public static void CopyState(Piece obj) {
     if (State == null || !Settings.CopyState || !obj.m_nview) return;
@@ -39,15 +38,14 @@ public static class Hammer {
     return true;
   }
   ///<summary>Sets the sample object while ensuring it has the needed Piece component.</summary>
-  public static bool SetLocation(Player player, GameObject obj, int seed) {
-    if (!player || !obj) return false;
-    Seed = seed;
+  public static bool SetLocation(Player player, ZoneSystem.ZoneLocation location, int seed) {
+    if (!player) return false;
     RemoveSelection();
-    GhostPrefab = Helper.SafeInstantiateLocation(obj);
-    GhostPrefab.transform.localScale = obj.transform.localScale;
+    GhostPrefab = Helper.SafeInstantiateLocation(location, seed);
     Helper.EnsurePiece(GhostPrefab);
     State = new ZDO();
-    State.Set("location", obj.name.GetStableHashCode());
+    State.Set("location", location.m_prefab.name.GetStableHashCode());
+    State.Set("seed", seed);
     player.SetupPlacementGhost();
     return true;
   }
@@ -99,23 +97,18 @@ public static class Hammer {
     obj.GetComponentInChildren<CookingStation>()?.UpdateCooking();
     obj.GetComponentInChildren<LocationProxy>()?.SpawnLocation();
     obj.GetComponentInChildren<Sign>()?.UpdateText();
-    var proxy = obj.GetComponent<LocationProxy>();
-    if (proxy) {
-      if (!proxy.m_instance)
-        proxy.SpawnLocation();
-      foreach (var view in proxy.GetComponentsInChildren<ZNetView>(true))
-        view.gameObject.SetActive(true);
-      var state = UnityEngine.Random.state;
-      UnityEngine.Random.InitState(Seed);
-      foreach (var random in proxy.GetComponentsInChildren<RandomSpawn>())
-        random.Randomize();
-      UnityEngine.Random.state = state;
-    }
   }
-  ///<summary>Each ZNetView/ZDO is supposed to be a separate object.</summary>
-  public static void SeparateObjects(Piece piece) {
-    foreach (var view in piece.GetComponentsInChildren<ZNetView>())
-      view.gameObject.transform.SetParent(null);
+  ///<summary>Replaces LocationProxy with the actual location.</summary>
+  public static void SpawnLocation(Piece piece) {
+    Helper.RemoveZDO(piece.m_nview.GetZDO());
+    if (State == null) return;
+    var prefab = State.GetInt("location", 0);
+    var seed = State.GetInt("seed", 0);
+    var location = ZoneSystem.instance.GetLocation(prefab);
+    var ghost = Helper.GetPlacementGhost(Console.instance);
+    var position = ghost.transform.position;
+    var rotation = ghost.transform.rotation;
+    ZoneSystem.instance.SpawnLocation(location, seed, position, rotation, ZoneSystem.SpawnMode.Full, new());
   }
   ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
   public static void PostProcessPlaced(Piece piece) {

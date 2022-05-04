@@ -30,15 +30,7 @@ public class PlacePiece {
     if (!Hammer.GhostPrefab) return;
     var name = Utils.GetPrefabName(piece.gameObject);
     var basePrefab = ZNetScene.instance.GetPrefab(name);
-    if (!basePrefab) {
-      var location = Helper.GetLocation(name);
-      foreach (var view in location.m_netViews)
-        view.gameObject.SetActive(true);
-      var state = UnityEngine.Random.state;
-      UnityEngine.Random.InitState(Hammer.Seed);
-      foreach (var random in location.m_randomSpawns)
-        random.Randomize();
-      UnityEngine.Random.state = state;
+    if (!basePrefab && ZoneSystem.instance.GetLocation(name) != null) {
       basePrefab = ZoneSystem.instance.m_locationProxyPrefab;
     }
     if (basePrefab == null || !basePrefab) return;
@@ -64,10 +56,14 @@ public class PlacePiece {
     if (__result && Piece.m_allPieces.Count > 0) {
       var added = Piece.m_allPieces[Piece.m_allPieces.Count - 1];
       // Hoe also creates pieces.
-      if (added.m_nview) {
+      if (!added.m_nview) return;
+      if (added.GetComponent<LocationProxy>()) {
+        UndoHelper.StartTracking();
+        Hammer.SpawnLocation(added);
+        UndoHelper.StopTracking();
+      } else {
         Hammer.PostProcessPlaced(added);
         UndoHelper.CreateObject(added.m_nview);
-        Hammer.SeparateObjects(added);
       }
     }
   }
