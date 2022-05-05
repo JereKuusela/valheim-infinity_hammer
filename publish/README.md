@@ -31,6 +31,7 @@ Note: Some commands have a direction parameter. These are intended for mouse whe
 - `hammer [item id]`: Selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)) to be placed.
 - `hammer [item id] [scale=1]`: Selects an object by id while setting the initial scale (if the object can be scaled). Number or x,y,z.
 - `hammer_add_piece_components`: Adds the Piece component to every object which allows copying them with PlanBuild mod.
+- `hammer_blueprint [file name]`: Selects a Plan Build blueprint located on your computer.
 - `hammer_config [key] [value]`: Toggles or sets configuration values. For lists, the given value is toggled on or off (`remove_blacklist` or `select_blacklist`).
 - `hammer_freeze`: Toggles whether the mouse affects placement position. Allows moving around while the object's position is frozen.
 - `hammer_location [location_id] [seed=0] [random damage]`: Selects a location by id. Allows setting the random result with seed ("all" value enables all child objects).
@@ -171,6 +172,7 @@ Following powers are available with `hammer_config` command:
 - No durability loss (default: `true`, key: `no_durability_loss`): Hammer auto-repairs used durability.
 - No stamina cost (default: `true`, key: `no_stamina_cost`): Hammer auto-regens used stamina.
 - Overwrite health (default: `0`, key: `overwrite_health`): Sets the health of built or repaired objects (0 reverts to the default max health, except for creatures).
+- Plan Build folder (default: `BepInEx/config/PlanBuild`, key: `plan_build_folder`): Folder relative to the Valheim.exe.
 - Remove anything (default: `false`, key: `remove_anything`): Allows removing any object.
 - Remove area (default: `0`, key: `remove_area`): Removes same objects within the radius.
 - Remove blacklist (key: `remove_blacklist`): Allows disabling remove for given objects (ids separated by ,). Only works if remove anything is enabled.
@@ -242,8 +244,10 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 # Changelog
 
 - v1.12:
+	- Adds a new command `hammer_blueprint` to place new instances of Plan Build blueprints.
 	- Adds a new command `hammer_location` to place new instances of locations.
 	- Adds a new command `hammer_freeze` to prevent mouse position affecting the placement (allows moving around).
+	- Adds a new command `plan_build_folder` to configure the blueprint folder.
 	- Adds a new setting `unfreeze_on_unequip` to automatically unfreeze the placement when unequipping the hammer (default `true`).
 	- Adds a new setting `unfreeze_on_select` to automatically unfreeze the placement when selecting a new piece (default `false`).
 	- Adds a new setting `reset_offset_on_unfreeze` to automatically reset the placement offset when a freeze is removed (default `true`).

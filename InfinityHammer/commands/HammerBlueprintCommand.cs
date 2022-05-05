@@ -43,10 +43,13 @@ public class HammerBlueprintCommand {
     ZNetView.m_forceDisableInit = false;
     return container;
   }
-
-  private static List<string> GetBlueprints() => Directory.EnumerateFiles(BepInEx.Paths.ConfigPath, "*.blueprint").Select(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_")).ToList();
+  private static IEnumerable<string> Files() {
+    if (!Directory.Exists(Settings.PlanBuildFolder)) Directory.CreateDirectory(Settings.PlanBuildFolder);
+    return Directory.EnumerateFiles(Settings.PlanBuildFolder, "*.blueprint", SearchOption.AllDirectories);
+  }
+  private static List<string> GetBlueprints() => Files().Select(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_")).ToList();
   private static Blueprint GetBluePrint(string name) {
-    var path = Directory.EnumerateFiles(BepInEx.Paths.ConfigPath, "*.blueprint").FirstOrDefault(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_") == name);
+    var path = Files().FirstOrDefault(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_") == name);
     if (path == null) throw new InvalidOperationException("Error: Blueprint not found.");
     var rows = File.ReadAllLines(path);
     return new() {
@@ -75,17 +78,14 @@ public class HammerBlueprintCommand {
 
 
   public HammerBlueprintCommand() {
-    CommandWrapper.Register("hammer_blueprint", (int index, int subIndex) => {
-      if (index == 0) return GetBlueprints();
-      return null;
-    });
+    CommandWrapper.Register("hammer_blueprint", (int index, int subIndex) => GetBlueprints());
     new Terminal.ConsoleCommand("hammer_blueprint", "[blueprint file] - Selects the blueprint to be placed.", (Terminal.ConsoleEventArgs args) => {
       if (!Player.m_localPlayer) return;
       if (!Settings.Enabled) return;
       if (args.Length < 2) return;
       Hammer.Equip();
       try {
-        var blueprint = GetBluePrint(args[1]);
+        var blueprint = GetBluePrint(string.Join("_", args.Args.Skip(1)));
         var obj = BuildObject(blueprint);
         if (Hammer.SetBlueprint(Player.m_localPlayer, obj))
           PrintSelected(args.Context, blueprint);

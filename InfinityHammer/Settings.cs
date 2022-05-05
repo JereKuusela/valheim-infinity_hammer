@@ -55,6 +55,8 @@ public class Settings {
   public static bool UnfreezeOnSelect => configUnfreezeOnSelect.Value;
   public static ConfigEntry<string> configOverwriteHealth;
   public static float OverwriteHealth => IsCheats ? InfiniteHealth ? 10E20f : Helper.ParseFloat(configOverwriteHealth.Value, 0f) : 0f;
+  public static ConfigEntry<string> configPlanBuildFolder;
+  public static string PlanBuildFolder => configPlanBuildFolder.Value;
   public static ConfigEntry<bool> configInfiniteHealth;
   public static bool InfiniteHealth => configInfiniteHealth.Value && IsCheats;
   public static ConfigEntry<bool> configCopyRotation;
@@ -126,6 +128,7 @@ public class Settings {
     section = "Items";
     configRemoveBlacklist = config.Bind(section, "Remove blacklist", "", "Object ids separated by , that can't be removed.");
     configSelectBlacklist = config.Bind(section, "Select blacklist", "", "Object ids separated by , that can't be selected.");
+    configPlanBuildFolder = config.Bind(section, "Plan Build folder", "BepInEx/config/PlanBuild", "Folder relative to the Valheim.exe.");
     section = "Messages";
     configDisableMessages = config.Bind(section, "Disable messages", false, "Disables all messages from this mod.");
     configDisableOffsetMessages = config.Bind(section, "Disable offset messages", false, "Disables messages from changing placement offset.");
@@ -172,7 +175,8 @@ public class Settings {
     "unfreeze_on_unequip",
     "unfreeze_on_select",
     "reset_offset_on_unfreeze",
-    "infinite_health"
+    "infinite_health",
+    "plan_build_folder"
   };
   private static string State(bool value) => value ? "enabled" : "disabled";
   private static string Flag(bool value) => value ? "removed" : "added";
@@ -229,6 +233,10 @@ public class Settings {
     if (key == "binds") {
       configBinds.Value = value;
       Helper.AddMessage(context, $"Binds set to {value}.");
+    }
+    if (key == "plan_build_folder") {
+      configPlanBuildFolder.Value = value;
+      Helper.AddMessage(context, $"Plan Build folder set to {value}.");
     }
     if (key == "remove_area") {
       configRemoveArea.Value = value;
