@@ -32,6 +32,7 @@ public class SetCommands {
     new HammerAddPieceComponentsCommand();
     new HammerCommand();
     new HammerLocationCommand();
+    new HammerBlueprintCommand();
     new HammerConfigCommand();
     new HammerMoveCommand();
     new HammerOffsetCommand();

@@ -234,6 +234,14 @@ public static class Helper {
     obj.SetActive(true);
     return ret;
   }
+  public static GameObject SafeInstantiate(string name, GameObject parent) {
+    var obj = ZNetScene.instance.GetPrefab(name);
+    if (!obj) throw new InvalidOperationException($"Error: Missing object {name}.");
+    obj.SetActive(false);
+    var ret = UnityEngine.Object.Instantiate(obj, parent.transform);
+    obj.SetActive(true);
+    return ret;
+  }
   ///<summary>Initializing the copy as inactive is the best way to avoid any script errors. ZNet stuff also won't run.</summary>
   public static GameObject SafeInstantiateLocation(ZoneSystem.ZoneLocation location, int? seed) {
     foreach (var view in location.m_netViews)

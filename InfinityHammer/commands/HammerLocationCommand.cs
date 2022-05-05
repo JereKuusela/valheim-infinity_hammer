@@ -2,12 +2,11 @@ using System;
 using UnityEngine;
 namespace InfinityHammer;
 public class HammerLocationCommand {
-  private static void PrintSelected(Terminal terminal, GameObject obj, Vector3 scale) {
+  private static void PrintSelected(Terminal terminal, GameObject obj) {
     if (Settings.DisableSelectMessages) return;
     var name = obj ? Utils.GetPrefabName(obj) : "";
     Helper.AddMessage(terminal, $"Selected {name}.");
   }
-  private static void PrintSelected(Terminal terminal, GameObject obj) => PrintSelected(terminal, obj, obj?.transform.localScale ?? Vector3.one);
   private static GameObject SetItem(Terminal terminal, string name, int seed) {
     var location = ZoneSystem.instance.GetLocation(name);
     if (location == null) throw new InvalidOperationException("Error: Location not found.");
@@ -36,7 +35,7 @@ public class HammerLocationCommand {
         if (seed == 0) seed = rng.Next();
         var selected = SetItem(args.Context, args[1], seed);
 
-        PrintSelected(args.Context, selected, Scaling.Scale);
+        PrintSelected(args.Context, selected);
       } catch (InvalidOperationException e) {
         Helper.AddMessage(args.Context, e.Message);
       }

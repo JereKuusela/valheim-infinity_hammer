@@ -9,14 +9,14 @@ namespace InfinityHammer;
 public static class UndoTracker {
   public static void Postfix(ZNetView __instance) {
     if (UndoHelper.Track)
-      UndoHelper.CreateObject(__instance);
+      UndoHelper.CreateObject(__instance.gameObject);
   }
 }
 public class UndoHelper {
   private static bool GroupCreating = false;
   private static List<ZDO> Objects = new();
   public static bool Track = false;
-  public static void CreateObject(ZNetView obj) {
+  public static void CreateObject(GameObject obj) {
     if (!obj) return;
     foreach (var view in obj.GetComponentsInChildren<ZNetView>())
       Objects.Add(view.GetZDO());

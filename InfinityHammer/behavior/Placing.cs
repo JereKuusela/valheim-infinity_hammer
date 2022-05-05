@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using HarmonyLib;
+using UnityEngine;
 // Code related to adding objects.
 namespace InfinityHammer;
 ///<summary>Overrides the piece selection.</summary>
 [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.GetSelectedPiece))]
 public class GetSelectedPiece {
   public static bool Prefix(ref Piece __result) {
-    if (Hammer.GhostPrefab && Hammer.GhostPrefab != null)
+    if (Hammer.GhostPrefab)
       __result = Hammer.GhostPrefab.GetComponent<Piece>();
     if (__result) return false;
     return true;
@@ -27,16 +28,22 @@ public class SetSelectedPiece {
 [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
 public class PlacePiece {
   private static bool AddedPiece = false;
+  private static int PreviousPieces = 0;
   public static void Prefix(ref Piece piece) {
     DisableEffects.Active = true;
     AddedPiece = false;
+    PreviousPieces = Piece.m_allPieces.Count;
     if (!Hammer.GhostPrefab) return;
     var name = Utils.GetPrefabName(piece.gameObject);
+
     var basePrefab = ZNetScene.instance.GetPrefab(name);
     if (!basePrefab && ZoneSystem.instance.GetLocation(name) != null) {
       basePrefab = ZoneSystem.instance.m_locationProxyPrefab;
     }
-    if (basePrefab == null || !basePrefab) return;
+    if (!basePrefab) {
+      basePrefab = new GameObject();
+      basePrefab.name = "__Ghost__";
+    }
     var basePiece = basePrefab.GetComponent<Piece>();
     if (!basePiece) {
       AddedPiece = true;
@@ -49,16 +56,32 @@ public class PlacePiece {
     piece = basePiece;
   }
 
-  public static void Postfix(ref Piece piece, bool __result) {
+  public static void Postfix(ref Piece piece, Player __instance, bool __result) {
     DisableEffects.Active = false;
     // Revert the adding of Piece component.
     if (AddedPiece) ObjectDB.Destroy(piece);
     // Restore the actual selection.
-    if (Hammer.GhostPrefab && Hammer.GhostPrefab != null)
+    if (Hammer.GhostPrefab)
       piece = Hammer.GhostPrefab.GetComponent<Piece>();
-    if (__result && Piece.m_allPieces.Count > 0) {
+    if (__result && Piece.m_allPieces.Count > PreviousPieces) {
       var added = Piece.m_allPieces[Piece.m_allPieces.Count - 1];
-      // Hoe also creates pieces.
+      if (Utils.GetPrefabName(added.gameObject) == "__Ghost__") {
+        if (!Hammer.GhostPrefab) return;
+        UndoHelper.StartTracking();
+        var ghost = __instance.m_placementGhost;
+        for (var i = 0; i < ghost.transform.childCount; i++) {
+          var obj = ghost.transform.GetChild(i).gameObject;
+          var name = Utils.GetPrefabName(obj);
+          var prefab = ZNetScene.instance.GetPrefab(name);
+          if (prefab) {
+            UnityEngine.Object.Instantiate(prefab, obj.transform.position, obj.transform.rotation);
+          }
+        }
+        UndoHelper.StopTracking();
+        UnityEngine.Object.Destroy(added);
+        return;
+      }
+      // Hoe adds pieces too.
       if (!added.m_nview) return;
       if (added.GetComponent<LocationProxy>()) {
         UndoHelper.StartTracking();
@@ -66,7 +89,7 @@ public class PlacePiece {
         UndoHelper.StopTracking();
       } else {
         Hammer.PostProcessPlaced(added);
-        UndoHelper.CreateObject(added.m_nview);
+        UndoHelper.CreateObject(added.gameObject);
       }
     }
   }

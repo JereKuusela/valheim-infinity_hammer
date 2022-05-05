@@ -3,8 +3,10 @@ using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer;
 public static class Hammer {
+#nullable disable
   ///<summary>Copy of the selected entity. Only needed for the placement ghost because armor and item stands have a different model depending on their state.</summary>
-  public static GameObject? GhostPrefab = null;
+  public static GameObject GhostPrefab = null;
+#nullable enable
   ///<summary>Copy of the state.</summary>
   public static ZDO? State = null;
   public static bool AllLocationsObjects = false;
@@ -36,6 +38,14 @@ public static class Hammer {
       State = null;
     }
     Helper.EnsurePiece(GhostPrefab);
+    player.SetupPlacementGhost();
+    return true;
+  }
+  ///<summary>Most logic in the command.</summary>
+  public static bool SetBlueprint(Player player, GameObject obj) {
+    if (!player) return false;
+    RemoveSelection();
+    GhostPrefab = obj;
     player.SetupPlacementGhost();
     return true;
   }
@@ -115,6 +125,12 @@ public static class Hammer {
     ZoneSystem.instance.SpawnLocation(location, seed, position, rotation, ZoneSystem.SpawnMode.Full, new());
     CustomizeSpawnLocation.RandomDamage = null;
     CustomizeSpawnLocation.AllViews = false;
+  }
+  ///<summary>Each ZDO must be an own object.</summary>
+  public static void SeparateZDOs(GameObject obj) {
+    foreach (var view in obj.GetComponentsInChildren<ZNetView>()) {
+      view.transform.SetParent(null);
+    }
   }
   ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
   public static void PostProcessPlaced(Piece piece) {
