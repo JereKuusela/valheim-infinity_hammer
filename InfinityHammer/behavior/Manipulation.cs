@@ -62,8 +62,7 @@ public static class Scaling {
     else
       Helper.AddMessage(terminal, "Selected object doesn't support scaling.");
   }
-  public static void SetPieceScale(Piece obj) {
-    var view = obj.m_nview;
+  public static void SetPieceScale(ZNetView view) {
     if (view && view.m_syncInitialScale)
       view.SetLocalScale(Scale);
   }
@@ -88,6 +87,13 @@ public class PlacementPosition1 {
       waterSurface = null;
 #nullable enable
     } else Normal = normal;
+  }
+}
+
+public class Test : SE_Stats {
+  public Test() {
+    var mod = new HitData.DamageModPair { m_modifier = HitData.DamageModifier.Resistant, m_type = HitData.DamageType.Poison };
+    m_mods.Add(mod);
   }
 }
 [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]

@@ -27,73 +27,75 @@ public class SetSelectedPiece {
 
 [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
 public class PlacePiece {
-  private static bool AddedPiece = false;
-  private static int PreviousPieces = 0;
-  public static void Prefix(ref Piece piece) {
-    DisableEffects.Active = true;
-    AddedPiece = false;
-    PreviousPieces = Piece.m_allPieces.Count;
-    if (!Hammer.GhostPrefab) return;
-    var name = Utils.GetPrefabName(piece.gameObject);
+  static GameObject GetPrefab(Piece obj) {
+    if (Hammer.Type == PrefabType.Default) return obj.gameObject;
+    var ghost = Helper.GetPlayer().m_placementGhost;
+    if (!ghost) return obj.gameObject;
+    var name = Utils.GetPrefabName(ghost);
 
-    var basePrefab = ZNetScene.instance.GetPrefab(name);
-    if (!basePrefab && ZoneSystem.instance.GetLocation(name) != null) {
-      basePrefab = ZoneSystem.instance.m_locationProxyPrefab;
+    if (Hammer.Type == PrefabType.Object)
+      return ZNetScene.instance.GetPrefab(name);
+    if (Hammer.Type == PrefabType.Location)
+      return ZoneSystem.instance.m_locationProxyPrefab;
+    if (Hammer.Type == PrefabType.Blueprint) {
+      var dummy = new GameObject();
+      dummy.name = "Blueprint";
+      return dummy;
     }
-    if (!basePrefab) {
-      basePrefab = new GameObject();
-      basePrefab.name = "__Ghost__";
-    }
-    var basePiece = basePrefab.GetComponent<Piece>();
-    if (!basePiece) {
-      AddedPiece = true;
-      // Not all prefabs have the piece component. So add it temporarily.
-      Helper.EnsurePiece(basePrefab);
-      basePiece = basePrefab.GetComponent<Piece>();
-    }
-    // When copying, some objects like armor and item stands will have a different model depending on their items.
-    // To avoid these model changes being copied, use the base prefab.
-    piece = basePiece;
+    return obj.gameObject;
   }
-
-  public static void Postfix(ref Piece piece, Player __instance, bool __result) {
-    DisableEffects.Active = false;
-    // Revert the adding of Piece component.
-    if (AddedPiece) ObjectDB.Destroy(piece);
-    // Restore the actual selection.
-    if (Hammer.GhostPrefab)
-      piece = Hammer.GhostPrefab.GetComponent<Piece>();
-    if (__result && Piece.m_allPieces.Count > PreviousPieces) {
-      var added = Piece.m_allPieces[Piece.m_allPieces.Count - 1];
-      if (Utils.GetPrefabName(added.gameObject) == "__Ghost__") {
-        if (!Hammer.GhostPrefab) return;
-        UndoHelper.StartTracking();
-        var ghost = __instance.m_placementGhost;
-        for (var i = 0; i < ghost.transform.childCount; i++) {
-          var obj = ghost.transform.GetChild(i).gameObject;
-          var name = Utils.GetPrefabName(obj);
-          var prefab = ZNetScene.instance.GetPrefab(name);
-          if (prefab) {
-            UnityEngine.Object.Instantiate(prefab, obj.transform.position, obj.transform.rotation);
-          }
+  static void Postprocess(GameObject obj) {
+    Helper.EnsurePiece(obj);
+    if (Hammer.Type == PrefabType.Blueprint) {
+      if (!Hammer.GhostPrefab) return;
+      UndoHelper.StartTracking();
+      var ghost = Helper.GetPlayer().m_placementGhost;
+      for (var i = 0; i < ghost.transform.childCount; i++) {
+        var childObj = ghost.transform.GetChild(i).gameObject;
+        var name = Utils.GetPrefabName(childObj);
+        var prefab = ZNetScene.instance.GetPrefab(name);
+        if (prefab) {
+          childObj = UnityEngine.Object.Instantiate(prefab, childObj.transform.position, childObj.transform.rotation);
+          Hammer.PostProcessPlaced(childObj);
         }
-        UndoHelper.StopTracking();
-        UnityEngine.Object.Destroy(added);
-        return;
       }
-      // Hoe adds pieces too.
-      if (!added.m_nview) return;
-      if (added.GetComponent<LocationProxy>()) {
-        UndoHelper.StartTracking();
-        Hammer.SpawnLocation(added);
-        UndoHelper.StopTracking();
-      } else {
-        Hammer.PostProcessPlaced(added);
-        UndoHelper.CreateObject(added.gameObject);
-      }
+      UndoHelper.StopTracking();
+      UnityEngine.Object.Destroy(obj);
+      return;
     }
+    var view = obj.GetComponent<ZNetView>();
+    // Hoe adds pieces too.
+    if (!view) return;
+    var piece = obj.GetComponent<Piece>();
+    if (Hammer.Type == PrefabType.Location && obj.GetComponent<LocationProxy>()) {
+      UndoHelper.StartTracking();
+      Hammer.SpawnLocation(view);
+      UndoHelper.StopTracking();
+    } else {
+      Hammer.CopyState(piece);
+      Hammer.PostProcessPlaced(piece.gameObject);
+      UndoHelper.CreateObject(piece.gameObject);
+    }
+  }
+  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+    return new CodeMatcher(instructions)
+          .MatchForward(
+              useEnd: false,
+              new CodeMatch(
+                  OpCodes.Callvirt,
+                  AccessTools.PropertyGetter(typeof(Component), nameof(Component.gameObject))))
+          .SetAndAdvance(OpCodes.Call, Transpilers.EmitDelegate<Func<Piece, GameObject>>(GetPrefab).operand)
+          .MatchForward(
+              useEnd: false,
+              new CodeMatch(OpCodes.Ldc_I4_1),
+              new CodeMatch(OpCodes.Ret))
+          .Advance(-1)
+          .Insert(new CodeInstruction(OpCodes.Ldloc_3),
+            new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate<Action<GameObject>>(Postprocess).operand))
+          .InstructionEnumeration();
   }
 }
+
 [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
 public class PostProcessToolOnPlace {
   public static void Postfix(Player __instance, ref bool __result) {

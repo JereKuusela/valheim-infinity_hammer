@@ -2,6 +2,12 @@ using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer;
+public enum PrefabType {
+  Object,
+  Location,
+  Blueprint,
+  Default
+}
 public static class Hammer {
 #nullable disable
   ///<summary>Copy of the selected entity. Only needed for the placement ghost because armor and item stands have a different model depending on their state.</summary>
@@ -11,6 +17,7 @@ public static class Hammer {
   public static ZDO? State = null;
   public static bool AllLocationsObjects = false;
   public static bool RandomLocationDamage = false;
+  public static PrefabType Type = PrefabType.Default;
 
   public static void CopyState(Piece obj) {
     if (State == null || !Settings.CopyState || !obj.m_nview) return;
@@ -39,6 +46,7 @@ public static class Hammer {
     }
     Helper.EnsurePiece(GhostPrefab);
     player.SetupPlacementGhost();
+    Type = PrefabType.Object;
     return true;
   }
   ///<summary>Most logic in the command.</summary>
@@ -47,6 +55,7 @@ public static class Hammer {
     RemoveSelection();
     GhostPrefab = obj;
     player.SetupPlacementGhost();
+    Type = PrefabType.Blueprint;
     return true;
   }
   ///<summary>Sets the sample object while ensuring it has the needed Piece component.</summary>
@@ -59,12 +68,14 @@ public static class Hammer {
     State.Set("location", location.m_prefab.name.GetStableHashCode());
     State.Set("seed", seed);
     player.SetupPlacementGhost();
+    Type = PrefabType.Location;
     return true;
   }
   public static void RemoveSelection() {
     if (GhostPrefab) ZNetScene.instance.Destroy(GhostPrefab);
     GhostPrefab = null;
     State = null;
+    Type = PrefabType.Default;
     if (Settings.UnfreezeOnSelect) Position.Unfreeze();
   }
   public static void Equip() {
@@ -111,8 +122,8 @@ public static class Hammer {
     obj.GetComponentInChildren<Sign>()?.UpdateText();
   }
   ///<summary>Replaces LocationProxy with the actual location.</summary>
-  public static void SpawnLocation(Piece piece) {
-    Helper.RemoveZDO(piece.m_nview.GetZDO());
+  public static void SpawnLocation(ZNetView view) {
+    Helper.RemoveZDO(view.GetZDO());
     if (State == null) return;
     var prefab = State.GetInt("location", 0);
     var seed = State.GetInt("seed", 0);
@@ -123,6 +134,10 @@ public static class Hammer {
     CustomizeSpawnLocation.AllViews = AllLocationsObjects;
     CustomizeSpawnLocation.RandomDamage = RandomLocationDamage;
     ZoneSystem.instance.SpawnLocation(location, seed, position, rotation, ZoneSystem.SpawnMode.Full, new());
+    foreach (var zdo in UndoHelper.Objects) {
+      if (ZNetScene.instance.m_instances.TryGetValue(zdo, out var obj))
+        PostProcessPlaced(obj.gameObject);
+    }
     CustomizeSpawnLocation.RandomDamage = null;
     CustomizeSpawnLocation.AllViews = false;
   }
@@ -133,32 +148,35 @@ public static class Hammer {
     }
   }
   ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
-  public static void PostProcessPlaced(Piece piece) {
-    if (!Settings.Enabled || !piece.m_nview) return;
-    CopyState(piece);
-    piece.m_canBeRemoved = true;
-    Scaling.SetPieceScale(piece);
-    var zdo = piece.m_nview.GetZDO();
-    // Creator data is only interesting for actual targets. Dummy components will have these both as false.
-    if (piece.m_randomTarget || piece.m_primaryTarget) {
-      if (Settings.NoCreator)
-        zdo.Set("creator", 0L);
-      else
-        piece.SetCreator(Game.instance.GetPlayerProfile().GetPlayerID());
+  public static void PostProcessPlaced(GameObject obj) {
+    var view = obj.GetComponent<ZNetView>();
+    if (!Settings.Enabled || !view) return;
+    var zdo = view.GetZDO();
+    Scaling.SetPieceScale(view);
+    var piece = obj.GetComponent<Piece>();
+    if (piece) {
+      piece.m_canBeRemoved = true;
+      // Creator data is only interesting for actual targets. Dummy components will have these both as false.
+      if (piece.m_randomTarget || piece.m_primaryTarget) {
+        if (Settings.NoCreator)
+          zdo.Set("creator", 0L);
+        else
+          piece.SetCreator(Game.instance.GetPlayerProfile().GetPlayerID());
+      }
     }
-    var character = piece.GetComponent<Character>();
+    var character = obj.GetComponent<Character>();
     if (Settings.OverwriteHealth > 0f) {
       if (character)
         zdo.Set("max_health", Settings.OverwriteHealth);
-      if (piece.GetComponent<TreeLog>() || piece.GetComponent<WearNTear>() || piece.GetComponent<Destructible>() || piece.GetComponent<TreeBase>() || character)
+      if (obj.GetComponent<TreeLog>() || obj.GetComponent<WearNTear>() || obj.GetComponent<Destructible>() || obj.GetComponent<TreeBase>() || character)
         zdo.Set("health", Settings.OverwriteHealth);
-      var mineRock = piece.GetComponent<MineRock5>();
+      var mineRock = obj.GetComponent<MineRock5>();
       if (mineRock) {
         foreach (var area in mineRock.m_hitAreas) area.m_health = Settings.OverwriteHealth;
         mineRock.SaveHealth();
       }
     }
-    FixData(piece.m_nview);
+    FixData(view);
   }
 
   ///<summary>Restores durability and stamina to counter the usage.</summary>

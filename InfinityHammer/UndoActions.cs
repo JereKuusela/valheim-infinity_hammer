@@ -14,7 +14,7 @@ public static class UndoTracker {
 }
 public class UndoHelper {
   private static bool GroupCreating = false;
-  private static List<ZDO> Objects = new();
+  public static List<ZDO> Objects = new();
   public static bool Track = false;
   public static void CreateObject(GameObject obj) {
     if (!obj) return;
