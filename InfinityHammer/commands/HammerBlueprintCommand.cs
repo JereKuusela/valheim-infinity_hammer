@@ -45,7 +45,10 @@ public class HammerBlueprintCommand {
   }
   private static IEnumerable<string> Files() {
     if (!Directory.Exists(Settings.PlanBuildFolder)) Directory.CreateDirectory(Settings.PlanBuildFolder);
-    return Directory.EnumerateFiles(Settings.PlanBuildFolder, "*.blueprint", SearchOption.AllDirectories);
+    if (!Directory.Exists(Settings.BuildShareFolder)) Directory.CreateDirectory(Settings.BuildShareFolder);
+    var planBuild = Directory.EnumerateFiles(Settings.PlanBuildFolder, "*.blueprint", SearchOption.AllDirectories);
+    var buildShare = Directory.EnumerateFiles(Settings.BuildShareFolder, "*.vbuild", SearchOption.AllDirectories);
+    return planBuild.Concat(buildShare).OrderBy(s => s);
   }
   private static List<string> GetBlueprints() => Files().Select(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_")).ToList();
   private static Blueprint GetBluePrint(string name) {
@@ -53,12 +56,17 @@ public class HammerBlueprintCommand {
     if (path == null) throw new InvalidOperationException("Error: Blueprint not found.");
     var rows = File.ReadAllLines(path);
     return new() {
-      Name = rows.Where(row => row.StartsWith("#Name:", StringComparison.Ordinal)).Select(row => row.Split(':')[1]).FirstOrDefault() ?? "",
+      Name = rows.Where(row => row.StartsWith("#Name:", StringComparison.Ordinal)).Select(row => row.Split(':')[1]).FirstOrDefault() ?? name,
       Description = rows.Where(row => row.StartsWith("#Description:", StringComparison.Ordinal)).Select(row => row.Split(':')[1]).FirstOrDefault() ?? "",
-      Objects = rows.Where(row => !row.StartsWith("#", StringComparison.Ordinal)).Select(GetBluePrintObject).ToArray()
+      Objects = rows.Where(row => !row.StartsWith("#", StringComparison.Ordinal)).Select(row => GetBluePrintObject(Path.GetExtension(path), row)).ToArray()
     };
   }
-  private static BlueprintObject GetBluePrintObject(string row) {
+  private static BlueprintObject GetBluePrintObject(string extension, string row) {
+    if (extension == ".vbuild") return GetBuildShareObject(row);
+    if (extension == ".blueprint") return GetPlanBuildObject(row);
+    throw new InvalidOperationException("Unknown file format.");
+  }
+  private static BlueprintObject GetPlanBuildObject(string row) {
     if (row.IndexOf(',') > -1) row = row.Replace(',', '.');
     var split = row.Split(';');
     var name = split[0];
@@ -69,6 +77,19 @@ public class HammerBlueprintCommand {
     var rotY = InvariantFloat(split[6]);
     var rotZ = InvariantFloat(split[7]);
     var rotW = InvariantFloat(split[8]);
+    return new BlueprintObject(name, posX, posY, posZ, rotX, rotY, rotZ, rotW);
+  }
+  private static BlueprintObject GetBuildShareObject(string row) {
+    if (row.IndexOf(',') > -1) row = row.Replace(',', '.');
+    var split = row.Split(' ');
+    var name = split[0];
+    var rotX = InvariantFloat(split[1]);
+    var rotY = InvariantFloat(split[2]);
+    var rotZ = InvariantFloat(split[3]);
+    var rotW = InvariantFloat(split[4]);
+    var posX = InvariantFloat(split[5]);
+    var posY = InvariantFloat(split[6]);
+    var posZ = InvariantFloat(split[7]);
     return new BlueprintObject(name, posX, posY, posZ, rotX, rotY, rotZ, rotW);
   }
   private static float InvariantFloat(string s) {

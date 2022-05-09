@@ -57,6 +57,8 @@ public class Settings {
   public static float OverwriteHealth => IsCheats ? InfiniteHealth ? 10E20f : Helper.ParseFloat(configOverwriteHealth.Value, 0f) : 0f;
   public static ConfigEntry<string> configPlanBuildFolder;
   public static string PlanBuildFolder => configPlanBuildFolder.Value;
+  public static ConfigEntry<string> configBuildShareFolder;
+  public static string BuildShareFolder => configBuildShareFolder.Value;
   public static ConfigEntry<bool> configInfiniteHealth;
   public static bool InfiniteHealth => configInfiniteHealth.Value && IsCheats;
   public static ConfigEntry<bool> configCopyRotation;
@@ -129,6 +131,7 @@ public class Settings {
     configRemoveBlacklist = config.Bind(section, "Remove blacklist", "", "Object ids separated by , that can't be removed.");
     configSelectBlacklist = config.Bind(section, "Select blacklist", "", "Object ids separated by , that can't be selected.");
     configPlanBuildFolder = config.Bind(section, "Plan Build folder", "BepInEx/config/PlanBuild", "Folder relative to the Valheim.exe.");
+    configBuildShareFolder = config.Bind(section, "Build Share folder", "BuildShare/Builds", "Folder relative to the Valheim.exe.");
     section = "Messages";
     configDisableMessages = config.Bind(section, "Disable messages", false, "Disables all messages from this mod.");
     configDisableOffsetMessages = config.Bind(section, "Disable offset messages", false, "Disables messages from changing placement offset.");
@@ -176,14 +179,29 @@ public class Settings {
     "unfreeze_on_select",
     "reset_offset_on_unfreeze",
     "infinite_health",
-    "plan_build_folder"
+    "plan_build_folder",
+    "build_share_folder"
   };
   private static string State(bool value) => value ? "enabled" : "disabled";
   private static string Flag(bool value) => value ? "removed" : "added";
+  private static HashSet<string> Truthies = new() {
+    "1",
+    "true",
+    "yes",
+    "on"
+  };
+  private static bool IsTruthy(string value) => Truthies.Contains(value);
+  private static HashSet<string> Falsies = new() {
+    "0",
+    "false",
+    "no",
+    "off"
+  };
+  private static bool IsFalsy(string value) => Falsies.Contains(value);
   private static void Toggle(Terminal context, ConfigEntry<bool> setting, string name, string value, bool reverse = false) {
     if (value == "") setting.Value = !setting.Value;
-    else if (value == "1") setting.Value = true;
-    else if (value == "0") setting.Value = false;
+    else if (IsTruthy(value)) setting.Value = true;
+    else if (IsFalsy(value)) setting.Value = false;
     Helper.AddMessage(context, $"{name} {State(reverse ? !setting.Value : setting.Value)}.");
   }
   private static void ToggleFlag(Terminal context, ConfigEntry<string> setting, string name, string value) {
@@ -235,6 +253,10 @@ public class Settings {
       Helper.AddMessage(context, $"Binds set to {value}.");
     }
     if (key == "plan_build_folder") {
+      configPlanBuildFolder.Value = value;
+      Helper.AddMessage(context, $"Plan Build folder set to {value}.");
+    }
+    if (key == "build_share_folder") {
       configPlanBuildFolder.Value = value;
       Helper.AddMessage(context, $"Plan Build folder set to {value}.");
     }

@@ -31,7 +31,7 @@ Note: Some commands have a direction parameter. These are intended for mouse whe
 - `hammer [item id]`: Selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)) to be placed.
 - `hammer [item id] [scale=1]`: Selects an object by id while setting the initial scale (if the object can be scaled). Number or x,y,z.
 - `hammer_add_piece_components`: Adds the Piece component to every object which allows copying them with PlanBuild mod.
-- `hammer_blueprint [file name]`: Selects a Plan Build blueprint located on your computer.
+- `hammer_blueprint [file name]`: Selects a Build Share or a Plan Build blueprint located on your computer.
 - `hammer_config [key] [value]`: Toggles or sets configuration values. For lists, the given value is toggled on or off (`remove_blacklist` or `select_blacklist`).
 - `hammer_freeze`: Toggles whether the mouse affects placement position. Allows moving around while the object's position is frozen.
 - `hammer_location [location_id] [seed=0] [random damage]`: Selects a location by id. Allows setting the random result with seed ("all" value enables all child objects).
@@ -157,6 +157,7 @@ Following powers are available with `hammer_config` command:
 - Auto equip (default: `true`, key: `auto_equip`): Automatically equips the hammer when selecting an object.
 - Binds (default: ` `, key: `binds`): Sets binds at the game start up. Any existing binds are cleared from those keys.
 - Build range (default: `0`, key: `build_range`): Range for building (capped at about 50 meters).
+- Build Share folder (default: `BuildShare/Builds`, key: `build_share_folder`): Folder relative to the Valheim.exe.
 - Copy rotation (default: `true`, key: `copy_rotation`): Copies rotation of the selected object.
 - Copy state (default: `true`, key: `copy_state`): Object state is copied (for example chest contents or item stand items).
 - Disable loot (default: `false`, key: `disable_loot`): Creatures and structures won't drop loot when destroyed with the hammer.
@@ -181,11 +182,11 @@ Following powers are available with `hammer_config` command:
 - Repair anything (default: `false`, key: `repair_anything`): Allows healing or repairing any object.
 - Repair range (default: `0`, key: `repair_range`): Range for repairing (capped at about 50 meters).
 - Repair taming (default: `false`, key: `repair_taming`): Repairing full health creatures will tame/untame them (works for all creatures).
-- Reset offset on unfreeze (defualt `true`, key: `reset_offset_on_unfreeze`): Removes the placement offset when unfreezing the placement.
+- Reset offset on unfreeze (default `true`, key: `reset_offset_on_unfreeze`): Removes the placement offset when unfreezing the placement.
 - Scaling step (default: `0.05`, key: `scaling_step`): How much the object is scaled up/down.
 - Select blacklist (key: `select_blacklist`): Allows disabling select for given objects (ids separated by ,).
 - Select range (default: `0`, key: `select_range`): Range for selecting (capped at about 50 meters).
-- Unfreeze on select (defualt `false`, key: `unfreeze_on_select`): Removes the placement freeze when selecting a new object.
+- Unfreeze on select (default `false`, key: `unfreeze_on_select`): Removes the placement freeze when selecting a new object.
 - Unfreeze on unequip (defualt `true`, key: `unfreeze_on_unequip`): Removes the placement freeze when unequipping the hammer.
 
 On servers, above features are disabled without cheat access (except Copy rotate, No placement marker, Remove effects, Select range and offsetting).
@@ -244,7 +245,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 # Changelog
 
 - v1.12:
-	- Adds a new command `hammer_blueprint` to place new instances of Plan Build blueprints.
+	- Adds a new command `hammer_blueprint` to place new instances of Build Share and Plan Build blueprints.
 	- Adds a new command `hammer_location` to place new instances of locations.
 	- Adds a new command `hammer_freeze` to prevent mouse position affecting the placement (allows moving around).
 	- Adds a new command `plan_build_folder` to configure the blueprint folder.
@@ -252,6 +253,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds a new setting `unfreeze_on_select` to automatically unfreeze the placement when selecting a new piece (default `false`).
 	- Adds a new setting `reset_offset_on_unfreeze` to automatically reset the placement offset when a freeze is removed (default `true`).
 	- Adds a new setting `infinite_health` to set a very high Overwrite health (default `false`).
+	- Adds more truthy/falsy values for the `hammer_config` command.
 	- Improves how the placement rule are checked with the placement offset.
 	- Fixes item drop data not being copied.
 
