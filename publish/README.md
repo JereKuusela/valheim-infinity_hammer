@@ -61,7 +61,6 @@ Note: Some commands have a direction parameter. These are intended for mouse whe
 - `hammer_scale [scale=1]`: Sets the object scale (if the object can be scaled). Number or x,y,z.
 - `hammer_scale_up`: Scales up the object (if the object can be scaled).
 - `hammer_scale_down`: Scales down the object (if the object can be scaled).
-- `hammer_setup_binds`: Sets some recommended key bindings.
 - `hammer_stack [forward,up,right or z1-z2,y1-y2,x1-x2] [step=auto,auto,auto] [direction=1]`: Places multiple objects next to each other.
 - `hammer_stack_backward [amount or min-max] [step=auto] [direction=1]`: Places multiple objects towards the backward direction.
 - `hammer_stack_down [amount or min-max] [step=auto] [direction=1]`: Places multiple objects towards the down direction.
@@ -85,11 +84,25 @@ Remember that you can copy-paste commands to the console.
 
 ### General usage
 
+Quickly selects the hovered object and undo/redo:
+- `bind keypad5 hammer`
+- `bind keypad7 hammer_undo`
+- `bind keypad9 hammer_redo`
 
+Object scaling and reset: 
+- `bind keypad1 hammer_scale_down`
+- `bind keypad2 hammer_scale`
+- `bind keypad3 hammer_scale_up`
+
+Toggles all features on/off (if even needed):
+- `bind keypad8 hammer_config enabled`
 
 ### Precise placement / placement offset
 
-Bind movement to arrow keys:
+Bind freezing or offset reset near arrow keys:
+- `bind keypad0 hammer_freeze` or `bind keypad0 hammer_offset`
+
+Then bind movement to arrow keys:
 - `bind rightarrow hammer_move_right 0.1`
 - `bind leftarrow hammer_move_left 0.1`
 - `bind downarrow hammer_move_down 0.1`
@@ -117,35 +130,6 @@ You can also use another modifier key for a bigger offset:
 - `bind uparrow,leftalt,-leftcontrol hammer_move_up 1`
 - `bind downarrow,leftalt,leftcontrol hammer_move_backward 1`
 - `bind uparrow,leftalt,leftcontrol hammer_move_forward 1`
-
-Then bind freezing or offset reset near arrow keys:
-
-- `bind keypad0 hammer_freeze` or `bind keypad0 hammer_offset`
-
-
-
-
-
-
-`hammer_setup_binds` command can be used to quickly set some key bindings that work with the Gizmo mod.
-
-Following bindings are added:
-
-- `bind keypad0 hammer`: Quickly selects the hovered object.
-- `bind keypad1 hammer_scale_down`
-- `bind keypad2 hammer_scale`: Resets the scaling.
-- `bind keypad3 hammer_scale_up`
-- `bind keypad7 hammer_undo`
-- `bind keypad8 hammer_config enabled`: Toggles all features on/off.
-- `bind rightcontrol hammer_redo`
-- `bind keypad9 hammer_offset`: Resets the offset.
-- `bind rightarrow hammer_move_right 0.1`
-- `bind leftarrow hammer_move_left 0.1`
-- `bind downarrow hammer_move_down 0.1`
-- `bind uparrow hammer_move_up 0.1`
-
-If you have Server Devcommands installed, following binds are added instead (to provide a different offset when Alt-key is down):
-
 
 # Configuration
 
@@ -255,6 +239,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds a new setting `infinite_health` to set a very high Overwrite health (default `false`).
 	- Adds more truthy/falsy values for the `hammer_config` command.
 	- Improves how the placement rule are checked with the placement offset.
+	- Removes the `hammer_setup_binds` as obsolete (probably just caused conflicts for most people).
 	- Fixes item drop data not being copied.
 
 - v1.11:

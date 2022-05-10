@@ -40,7 +40,6 @@ public class SetCommands {
     new HammerRepairCommand();
     new HammerRotateCommand();
     new HammerScaleCommand();
-    new HammerSetupBindsCommand();
     new HammerStackCommand();
     new HammerUndoCommand();
     new HammerFreezeCommand();
