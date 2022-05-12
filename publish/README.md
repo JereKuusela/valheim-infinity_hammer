@@ -72,7 +72,7 @@ Note: Some commands have a direction parameter. These are intended for mouse whe
 
 Note: Some interactions are quite complicated so please report any issues!
 
-## Key bindings
+# Key bindings
 
 Bind frequently used commands to ([key codes](https://docs.unity3d.com/ScriptReference/KeyCode.html)).
 
@@ -82,7 +82,7 @@ It's recommended to install Server Devcommands mod which allows using modifier k
 
 Remember that you can copy-paste commands to the console.
 
-### General usage
+## General usage
 
 Quickly selects the hovered object and undo/redo:
 - `bind keypad5 hammer`
@@ -97,7 +97,7 @@ Object scaling and reset:
 Toggles all features on/off (if even needed):
 - `bind keypad8 hammer_config enabled`
 
-### Precise placement / placement offset
+## Precise placement / placement offset
 
 Bind freezing or offset reset near arrow keys:
 - `bind keypad0 hammer_freeze` or `bind keypad0 hammer_offset`
@@ -117,7 +117,6 @@ With Server Devcommands you can use modifier keys for the forward/backward direc
 - `bind uparrow,leftcontrol hammer_move_forward 0.1`
 
 You can also use another modifier key for a bigger offset:
-
 - `bind rightarrow,-leftalt hammer_move_right 0.1`
 - `bind leftarrow,-leftalt hammer_move_left 0.1`
 - `bind downarrow,-leftalt,-leftcontrol hammer_move_down 0.1`
@@ -232,12 +231,13 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds a new command `hammer_blueprint` to place new instances of Build Share and Plan Build blueprints.
 	- Adds a new command `hammer_location` to place new instances of locations.
 	- Adds a new command `hammer_freeze` to prevent mouse position affecting the placement (allows moving around).
-	- Adds a new command `plan_build_folder` to configure the blueprint folder.
+	- Adds a new setting `build_share_folder` to configure the blueprint folder.
+	- Adds a new setting `plan_build_folder` to configure the blueprint folder.
 	- Adds a new setting `unfreeze_on_unequip` to automatically unfreeze the placement when unequipping the hammer (default `true`).
 	- Adds a new setting `unfreeze_on_select` to automatically unfreeze the placement when selecting a new piece (default `false`).
 	- Adds a new setting `reset_offset_on_unfreeze` to automatically reset the placement offset when a freeze is removed (default `true`).
 	- Adds a new setting `infinite_health` to set a very high Overwrite health (default `false`).
-	- Adds more truthy/falsy values for the `hammer_config` command.
+	- Adds more supported truthy/falsy values for the `hammer_config` command.
 	- Improves how the placement rule are checked with the placement offset.
 	- Removes the `hammer_setup_binds` as obsolete (probably just caused conflicts for most people).
 	- Fixes item drop data not being copied.
