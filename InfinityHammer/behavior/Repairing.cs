@@ -1,6 +1,6 @@
+using System.Linq;
 using HarmonyLib;
 using UnityEngine;
-using System.Linq;
 // Code related to repairing objects.
 namespace InfinityHammer;
 [HarmonyPatch(typeof(Player), nameof(Player.Repair))]
@@ -43,12 +43,13 @@ public class Repair {
     return true;
   }
   public static bool RepairStructure(ZNetView obj) {
+    obj.ClaimOwnership();
     var wearNTear = obj.GetComponent<WearNTear>();
     if (!wearNTear || Time.time - wearNTear.m_lastRepair < 1f) return false;
     var result = RepairShared(obj, wearNTear.m_health);
     if (result) {
       wearNTear.m_lastRepair = Time.time;
-      obj.InvokeRPC(ZNetView.Everybody, "WNTHealthChanged", new[] { obj.GetZDO().GetFloat("health", wearNTear.m_health) });
+      obj.InvokeRPC(ZNetView.Everybody, "WNTHealthChanged", new object[] { obj.GetZDO().GetFloat("health", wearNTear.m_health) });
     }
     return result;
   }
@@ -164,15 +165,16 @@ public class Repair {
     Repaired = false;
   }
   public static void Postfix(Player __instance) {
-    DisableEffects.Active = false;
-    IsRepairing = false;
     if (!__instance.InPlaceMode()) return;
     if (!Repaired && Settings.RepairAnything)
       Repaired = RepairAnything(__instance);
     if (Repaired) Hammer.PostProcessTool(__instance);
   }
+  public static void Finalizer() {
+    IsRepairing = false;
+    DisableEffects.Active = false;
+  }
 }
-
 
 [HarmonyPatch(typeof(Player), nameof(Player.UpdateWearNTearHover))]
 public class UnlockRepairDistance {
@@ -189,7 +191,7 @@ public class UnlockRepairDistance {
 
 [HarmonyPatch(typeof(Character), nameof(Character.UseStamina))]
 public class CheckRepair {
-  static void Prefix() {
+  static void Finalizer() {
     if (Repair.IsRepairing) Repair.Repaired = true;
   }
 }
@@ -197,7 +199,7 @@ public class CheckRepair {
 [HarmonyPatch(typeof(WearNTear), nameof(WearNTear.Repair))]
 public class AdvancedRepair {
   public static bool Prefix(WearNTear __instance, ref bool __result) {
-    if (!Settings.Enabled || !__instance.m_nview) return true;
+    if (!Repair.IsRepairing || !Settings.Enabled || !__instance.m_nview || Settings.OverwriteHealth == 0f) return true;
     __result = Repair.RepairStructure(__instance.m_nview);
     return false;
   }

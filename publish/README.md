@@ -227,7 +227,10 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 
 # Changelog
 
-- v1.12:
+- v1.13
+	- Improves compatibility with automatic repair mods.
+
+- v1.12
 	- Adds a new command `hammer_blueprint` to place new instances of Build Share and Plan Build blueprints.
 	- Adds a new command `hammer_location` to place new instances of locations.
 	- Adds a new command `hammer_freeze` to prevent mouse position affecting the placement (allows moving around).
@@ -242,22 +245,22 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Removes the `hammer_setup_binds` as obsolete (probably just caused conflicts for most people).
 	- Fixes item drop data not being copied.
 
-- v1.11:
+- v1.11
 	- Adds compatibility with Gizmo Reloaded.
 	- Adds a new setting `binds` to automatically set binds at the game start up.
 	- Adds support for random rotation to `hammer_rotate_*` commands.
 
-- v1.10:
+- v1.10
 	- Renames and splits commands `hammer_move_*` to be more clear about the direction.
 	- Renames and splits commands `hammer_stack_*` to be more clear about the direction.
 	- Improves autocomplete and output for most commands.
 	- Fixes the undo feature breaking hoe usage.
 
-- v1.9:
+- v1.9
 	- Fixes `hammer_move_*` commands not working properly.
 	- Fixes `hammer_stack_*` not working with rotated objects.
 
-- v1.8:
+- v1.8
 	- Adds compatibility with Comfy Gizmo.
 	- Adds supports for `number*auto` value to the commands `hammer_move_x`, `hammer_move_y` and `hammer_move_z` (automatically sets the step size). 
 	- Adds a new direction parameter to the commands `hammer_move_x`, `hammer_move_y` and `hammer_move_z` for Server Devcommands mouse wheel binding.
@@ -274,7 +277,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Fixes repair range not working for creatures and other non-piece objects.
 	- Fixes repair taming.
 
-- v1.7:
+- v1.7
 	- Adds new setting `remove_blacklist` that allows disabling remove for some objects.
 	- Adds new setting `select_blacklist` that allows disabling select for some objects.
 	- Changes Server devcommands compatibility to work with the newest version (old versions won't work anymore as the name was changed).
@@ -292,14 +295,14 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Fixes scale not being set when selecting objects from the build menu (better compatibility with some mods).
 	- Fixes Piece components being added to the object library when selecting objects (no known issues).
 
-- v1.5:
+- v1.5
 	- Adds support for the undo system of Server devcommands mod (if installed).
 	- Adds a new command `hammer_add_piece_components` to allow copying anything with PlanBuild.
 	- Removes the `hammer_setup_binds_DEV` command as obsolete (Server devcommands mod is used automatically, if installed).
 	- Fixes some error messages appearing when placing spawners and other objects.
 	- Fixes error messages when using the hoe.
 
-- v1.4:
+- v1.4
 	- Adds new commands to offset the placement to precisely set the position.
 	- Adds new commands to set recommended key bindings.
 	- Adds new setting to disable the placement marker.
@@ -312,10 +315,10 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Fixes "Select range" setting not working.
 	- Fixes "Remove range" setting not working.
 
-- v1.3:
+- v1.3
 	- Fixes health not being copied for creatures (got overwritten by stars).
 
-- v1.2:
+- v1.2
 	- Adds object names to the build overlay.
 	- Adds setting to disable build, repair and destroy effects.
 	- Adds setting to tame/untame creatures with repair.
@@ -326,7 +329,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Fixes structures having a higher destroy priority even with "Destroy anything" enabled.
 	- Fixes "Overwrite health" not working when selecting a piece from the build menu.
 
-- v1.1: 
+- v1.1
 	- Adds new setting to overwrite the health of built and repaired objects (including creatures).
 	- Adds no stamina and durability cost to also affect repairing.
 	- Adds new setting to change repair range.
@@ -339,7 +342,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Fixes selection keeping the hover color when selecting a structure.
 	- Fixes selection being removed when the selected objects is destroyed.
 
-- v1.0: 
+- v1.0
 	- Initial release.
 
 Thanks for Azumatt for creating the mod icon!

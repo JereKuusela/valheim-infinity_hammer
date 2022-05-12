@@ -63,17 +63,6 @@ public class RemovePiece {
       Remove(obj);
     }
   }
-  private static void End(bool result) {
-    DisableEffects.Active = false;
-    if (result && RemovedObjects.Count > 0) {
-      RemoveInArea(RemovedObjects[0], Settings.RemoveArea);
-      UndoWrapper.Remove(RemovedObjects);
-    }
-    Removing = false;
-    RemovedObjects.Clear();
-    PreventPieceDrops.Active = false;
-    PreventCreaturerops.Active = false;
-  }
   public static bool Prefix(Player __instance, ref bool __result) {
     DisableEffects.Active = true;
     Removing = true;
@@ -81,12 +70,21 @@ public class RemovePiece {
     PreventCreaturerops.Active = Settings.DisableLoot;
     if (Settings.RemoveAnything) {
       __result = RemoveAnything(__instance);
-      End(__result);
       return false;
     }
     return true;
   }
-  public static void Postfix(ref bool __result) => End(__result);
+  static void Finalizer() {
+    if (RemovedObjects.Count > 0) {
+      RemoveInArea(RemovedObjects[0], Settings.RemoveArea);
+      UndoWrapper.Remove(RemovedObjects);
+    }
+    RemovedObjects.Clear();
+    DisableEffects.Active = false;
+    PreventPieceDrops.Active = false;
+    PreventCreaturerops.Active = false;
+    Removing = false;
+  }
 }
 
 [HarmonyPatch(typeof(Piece), nameof(Piece.DropResources))]
