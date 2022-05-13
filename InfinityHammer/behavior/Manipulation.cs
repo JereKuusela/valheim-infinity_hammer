@@ -70,34 +70,30 @@ public static class Scaling {
 
 
 [HarmonyPatch(typeof(Player), nameof(Player.PieceRayTest))]
-public class PlacementPosition1 {
-  static Vector3 Normal;
-
-  ///<summary>First override the initial position so that placement rules are checked on the actual position-</summary>
+public class FreezePlacementMarker {
+  static Vector3 CurrentNormal;
+  static Vector3 CurrentPoint;
+  static bool CurrentSuccess = false;
   static void Postfix(ref Vector3 point, ref Vector3 normal, ref Piece piece, ref Heightmap heightmap, ref Collider waterSurface, ref bool __result) {
-    point = Position.Apply(point);
-    var ghost = Helper.GetPlayer().m_placementGhost;
-    if (!ghost) return;
     if (Position.Override.HasValue) {
-      normal = Normal;
-      __result = true;
+      point = CurrentPoint;
+      normal = CurrentNormal;
+      __result = CurrentSuccess;
 #nullable disable
       piece = null;
       heightmap = null;
       waterSurface = null;
 #nullable enable
-    } else Normal = normal;
+    } else {
+      CurrentPoint = point;
+      CurrentNormal = normal;
+      CurrentSuccess = __result;
+    }
   }
 }
 
-public class Test : SE_Stats {
-  public Test() {
-    var mod = new HitData.DamageModPair { m_modifier = HitData.DamageModifier.Resistant, m_type = HitData.DamageType.Poison };
-    m_mods.Add(mod);
-  }
-}
 [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
-public class PlacementPosition2 {
+public class OverridePlacementGhost {
   ///<summary>Then override snapping and other modifications for the final result (and some rules are checked too).</summary>
   static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
     return new CodeMatcher(instructions)
