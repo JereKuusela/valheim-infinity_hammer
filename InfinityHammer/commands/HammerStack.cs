@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using HarmonyLib;
 using UnityEngine;
@@ -31,104 +32,36 @@ public class HammerStackCommand {
     return null;
   }
   private static string Description(string direction) => $"[amount] [step=auto] [direction=1] - Places multiple objects towards the {direction} direction.";
-  public HammerStackCommand() {
-    CommandWrapper.Register("hammer_stack_left", AutoComplete);
-    new Terminal.ConsoleCommand("hammer_stack_left", Description("left"), (Terminal.ConsoleEventArgs args) => {
-      if (args.Length < 2) {
-        Helper.AddMessage(args.Context, "Error: Missing the amount.");
-        return;
-      }
-      var ghost = Helper.GetPlacementGhost(args.Context);
-      if (!ghost) return;
+  private static void Command(string name, string description, Func<Vector3, float, Vector3> action) {
+    CommandWrapper.Register(name, AutoComplete);
+    Helper.Command(name, Description(description), (args) => {
+      Helper.CheatCheck();
+      Helper.ArgsCheck(args, 2, "Missing the amount.");
+      var ghost = Helper.GetPlacementGhost();
       var amount = Helper.ParseIntRange(args[1]);
-      var size = Helper.TryParseSize(ghost, args.Args, 2).x;
+      var size = Helper.TryParseSize(ghost, args.Args, 2);
       var direction = Helper.ParseDirection(args.Args, 3);
-      Vector3 delta = new(-direction * size, 0f, 0f);
+      var delta = action(size, direction);
       Execute(delta, new(amount.Min, 0, 0), new(amount.Max, 0, 0));
     });
-    CommandWrapper.Register("hammer_stack_right", AutoComplete);
-    new Terminal.ConsoleCommand("hammer_stack_right", Description("right"), (Terminal.ConsoleEventArgs args) => {
-      if (args.Length < 2) {
-        Helper.AddMessage(args.Context, "Error: Missing the amount.");
-        return;
-      }
-      var ghost = Helper.GetPlacementGhost(args.Context);
-      if (!ghost) return;
-      var amount = Helper.ParseIntRange(args[1]);
-      var size = Helper.TryParseSize(ghost, args.Args, 2).x;
-      var direction = Helper.ParseDirection(args.Args, 3);
-      var delta = new Vector3(direction * size, 0f, 0f);
-      Execute(delta, new Vector3Int(amount.Min, 0, 0), new Vector3Int(amount.Max, 0, 0));
-    });
-    CommandWrapper.Register("hammer_stack_down", AutoComplete);
-    new Terminal.ConsoleCommand("hammer_stack_down", Description("down"), (Terminal.ConsoleEventArgs args) => {
-      if (args.Length < 2) {
-        Helper.AddMessage(args.Context, "Error: Missing the amount.");
-        return;
-      }
-      var ghost = Helper.GetPlacementGhost(args.Context);
-      if (!ghost) return;
-      var amount = Helper.ParseIntRange(args[1]);
-      var size = Helper.TryParseSize(ghost, args.Args, 2).y;
-      var direction = Helper.ParseDirection(args.Args, 3);
-      Vector3 delta = new(0f, -direction * size, 0f);
-      Execute(delta, new(0, amount.Min, 0), new(0, amount.Max, 0));
-    });
-    CommandWrapper.Register("hammer_stack_up", AutoComplete);
-    new Terminal.ConsoleCommand("hammer_stack_up", Description("up"), (Terminal.ConsoleEventArgs args) => {
-      if (args.Length < 2) {
-        Helper.AddMessage(args.Context, "Error: Missing the amount.");
-        return;
-      }
-      var ghost = Helper.GetPlacementGhost(args.Context);
-      if (!ghost) return;
-      var amount = Helper.ParseIntRange(args[1]);
-      var size = Helper.TryParseSize(ghost, args.Args, 2).y;
-      var direction = Helper.ParseDirection(args.Args, 3);
-      Vector3 delta = new(0f, direction * size, 0f);
-      Execute(delta, new(0, amount.Min, 0), new(0, amount.Max, 0));
-    });
-    CommandWrapper.Register("hammer_stack_backward", AutoComplete);
-    new Terminal.ConsoleCommand("hammer_stack_backward", Description("backward"), (Terminal.ConsoleEventArgs args) => {
-      if (args.Length < 2) {
-        Helper.AddMessage(args.Context, "Error: Missing the amount.");
-        return;
-      }
-      var ghost = Helper.GetPlacementGhost(args.Context);
-      if (!ghost) return;
-      var amount = Helper.ParseIntRange(args[1]);
-      var size = Helper.TryParseSize(ghost, args.Args, 2).z;
-      var direction = Helper.ParseDirection(args.Args, 3);
-      Vector3 delta = new(0f, 0f, -direction * size);
-      Execute(delta, new(0, 0, amount.Min), new(0, 0, amount.Max));
-    });
-    CommandWrapper.Register("hammer_stack_forward", AutoComplete);
-    new Terminal.ConsoleCommand("hammer_stack_forward", Description("forward"), (Terminal.ConsoleEventArgs args) => {
-      if (args.Length < 2) {
-        Helper.AddMessage(args.Context, "Error: Missing the amount.");
-        return;
-      }
-      var ghost = Helper.GetPlacementGhost(args.Context);
-      if (!ghost) return;
-      var amount = Helper.ParseIntRange(args[1]);
-      var size = Helper.TryParseSize(ghost, args.Args, 2).z;
-      var direction = Helper.ParseDirection(args.Args, 3);
-      Vector3 delta = new(0f, 0f, direction * size);
-      Execute(delta, new(0, 0, amount.Min), new(0, 0, amount.Max));
-    });
+  }
+  public HammerStackCommand() {
+    Command("hammer_stack_left", "left", (size, direction) => new(-direction * size.x, 0f, 0f));
+    Command("hammer_stack_right", "right", (size, direction) => new(direction * size.x, 0f, 0f));
+    Command("hammer_stack_down", "down", (size, direction) => new(0f, -direction * size.y, 0f));
+    Command("hammer_stack_up", "up", (size, direction) => new(0f, direction * size.y, 0f));
+    Command("hammer_stack_backward", "backward", (size, direction) => new(0f, 0f, -direction * size.z));
+    Command("hammer_stack_forward", "forward", (size, direction) => new(0f, 0f, direction * size.z));
     CommandWrapper.Register("hammer_stack", (int index, int subIndex) => {
       if (index == 0) return CommandWrapper.FRU("Amounts", subIndex);
       if (index == 1) return CommandWrapper.FRU("Step size (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size)", subIndex);
       if (index == 2) return CommandWrapper.Info("Direction (default 1 or -1).");
       return null;
     });
-    new Terminal.ConsoleCommand("hammer_stack", "[forward,up,right] [step=auto,auto,auto] [direction=1] - Places multiple objects next to each other.", (Terminal.ConsoleEventArgs args) => {
-      if (args.Length < 2) {
-        Helper.AddMessage(args.Context, "Error: Missing the amount.");
-        return;
-      }
-      var ghost = Helper.GetPlacementGhost(args.Context);
-      if (!ghost) return;
+    Helper.Command("hammer_stack", "[forward,up,right] [step=auto,auto,auto] [direction=1] - Places multiple objects next to each other.", (args) => {
+      Helper.CheatCheck();
+      Helper.ArgsCheck(args, 2, "Missing the amount.");
+      var ghost = Helper.GetPlacementGhost();
       var amount = Helper.ParseZYXRange(args[1]);
       var size = Helper.TryParseSizesZYX(ghost, args.Args, 2);
       var direction = Helper.ParseDirection(args.Args, 3);

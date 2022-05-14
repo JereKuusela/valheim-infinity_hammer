@@ -1,25 +1,28 @@
+using System;
 using UnityEngine;
 namespace InfinityHammer;
 public class HammerScaleCommand {
+  private static void Command(string direction, Action action) {
+    CommandWrapper.RegisterEmpty($"hammer_scale_{direction}");
+    Helper.Command($"hammer_scale_{direction}", $"Scales {direction} the selection (if the object supports it).", (args) => {
+      CheckStep();
+      action();
+      Scaling.PrintScale(args.Context);
+    });
+  }
+  private static void CheckStep() {
+    if (Settings.ScaleStep <= 0f)
+      throw new InvalidOperationException("Invalid step size on the mod configuration.");
+  }
   public HammerScaleCommand() {
-    CommandWrapper.RegisterEmpty("hammer_scale_up");
-    new Terminal.ConsoleCommand("hammer_scale_up", "Scales up the selection (if the object supports it).", (Terminal.ConsoleEventArgs args) => {
-      if (Settings.ScaleStep <= 0f) return;
-      Scaling.ScaleUp();
-      Scaling.PrintScale(args.Context);
-    });
-    CommandWrapper.RegisterEmpty("hammer_scale_down");
-    new Terminal.ConsoleCommand("hammer_scale_down", "Scales down the selection (if the object supports it).", (Terminal.ConsoleEventArgs args) => {
-      if (Settings.ScaleStep <= 0f) return;
-      Scaling.ScaleDown();
-      Scaling.PrintScale(args.Context);
-    });
+    Command("up", Scaling.ScaleUp);
+    Command("down", Scaling.ScaleDown);
     CommandWrapper.Register("hammer_scale", (int index, int subIndex) => {
       if (index == 0) return CommandWrapper.Scale("Sets the size (if the object supports it).", subIndex);
       return null;
     });
-    new Terminal.ConsoleCommand("hammer_scale", "[scale=1] - Sets the size (if the object supports it).", (Terminal.ConsoleEventArgs args) => {
-      if (Settings.ScaleStep <= 0f) return;
+    Helper.Command("hammer_scale", "[scale=1] - Sets the size (if the object supports it).", (args) => {
+      CheckStep();
       if (args.Length < 2)
         Scaling.SetScale(1f);
       else if (args[1].Contains(",")) {

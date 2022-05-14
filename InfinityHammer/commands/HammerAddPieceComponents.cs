@@ -3,7 +3,7 @@ namespace InfinityHammer;
 public class HammerAddPieceComponentsCommand {
   public HammerAddPieceComponentsCommand() {
     CommandWrapper.RegisterEmpty("hammer_add_piece_components");
-    new Terminal.ConsoleCommand("hammer_add_piece_components", "Adds the Piece component to every prefab to allow copying them with PlanBuild.", (Terminal.ConsoleEventArgs args) => {
+    new Terminal.ConsoleCommand("hammer_add_piece_components", "Adds the Piece component to every prefab to allow copying them with PlanBuild.", (args) => {
       if (!ZNetScene.instance) return;
       if (!Settings.IsCheats) {
         Helper.AddMessage(args.Context, "Error: Cheats are not allowed.");

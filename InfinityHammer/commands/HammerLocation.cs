@@ -22,9 +22,12 @@ public class HammerLocationCommand {
       if (index == 2) return CommandWrapper.Info("Any value forces random damage on structures (disabled by default).");
       return null;
     });
-    new Terminal.ConsoleCommand("hammer_location", "[location id] [seed=0] [random damage] - Selects the location to be placed.", (Terminal.ConsoleEventArgs args) => {
+    new Terminal.ConsoleCommand("hammer_location", "[location id] [seed=0] [random damage] - Selects the location to be placed.", (args) => {
       if (!Player.m_localPlayer) return;
-      if (!Settings.Enabled) return;
+      if (!Settings.IsCheats) {
+        Helper.AddMessage(args.Context, "Error: This command is disabled.");
+        return;
+      }
       if (args.Length < 2) return;
       Hammer.Equip();
       try {

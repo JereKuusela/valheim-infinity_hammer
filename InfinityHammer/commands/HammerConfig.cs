@@ -7,7 +7,7 @@ public class HammerConfigCommand {
       if (index == 1) return CommandWrapper.Info("Value.");
       return null;
     });
-    new Terminal.ConsoleCommand("hammer_config", "[key] [value] - Toggles or sets config value.", (Terminal.ConsoleEventArgs args) => {
+    new Terminal.ConsoleCommand("hammer_config", "[key] [value] - Toggles or sets config value.", (args) => {
       if (args.Length < 2) return;
       if (args.Length == 2)
         Settings.UpdateValue(args.Context, args[1], "");

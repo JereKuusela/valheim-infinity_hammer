@@ -128,7 +128,7 @@ public static class Hammer {
     var prefab = State.GetInt("location", 0);
     var seed = State.GetInt("seed", 0);
     var location = ZoneSystem.instance.GetLocation(prefab);
-    var ghost = Helper.GetPlacementGhost(Console.instance);
+    var ghost = Helper.GetPlacementGhost();
     var position = ghost.transform.position;
     var rotation = ghost.transform.rotation;
     CustomizeSpawnLocation.AllViews = AllLocationsObjects;

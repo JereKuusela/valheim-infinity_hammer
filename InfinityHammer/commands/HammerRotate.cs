@@ -5,8 +5,7 @@ public class HammerRotateCommand {
   private static float Parse(Terminal terminal, string[] values, Func<GameObject, bool> isSquare) {
     var amount = 0f;
     if (values[1].Contains("random")) {
-      var ghost = Helper.GetPlacementGhost(terminal);
-      if (!ghost) return 0f;
+      var ghost = Helper.GetPlacementGhost();
       System.Random rng = new();
       var multiplier = (int)Helper.ParseMultiplier(values[1]);
       if (multiplier == 1) {
@@ -24,7 +23,7 @@ public class HammerRotateCommand {
       if (index == 1) return CommandWrapper.Info("Direction (1 or -1).");
       return null;
     });
-    new Terminal.ConsoleCommand("hammer_rotate_x", "[degrees/random/number*random] [direction=1] - Rotates around the X axis.", (Terminal.ConsoleEventArgs args) => {
+    new Terminal.ConsoleCommand("hammer_rotate_x", "[degrees/random/number*random] [direction=1] - Rotates around the X axis.", (args) => {
       if (args.Length < 2) return;
       var amount = Parse(args.Context, args.Args, Helper.IsSquareX);
       Rotating.RotateX(amount);
@@ -34,7 +33,7 @@ public class HammerRotateCommand {
       if (index == 1) return CommandWrapper.Info("Direction (1 or -1).");
       return null;
     });
-    new Terminal.ConsoleCommand("hammer_rotate_y", "[degrees/random/number*random] [direction=1] - Rotates around the Y axis.", (Terminal.ConsoleEventArgs args) => {
+    new Terminal.ConsoleCommand("hammer_rotate_y", "[degrees/random/number*random] [direction=1] - Rotates around the Y axis.", (args) => {
       if (args.Length < 2) return;
       var amount = Parse(args.Context, args.Args, Helper.IsSquareY);
       Rotating.RotateY(amount);
@@ -44,7 +43,7 @@ public class HammerRotateCommand {
       if (index == 1) return CommandWrapper.Info("Direction (1 or -1).");
       return null;
     });
-    new Terminal.ConsoleCommand("hammer_rotate_z", "[degrees/random/number*random] [direction=1] - Rotates around the Z axis.", (Terminal.ConsoleEventArgs args) => {
+    new Terminal.ConsoleCommand("hammer_rotate_z", "[degrees/random/number*random] [direction=1] - Rotates around the Z axis.", (args) => {
       if (args.Length < 2) return;
       var amount = Parse(args.Context, args.Args, Helper.IsSquareZ);
       Rotating.RotateZ(amount);

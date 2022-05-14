@@ -18,9 +18,9 @@ public class Range<T> {
   }
 }
 public static class Helper {
-  public static GameObject GetPlacementGhost(Terminal terminal) {
+  public static GameObject GetPlacementGhost() {
     var player = GetPlayer();
-    if (!player.m_placementGhost) throw new InvalidOperationException("Error: Not currently placing anything.");
+    if (!player.m_placementGhost) throw new InvalidOperationException("Not currently placing anything.");
     return player.m_placementGhost;
   }
   public static void RemoveZDO(ZDO zdo) {
@@ -148,8 +148,9 @@ public static class Helper {
     var multiplier = ParseMultiplier(value);
     var size = Vector3.one;
     if (value.Contains("auto")) {
-      if (!ghost) return Vector3.zero;
-      size = Bounds.Get[Utils.GetPrefabName(ghost)];
+      if (!ghost) throw new InvalidOperationException("Error: No placement ghost.");
+      if (!Bounds.Get.TryGetValue(Utils.GetPrefabName(ghost), out size))
+        throw new InvalidOperationException("Error: Missing object dimensions. Try placing the object to fix the issue.");
     }
     return multiplier * size;
   }
@@ -186,6 +187,9 @@ public static class Helper {
     return size.x - size.y < 0.01f;
   }
 
+  public static void AddError(Terminal context, string message, bool priority = true) {
+    AddMessage(context, $"Error: {message}", priority);
+  }
   public static void AddMessage(Terminal context, string message, bool priority = true) {
     context.AddString(message);
     var hud = MessageHud.instance;
@@ -299,6 +303,23 @@ public static class Helper {
   public static bool IsValid(ZNetView view) => view && IsValid(view.GetZDO());
   ///<summary>Helper to check object validity.</summary>
   public static bool IsValid(ZDO zdo) => zdo != null && zdo.IsValid();
+  public static void CheatCheck() {
+    if (!Settings.IsCheats) throw new InvalidOperationException("This command is disabled.");
+  }
+  public static void ArgsCheck(Terminal.ConsoleEventArgs args, int amount, string message) {
+    if (args.Length < amount) throw new InvalidOperationException(message);
+  }
+  public static void Command(string name, string description, Terminal.ConsoleEvent action) {
+    new Terminal.ConsoleCommand(name, description, Helper.Catch(action));
+  }
+  public static Terminal.ConsoleEvent Catch(Terminal.ConsoleEvent action) =>
+    (args) => {
+      try {
+        action(args);
+      } catch (InvalidOperationException e) {
+        Helper.AddError(args.Context, e.Message);
+      }
+    };
 }
 public class Hovered {
   public ZNetView Obj;

@@ -100,9 +100,12 @@ public class HammerBlueprintCommand {
 
   public HammerBlueprintCommand() {
     CommandWrapper.Register("hammer_blueprint", (int index, int subIndex) => GetBlueprints());
-    new Terminal.ConsoleCommand("hammer_blueprint", "[blueprint file] - Selects the blueprint to be placed.", (Terminal.ConsoleEventArgs args) => {
+    new Terminal.ConsoleCommand("hammer_blueprint", "[blueprint file] - Selects the blueprint to be placed.", (args) => {
       if (!Player.m_localPlayer) return;
-      if (!Settings.Enabled) return;
+      if (!Settings.IsCheats) {
+        Helper.AddMessage(args.Context, "Error: This command is disabled.");
+        return;
+      }
       if (args.Length < 2) return;
       Hammer.Equip();
       try {

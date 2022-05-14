@@ -228,6 +228,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 # Changelog
 
 - v1.14
+	- Improves error handling.
 	- Fixes the snapping disconnecting with the precise placement (non-freeze).
 
 - v1.13

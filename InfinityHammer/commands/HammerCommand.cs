@@ -1,5 +1,5 @@
-using UnityEngine;
 using System;
+using UnityEngine;
 namespace InfinityHammer;
 public class HammerCommand {
   ///<summary>Returns the hovered object.</summary>
@@ -47,7 +47,7 @@ public class HammerCommand {
     }, new() {
       { "scale", (int index) => CommandWrapper.Scale("scale", "Size of the object (if the object can be scaled).", index) }
     });
-    new Terminal.ConsoleCommand("hammer", "[item id] [scale=1] - Selects the object to be placed (the hovered object by default).", (Terminal.ConsoleEventArgs args) => {
+    new Terminal.ConsoleCommand("hammer", "[item id] [scale=1] - Selects the object to be placed (the hovered object by default).", (args) => {
       if (!Player.m_localPlayer) return;
       if (!Settings.Enabled) return;
       Hammer.Equip();

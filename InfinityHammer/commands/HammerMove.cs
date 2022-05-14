@@ -1,85 +1,50 @@
+using System;
+using UnityEngine;
 namespace InfinityHammer;
 public class HammerMoveCommand {
-  public HammerMoveCommand() {
-    CommandWrapper.Register("hammer_move_left", (int index) => {
-      if (index == 0) return CommandWrapper.Info("Meters towards the left direction (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
+  private static void Command(string direction, Action<Terminal.ConsoleEventArgs, GameObject> action) {
+    CommandWrapper.Register($"hammer_move_{direction}", (int index) => {
+      if (index == 0) return CommandWrapper.Info($"Meters towards the {direction} direction (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
       if (index == 1) return CommandWrapper.Info("Direction (default 1 or -1).");
       return null;
     });
-    new Terminal.ConsoleCommand("hammer_move_left", "[value=auto] [direction=1] - Moves the placement towards the left direction.", (Terminal.ConsoleEventArgs args) => {
-      var ghost = Helper.GetPlacementGhost(args.Context);
-      if (!ghost) return;
+    Helper.Command($"hammer_move_{direction}", $"[value=auto] [direction=1] - Moves the placement towards the {direction} direction.", (args) => {
+      var ghost = Helper.GetPlacementGhost();
+      action(args, ghost);
+      Position.Print(args.Context);
+    });
+  }
+  public HammerMoveCommand() {
+    Command("left", (args, ghost) => {
       var amount = Helper.TryParseSize(ghost, args.Args, 1).x;
       Position.MoveLeft(Helper.ParseDirection(args.Args, 2) * amount);
-      Position.Print(args.Context);
     });
-    CommandWrapper.Register("hammer_move_right", (int index) => {
-      if (index == 0) return CommandWrapper.Info("Meters towards the right direction (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
-      if (index == 1) return CommandWrapper.Info("Direction (default 1 or -1).");
-      return null;
-    });
-    new Terminal.ConsoleCommand("hammer_move_right", "[value=auto] [direction=1] - Moves the placement towards the right direction.", (Terminal.ConsoleEventArgs args) => {
-      var ghost = Helper.GetPlacementGhost(args.Context);
-      if (!ghost) return;
+    Command("right", (args, ghost) => {
       var amount = Helper.TryParseSize(ghost, args.Args, 1).x;
       Position.MoveRight(Helper.ParseDirection(args.Args, 2) * amount);
-      Position.Print(args.Context);
     });
-    CommandWrapper.Register("hammer_move_down", (int index) => {
-      if (index == 0) return CommandWrapper.Info("Meters towards the up direction (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
-      if (index == 1) return CommandWrapper.Info("Direction (default 1 or -1).");
-      return null;
-    });
-    new Terminal.ConsoleCommand("hammer_move_down", "[value=auto] [direction=1] - Moves the placement towards the up direction.", (Terminal.ConsoleEventArgs args) => {
-      var ghost = Helper.GetPlacementGhost(args.Context);
-      if (!ghost) return;
+    Command("down", (args, ghost) => {
       var amount = Helper.TryParseSize(ghost, args.Args, 1).y;
       Position.MoveDown(Helper.ParseDirection(args.Args, 2) * amount);
-      Position.Print(args.Context);
     });
-    CommandWrapper.Register("hammer_move_up", (int index) => {
-      if (index == 0) return CommandWrapper.Info("Meters towards the up direction (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
-      if (index == 1) return CommandWrapper.Info("Direction (default 1 or -1).");
-      return null;
-    });
-    new Terminal.ConsoleCommand("hammer_move_up", "[value=auto] [direction=1] - Moves the placement towards the up direction.", (Terminal.ConsoleEventArgs args) => {
-      var ghost = Helper.GetPlacementGhost(args.Context);
-      if (!ghost) return;
+    Command("up", (args, ghost) => {
       var amount = Helper.TryParseSize(ghost, args.Args, 1).y;
       Position.MoveUp(Helper.ParseDirection(args.Args, 2) * amount);
-      Position.Print(args.Context);
     });
-    CommandWrapper.Register("hammer_move_backward", (int index) => {
-      if (index == 0) return CommandWrapper.Info("Meters towards the backward direction (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
-      if (index == 1) return CommandWrapper.Info("Direction (default 1 or -1).");
-      return null;
-    });
-    new Terminal.ConsoleCommand("hammer_move_backward", "[value=auto] [direction=1] - Moves the placement towards the backward direction.", (Terminal.ConsoleEventArgs args) => {
-      var ghost = Helper.GetPlacementGhost(args.Context);
-      if (!ghost) return;
+    Command("backward", (args, ghost) => {
       var amount = Helper.TryParseSize(ghost, args.Args, 1).z;
       Position.MoveBackward(Helper.ParseDirection(args.Args, 2) * amount);
-      Position.Print(args.Context);
     });
-    CommandWrapper.Register("hammer_move_forward", (int index) => {
-      if (index == 0) return CommandWrapper.Info("Meters towards the forward direction (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
-      if (index == 1) return CommandWrapper.Info("Direction (default 1 or -1).");
-      return null;
-    });
-    new Terminal.ConsoleCommand("hammer_move_forward", "[value=auto] [direction=1] - Moves the placement towards the forward direction.", (Terminal.ConsoleEventArgs args) => {
-      var ghost = Helper.GetPlacementGhost(args.Context);
-      if (!ghost) return;
+    Command("forward", (args, ghost) => {
       var amount = Helper.TryParseSize(ghost, args.Args, 1).z;
       Position.MoveForward(Helper.ParseDirection(args.Args, 2) * amount);
-      Position.Print(args.Context);
     });
     CommandWrapper.Register("hammer_move", (int index, int subIndex) => {
       if (index == 0) return CommandWrapper.FRU("Meters to move the placement", subIndex);
       return null;
     });
-    new Terminal.ConsoleCommand("hammer_move", "[forward,up,right] - Moves the placement.", (Terminal.ConsoleEventArgs args) => {
-      var ghost = Helper.GetPlacementGhost(args.Context);
-      if (!ghost) return;
+    Helper.Command("hammer_move", "[forward,up,right] - Moves the placement.", (args) => {
+      var ghost = Helper.GetPlacementGhost();
       var amount = Helper.TryParseSizesZYX(ghost, args.Args, 1, "0");
       Position.Move(amount);
       Position.Print(args.Context);
