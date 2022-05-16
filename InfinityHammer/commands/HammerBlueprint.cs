@@ -18,14 +18,16 @@ public class BlueprintObject {
 public class Blueprint {
   public string Name = "";
   public string Description = "";
-  public BlueprintObject[] Objects = new BlueprintObject[0];
+  public List<BlueprintObject> Objects = new();
+  public List<Vector3> SnapPoints = new();
 }
 public class HammerBlueprintCommand {
   private static void PrintSelected(Terminal terminal, Blueprint blueprint) {
     if (Settings.DisableSelectMessages) return;
     Helper.AddMessage(terminal, $"Selected {blueprint.Name}.");
   }
-  private static GameObject BuildObject(Blueprint blueprint) {
+
+  private static GameObject BuildObject(Terminal terminal, Blueprint blueprint) {
     var container = new GameObject();
     // Prevents children from disappearing.
     container.SetActive(false);
@@ -35,10 +37,25 @@ public class HammerBlueprintCommand {
     piece.m_description = blueprint.Description;
     ZNetView.m_forceDisableInit = true;
     foreach (var item in blueprint.Objects) {
-      var obj = Helper.SafeInstantiate(item.Prefab, container);
-      obj.SetActive(true);
-      obj.transform.localPosition = item.Pos;
-      obj.transform.localRotation = item.Rot;
+      try {
+        var obj = Helper.SafeInstantiate(item.Prefab, container);
+        obj.SetActive(true);
+        obj.transform.localPosition = item.Pos;
+        obj.transform.localRotation = item.Rot;
+
+      } catch (InvalidOperationException e) {
+        Helper.AddMessage(terminal, $"Warning: {e.Message}");
+      }
+    }
+    foreach (var position in blueprint.SnapPoints) {
+      GameObject obj = new() {
+        name = "_snappoint",
+        layer = LayerMask.NameToLayer("piece"),
+        tag = "snappoint"
+      };
+      obj.SetActive(false);
+      obj.transform.SetParent(obj.transform);
+      obj.transform.localPosition = position;
     }
     ZNetView.m_forceDisableInit = false;
     return container;
@@ -55,67 +72,88 @@ public class HammerBlueprintCommand {
     var path = Files().FirstOrDefault(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_") == name);
     if (path == null) throw new InvalidOperationException("Error: Blueprint not found.");
     var rows = File.ReadAllLines(path);
-    return new() {
-      Name = rows.Where(row => row.StartsWith("#Name:", StringComparison.Ordinal)).Select(row => row.Split(':')[1]).FirstOrDefault() ?? name,
-      Description = rows.Where(row => row.StartsWith("#Description:", StringComparison.Ordinal)).Select(row => row.Split(':')[1]).FirstOrDefault() ?? "",
-      Objects = rows.Where(row => !row.StartsWith("#", StringComparison.Ordinal)).Select(row => GetBluePrintObject(Path.GetExtension(path), row)).ToArray()
-    };
-  }
-  private static BlueprintObject GetBluePrintObject(string extension, string row) {
-    if (extension == ".vbuild") return GetBuildShareObject(row);
-    if (extension == ".blueprint") return GetPlanBuildObject(row);
+    var extension = Path.GetExtension(path);
+    Blueprint bp = new() { Name = name };
+    if (extension == ".vbuild") return GetBuildShare(bp, rows);
+    if (extension == ".blueprint") return GetPlanBuild(bp, rows);
     throw new InvalidOperationException("Unknown file format.");
+  }
+  private static Blueprint GetPlanBuild(Blueprint bp, string[] rows) {
+    var piece = true;
+    foreach (var row in rows) {
+      if (row.StartsWith("#name:", StringComparison.OrdinalIgnoreCase))
+        bp.Name = row.Split(':')[1];
+      else if (row.StartsWith("#description:", StringComparison.OrdinalIgnoreCase))
+        bp.Description = row.Split(':')[1];
+      else if (row.StartsWith("#snappoints", StringComparison.OrdinalIgnoreCase))
+        piece = false;
+      else if (row.StartsWith("#pieces", StringComparison.OrdinalIgnoreCase))
+        piece = true;
+      else if (row.StartsWith("#", StringComparison.Ordinal))
+        continue;
+      else if (piece)
+        bp.Objects.Add(GetPlanBuildObject(row));
+      else
+        bp.SnapPoints.Add(GetPlanBuildSnapPoint(row));
+    }
+    return bp;
   }
   private static BlueprintObject GetPlanBuildObject(string row) {
     if (row.IndexOf(',') > -1) row = row.Replace(',', '.');
     var split = row.Split(';');
     var name = split[0];
-    var posX = InvariantFloat(split[2]);
-    var posY = InvariantFloat(split[3]);
-    var posZ = InvariantFloat(split[4]);
-    var rotX = InvariantFloat(split[5]);
-    var rotY = InvariantFloat(split[6]);
-    var rotZ = InvariantFloat(split[7]);
-    var rotW = InvariantFloat(split[8]);
+    var posX = InvariantFloat(split, 2);
+    var posY = InvariantFloat(split, 3);
+    var posZ = InvariantFloat(split, 4);
+    var rotX = InvariantFloat(split, 5);
+    var rotY = InvariantFloat(split, 6);
+    var rotZ = InvariantFloat(split, 7);
+    var rotW = InvariantFloat(split, 8);
     return new BlueprintObject(name, posX, posY, posZ, rotX, rotY, rotZ, rotW);
+  }
+  private static Vector3 GetPlanBuildSnapPoint(string row) {
+    if (row.IndexOf(',') > -1) row = row.Replace(',', '.');
+    var split = row.Split(';');
+    var x = InvariantFloat(split, 0);
+    var y = InvariantFloat(split, 1);
+    var z = InvariantFloat(split, 2);
+    return new Vector3(x, y, z);
+  }
+  private static Blueprint GetBuildShare(Blueprint bp, string[] rows) {
+    bp.Objects = rows.Select(GetBuildShareObject).ToList();
+    return bp;
   }
   private static BlueprintObject GetBuildShareObject(string row) {
     if (row.IndexOf(',') > -1) row = row.Replace(',', '.');
     var split = row.Split(' ');
     var name = split[0];
-    var rotX = InvariantFloat(split[1]);
-    var rotY = InvariantFloat(split[2]);
-    var rotZ = InvariantFloat(split[3]);
-    var rotW = InvariantFloat(split[4]);
-    var posX = InvariantFloat(split[5]);
-    var posY = InvariantFloat(split[6]);
-    var posZ = InvariantFloat(split[7]);
+    var rotX = InvariantFloat(split, 1);
+    var rotY = InvariantFloat(split, 2);
+    var rotZ = InvariantFloat(split, 3);
+    var rotW = InvariantFloat(split, 4);
+    var posX = InvariantFloat(split, 5);
+    var posY = InvariantFloat(split, 6);
+    var posZ = InvariantFloat(split, 7);
     return new BlueprintObject(name, posX, posY, posZ, rotX, rotY, rotZ, rotW);
   }
-  private static float InvariantFloat(string s) {
+  private static float InvariantFloat(string[] row, int index) {
+    if (index >= row.Length) return 0f;
+    var s = row[index];
     if (string.IsNullOrEmpty(s)) return 0f;
     return float.Parse(s, NumberStyles.Any, NumberFormatInfo.InvariantInfo);
   }
 
-
   public HammerBlueprintCommand() {
     CommandWrapper.Register("hammer_blueprint", (int index, int subIndex) => GetBlueprints());
-    new Terminal.ConsoleCommand("hammer_blueprint", "[blueprint file] - Selects the blueprint to be placed.", (args) => {
-      if (!Player.m_localPlayer) return;
-      if (!Settings.IsCheats) {
-        Helper.AddMessage(args.Context, "Error: This command is disabled.");
-        return;
-      }
-      if (args.Length < 2) return;
+    Helper.Command("hammer_blueprint", "[blueprint file] - Selects the blueprint to be placed.", (args) => {
+      Helper.CheatCheck();
+      Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
       Hammer.Equip();
-      try {
-        var blueprint = GetBluePrint(string.Join("_", args.Args.Skip(1)));
-        var obj = BuildObject(blueprint);
-        if (Hammer.SetBlueprint(Player.m_localPlayer, obj))
-          PrintSelected(args.Context, blueprint);
-      } catch (InvalidOperationException e) {
-        Helper.AddMessage(args.Context, e.Message);
-      }
-    }, optionsFetcher: GetBlueprints);
+      var blueprint = GetBluePrint(string.Join("_", args.Args.Skip(1)));
+      var obj = BuildObject(args.Context, blueprint);
+      if (Hammer.SetBlueprint(Player.m_localPlayer, obj))
+        PrintSelected(args.Context, blueprint);
+
+    }, GetBlueprints);
   }
 }

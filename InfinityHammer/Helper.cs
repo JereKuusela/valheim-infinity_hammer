@@ -240,7 +240,7 @@ public static class Helper {
   }
   public static GameObject SafeInstantiate(string name, GameObject parent) {
     var obj = ZNetScene.instance.GetPrefab(name);
-    if (!obj) throw new InvalidOperationException($"Error: Missing object {name}.");
+    if (!obj) throw new InvalidOperationException($"Missing object {name}.");
     obj.SetActive(false);
     var ret = UnityEngine.Object.Instantiate(obj, parent.transform);
     obj.SetActive(true);
@@ -309,12 +309,13 @@ public static class Helper {
   public static void ArgsCheck(Terminal.ConsoleEventArgs args, int amount, string message) {
     if (args.Length < amount) throw new InvalidOperationException(message);
   }
-  public static void Command(string name, string description, Terminal.ConsoleEvent action) {
-    new Terminal.ConsoleCommand(name, description, Helper.Catch(action));
+  public static void Command(string name, string description, Terminal.ConsoleEvent action, Terminal.ConsoleOptionsFetcher? fetcher = null) {
+    new Terminal.ConsoleCommand(name, description, Helper.Catch(action), optionsFetcher: fetcher);
   }
   public static Terminal.ConsoleEvent Catch(Terminal.ConsoleEvent action) =>
     (args) => {
       try {
+        if (!Player.m_localPlayer) throw new InvalidOperationException("Player not found.");
         action(args);
       } catch (InvalidOperationException e) {
         Helper.AddError(args.Context, e.Message);
