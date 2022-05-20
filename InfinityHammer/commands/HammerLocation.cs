@@ -9,9 +9,9 @@ public class HammerLocationCommand {
   }
   private static GameObject SetItem(Terminal terminal, string name, int seed) {
     var location = ZoneSystem.instance.GetLocation(name);
-    if (location == null) throw new InvalidOperationException("Error: Location not found.");
-    if (!location.m_prefab) throw new InvalidOperationException("Error: Invalid location");
-    if (!Hammer.SetLocation(Player.m_localPlayer, location, seed)) throw new InvalidOperationException("Error: Invalid location.");
+    if (location == null) throw new InvalidOperationException("Location not found.");
+    if (!location.m_prefab) throw new InvalidOperationException("Invalid location");
+    if (!Hammer.SetLocation(Player.m_localPlayer, location, seed)) throw new InvalidOperationException("Invalid location.");
     return location.m_prefab;
   }
 
@@ -22,13 +22,9 @@ public class HammerLocationCommand {
       if (index == 2) return CommandWrapper.Info("Any value forces random damage on structures (disabled by default).");
       return null;
     });
-    new Terminal.ConsoleCommand("hammer_location", "[location id] [seed=0] [random damage] - Selects the location to be placed.", (args) => {
-      if (!Player.m_localPlayer) return;
-      if (!Settings.IsCheats) {
-        Helper.AddMessage(args.Context, "Error: This command is disabled.");
-        return;
-      }
-      if (args.Length < 2) return;
+    Helper.Command("hammer_location", "[location id] [seed=0] [random damage] - Selects the location to be placed.", (args) => {
+      Helper.CheatCheck();
+      Helper.ArgsCheck(args, 2, "Missing the location id.");
       Hammer.Equip();
       try {
         Hammer.AllLocationsObjects = args.Length > 2 && args[2] == "all";
@@ -42,6 +38,6 @@ public class HammerLocationCommand {
       } catch (InvalidOperationException e) {
         Helper.AddMessage(args.Context, e.Message);
       }
-    }, optionsFetcher: CommandWrapper.LocationIds);
+    }, CommandWrapper.LocationIds);
   }
 }

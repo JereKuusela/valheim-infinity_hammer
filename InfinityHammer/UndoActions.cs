@@ -44,10 +44,10 @@ public class UndoHelper {
   }
   public static ZDO Place(ZDO zdo) {
     var prefab = ZNetScene.instance.GetPrefab(zdo.GetPrefab());
-    if (!prefab) throw new InvalidOperationException("Error: Invalid prefab");
+    if (!prefab) throw new InvalidOperationException("Invalid prefab");
     var obj = UnityEngine.Object.Instantiate<GameObject>(prefab, zdo.GetPosition(), zdo.GetRotation());
     var netView = obj.GetComponent<ZNetView>();
-    if (!netView) throw new InvalidOperationException("Error: No view");
+    if (!netView) throw new InvalidOperationException("No view");
     var added = netView.GetZDO();
     netView.SetLocalScale(zdo.GetVec3("scale", obj.transform.localScale));
     Helper.CopyData(zdo.Clone(), added);

@@ -75,6 +75,17 @@ public class FreezePlacementMarker {
   static Vector3 CurrentPoint;
   static bool CurrentSuccess = false;
   static void Postfix(ref Vector3 point, ref Vector3 normal, ref Piece piece, ref Heightmap heightmap, ref Collider waterSurface, ref bool __result) {
+    if (__result && Grid.Enabled) {
+      point = Grid.Apply(point, heightmap ? Vector3.up : normal);
+      if (heightmap) {
+        // +2 meters so that floors and small objects will be hit by the collision check.
+        point.y = ZoneSystem.instance.GetGroundHeight(point) + 2f;
+        if (Physics.Raycast(point, Vector3.down, out var raycastHit, 50f, Player.m_localPlayer.m_placeRayMask)) {
+          point = raycastHit.point;
+          normal = raycastHit.normal;
+        }
+      }
+    }
     if (Position.Override.HasValue) {
       point = CurrentPoint;
       normal = CurrentNormal;
@@ -113,6 +124,28 @@ public class OverridePlacementGhost {
   }
 }
 
+public static class Grid {
+  public static bool Enabled => Precision != 0f;
+  private static float Precision;
+  private static Vector3 Center;
+  public static Vector3 Apply(Vector3 point, Vector3 normal) {
+    if (!Enabled) return point;
+    var rotation = Quaternion.FromToRotation(Vector3.up, normal);
+    point = rotation * point;
+    var center = rotation * Center;
+    point.x = center.x + Mathf.Round((point.x - center.x) / Precision) * Precision;
+    point.z = center.z + Mathf.Round((point.z - center.z) / Precision) * Precision;
+    return Quaternion.Inverse(rotation) * point;
+  }
+  public static void Set(float precision, Vector3 center) {
+    if (Precision == precision) {
+      Precision = 0f;
+    } else {
+      Center = center;
+      Precision = precision;
+    }
+  }
+}
 public static class Position {
   public static Vector3? Override = null;
   public static Vector3 Offset = Vector3.zero;

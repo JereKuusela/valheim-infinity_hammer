@@ -91,6 +91,14 @@ public static class Helper {
     if (split.Length > 2) vector.x = Helper.ParseFloat(split[2]);
     return vector;
   }
+  public static Vector3 ParseXYZ(string value) {
+    var vector = Vector3.zero;
+    var split = value.Split(',');
+    if (split.Length > 0) vector.x = Helper.ParseFloat(split[0]);
+    if (split.Length > 1) vector.y = Helper.ParseFloat(split[1]);
+    if (split.Length > 2) vector.z = Helper.ParseFloat(split[2]);
+    return vector;
+  }
   public static Range<Vector3Int> ParseZYXRange(string value) {
     var min = Vector3Int.zero;
     var max = Vector3Int.zero;
@@ -148,9 +156,9 @@ public static class Helper {
     var multiplier = ParseMultiplier(value);
     var size = Vector3.one;
     if (value.Contains("auto")) {
-      if (!ghost) throw new InvalidOperationException("Error: No placement ghost.");
+      if (!ghost) throw new InvalidOperationException("No placement ghost.");
       if (!Bounds.Get.TryGetValue(Utils.GetPrefabName(ghost), out size))
-        throw new InvalidOperationException("Error: Missing object dimensions. Try placing the object to fix the issue.");
+        throw new InvalidOperationException("Missing object dimensions. Try placing the object to fix the issue.");
     }
     return multiplier * size;
   }
@@ -228,7 +236,7 @@ public static class Helper {
   }
   public static Player GetPlayer() {
     var player = Player.m_localPlayer;
-    if (!player) throw new InvalidOperationException("Error: No player.");
+    if (!player) throw new InvalidOperationException("No player.");
     return player;
   }
   ///<summary>Initializing the copy as inactive is the best way to avoid any script errors. ZNet stuff also won't run.</summary>
@@ -305,6 +313,9 @@ public static class Helper {
   public static bool IsValid(ZDO zdo) => zdo != null && zdo.IsValid();
   public static void CheatCheck() {
     if (!Settings.IsCheats) throw new InvalidOperationException("This command is disabled.");
+  }
+  public static void EnabledCheck() {
+    if (!Settings.Enabled) throw new InvalidOperationException("Infinity Hammer is disabled.");
   }
   public static void ArgsCheck(Terminal.ConsoleEventArgs args, int amount, string message) {
     if (args.Length < amount) throw new InvalidOperationException(message);

@@ -43,5 +43,6 @@ public class SetCommands {
     new HammerStackCommand();
     new HammerUndoCommand();
     new HammerFreezeCommand();
+    new HammerGridCommand();
   }
 }

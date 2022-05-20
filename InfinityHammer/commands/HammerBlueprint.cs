@@ -70,7 +70,7 @@ public class HammerBlueprintCommand {
   private static List<string> GetBlueprints() => Files().Select(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_")).ToList();
   private static Blueprint GetBluePrint(string name) {
     var path = Files().FirstOrDefault(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_") == name);
-    if (path == null) throw new InvalidOperationException("Error: Blueprint not found.");
+    if (path == null) throw new InvalidOperationException("Blueprint not found.");
     var rows = File.ReadAllLines(path);
     var extension = Path.GetExtension(path);
     Blueprint bp = new() { Name = name };

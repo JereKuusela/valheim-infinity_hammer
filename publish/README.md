@@ -34,6 +34,7 @@ Note: Some commands have a direction parameter. These are intended for mouse whe
 - `hammer_blueprint [file name]`: Selects a Build Share or a Plan Build blueprint located on your computer.
 - `hammer_config [key] [value]`: Toggles or sets configuration values. For lists, the given value is toggled on or off (`remove_blacklist` or `select_blacklist`).
 - `hammer_freeze`: Toggles whether the mouse affects placement position. Allows moving around while the object's position is frozen.
+- `hammer_grid [precision] [center=current]`: Restricts possible placement coordinates. Using the same command removes the restriction.
 - `hammer_location [location_id] [seed=0] [random damage]`: Selects a location by id. Allows setting the random result with seed ("all" value enables all child objects).
 - `hammer_move [forward,up,right]`: Moves the placement ghost offset for precise placement. Auto value can be used for the object size.
 - `hammer_move_backward [meters or number*auto] [direction=1]`: Moves the placement towards the backward direction.
@@ -228,6 +229,9 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 # Changelog
 
 - v1.14
+	- Adds support for PlanBuild snappoints.
+	- Adds support for placing blueprints even when some objects are missing.
+	- Adds a new command `hammer_grid` to restrict the possible placement coordinates.
 	- Improves error handling.
 	- Fixes the snapping disconnecting with the precise placement (non-freeze).
 
