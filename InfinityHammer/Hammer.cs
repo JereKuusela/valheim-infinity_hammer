@@ -14,16 +14,16 @@ public static class Hammer {
   public static GameObject GhostPrefab = null;
 #nullable enable
   ///<summary>Copy of the state.</summary>
-  public static ZDO? State = null;
+  public static ZDO[] State = new ZDO[0];
   public static bool AllLocationsObjects = false;
   public static bool RandomLocationDamage = false;
   public static PrefabType Type = PrefabType.Default;
 
-  public static void CopyState(Piece obj) {
-    if (State == null || !Settings.CopyState || !obj.m_nview) return;
-    var zdo = obj.m_nview.GetZDO();
+  public static void CopyState(ZNetView view, int index = 0) {
+    if (State.Length <= index || !Settings.CopyState || !view) return;
+    var zdo = view.GetZDO();
     if (!zdo.IsValid()) return;
-    Helper.CopyData(State.Clone(), zdo);
+    Helper.CopyData(State[index].Clone(), zdo);
   }
 
   private static bool IsBuildPiece(Player player, GameObject obj)
@@ -37,12 +37,12 @@ public static class Hammer {
     RemoveSelection();
     if (Settings.CopyState) {
       GhostPrefab = Helper.SafeInstantiate(obj);
-      State = state == null ? null : state.Clone();
+      State = state == null ? new ZDO[0] : new ZDO[] { state.Clone() };
     } else {
       var basePrefab = ZNetScene.instance.GetPrefab(Utils.GetPrefabName(obj));
       GhostPrefab = Helper.SafeInstantiate(basePrefab);
       GhostPrefab.transform.localScale = obj.transform.localScale;
-      State = null;
+      State = new ZDO[0];
     }
     Helper.EnsurePiece(GhostPrefab);
     player.SetupPlacementGhost();
@@ -50,12 +50,13 @@ public static class Hammer {
     return true;
   }
   ///<summary>Most logic in the command.</summary>
-  public static bool SetBlueprint(Player player, GameObject obj) {
+  public static bool SetBlueprint(Player player, GameObject obj, ZDO[] data) {
     if (!player) return false;
     RemoveSelection();
     GhostPrefab = obj;
     player.SetupPlacementGhost();
     Type = PrefabType.Blueprint;
+    State = data;
     return true;
   }
   ///<summary>Sets the sample object while ensuring it has the needed Piece component.</summary>
@@ -64,9 +65,10 @@ public static class Hammer {
     RemoveSelection();
     GhostPrefab = Helper.SafeInstantiateLocation(location, AllLocationsObjects ? null : seed);
     Helper.EnsurePiece(GhostPrefab);
-    State = new ZDO();
-    State.Set("location", location.m_prefab.name.GetStableHashCode());
-    State.Set("seed", seed);
+    ZDO state = new();
+    state.Set("location", location.m_prefab.name.GetStableHashCode());
+    state.Set("seed", seed);
+    State = new ZDO[] { state };
     player.SetupPlacementGhost();
     Type = PrefabType.Location;
     return true;
@@ -74,7 +76,7 @@ public static class Hammer {
   public static void RemoveSelection() {
     if (GhostPrefab) ZNetScene.instance.Destroy(GhostPrefab);
     GhostPrefab = null;
-    State = null;
+    State = new ZDO[0];
     Type = PrefabType.Default;
     if (Settings.UnfreezeOnSelect) Position.Unfreeze();
   }
@@ -124,9 +126,9 @@ public static class Hammer {
   ///<summary>Replaces LocationProxy with the actual location.</summary>
   public static void SpawnLocation(ZNetView view) {
     Helper.RemoveZDO(view.GetZDO());
-    if (State == null) return;
-    var prefab = State.GetInt("location", 0);
-    var seed = State.GetInt("seed", 0);
+    if (State.Length < 1) return;
+    var prefab = State[0].GetInt("location", 0);
+    var seed = State[0].GetInt("seed", 0);
     var location = ZoneSystem.instance.GetLocation(prefab);
     var ghost = Helper.GetPlacementGhost();
     var position = ghost.transform.position;
@@ -140,12 +142,6 @@ public static class Hammer {
     }
     CustomizeSpawnLocation.RandomDamage = null;
     CustomizeSpawnLocation.AllViews = false;
-  }
-  ///<summary>Each ZDO must be an own object.</summary>
-  public static void SeparateZDOs(GameObject obj) {
-    foreach (var view in obj.GetComponentsInChildren<ZNetView>()) {
-      view.transform.SetParent(null);
-    }
   }
   ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
   public static void PostProcessPlaced(GameObject obj) {

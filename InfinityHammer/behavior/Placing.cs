@@ -56,6 +56,7 @@ public class PlacePiece {
         var prefab = ZNetScene.instance.GetPrefab(name);
         if (prefab) {
           childObj = UnityEngine.Object.Instantiate(prefab, childObj.transform.position, childObj.transform.rotation);
+          Hammer.CopyState(childObj.GetComponent<ZNetView>(), i);
           Hammer.PostProcessPlaced(childObj);
         }
       }
@@ -72,7 +73,7 @@ public class PlacePiece {
       Hammer.SpawnLocation(view);
       UndoHelper.StopTracking();
     } else {
-      Hammer.CopyState(piece);
+      Hammer.CopyState(view);
       Hammer.PostProcessPlaced(piece.gameObject);
       UndoHelper.CreateObject(piece.gameObject);
     }
@@ -151,8 +152,8 @@ public class CustomizeSpawnLocation {
     if (RandomDamage.HasValue) {
       WearNTear.m_randomInitialDamage = RandomDamage.Value;
     }
-    if (AllViews && Hammer.State != null) {
-      var location = ZoneSystem.instance.GetLocation(Hammer.State.GetInt("location", 0));
+    if (AllViews && Hammer.State.Length > 0) {
+      var location = ZoneSystem.instance.GetLocation(Hammer.State[0].GetInt("location", 0));
       if (location != null) {
         foreach (var view in location.m_netViews)
           view.gameObject.SetActive(true);

@@ -59,6 +59,7 @@ Note: Some commands have a direction parameter. These are intended for mouse whe
 - `hammer_rotate_z [degrees/number*random/random] [direction=1]`: Rotates around the Z axis.
 - `hammer_rotate_z [number*random] [direction=1]`: Randomly rotates around the Z axis with a given step size. For example `3*random` would randomly rotate 0, 120 or 240 degrees.
 - `hammer_rotate_z [random] [direction=1]`: Randomly rotates around the Z axis depending on the object shape (90 or 180 degrees precision).
+- `hammer_save [file name]`: Saves the selection to a blueprint.
 - `hammer_scale [scale=1]`: Sets the object scale (if the object can be scaled). Number or x,y,z.
 - `hammer_scale_up`: Scales up the object (if the object can be scaled).
 - `hammer_scale_down`: Scales down the object (if the object can be scaled).
@@ -227,6 +228,9 @@ If "Disable loot" is enabled, destroying creatures or structures won't drop loot
 Blacklist can be used to avoid destroying critical objects like locations. For example `hammer_config remove_blacklist LocationProxy`.
 
 # Changelog
+
+- v1.15
+	- Adds a new command `hammer_save` to create blueprints with data.
 
 - v1.14
 	- Adds support for PlanBuild snappoints.

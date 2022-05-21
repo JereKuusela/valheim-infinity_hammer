@@ -3,7 +3,7 @@ using BepInEx.Bootstrap;
 using BepInEx.Logging;
 using HarmonyLib;
 namespace InfinityHammer;
-[BepInPlugin("valheim.jerekuusela.infinity_hammer", "Infinity Hammer", "1.14.0.0")]
+[BepInPlugin("valheim.jerekuusela.infinity_hammer", "Infinity Hammer", "1.15.0.0")]
 [BepInDependency("com.rolopogo.gizmo.comfy", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("m3to.mods.GizmoReloaded", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("valheim.jerekuusela.server_devcommands", BepInDependency.DependencyFlags.SoftDependency)]
@@ -44,5 +44,6 @@ public class SetCommands {
     new HammerUndoCommand();
     new HammerFreezeCommand();
     new HammerGridCommand();
+    new HammerSaveCommand();
   }
 }
