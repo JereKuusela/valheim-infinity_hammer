@@ -199,7 +199,8 @@ public static class Helper {
     AddMessage(context, $"Error: {message}", priority);
   }
   public static void AddMessage(Terminal context, string message, bool priority = true) {
-    context.AddString(message);
+    if (context == Console.instance || Settings.ChatOutput)
+      context.AddString(message);
     var hud = MessageHud.instance;
     if (!hud || Settings.DisableMessages) return;
     if (priority) {

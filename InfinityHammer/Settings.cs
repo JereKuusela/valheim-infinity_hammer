@@ -39,6 +39,8 @@ public class Settings {
   public static bool DisableOffsetMessages => configDisableOffsetMessages.Value;
   public static ConfigEntry<bool> configDisableScaleMessages;
   public static bool DisableScaleMessages => configDisableScaleMessages.Value;
+  public static ConfigEntry<bool> configChatOutput;
+  public static bool ChatOutput => configChatOutput.Value;
   public static ConfigEntry<bool> configDisableLoot;
   public static bool DisableLoot => configDisableLoot.Value && IsCheats;
   public static ConfigEntry<bool> configRepairAnything;
@@ -137,6 +139,7 @@ public class Settings {
     configDisableOffsetMessages = config.Bind(section, "Disable offset messages", false, "Disables messages from changing placement offset.");
     configDisableScaleMessages = config.Bind(section, "Disable scale messages", false, "Disables messages from changing the scale.");
     configDisableSelectMessages = config.Bind(section, "Disable select messages", false, "Disables messages from selecting objects.");
+    configChatOutput = config.Bind(section, "Chat output", false, "Sends messages to the chat window from bound keys.");
   }
 
   public static List<string> Options = new() {
@@ -173,6 +176,7 @@ public class Settings {
     "disable_offset_messages",
     "disable_scale_messages",
     "disable_select_messages",
+    "chat_output",
     "remove_area",
     "binds",
     "unfreeze_on_unequip",
@@ -226,6 +230,7 @@ public class Settings {
     if (key == "disable_offset_messages") Toggle(context, configDisableOffsetMessages, "Offset messages", value, true);
     if (key == "disable_scale_messages") Toggle(context, configDisableScaleMessages, "Scale messages", value, true);
     if (key == "disable_select_messages") Toggle(context, configDisableSelectMessages, "Select messages", value, true);
+    if (key == "chat_output") Toggle(context, configChatOutput, "Chat output", value);
     if (key == "auto_equip") Toggle(context, configAutoEquip, "Auto equip", value);
     if (key == "enable_undo") Toggle(context, configEnableUndo, "Undo", value);
     if (key == "disable_marker") Toggle(context, configHidePlacementMarker, "Placement marker", value, true);

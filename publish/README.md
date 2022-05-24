@@ -178,6 +178,7 @@ On servers, above features are disabled without cheat access (except Copy rotate
 
 Messages from the mod can be configured with following settings:
 
+- `chat_output`: Sends messages to the chat window (when using binds or commands in the chat window).
 - `disable_messages`: Disables all messages from the mod (console output not affected).
 - `disable_offset_messages`: Disables messages from changing the placement offset.
 - `disable_scale_messages`: Disables messages from changing the object scale.
@@ -232,6 +233,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 - v1.15
 	- Adds a new command `hammer_save` to create blueprints with data.
 	- Adds support for PlanBuild scaling.
+	- Adds a new setting `chat_output` to control is the output show on the chat window (default `false`).
 
 - v1.14
 	- Adds support for PlanBuild snappoints.
