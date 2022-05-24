@@ -231,6 +231,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 
 - v1.15
 	- Adds a new command `hammer_save` to create blueprints with data.
+	- Adds support for PlanBuild scaling.
 
 - v1.14
 	- Adds support for PlanBuild snappoints.

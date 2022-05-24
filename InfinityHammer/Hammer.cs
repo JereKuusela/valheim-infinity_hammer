@@ -14,16 +14,18 @@ public static class Hammer {
   public static GameObject GhostPrefab = null;
 #nullable enable
   ///<summary>Copy of the state.</summary>
-  public static ZDO[] State = new ZDO[0];
+  public static ZDO?[] State = new ZDO?[0];
   public static bool AllLocationsObjects = false;
   public static bool RandomLocationDamage = false;
   public static PrefabType Type = PrefabType.Default;
 
   public static void CopyState(ZNetView view, int index = 0) {
     if (State.Length <= index || !Settings.CopyState || !view) return;
+    var data = State[index];
+    if (data == null) return;
     var zdo = view.GetZDO();
     if (!zdo.IsValid()) return;
-    Helper.CopyData(State[index].Clone(), zdo);
+    Helper.CopyData(data.Clone(), zdo);
   }
 
   private static bool IsBuildPiece(Player player, GameObject obj)
@@ -50,7 +52,7 @@ public static class Hammer {
     return true;
   }
   ///<summary>Most logic in the command.</summary>
-  public static bool SetBlueprint(Player player, GameObject obj, ZDO[] data) {
+  public static bool SetBlueprint(Player player, GameObject obj, ZDO?[] data) {
     if (!player) return false;
     RemoveSelection();
     GhostPrefab = obj;
@@ -127,8 +129,10 @@ public static class Hammer {
   public static void SpawnLocation(ZNetView view) {
     Helper.RemoveZDO(view.GetZDO());
     if (State.Length < 1) return;
-    var prefab = State[0].GetInt("location", 0);
-    var seed = State[0].GetInt("seed", 0);
+    var data = State[0];
+    if (data == null) return;
+    var prefab = data.GetInt("location", 0);
+    var seed = data.GetInt("seed", 0);
     var location = ZoneSystem.instance.GetLocation(prefab);
     var ghost = Helper.GetPlacementGhost();
     var position = ghost.transform.position;
@@ -148,7 +152,6 @@ public static class Hammer {
     var view = obj.GetComponent<ZNetView>();
     if (!Settings.Enabled || !view) return;
     var zdo = view.GetZDO();
-    Scaling.SetPieceScale(view);
     var piece = obj.GetComponent<Piece>();
     if (piece) {
       piece.m_canBeRemoved = true;

@@ -9,19 +9,14 @@ public class BlueprintObject {
   public string Prefab = "";
   public Vector3 Pos;
   public Quaternion Rot;
+  public Vector3 Scale;
   public string ExtraInfo;
-  public ZDO Data;
-  public BlueprintObject(string name, float posX, float posY, float posZ, float rotX, float rotY, float rotZ, float rotW, string info, ZDO data) {
-    Prefab = name;
-    Pos = new Vector3(posX, posY, posZ);
-    Rot = new Quaternion(rotX, rotY, rotZ, rotW).normalized;
-    ExtraInfo = info;
-    Data = data;
-  }
-  public BlueprintObject(string name, Vector3 pos, Quaternion rot, string info, ZDO data) {
+  public ZDO? Data;
+  public BlueprintObject(string name, Vector3 pos, Quaternion rot, Vector3 scale, string info, ZDO? data) {
     Prefab = name;
     Pos = pos;
     Rot = rot.normalized;
+    Scale = scale;
     ExtraInfo = info;
     Data = data;
   }
@@ -54,6 +49,7 @@ public class HammerBlueprintCommand {
         obj.SetActive(true);
         obj.transform.localPosition = item.Pos;
         obj.transform.localRotation = item.Rot;
+        obj.transform.localScale = item.Scale;
 
       } catch (InvalidOperationException e) {
         Helper.AddMessage(terminal, $"Warning: {e.Message}");
@@ -72,7 +68,7 @@ public class HammerBlueprintCommand {
     ZNetView.m_forceDisableInit = false;
     return container;
   }
-  private static ZDO[] BuildData(Blueprint blueprint) => blueprint.Objects.Select(obj => obj.Data).ToArray();
+  private static ZDO?[] BuildData(Blueprint blueprint) => blueprint.Objects.Select(obj => obj.Data).ToArray();
   private static IEnumerable<string> Files() {
     if (!Directory.Exists(Settings.PlanBuildFolder)) Directory.CreateDirectory(Settings.PlanBuildFolder);
     if (!Directory.Exists(Settings.BuildShareFolder)) Directory.CreateDirectory(Settings.BuildShareFolder);
@@ -196,13 +192,17 @@ public class HammerBlueprintCommand {
     var rotZ = InvariantFloat(split, 7);
     var rotW = InvariantFloat(split, 8);
     var info = split.Length > 9 ? split[9] : "";
-    var data = split.Length > 10 ? split[10] : "";
-    ZDO zdo = new();
+    var scaleX = InvariantFloat(split, 10, 1f);
+    var scaleY = InvariantFloat(split, 11, 1f);
+    var scaleZ = InvariantFloat(split, 12, 1f);
+    var data = split.Length > 13 ? split[13] : "";
+    ZDO? zdo = null;
     if (data != "") {
       ZPackage pkg = new(data);
+      zdo = new();
       Deserialize(zdo, pkg);
     }
-    return new BlueprintObject(name, posX, posY, posZ, rotX, rotY, rotZ, rotW, info, zdo);
+    return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), new(scaleX, scaleY, scaleZ), info, zdo);
   }
   private static Vector3 GetPlanBuildSnapPoint(string row) {
     if (row.IndexOf(',') > -1) row = row.Replace(',', '.');
@@ -227,12 +227,12 @@ public class HammerBlueprintCommand {
     var posX = InvariantFloat(split, 5);
     var posY = InvariantFloat(split, 6);
     var posZ = InvariantFloat(split, 7);
-    return new BlueprintObject(name, posX, posY, posZ, rotX, rotY, rotZ, rotW, "", new());
+    return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), Vector3.one, "", null);
   }
-  private static float InvariantFloat(string[] row, int index) {
-    if (index >= row.Length) return 0f;
+  private static float InvariantFloat(string[] row, int index, float defaultValue = 0f) {
+    if (index >= row.Length) return defaultValue;
     var s = row[index];
-    if (string.IsNullOrEmpty(s)) return 0f;
+    if (string.IsNullOrEmpty(s)) return defaultValue;
     return float.Parse(s, NumberStyles.Any, NumberFormatInfo.InvariantInfo);
   }
 

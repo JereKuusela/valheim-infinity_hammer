@@ -62,9 +62,9 @@ public static class Scaling {
     else
       Helper.AddMessage(terminal, "Selected object doesn't support scaling.");
   }
-  public static void SetPieceScale(ZNetView view) {
+  public static void SetPieceScale(ZNetView view, GameObject ghost) {
     if (view && view.m_syncInitialScale)
-      view.SetLocalScale(Scale);
+      view.SetLocalScale(ghost.transform.localScale);
   }
 }
 

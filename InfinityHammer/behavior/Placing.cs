@@ -46,18 +46,20 @@ public class PlacePiece {
   }
   static void Postprocess(GameObject obj) {
     Helper.EnsurePiece(obj);
+    var ghost = Helper.GetPlayer().m_placementGhost;
+    if (!ghost) return;
     if (Hammer.Type == PrefabType.Blueprint) {
-      if (!Hammer.GhostPrefab) return;
       UndoHelper.StartTracking();
-      var ghost = Helper.GetPlayer().m_placementGhost;
       for (var i = 0; i < ghost.transform.childCount; i++) {
-        var childObj = ghost.transform.GetChild(i).gameObject;
-        var name = Utils.GetPrefabName(childObj);
+        var ghostObj = ghost.transform.GetChild(i).gameObject;
+        var name = Utils.GetPrefabName(ghostObj);
         var prefab = ZNetScene.instance.GetPrefab(name);
         if (prefab) {
-          childObj = UnityEngine.Object.Instantiate(prefab, childObj.transform.position, childObj.transform.rotation);
-          Hammer.CopyState(childObj.GetComponent<ZNetView>(), i);
+          var childObj = UnityEngine.Object.Instantiate(prefab, ghostObj.transform.position, ghostObj.transform.rotation);
+          var childView = childObj.GetComponent<ZNetView>();
+          Hammer.CopyState(childView, i);
           Hammer.PostProcessPlaced(childObj);
+          Scaling.SetPieceScale(childView, ghostObj);
         }
       }
       UndoHelper.StopTracking();
@@ -75,6 +77,7 @@ public class PlacePiece {
     } else {
       Hammer.CopyState(view);
       Hammer.PostProcessPlaced(piece.gameObject);
+      Scaling.SetPieceScale(view, ghost);
       UndoHelper.CreateObject(piece.gameObject);
     }
   }
@@ -153,10 +156,14 @@ public class CustomizeSpawnLocation {
       WearNTear.m_randomInitialDamage = RandomDamage.Value;
     }
     if (AllViews && Hammer.State.Length > 0) {
-      var location = ZoneSystem.instance.GetLocation(Hammer.State[0].GetInt("location", 0));
-      if (location != null) {
-        foreach (var view in location.m_netViews)
-          view.gameObject.SetActive(true);
+      var data = Hammer.State[0];
+      if (data != null) {
+        var location = ZoneSystem.instance.GetLocation(data.GetInt("location", 0));
+        if (location != null) {
+          foreach (var view in location.m_netViews)
+            view.gameObject.SetActive(true);
+        }
+
       }
     }
   }

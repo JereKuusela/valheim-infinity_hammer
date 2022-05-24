@@ -76,12 +76,12 @@ public class HammerSaveCommand {
     }
   }
   private static void AddSingleObject(Blueprint bp, GameObject obj) {
-    var zdo = Hammer.State.Length > 0 ? Hammer.State[0] : new();
-    bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), Vector3.zero, Quaternion.identity, "", zdo));
+    var zdo = Hammer.State.Length > 0 ? Hammer.State[0] : null;
+    bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), Vector3.zero, Quaternion.identity, obj.transform.localScale, "", zdo));
   }
   private static void AddObject(Blueprint bp, GameObject obj, int index = 0) {
-    var zdo = Hammer.State.Length > index ? Hammer.State[index] : new();
-    bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), obj.transform.localPosition, obj.transform.localRotation, "", zdo));
+    var zdo = Hammer.State.Length > index ? Hammer.State[index] : null;
+    bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), obj.transform.localPosition, obj.transform.localRotation, obj.transform.localScale, "", zdo));
   }
   private static Blueprint BuildBluePrint(Player player, GameObject obj) {
     Blueprint bp = new();
@@ -134,18 +134,24 @@ public class HammerSaveCommand {
   }
   private static string GetPlanBuildObject(BlueprintObject obj) {
     var name = obj.Prefab;
-    var x = InvariantString(obj.Pos.x);
-    var y = InvariantString(obj.Pos.y);
-    var z = InvariantString(obj.Pos.z);
+    var posX = InvariantString(obj.Pos.x);
+    var posY = InvariantString(obj.Pos.y);
+    var posZ = InvariantString(obj.Pos.z);
     var rotX = InvariantString(obj.Rot.x);
     var rotY = InvariantString(obj.Rot.y);
     var rotZ = InvariantString(obj.Rot.z);
     var rotW = InvariantString(obj.Rot.w);
+    var scaleX = InvariantString(obj.Scale.x);
+    var scaleY = InvariantString(obj.Scale.y);
+    var scaleZ = InvariantString(obj.Scale.z);
     var info = obj.ExtraInfo;
-    ZPackage pkg = new();
-    Serialize(obj.Data, pkg);
-    var data = pkg.GetBase64();
-    return $"{name};;{x};{y};{z};{rotX};{rotY};{rotZ};{rotW};{info};{data}";
+    var data = "";
+    if (obj.Data != null) {
+      ZPackage pkg = new();
+      Serialize(obj.Data, pkg);
+      data = pkg.GetBase64();
+    }
+    return $"{name};;{posX};{posY};{posZ};{rotX};{rotY};{rotZ};{rotW};{scaleX};{scaleY};{scaleZ};{info};{data}";
   }
 
   public HammerSaveCommand() {
