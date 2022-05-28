@@ -76,11 +76,11 @@ public class HammerSaveCommand {
     }
   }
   private static void AddSingleObject(Blueprint bp, GameObject obj) {
-    var zdo = Hammer.State.Length > 0 ? Hammer.State[0] : null;
+    var zdo = Selection.GetData();
     bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), Vector3.zero, Quaternion.identity, obj.transform.localScale, "", zdo));
   }
   private static void AddObject(Blueprint bp, GameObject obj, int index = 0) {
-    var zdo = Hammer.State.Length > index ? Hammer.State[index] : null;
+    var zdo = Selection.GetData(index);
     bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), obj.transform.localPosition, obj.transform.localRotation, obj.transform.localScale, "", zdo));
   }
   private static Blueprint BuildBluePrint(Player player, GameObject obj) {
@@ -92,14 +92,14 @@ public class HammerSaveCommand {
       bp.Name = Localization.instance.Localize(piece.m_name);
       bp.Description = piece.m_description;
     }
-    if (Hammer.Type == PrefabType.Object) {
+    if (Selection.Type == SelectionType.Object) {
       AddSingleObject(bp, obj);
       foreach (Transform child in obj.transform) {
         if (child.gameObject.tag == "snappoint")
           bp.SnapPoints.Add(child.localPosition);
       }
     }
-    if (Hammer.Type == PrefabType.Blueprint || Hammer.Type == PrefabType.Location) {
+    if (Selection.Type == SelectionType.Blueprint || Selection.Type == SelectionType.Location) {
       for (var i = 0; i < obj.transform.childCount; i++) {
         var child = obj.transform.GetChild(i);
         if (child.gameObject.tag == "snappoint")

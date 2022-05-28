@@ -1,90 +1,26 @@
-using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer;
-public enum PrefabType {
-  Object,
-  Location,
-  Blueprint,
-  Default
-}
 public static class Hammer {
-#nullable disable
-  ///<summary>Copy of the selected entity. Only needed for the placement ghost because armor and item stands have a different model depending on their state.</summary>
-  public static GameObject GhostPrefab = null;
-#nullable enable
-  ///<summary>Copy of the state.</summary>
-  public static ZDO?[] State = new ZDO?[0];
+
   public static bool AllLocationsObjects = false;
   public static bool RandomLocationDamage = false;
-  public static PrefabType Type = PrefabType.Default;
 
   public static void CopyState(ZNetView view, int index = 0) {
-    if (State.Length <= index || !Settings.CopyState || !view) return;
-    var data = State[index];
-    if (data == null) return;
+    if (Settings.CopyState || !view) return;
     var zdo = view.GetZDO();
-    if (!zdo.IsValid()) return;
-    Helper.CopyData(data.Clone(), zdo);
-  }
-
-  private static bool IsBuildPiece(Player player, GameObject obj)
-    => player.m_buildPieces.m_pieces.Any(piece => Utils.GetPrefabName(obj) == Utils.GetPrefabName(piece));
-
-  ///<summary>Sets the sample object while ensuring it has the needed Piece component.</summary>
-  public static bool Set(Player player, GameObject obj, ZDO? state) {
-    if (!player || !obj) return false;
-    if (obj.GetComponent<Player>()) return false;
-    if (!Settings.AllObjects && !IsBuildPiece(player, obj)) return false;
-    RemoveSelection();
-    if (Settings.CopyState) {
-      GhostPrefab = Helper.SafeInstantiate(obj);
-      State = state == null ? new ZDO[0] : new ZDO[] { state.Clone() };
-    } else {
-      var basePrefab = ZNetScene.instance.GetPrefab(Utils.GetPrefabName(obj));
-      GhostPrefab = Helper.SafeInstantiate(basePrefab);
-      GhostPrefab.transform.localScale = obj.transform.localScale;
-      State = new ZDO[0];
-    }
-    Helper.EnsurePiece(GhostPrefab);
-    player.SetupPlacementGhost();
-    Type = PrefabType.Object;
-    return true;
-  }
-  ///<summary>Most logic in the command.</summary>
-  public static bool SetBlueprint(Player player, GameObject obj, ZDO?[] data) {
-    if (!player) return false;
-    RemoveSelection();
-    GhostPrefab = obj;
-    player.SetupPlacementGhost();
-    Type = PrefabType.Blueprint;
-    State = data;
-    return true;
-  }
-  ///<summary>Sets the sample object while ensuring it has the needed Piece component.</summary>
-  public static bool SetLocation(Player player, ZoneSystem.ZoneLocation location, int seed) {
-    if (!player) return false;
-    RemoveSelection();
-    GhostPrefab = Helper.SafeInstantiateLocation(location, AllLocationsObjects ? null : seed);
-    Helper.EnsurePiece(GhostPrefab);
-    ZDO state = new();
-    state.Set("location", location.m_prefab.name.GetStableHashCode());
-    state.Set("seed", seed);
-    State = new ZDO[] { state };
-    player.SetupPlacementGhost();
-    Type = PrefabType.Location;
-    return true;
+    if (zdo == null || !zdo.IsValid()) return;
+    var data = Selection.GetData(index);
+    if (data == null) return;
+    Helper.CopyData(data, zdo);
   }
   public static void RemoveSelection() {
-    if (GhostPrefab) ZNetScene.instance.Destroy(GhostPrefab);
-    GhostPrefab = null;
-    State = new ZDO[0];
-    Type = PrefabType.Default;
+    Selection.Clear();
     if (Settings.UnfreezeOnSelect) Position.Unfreeze();
   }
   public static void Equip() {
-    var player = Player.m_localPlayer;
-    if (!Settings.AutoEquip || !player) return;
+    var player = Helper.GetPlayer();
+    if (!Settings.AutoEquip) return;
     if (player.GetRightItem()?.m_dropPrefab?.gameObject.name == "Hammer") return;
     var inventory = player.GetInventory();
     var hammer = inventory.m_inventory.Find(item => item.m_dropPrefab.gameObject.name == "Hammer");
@@ -128,8 +64,7 @@ public static class Hammer {
   ///<summary>Replaces LocationProxy with the actual location.</summary>
   public static void SpawnLocation(ZNetView view) {
     Helper.RemoveZDO(view.GetZDO());
-    if (State.Length < 1) return;
-    var data = State[0];
+    var data = Selection.GetData();
     if (data == null) return;
     var prefab = data.GetInt("location", 0);
     var seed = data.GetInt("seed", 0);

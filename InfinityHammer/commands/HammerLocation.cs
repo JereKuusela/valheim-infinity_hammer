@@ -7,13 +7,6 @@ public class HammerLocationCommand {
     var name = obj ? Utils.GetPrefabName(obj) : "";
     Helper.AddMessage(terminal, $"Selected {name}.");
   }
-  private static GameObject SetItem(Terminal terminal, string name, int seed) {
-    var location = ZoneSystem.instance.GetLocation(name);
-    if (location == null) throw new InvalidOperationException("Location not found.");
-    if (!location.m_prefab) throw new InvalidOperationException("Invalid location");
-    if (!Hammer.SetLocation(Player.m_localPlayer, location, seed)) throw new InvalidOperationException("Invalid location.");
-    return location.m_prefab;
-  }
 
   public HammerLocationCommand() {
     CommandWrapper.Register("hammer_location", (int index, int subIndex) => {
@@ -32,7 +25,8 @@ public class HammerLocationCommand {
         var rng = new System.Random();
         var seed = args.TryParameterInt(2, rng.Next());
         if (seed == 0) seed = rng.Next();
-        var selected = SetItem(args.Context, args[1], seed);
+        var location = ZoneSystem.instance.GetLocation(args[1]);
+        var selected = Selection.Set(location, seed);
 
         PrintSelected(args.Context, selected);
       } catch (InvalidOperationException e) {

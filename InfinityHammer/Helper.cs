@@ -296,7 +296,8 @@ public static class Helper {
     UnityEngine.Object.Destroy(obj.GetComponentInChildren<MusicLocation>());
     UnityEngine.Object.Destroy(obj.GetComponentInChildren<SpawnArea>());
   }
-
+  public static bool IsBuildPiece(GameObject obj)
+      => Player.m_localPlayer.m_buildPieces.m_pieces.Any(piece => Utils.GetPrefabName(obj) == Utils.GetPrefabName(piece));
   ///<summary>Placement requires the Piece component.</summary>
   public static void EnsurePiece(GameObject obj) {
     if (obj.GetComponent<Piece>()) return;

@@ -9,8 +9,8 @@ namespace InfinityHammer;
 [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.GetSelectedPiece))]
 public class GetSelectedPiece {
   public static bool Prefix(ref Piece __result) {
-    if (Hammer.GhostPrefab)
-      __result = Hammer.GhostPrefab.GetComponent<Piece>();
+    if (Selection.Ghost)
+      __result = Selection.Ghost.GetComponent<Piece>();
     if (__result) return false;
     return true;
   }
@@ -28,16 +28,17 @@ public class SetSelectedPiece {
 [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
 public class PlacePiece {
   static GameObject GetPrefab(Piece obj) {
-    if (Hammer.Type == PrefabType.Default) return obj.gameObject;
+    var type = Selection.Type;
+    if (type == SelectionType.Default) return obj.gameObject;
     var ghost = Helper.GetPlayer().m_placementGhost;
     if (!ghost) return obj.gameObject;
     var name = Utils.GetPrefabName(ghost);
 
-    if (Hammer.Type == PrefabType.Object)
+    if (type == SelectionType.Object)
       return ZNetScene.instance.GetPrefab(name);
-    if (Hammer.Type == PrefabType.Location)
+    if (type == SelectionType.Location)
       return ZoneSystem.instance.m_locationProxyPrefab;
-    if (Hammer.Type == PrefabType.Blueprint) {
+    if (type == SelectionType.Blueprint) {
       var dummy = new GameObject();
       dummy.name = "Blueprint";
       return dummy;
@@ -48,7 +49,7 @@ public class PlacePiece {
     Helper.EnsurePiece(obj);
     var ghost = Helper.GetPlayer().m_placementGhost;
     if (!ghost) return;
-    if (Hammer.Type == PrefabType.Blueprint) {
+    if (Selection.Type == SelectionType.Blueprint) {
       UndoHelper.StartTracking();
       for (var i = 0; i < ghost.transform.childCount; i++) {
         var ghostObj = ghost.transform.GetChild(i).gameObject;
@@ -70,7 +71,7 @@ public class PlacePiece {
     // Hoe adds pieces too.
     if (!view) return;
     var piece = obj.GetComponent<Piece>();
-    if (Hammer.Type == PrefabType.Location && obj.GetComponent<LocationProxy>()) {
+    if (Selection.Type == SelectionType.Location && obj.GetComponent<LocationProxy>()) {
       UndoHelper.StartTracking();
       Hammer.SpawnLocation(view);
       UndoHelper.StopTracking();
@@ -155,8 +156,8 @@ public class CustomizeSpawnLocation {
     if (RandomDamage.HasValue) {
       WearNTear.m_randomInitialDamage = RandomDamage.Value;
     }
-    if (AllViews && Hammer.State.Length > 0) {
-      var data = Hammer.State[0];
+    if (AllViews) {
+      var data = Selection.GetData();
       if (data != null) {
         var location = ZoneSystem.instance.GetLocation(data.GetInt("location", 0));
         if (location != null) {

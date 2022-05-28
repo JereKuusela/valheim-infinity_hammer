@@ -5,70 +5,12 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 namespace InfinityHammer;
-public class BlueprintObject {
-  public string Prefab = "";
-  public Vector3 Pos;
-  public Quaternion Rot;
-  public Vector3 Scale;
-  public string ExtraInfo;
-  public ZDO? Data;
-  public BlueprintObject(string name, Vector3 pos, Quaternion rot, Vector3 scale, string info, ZDO? data) {
-    Prefab = name;
-    Pos = pos;
-    Rot = rot.normalized;
-    Scale = scale;
-    ExtraInfo = info;
-    Data = data;
-  }
-}
-public class Blueprint {
-  public string Name = "";
-  public string Description = "";
-  public string Creator = "";
-  public List<BlueprintObject> Objects = new();
-  public List<Vector3> SnapPoints = new();
-}
 public class HammerBlueprintCommand {
-  private static void PrintSelected(Terminal terminal, Blueprint blueprint) {
+  private static void PrintSelected(Terminal terminal, string name) {
     if (Settings.DisableSelectMessages) return;
-    Helper.AddMessage(terminal, $"Selected {blueprint.Name}.");
+    Helper.AddMessage(terminal, $"Selected {name}.");
   }
 
-  private static GameObject BuildObject(Terminal terminal, Blueprint blueprint) {
-    var container = new GameObject();
-    // Prevents children from disappearing.
-    container.SetActive(false);
-    container.name = blueprint.Name;
-    var piece = container.AddComponent<Piece>();
-    piece.m_name = blueprint.Name;
-    piece.m_description = blueprint.Description;
-    ZNetView.m_forceDisableInit = true;
-    foreach (var item in blueprint.Objects) {
-      try {
-        var obj = Helper.SafeInstantiate(item.Prefab, container);
-        obj.SetActive(true);
-        obj.transform.localPosition = item.Pos;
-        obj.transform.localRotation = item.Rot;
-        obj.transform.localScale = item.Scale;
-
-      } catch (InvalidOperationException e) {
-        Helper.AddMessage(terminal, $"Warning: {e.Message}");
-      }
-    }
-    foreach (var position in blueprint.SnapPoints) {
-      GameObject obj = new() {
-        name = "_snappoint",
-        layer = LayerMask.NameToLayer("piece"),
-        tag = "snappoint"
-      };
-      obj.SetActive(false);
-      obj.transform.SetParent(obj.transform);
-      obj.transform.localPosition = position;
-    }
-    ZNetView.m_forceDisableInit = false;
-    return container;
-  }
-  private static ZDO?[] BuildData(Blueprint blueprint) => blueprint.Objects.Select(obj => obj.Data).ToArray();
   private static IEnumerable<string> Files() {
     if (!Directory.Exists(Settings.PlanBuildFolder)) Directory.CreateDirectory(Settings.PlanBuildFolder);
     if (!Directory.Exists(Settings.BuildShareFolder)) Directory.CreateDirectory(Settings.BuildShareFolder);
@@ -242,11 +184,9 @@ public class HammerBlueprintCommand {
       Helper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
       Hammer.Equip();
-      var blueprint = GetBluePrint(string.Join("_", args.Args.Skip(1)));
-      var obj = BuildObject(args.Context, blueprint);
-      var data = BuildData(blueprint);
-      if (Hammer.SetBlueprint(Player.m_localPlayer, obj, data))
-        PrintSelected(args.Context, blueprint);
+      var bp = GetBluePrint(string.Join("_", args.Args.Skip(1)));
+      var obj = Selection.Set(args.Context, bp);
+      PrintSelected(args.Context, bp.Name);
 
     }, GetBlueprints);
   }
