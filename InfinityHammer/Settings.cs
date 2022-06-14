@@ -65,8 +65,6 @@ public class Settings {
   public static bool InfiniteHealth => configInfiniteHealth.Value && IsCheats;
   public static ConfigEntry<bool> configCopyRotation;
   public static bool CopyRotation => configCopyRotation.Value && Enabled;
-  public static ConfigEntry<string> configUndoLimit;
-  public static int UndoLimit => (int)Helper.ParseFloat(configUndoLimit.Value, 0f);
   public static ConfigEntry<string> configRemoveArea;
   public static float RemoveArea => Enabled ? Helper.ParseFloat(configRemoveArea.Value, 0f) : 0f;
   public static ConfigEntry<string> configSelectRange;
@@ -127,8 +125,6 @@ public class Settings {
     configHidePlacementMarker = config.Bind(section, "No placement marker", false, "Hides the yellow placement marker (also affects Gizmo mod).");
     configIgnoreOtherRestrictions = config.Bind(section, "Ignore other restrictions", true, "Ignores any other restrictions (material, biome, etc.)");
     configScaleStep = config.Bind(section, "Scaling step", "0.05", "How much each scale up/down affects the size");
-    configUndoLimit = config.Bind(section, "Max undo steps", "50", "How many undo actions are stored.");
-    configUndoLimit.SettingChanged += (s, e) => UndoManager.MaxSteps = UndoLimit;
     section = "Items";
     configRemoveBlacklist = config.Bind(section, "Remove blacklist", "", "Object ids separated by , that can't be removed.");
     configSelectBlacklist = config.Bind(section, "Select blacklist", "", "Object ids separated by , that can't be selected.");
@@ -160,7 +156,6 @@ public class Settings {
     "remove_anything",
     "ignore_other_restrictions",
     "scaling_step",
-    "max_undo_steps",
     "no_creator",
     "overwrite_health",
     "repair_anything",
@@ -288,10 +283,6 @@ public class Settings {
     if (key == "scaling_step") {
       configScaleStep.Value = value;
       Helper.AddMessage(context, $"Scaling step set to {value}%.");
-    }
-    if (key == "max_undo_steps") {
-      configUndoLimit.Value = value;
-      Helper.AddMessage(context, $"Max undo steps set to {value}.");
     }
     if (key == "overwrite_health") {
       configOverwriteHealth.Value = value;

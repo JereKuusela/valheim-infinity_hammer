@@ -152,7 +152,6 @@ Following powers are available with `hammer_config` command:
 - Ignore other restrictions (default: `true`, key: `ignore_other_restrictions`): Removes any other restrictions (for example campfires can be built on wood floors).
 - Ignore wards (default: `true`, key: `ignore_wards`): Wards no longer prevent building.
 - Infinite health (default: `false`, key: `infinite_health`): Sets the Overwrite health setting to 10E30.
-- Max undo steps (default: `50`, key: `max_undo_steps`): How many undo actions are stored (ignored if Server Devcommands is installed).
 - No build cost (default: `true`, key: `no_build_cost`): Removes resource cost and crafting station requirement.
 - No creator (default: `false`, key: `no_creator`): Builds without setting the creator information.
 - No durability loss (default: `true`, key: `no_durability_loss`): Hammer auto-repairs used durability.
@@ -234,6 +233,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds a new command `hammer_save` to create blueprints with data.
 	- Adds support for PlanBuild scaling.
 	- Adds a new setting `chat_output` to control is the output show on the chat window (default `false`).
+	- Removes the setting `max_undo_steps` as obsolete (usually Server Devcommands installed).
 
 - v1.14
 	- Adds support for PlanBuild snappoints.
