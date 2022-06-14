@@ -91,8 +91,9 @@ public static class Helper {
     if (split.Length > 2) vector.x = Helper.ParseFloat(split[2]);
     return vector;
   }
-  public static Vector3 ParseXYZ(string value) {
-    var vector = Vector3.zero;
+  public static Vector3 ParseXYZ(string value) => ParseXYZ(value, Vector3.zero);
+  public static Vector3 ParseXYZ(string value, Vector3 defaultValue) {
+    var vector = defaultValue;
     var split = value.Split(',');
     if (split.Length > 0) vector.x = Helper.ParseFloat(split[0]);
     if (split.Length > 1) vector.y = Helper.ParseFloat(split[1]);
