@@ -39,7 +39,6 @@ public class HammerParameters {
         Position = Parse.TryVectorXZY(values, Position);
       if (name == "scale")
         Scale = Parse.TryScale(values);
-
     }
   }
 }

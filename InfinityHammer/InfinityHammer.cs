@@ -24,6 +24,10 @@ public class InfinityHammer : BaseUnityPlugin {
     if (Chainloader.PluginInfos.TryGetValue("m3to.mods.GizmoReloaded", out info))
       GizmoWrapper.InitReloaded(info.Instance.GetType().Assembly);
   }
+
+  public void LateUpdate() {
+    Ruler.Update();
+  }
 }
 
 [HarmonyPatch(typeof(Terminal), nameof(Terminal.InitTerminal))]
@@ -45,5 +49,6 @@ public class SetCommands {
     new HammerFreezeCommand();
     new HammerGridCommand();
     new HammerSaveCommand();
+    new HammerCommandCommand();
   }
 }

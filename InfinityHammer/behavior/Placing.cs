@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
@@ -45,10 +46,62 @@ public class PlacePiece {
     }
     return obj.gameObject;
   }
+  static bool IsParameter(string arg, string par) => arg == par || arg.EndsWith("=" + par, StringComparison.OrdinalIgnoreCase);
+  static string ReplaceEnd(string arg, string par, int amount) => arg.Substring(0, arg.Length - amount) + par;
+
   static void Postprocess(GameObject obj) {
     Helper.EnsurePiece(obj);
     var ghost = Helper.GetPlayer().m_placementGhost;
     if (!ghost) return;
+    var piece = obj.GetComponent<Piece>();
+    if (Selection.Type == SelectionType.Command) {
+      var x = obj.transform.position.x.ToString(CultureInfo.InvariantCulture);
+      var y = obj.transform.position.y.ToString(CultureInfo.InvariantCulture);
+      var z = obj.transform.position.z.ToString(CultureInfo.InvariantCulture);
+      var angle = obj.transform.rotation.eulerAngles.y.ToString(CultureInfo.InvariantCulture);
+      var args = piece.m_description.Split(' ');
+      for (var i = 0; i < args.Length; i++) {
+        var arg = args[i];
+        if (IsParameter(arg, "a"))
+          args[i] = ReplaceEnd(arg, angle, 1);
+        if (IsParameter(arg, "x"))
+          args[i] = ReplaceEnd(arg, x, 1);
+        if (IsParameter(arg, "y"))
+          args[i] = ReplaceEnd(arg, y, 1);
+        if (IsParameter(arg, "z"))
+          args[i] = ReplaceEnd(arg, z, 1);
+        if (IsParameter(arg, "x,y"))
+          args[i] = ReplaceEnd(arg, $"{x},{y}", 3);
+        if (IsParameter(arg, "x,z"))
+          args[i] = ReplaceEnd(arg, $"{x},{z}", 3);
+        if (IsParameter(arg, "y,x"))
+          args[i] = ReplaceEnd(arg, $"{y},{x}", 3);
+        if (IsParameter(arg, "y,z"))
+          args[i] = ReplaceEnd(arg, $"{y},{z}", 3);
+        if (IsParameter(arg, "z,x"))
+          args[i] = ReplaceEnd(arg, $"{z},{x}", 3);
+        if (IsParameter(arg, "z,y"))
+          args[i] = ReplaceEnd(arg, $"{z},{y}", 3);
+        if (IsParameter(arg, "x,y,z"))
+          args[i] = ReplaceEnd(arg, $"{x},{y},{z}", 5);
+        if (IsParameter(arg, "x,z,y"))
+          args[i] = ReplaceEnd(arg, $"{x},{z},{y}", 5);
+        if (IsParameter(arg, "y,x,z"))
+          args[i] = ReplaceEnd(arg, $"{y},{x},{z}", 5);
+        if (IsParameter(arg, "y,z,x"))
+          args[i] = ReplaceEnd(arg, $"{y},{z},{x}", 5);
+        if (IsParameter(arg, "z,x,y"))
+          args[i] = ReplaceEnd(arg, $"{z},{x},{y}", 5);
+        if (IsParameter(arg, "z,y,x"))
+          args[i] = ReplaceEnd(arg, $"{z},{y},{x}", 5);
+      }
+      var command = string.Join(" ", args);
+      if (!Settings.DisableMessages)
+        Console.instance.AddString($"Hammering command: {command}");
+      Console.instance.TryRunCommand(command);
+      UnityEngine.Object.Destroy(obj);
+      return;
+    }
     if (Selection.Type == SelectionType.Multiple) {
       UndoHelper.StartTracking();
       for (var i = 0; i < ghost.transform.childCount; i++) {
@@ -70,7 +123,6 @@ public class PlacePiece {
     var view = obj.GetComponent<ZNetView>();
     // Hoe adds pieces too.
     if (!view) return;
-    var piece = obj.GetComponent<Piece>();
     if (Selection.Type == SelectionType.Location && obj.GetComponent<LocationProxy>()) {
       UndoHelper.StartTracking();
       Hammer.SpawnLocation(view);

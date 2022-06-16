@@ -7,6 +7,7 @@ public enum SelectionType {
   Object,
   Location,
   Multiple,
+  Command,
   Default
 }
 public class SelectionObject {
@@ -97,6 +98,19 @@ public static class Selection {
     ZNetView.m_forceDisableInit = false;
     Helper.GetPlayer().SetupPlacementGhost();
     Type = SelectionType.Multiple;
+    return Ghost;
+  }
+
+  public static GameObject Set(string command) {
+    Clear();
+    Ghost = new GameObject();
+    Ghost.name = "Command";
+    var piece = Ghost.AddComponent<Piece>();
+    piece.m_name = "Command";
+    piece.m_description = command;
+    piece.m_clipEverything = true;
+    Helper.GetPlayer().SetupPlacementGhost();
+    Type = SelectionType.Command;
     return Ghost;
   }
   public static GameObject Set(ZoneSystem.ZoneLocation location, int seed) {
