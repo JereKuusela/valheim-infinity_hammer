@@ -99,7 +99,7 @@ public class HammerSaveCommand {
           bp.SnapPoints.Add(child.localPosition);
       }
     }
-    if (Selection.Type == SelectionType.Blueprint || Selection.Type == SelectionType.Location) {
+    if (Selection.Type == SelectionType.Multiple || Selection.Type == SelectionType.Location) {
       for (var i = 0; i < obj.transform.childCount; i++) {
         var child = obj.transform.GetChild(i);
         if (child.gameObject.tag == "snappoint")

@@ -29,7 +29,14 @@ Note: Some commands have a direction parameter. These are intended for mouse whe
 
 - `hammer`: Selects the hovered object to be placed.
 - `hammer [item id]`: Selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)) to be placed.
-- `hammer [item id] [scale=1]`: Selects an object by id while setting the initial scale (if the object can be scaled). Number or x,y,z.
+- `hammer connect=piece`: Selects the hovered object and all connected pieces.
+- `hammer radius=number`: Selects all nearby objects.
+- `hammer ... scale=number`: Overrides the initial scale (if the object can be scaled). Number or x,z,y.
+- `hammer ... health=number`: Overrides the object health.
+- `hammer ... text=string`: Overrides the sign text.
+- `hammer ... level=number`: Overrides the creature level (stars + 1).
+- `hammer ... stars=number`: Overrides the creature stars (level - 1).
+- `hammer ... from=x,z,y`: Overrides the player position when doing area selection.
 - `hammer_add_piece_components`: Adds the Piece component to every object which allows copying them with PlanBuild mod.
 - `hammer_blueprint [file name]`: Selects a Build Share or a Plan Build blueprint located on your computer.
 - `hammer_config [key] [value]`: Toggles or sets configuration values. For lists, the given value is toggled on or off (`remove_blacklist` or `select_blacklist`).
@@ -228,6 +235,15 @@ If "Disable loot" is enabled, destroying creatures or structures won't drop loot
 Blacklist can be used to avoid destroying critical objects like locations. For example `hammer_config remove_blacklist LocationProxy`.
 
 # Changelog
+
+- v1.16
+	- Adds a new parameter `radius` to the `hammer` command which allows selecting all nearby objects.
+	- Adds a new parameter `connect=piece` to the `hammer` command which allows selecting the hovered object and connected pieces.
+	- Adds a new parameter `health` to the `hammer` command which allows overriding the object health.
+	- Adds new parameters `level` and `stars` to the `hammer` command which allows overriding the creature level.
+	- Adds a new parameter `text` to the `hammer` command which allows setting the sign text.
+	- Fixes the setting `copy_state` not working.
+	- Fixes the `scale` parameter not working on the `hammer` command.
 
 - v1.15
 	- Adds a new command `hammer_save` to create blueprints with data.

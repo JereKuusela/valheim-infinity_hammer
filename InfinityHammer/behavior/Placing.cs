@@ -38,7 +38,7 @@ public class PlacePiece {
       return ZNetScene.instance.GetPrefab(name);
     if (type == SelectionType.Location)
       return ZoneSystem.instance.m_locationProxyPrefab;
-    if (type == SelectionType.Blueprint) {
+    if (type == SelectionType.Multiple) {
       var dummy = new GameObject();
       dummy.name = "Blueprint";
       return dummy;
@@ -49,7 +49,7 @@ public class PlacePiece {
     Helper.EnsurePiece(obj);
     var ghost = Helper.GetPlayer().m_placementGhost;
     if (!ghost) return;
-    if (Selection.Type == SelectionType.Blueprint) {
+    if (Selection.Type == SelectionType.Multiple) {
       UndoHelper.StartTracking();
       for (var i = 0; i < ghost.transform.childCount; i++) {
         var ghostObj = ghost.transform.GetChild(i).gameObject;

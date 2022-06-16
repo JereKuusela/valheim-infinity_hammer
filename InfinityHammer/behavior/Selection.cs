@@ -1,11 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 namespace InfinityHammer;
 public enum SelectionType {
   Object,
   Location,
-  Blueprint,
+  Multiple,
   Default
 }
 public class SelectionObject {
@@ -15,7 +16,7 @@ public class SelectionObject {
   public SelectionObject(string name, Vector3 scale, ZDO? data) {
     Prefab = name;
     Scale = scale;
-    Data = data;
+    Data = data == null ? data : data.Clone();
   }
 }
 public static class Selection {
@@ -35,7 +36,7 @@ public static class Selection {
     Type = SelectionType.Default;
     Objects.Clear();
   }
-  public static GameObject Set(string name) {
+  public static GameObject Set(string name, Vector3? scale) {
     var prefab = ZNetScene.instance.GetPrefab(name);
     if (!prefab) throw new InvalidOperationException("Invalid prefab.");
     if (prefab.GetComponent<Player>()) throw new InvalidOperationException("Players are not valid objects.");
@@ -43,12 +44,15 @@ public static class Selection {
     Clear();
     Type = SelectionType.Object;
     Ghost = Helper.SafeInstantiate(prefab);
-    Selection.Objects.Add(new(name, Vector3.one, null));
+    if (prefab.GetComponent<ZNetView>().m_syncInitialScale)
+      Ghost.transform.localScale = scale ?? Vector3.one;
+    Selection.Objects.Add(new(name, Ghost.transform.localScale, null));
+    Scaling.SetScale(Ghost.transform.localScale);
     Helper.EnsurePiece(Ghost);
     Helper.GetPlayer().SetupPlacementGhost();
     return Ghost;
   }
-  public static GameObject Set(ZNetView view) {
+  public static GameObject Set(ZNetView view, Vector3? scale) {
     var name = Utils.GetPrefabName(view.gameObject);
     var prefab = Settings.CopyState ? view.gameObject : ZNetScene.instance.GetPrefab(name);
     var data = Settings.CopyState ? view.GetZDO() : null;
@@ -59,11 +63,40 @@ public static class Selection {
     Clear();
     Type = SelectionType.Object;
     Ghost = Helper.SafeInstantiate(prefab);
-    Ghost.transform.localScale = view.gameObject.transform.localScale;
-    Objects.Add(new(name, view.gameObject.transform.localScale, data));
+    if (view.m_syncInitialScale)
+      Ghost.transform.localScale = scale ?? view.gameObject.transform.localScale;
+    Objects.Add(new(name, Ghost.transform.localScale, data));
+    Scaling.SetScale(Ghost.transform.localScale);
     Helper.EnsurePiece(Ghost);
     Helper.GetPlayer().SetupPlacementGhost();
     Rotating.UpdatePlacementRotation(view.gameObject);
+    return Ghost;
+  }
+  public static GameObject Set(IEnumerable<ZNetView> views, Vector3? scale) {
+    if (views.Count() == 1)
+      return Set(views.First(), scale);
+    Clear();
+    Ghost = new GameObject();
+    // Prevents children from disappearing.
+    Ghost.SetActive(false);
+    Ghost.name = "Multiple";
+    var piece = Ghost.AddComponent<Piece>();
+    piece.m_name = "Multiple";
+    piece.m_description = "";
+    ZNetView.m_forceDisableInit = true;
+    foreach (var item in views) {
+      var name = Utils.GetPrefabName(item.gameObject);
+      var obj = Helper.SafeInstantiate(name, Ghost);
+      obj.SetActive(true);
+      obj.transform.position = item.transform.position;
+      obj.transform.rotation = item.transform.rotation;
+      if (item.m_syncInitialScale)
+        obj.transform.localScale = scale ?? item.transform.localScale;
+      Objects.Add(new SelectionObject(name, obj.transform.localScale, item.GetZDO()));
+    }
+    ZNetView.m_forceDisableInit = false;
+    Helper.GetPlayer().SetupPlacementGhost();
+    Type = SelectionType.Multiple;
     return Ghost;
   }
   public static GameObject Set(ZoneSystem.ZoneLocation location, int seed) {
@@ -115,7 +148,7 @@ public static class Selection {
     }
     ZNetView.m_forceDisableInit = false;
     Helper.GetPlayer().SetupPlacementGhost();
-    Type = SelectionType.Blueprint;
+    Type = SelectionType.Multiple;
     return Ghost;
   }
 }

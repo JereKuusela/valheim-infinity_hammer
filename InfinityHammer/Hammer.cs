@@ -7,7 +7,7 @@ public static class Hammer {
   public static bool RandomLocationDamage = false;
 
   public static void CopyState(ZNetView view, int index = 0) {
-    if (Settings.CopyState || !view) return;
+    if (!Settings.CopyState || !view) return;
     var zdo = view.GetZDO();
     if (zdo == null || !zdo.IsValid()) return;
     var data = Selection.GetData(index);
@@ -60,6 +60,7 @@ public static class Hammer {
     obj.GetComponentInChildren<CookingStation>()?.UpdateCooking();
     obj.GetComponentInChildren<LocationProxy>()?.SpawnLocation();
     obj.GetComponentInChildren<Sign>()?.UpdateText();
+    obj.GetComponentInChildren<Door>()?.UpdateState();
   }
   ///<summary>Replaces LocationProxy with the actual location.</summary>
   public static void SpawnLocation(ZNetView view) {
