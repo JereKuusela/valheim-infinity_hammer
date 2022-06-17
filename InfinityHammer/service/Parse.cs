@@ -221,4 +221,36 @@ public static class Parse {
     if (args.Length <= index) return new string[0];
     return Split(args[index], separator);
   }
+
+  public static float Direction(string value) {
+    var direction = TryFloat(value, 1);
+    if (direction > 0) return 1f;
+    return -1f;
+  }
+
+  public static float Direction(string[] args, int index) {
+    if (args.Length <= index) return 1f;
+    var direction = TryFloat(args[index], 1);
+    if (direction > 0) return 1f;
+    return -1f;
+  }
+  public static Vector3Int ParseXYZInt(string value) {
+    var vector = Vector3Int.zero;
+    var split = value.Split(',');
+    if (split.Length > 0) vector.x = TryInt(split[0]);
+    if (split.Length > 1) vector.y = TryInt(split[1]);
+    if (split.Length > 2) vector.z = TryInt(split[2]);
+    return vector;
+  }
+
+  public static float Multiplier(string value) {
+    var multiplier = 1f;
+    var split = value.Split('*');
+    foreach (var str in split) multiplier *= TryFloat(str, 1f);
+    return multiplier;
+  }
+  public static float TryMultiplier(string[] args, int index, float defaultValue = 1f) {
+    if (args.Length <= index) return defaultValue;
+    return Multiplier(args[index]);
+  }
 }

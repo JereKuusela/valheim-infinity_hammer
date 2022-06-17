@@ -3,7 +3,7 @@ using UnityEngine;
 namespace InfinityHammer;
 
 public class RulerParameters {
-  public float? Diameter;
+  public float? Radius;
   public float? Width;
   public float? Depth;
 }
@@ -20,11 +20,21 @@ public class Ruler {
   public static void Update() {
     if (Projector == null || !Player.m_localPlayer) return;
     var ghost = Player.m_localPlayer.m_placementGhost;
+    Projector.SetActive(ghost);
     if (!ghost) return;
     Projector.transform.position = ghost.transform.position;
     Projector.transform.rotation = ghost.transform.rotation;
-
+    if (Projector.GetComponent<CircleProjector>() is { } circle) {
+      circle.m_radius = ghost.transform.localScale.x;
+      circle.m_nrOfSegments = Math.Max(3, (int)(circle.m_radius * 4));
+    }
+    if (Projector.GetComponent<RectangleProjector>() is { } rect) {
+      rect.m_width = ghost.transform.localScale.x;
+      rect.m_depth = ghost.transform.localScale.z;
+      rect.m_nrOfSegments = Math.Max(3, (int)((rect.m_depth + rect.m_width) * 2));
+    }
   }
+
   private static GameObject InitializeGameObject(RulerParameters pars) {
     Projector = new();
     Projector.layer = LayerMask.NameToLayer("character_trigger");
@@ -33,30 +43,29 @@ public class Ruler {
   public static void InitializeProjector(RulerParameters pars, GameObject obj) {
     if (BaseProjector == null)
       BaseProjector = GetBaseProjector();
-    if (pars.Diameter.HasValue) {
+    if (pars.Radius.HasValue) {
       var circle = obj.AddComponent<CircleProjector>();
       circle.m_prefab = BaseProjector.m_prefab;
       circle.m_mask = BaseProjector.m_mask;
-      circle.m_radius = pars.Diameter.Value / 2f;
-      circle.m_nrOfSegments = Math.Max(3, (int)(circle.m_radius * 4));
+      circle.m_nrOfSegments = 3;
+      Scaling.SetScale(pars.Radius.Value);
     }
     if (pars.Depth.HasValue && pars.Width.HasValue) {
       var rect = obj.AddComponent<RectangleProjector>();
       rect.m_prefab = BaseProjector.m_prefab;
       rect.m_mask = BaseProjector.m_mask;
-      rect.m_depth = pars.Depth.Value / 2f;
-      rect.m_width = pars.Width.Value / 2f;
-      rect.m_nrOfSegments = Math.Max(3, (int)((rect.m_depth + rect.m_width) * 2));
+      Scaling.SetScale(new Vector3(pars.Width.Value / 2f, 1f, pars.Depth.Value / 2f));
+      rect.m_nrOfSegments = 3;
     }
   }
   public static void Create(RulerParameters pars) {
     Remove();
-    if (pars.Diameter == null && pars.Width == null && pars.Depth == null) return;
+    if (pars.Radius == null && pars.Width == null && pars.Depth == null) return;
     var obj = InitializeGameObject(pars);
     InitializeProjector(pars, InitializeGameObject(pars));
   }
 
-  private static void Remove() {
+  public static void Remove() {
     if (Projector != null)
       UnityEngine.Object.Destroy(Projector);
     Projector = null;

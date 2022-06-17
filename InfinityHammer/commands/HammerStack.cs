@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using HarmonyLib;
+using Service;
 using UnityEngine;
 namespace InfinityHammer;
 public class HammerStackCommand {
@@ -40,7 +41,7 @@ public class HammerStackCommand {
       var ghost = Helper.GetPlacementGhost();
       var amount = Helper.ParseIntRange(args[1]);
       var size = Helper.TryParseSize(ghost, args.Args, 2);
-      var direction = Helper.ParseDirection(args.Args, 3);
+      var direction = Parse.Direction(args.Args, 3);
       var delta = action(size, direction);
       Execute(delta, new(amount.Min, 0, 0), new(amount.Max, 0, 0));
     });
@@ -64,7 +65,7 @@ public class HammerStackCommand {
       var ghost = Helper.GetPlacementGhost();
       var amount = Helper.ParseZYXRange(args[1]);
       var size = Helper.TryParseSizesZYX(ghost, args.Args, 2);
-      var direction = Helper.ParseDirection(args.Args, 3);
+      var direction = Parse.Direction(args.Args, 3);
       var delta = direction * size;
       Execute(delta, amount.Min, amount.Max);
     });

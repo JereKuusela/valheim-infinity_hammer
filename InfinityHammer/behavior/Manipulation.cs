@@ -28,23 +28,34 @@ public static class Bounds {
   }
 }
 public static class Scaling {
-  public static Vector3 Scale = Vector3.one;
-  public static void ScaleUp() {
-    Scale *= (1f + Settings.ScaleStep);
+  public static Vector3 Value = Vector3.one;
+  public static void Scale(float step) {
+    if (step < 0f) Value /= (1f - step);
+    else Value *= (1f + step);
   }
-  public static void ScaleDown() {
-    Scale /= (1f + Settings.ScaleStep);
+  public static void ScaleX(float step) {
+    if (step < 0f) Value.x /= (1f - step);
+    else Value.x *= (1f + step);
+  }
+  public static void ScaleY(float step) {
+    if (step < 0f) Value.y /= (1f - step);
+    else Value.y *= (1f + step);
+  }
+  public static void ScaleZ(float step) {
+    if (step < 0f) Value.z /= (1f - step);
+    else Value.z *= (1f + step);
   }
   public static void SetScale(float value) {
-    Scale = value * Vector3.one;
+    Value = value * Vector3.one;
   }
   public static void SetScale(Vector3 value) {
-    Scale = value;
+    Value = value;
   }
   private static bool IsScalingSupported() {
     var player = Helper.GetPlayer();
     var ghost = player.m_placementGhost;
     if (!ghost) return false;
+    if (Selection.Type == SelectionType.Command) return true;
     // Ghost won't have netview so the selected piece must be used.
     // This technically also works for the build window if other mods add scalable objects there.
     var view = player.GetSelectedPiece()?.GetComponent<ZNetView>();
@@ -53,12 +64,12 @@ public static class Scaling {
   public static void UpdatePlacement() {
     var ghost = Helper.GetPlayer().m_placementGhost;
     if (Settings.Enabled && ghost && IsScalingSupported())
-      ghost.transform.localScale = Scale;
+      ghost.transform.localScale = Value;
   }
   public static void PrintScale(Terminal terminal) {
     if (Settings.DisableScaleMessages) return;
     if (IsScalingSupported())
-      Helper.AddMessage(terminal, $"Scale set to {Scale.y.ToString("P0")}.");
+      Helper.AddMessage(terminal, $"Scale set to {Value.y.ToString("P0")}.");
     else
       Helper.AddMessage(terminal, "Selected object doesn't support scaling.");
   }

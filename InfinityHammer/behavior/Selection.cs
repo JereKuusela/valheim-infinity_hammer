@@ -23,6 +23,7 @@ public class SelectionObject {
 public static class Selection {
   public static SelectionType Type = SelectionType.Default;
   public static List<SelectionObject> Objects = new();
+  public static string Command = "";
   public static ZDO? GetData(int index = 0) {
     if (Objects.Count <= index) return null;
     return Objects[index].Data?.Clone();
@@ -35,6 +36,8 @@ public static class Selection {
     if (Ghost) ZNetScene.instance.Destroy(Ghost);
     Ghost = null;
     Type = SelectionType.Default;
+    Ruler.Remove();
+    Command = "";
     Objects.Clear();
   }
   public static GameObject Set(string name, Vector3? scale) {
@@ -101,13 +104,14 @@ public static class Selection {
     return Ghost;
   }
 
-  public static GameObject Set(string command) {
+  public static GameObject Set(string command, string original) {
     Clear();
+    Command = command;
     Ghost = new GameObject();
     Ghost.name = "Command";
     var piece = Ghost.AddComponent<Piece>();
     piece.m_name = "Command";
-    piece.m_description = command;
+    piece.m_description = original;
     piece.m_clipEverything = true;
     Helper.GetPlayer().SetupPlacementGhost();
     Type = SelectionType.Command;

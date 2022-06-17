@@ -75,8 +75,6 @@ public class Settings {
   public static float RepairRange => IsCheats ? Helper.ParseFloat(configRepairRange.Value, 0f) : 0f;
   public static ConfigEntry<string> configBuildRange;
   public static float BuildRange => IsCheats ? Helper.ParseFloat(configBuildRange.Value, 0f) : 0f;
-  public static ConfigEntry<string> configScaleStep;
-  public static float ScaleStep => IsCheats ? Helper.ParseFloat(configScaleStep.Value, 0f) : 0f;
   public static ConfigEntry<bool> configRemoveEffects;
   public static bool RemoveEffects => configRemoveEffects.Value && Enabled;
   public static ConfigEntry<bool> configRepairTaming;
@@ -124,7 +122,6 @@ public class Settings {
     configUnfreezeOnUnequip = config.Bind(section, "Unfreeze on unequip", true, "Removes the placement freeze when unequipping the hammer.");
     configHidePlacementMarker = config.Bind(section, "No placement marker", false, "Hides the yellow placement marker (also affects Gizmo mod).");
     configIgnoreOtherRestrictions = config.Bind(section, "Ignore other restrictions", true, "Ignores any other restrictions (material, biome, etc.)");
-    configScaleStep = config.Bind(section, "Scaling step", "0.05", "How much each scale up/down affects the size");
     section = "Items";
     configRemoveBlacklist = config.Bind(section, "Remove blacklist", "", "Object ids separated by , that can't be removed.");
     configSelectBlacklist = config.Bind(section, "Select blacklist", "", "Object ids separated by , that can't be selected.");
@@ -279,10 +276,6 @@ public class Settings {
     if (key == "build_range") {
       configBuildRange.Value = value;
       Helper.AddMessage(context, $"Build range set to {value} meters.");
-    }
-    if (key == "scaling_step") {
-      configScaleStep.Value = value;
-      Helper.AddMessage(context, $"Scaling step set to {value}%.");
     }
     if (key == "overwrite_health") {
       configOverwriteHealth.Value = value;

@@ -1,4 +1,5 @@
 using System;
+using Service;
 using UnityEngine;
 namespace InfinityHammer;
 public class HammerMoveCommand {
@@ -17,27 +18,27 @@ public class HammerMoveCommand {
   public HammerMoveCommand() {
     Command("left", (args, ghost) => {
       var amount = Helper.TryParseSize(ghost, args.Args, 1).x;
-      Position.MoveLeft(Helper.ParseDirection(args.Args, 2) * amount);
+      Position.MoveLeft(Parse.Direction(args.Args, 2) * amount);
     });
     Command("right", (args, ghost) => {
       var amount = Helper.TryParseSize(ghost, args.Args, 1).x;
-      Position.MoveRight(Helper.ParseDirection(args.Args, 2) * amount);
+      Position.MoveRight(Parse.Direction(args.Args, 2) * amount);
     });
     Command("down", (args, ghost) => {
       var amount = Helper.TryParseSize(ghost, args.Args, 1).y;
-      Position.MoveDown(Helper.ParseDirection(args.Args, 2) * amount);
+      Position.MoveDown(Parse.Direction(args.Args, 2) * amount);
     });
     Command("up", (args, ghost) => {
       var amount = Helper.TryParseSize(ghost, args.Args, 1).y;
-      Position.MoveUp(Helper.ParseDirection(args.Args, 2) * amount);
+      Position.MoveUp(Parse.Direction(args.Args, 2) * amount);
     });
     Command("backward", (args, ghost) => {
       var amount = Helper.TryParseSize(ghost, args.Args, 1).z;
-      Position.MoveBackward(Helper.ParseDirection(args.Args, 2) * amount);
+      Position.MoveBackward(Parse.Direction(args.Args, 2) * amount);
     });
     Command("forward", (args, ghost) => {
       var amount = Helper.TryParseSize(ghost, args.Args, 1).z;
-      Position.MoveForward(Helper.ParseDirection(args.Args, 2) * amount);
+      Position.MoveForward(Parse.Direction(args.Args, 2) * amount);
     });
     CommandWrapper.Register("hammer_move", (int index, int subIndex) => {
       if (index == 0) return CommandWrapper.FRU("Meters to move the placement", subIndex);

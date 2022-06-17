@@ -55,11 +55,15 @@ public class PlacePiece {
     if (!ghost) return;
     var piece = obj.GetComponent<Piece>();
     if (Selection.Type == SelectionType.Command) {
-      var x = obj.transform.position.x.ToString(CultureInfo.InvariantCulture);
-      var y = obj.transform.position.y.ToString(CultureInfo.InvariantCulture);
-      var z = obj.transform.position.z.ToString(CultureInfo.InvariantCulture);
-      var angle = obj.transform.rotation.eulerAngles.y.ToString(CultureInfo.InvariantCulture);
-      var args = piece.m_description.Split(' ');
+      var x = ghost.transform.position.x.ToString(CultureInfo.InvariantCulture);
+      var y = ghost.transform.position.y.ToString(CultureInfo.InvariantCulture);
+      var z = ghost.transform.position.z.ToString(CultureInfo.InvariantCulture);
+      var radius = ghost.transform.localScale.x.ToString(CultureInfo.InvariantCulture);
+      var diameter = (2f * ghost.transform.localScale.x).ToString(CultureInfo.InvariantCulture);
+      var width = (2f * ghost.transform.localScale.x).ToString(CultureInfo.InvariantCulture);
+      var depth = (2f * ghost.transform.localScale.z).ToString(CultureInfo.InvariantCulture);
+      var angle = ghost.transform.rotation.eulerAngles.y.ToString(CultureInfo.InvariantCulture);
+      var args = Selection.Command.Split(' ');
       for (var i = 0; i < args.Length; i++) {
         var arg = args[i];
         if (IsParameter(arg, "a"))
@@ -96,6 +100,7 @@ public class PlacePiece {
           args[i] = ReplaceEnd(arg, $"{z},{y},{x}", 5);
       }
       var command = string.Join(" ", args);
+      command = command.Replace("#radius", radius).Replace("#diameter", diameter).Replace("#depth", depth).Replace("#width", width);
       if (!Settings.DisableMessages)
         Console.instance.AddString($"Hammering command: {command}");
       Console.instance.TryRunCommand(command);

@@ -39,6 +39,7 @@ Note: Some commands have a direction parameter. These are intended for mouse whe
 - `hammer ... from=x,z,y`: Overrides the player position when doing area selection.
 - `hammer_add_piece_components`: Adds the Piece component to every object which allows copying them with PlanBuild mod.
 - `hammer_blueprint [file name]`: Selects a Build Share or a Plan Build blueprint located on your computer.
+- `hammer_command [command]`: Executes the given command. Replaces command values with coordinates, angle and scale.
 - `hammer_config [key] [value]`: Toggles or sets configuration values. For lists, the given value is toggled on or off (`remove_blacklist` or `select_blacklist`).
 - `hammer_freeze`: Toggles whether the mouse affects placement position. Allows moving around while the object's position is frozen.
 - `hammer_grid [precision] [center=current]`: Restricts possible placement coordinates. Using the same command removes the restriction.
@@ -67,9 +68,11 @@ Note: Some commands have a direction parameter. These are intended for mouse whe
 - `hammer_rotate_z [number*random] [direction=1]`: Randomly rotates around the Z axis with a given step size. For example `3*random` would randomly rotate 0, 120 or 240 degrees.
 - `hammer_rotate_z [random] [direction=1]`: Randomly rotates around the Z axis depending on the object shape (90 or 180 degrees precision).
 - `hammer_save [file name]`: Saves the selection to a blueprint.
-- `hammer_scale [scale=1]`: Sets the object scale (if the object can be scaled). Number or x,y,z.
-- `hammer_scale_up`: Scales up the object (if the object can be scaled).
-- `hammer_scale_down`: Scales down the object (if the object can be scaled).
+- `hammer_scale`: Resets the scale to 100%.
+- `hammer_scale [percentage] [direction=1]`: Scales the selection (if the object supports it).
+- `hammer_scale_x [percentage] [direction=1]`: Scales the x-axis (if the object supports it).
+- `hammer_scale_y [percentage] [direction=1]`: Scales the y-axis (if the object supports it).
+- `hammer_scale_z [percentage] [direction=1]`: Scales the z-axis (if the object supports it).
 - `hammer_stack [forward,up,right or z1-z2,y1-y2,x1-x2] [step=auto,auto,auto] [direction=1]`: Places multiple objects next to each other.
 - `hammer_stack_backward [amount or min-max] [step=auto] [direction=1]`: Places multiple objects towards the backward direction.
 - `hammer_stack_down [amount or min-max] [step=auto] [direction=1]`: Places multiple objects towards the down direction.
@@ -174,7 +177,6 @@ Following powers are available with `hammer_config` command:
 - Repair range (default: `0`, key: `repair_range`): Range for repairing (capped at about 50 meters).
 - Repair taming (default: `false`, key: `repair_taming`): Repairing full health creatures will tame/untame them (works for all creatures).
 - Reset offset on unfreeze (default `true`, key: `reset_offset_on_unfreeze`): Removes the placement offset when unfreezing the placement.
-- Scaling step (default: `0.05`, key: `scaling_step`): How much the object is scaled up/down.
 - Select blacklist (key: `select_blacklist`): Allows disabling select for given objects (ids separated by ,).
 - Select range (default: `0`, key: `select_range`): Range for selecting (capped at about 50 meters).
 - Unfreeze on select (default `false`, key: `unfreeze_on_select`): Removes the placement freeze when selecting a new object.
@@ -242,8 +244,13 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds a new parameter `health` to the `hammer` command which allows overriding the object health.
 	- Adds new parameters `level` and `stars` to the `hammer` command which allows overriding the creature level.
 	- Adds a new parameter `text` to the `hammer` command which allows setting the sign text.
+	- Adds a new command `hammer_command` that allows executing console commands.
+	- Adds new commands `hammer_scale_x`, `hammer_scale_y` and `hammer_scale_z` to scale up/down a single axis.
+	- Changes the `hammer_scale` command to scale up/down instead of setting the scale directly.
 	- Fixes the setting `copy_state` not working.
 	- Fixes the `scale` parameter not working on the `hammer` command.
+	- Removes the setting `scaling_step` as obsolete.
+	- Removes the commands `hammer_scale_up` and `hammer_scale_down` as obsolete.
 
 - v1.15
 	- Adds a new command `hammer_save` to create blueprints with data.

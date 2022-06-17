@@ -1,42 +1,36 @@
 using System;
-using UnityEngine;
+using Service;
 namespace InfinityHammer;
 public class HammerScaleCommand {
-  private static void Command(string direction, Action action) {
-    CommandWrapper.RegisterEmpty($"hammer_scale_{direction}");
-    Helper.Command($"hammer_scale_{direction}", $"Scales {direction} the selection (if the object supports it).", (args) => {
-      CheckStep();
-      action();
+  private static void Command(string direction, Action<float> action) {
+    CommandWrapper.Register($"hammer_scale_{direction}", (int index) => {
+      if (index == 0) return CommandWrapper.Info("Percentage to scale.");
+      if (index == 1) return CommandWrapper.Info("Direction (1 or -1).");
+      return null;
+    });
+    Helper.Command($"hammer_scale_{direction}", $"[percentage] [direction=1] - Scales the {direction} axis (if the object supports it).", (args) => {
+      Helper.ArgsCheck(args, 2, "Missing the amount.");
+      var amount = Parse.Direction(args.Args, 2) * Parse.TryFloat(args[1], 0.05f);
+      action(amount);
       Scaling.PrintScale(args.Context);
     });
   }
-  private static void CheckStep() {
-    if (Settings.ScaleStep <= 0f)
-      throw new InvalidOperationException("Invalid step size on the mod configuration.");
-  }
   public HammerScaleCommand() {
-    Command("up", Scaling.ScaleUp);
-    Command("down", Scaling.ScaleDown);
+    Command("x", Scaling.ScaleX);
+    Command("y", Scaling.ScaleY);
+    Command("z", Scaling.ScaleZ);
     CommandWrapper.Register("hammer_scale", (int index, int subIndex) => {
-      if (index == 0) return CommandWrapper.Scale("Sets the size (if the object supports it).", subIndex);
+      if (index == 0) return CommandWrapper.Info("Percentage to scale. If missing, resets the scale.");
+      if (index == 1) return CommandWrapper.Info("Direction (1 or -1).");
       return null;
     });
-    Helper.Command("hammer_scale", "[scale=1] - Sets the size (if the object supports it).", (args) => {
-      CheckStep();
+    Helper.Command("hammer_scale", "[amount] [direction=1] - Scales the selection (if the object supports it).", (args) => {
       if (args.Length < 2)
         Scaling.SetScale(1f);
-      else if (args[1].Contains(",")) {
-        var scale = Vector3.one;
-        var split = args[1].Replace("scale=", "").Split(',');
-        if (split.Length > 0) scale.x = Helper.ParseFloat(split[0], 1f);
-        if (split.Length > 1) scale.y = Helper.ParseFloat(split[1], 1f);
-        if (split.Length > 2) scale.z = Helper.ParseFloat(split[2], 1f);
-        if (scale.x == 0f) scale.x = 1f;
-        if (scale.y == 0f) scale.y = 1f;
-        if (scale.z == 0f) scale.z = 1f;
-        Scaling.SetScale(scale);
-      } else
-        Scaling.SetScale(Helper.ParseFloat(args[1].Replace("scale=", ""), 1f));
+      else {
+        var amount = Parse.Direction(args.Args, 2) * Parse.TryFloat(args[1], 0.05f);
+        Scaling.Scale(amount);
+      }
       Scaling.PrintScale(args.Context);
     });
   }

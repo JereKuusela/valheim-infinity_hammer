@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using HarmonyLib;
+using Service;
 using UnityEngine;
 namespace InfinityHammer;
 public class Range<T> {
@@ -121,40 +122,10 @@ public static class Helper {
     }
     return new(min, max);
   }
-  public static Vector3Int ParseXYZInt(string value) {
-    var vector = Vector3Int.zero;
-    var split = value.Split(',');
-    if (split.Length > 0) vector.x = Helper.ParseInt(split[0]);
-    if (split.Length > 1) vector.y = Helper.ParseInt(split[1]);
-    if (split.Length > 2) vector.z = Helper.ParseInt(split[2]);
-    return vector;
-  }
-  public static float ParseDirection(string value) {
-    var direction = ParseFloat(value, 1);
-    if (direction > 0) return 1f;
-    return -1f;
-  }
 
-  public static float ParseDirection(string[] args, int index) {
-    if (args.Length <= index) return 1f;
-    var direction = ParseFloat(args[index], 1);
-    if (direction > 0) return 1f;
-    return -1f;
-  }
-
-  public static float ParseMultiplier(string value) {
-    var multiplier = 1f;
-    var split = value.Split('*');
-    foreach (var str in split) multiplier *= Helper.ParseFloat(str, 1f);
-    return multiplier;
-  }
-  public static float TryParseMultiplier(string[] args, int index, float defaultValue = 1f) {
-    if (args.Length <= index) return defaultValue;
-    return ParseMultiplier(args[index]);
-  }
   ///<summary>Parses a size which can be a constant number or based on the ghost size.</summary>
   public static Vector3 ParseSize(GameObject ghost, string value) {
-    var multiplier = ParseMultiplier(value);
+    var multiplier = Parse.Multiplier(value);
     var size = Vector3.one;
     if (value.Contains("auto")) {
       if (!ghost) throw new InvalidOperationException("No placement ghost.");
@@ -176,7 +147,6 @@ public static class Helper {
     var split = value.Split(',');
     return new(TryParseSize(ghost, split, 2, defaltValue).x, TryParseSize(ghost, split, 1, defaltValue).y, TryParseSize(ghost, split, 0, defaltValue).z);
   }
-
   ///<summary>Returns whether the ghost is square on x-axis.</summary>
   public static bool IsSquareX(GameObject ghost) {
     if (!ghost) return false;
