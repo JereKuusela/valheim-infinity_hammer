@@ -29,10 +29,9 @@ public class HammerStackCommand {
   private static List<string>? AutoComplete(int index) {
     if (index == 0) return CommandWrapper.Info("Amount of objects to be placed (number or min-max).");
     if (index == 1) return CommandWrapper.Info("Step size (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
-    if (index == 2) return CommandWrapper.Info("Direction (default 1 or -1).");
     return null;
   }
-  private static string Description(string direction) => $"[amount] [step=auto] [direction=1] - Places multiple objects towards the {direction} direction.";
+  private static string Description(string direction) => $"[amount] [step=auto] - Places multiple objects towards the {direction} direction.";
   private static void Command(string name, string description, Func<Vector3, float, Vector3> action) {
     CommandWrapper.Register(name, AutoComplete);
     Helper.Command(name, Description(description), (args) => {
@@ -56,10 +55,9 @@ public class HammerStackCommand {
     CommandWrapper.Register("hammer_stack", (int index, int subIndex) => {
       if (index == 0) return CommandWrapper.FRU("Amounts", subIndex);
       if (index == 1) return CommandWrapper.FRU("Step size (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size)", subIndex);
-      if (index == 2) return CommandWrapper.Info("Direction (default 1 or -1).");
       return null;
     });
-    Helper.Command("hammer_stack", "[forward,up,right] [step=auto,auto,auto] [direction=1] - Places multiple objects next to each other.", (args) => {
+    Helper.Command("hammer_stack", "[forward,up,right] [step=auto,auto,auto] - Places multiple objects next to each other.", (args) => {
       Helper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
       var ghost = Helper.GetPlacementGhost();

@@ -25,8 +25,6 @@ Client-side mod that is compatible with unmodded clients.
 
 # Commands
 
-Note: Some commands have a direction parameter. These are intended for mouse wheel binding and are something you probably don't have to use.
-
 - `hammer`: Selects the hovered object to be placed.
 - `hammer [item id]`: Selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)) to be placed.
 - `hammer connect=piece`: Selects the hovered object and all connected pieces.
@@ -45,12 +43,12 @@ Note: Some commands have a direction parameter. These are intended for mouse whe
 - `hammer_grid [precision] [center=current]`: Restricts possible placement coordinates. Using the same command removes the restriction.
 - `hammer_location [location_id] [seed=0] [random damage]`: Selects a location by id. Allows setting the random result with seed ("all" value enables all child objects).
 - `hammer_move [forward,up,right]`: Moves the placement ghost offset for precise placement. Auto value can be used for the object size.
-- `hammer_move_backward [meters or number*auto] [direction=1]`: Moves the placement towards the backward direction.
-- `hammer_move_down [meters or number*auto] [direction=1]`: Moves the placement towards the down direction.
-- `hammer_move_forward [meters or number*auto] [direction=1]`: Moves the placement towards the forward direction.
-- `hammer_move_left [meters or number*auto] [direction=1]`: Moves the placement towards the left direction.
-- `hammer_move_right [meters or number*auto] [direction=1]`: Moves the placement towards right left direction.
-- `hammer_move_up [meters or number*auto] [direction=1]`: Moves the placement towards the up direction.
+- `hammer_move_backward [meters or number*auto]`: Moves the placement towards the backward direction.
+- `hammer_move_down [meters or number*auto]`: Moves the placement towards the down direction.
+- `hammer_move_forward [meters or number*auto]`: Moves the placement towards the forward direction.
+- `hammer_move_left [meters or number*auto]`: Moves the placement towards the left direction.
+- `hammer_move_right [meters or number*auto]`: Moves the placement towards right left direction.
+- `hammer_move_up [meters or number*auto]`: Moves the placement towards the up direction.
 - `hammer_offset [forward,up,right]`: Sets the placement ghost offset.
 - `hammer_offset_x [value]`: Sets the offset in the right / left direction.
 - `hammer_offset_y [value]`: Sets the offset in the up / down direction.
@@ -58,31 +56,34 @@ Note: Some commands have a direction parameter. These are intended for mouse whe
 - `hammer_place`: Allows placing with a key press (for command bindings).
 - `hammer_redo`: Restores reverted actions. Uses Server Devcommands undo system if installed.
 - `hammer_repair`: Selects the repair tool. Useful for clearing the selection.
-- `hammer_rotate_x [degrees] [direction=1]`: Rotates around the X axis.
-- `hammer_rotate_x [number*random] [direction=1]`: Randomly rotates around the X axis with a given step size. For example `3*random` would randomly rotate 0, 120 or 240 degrees.
-- `hammer_rotate_x [random] [direction=1]`: Randomly rotates around the X axis depending on the object shape (90 or 180 degrees precision).
-- `hammer_rotate_y [degrees/number*random/random] [direction=1]`: Rotates around the Y axis.
-- `hammer_rotate_y [number*random] [direction=1]`: Randomly rotates around the Y axis with a given step size. For example `3*random` would randomly rotate 0, 120 or 240 degrees.
-- `hammer_rotate_y [random] [direction=1]`: Randomly rotates around the Y axis depending on the object shape (90 or 180 degrees precision).
-- `hammer_rotate_z [degrees/number*random/random] [direction=1]`: Rotates around the Z axis.
-- `hammer_rotate_z [number*random] [direction=1]`: Randomly rotates around the Z axis with a given step size. For example `3*random` would randomly rotate 0, 120 or 240 degrees.
-- `hammer_rotate_z [random] [direction=1]`: Randomly rotates around the Z axis depending on the object shape (90 or 180 degrees precision).
+- `hammer_rotate_x [degrees]`: Rotates around the X axis.
+- `hammer_rotate_x [number*random]`: Randomly rotates around the X axis with a given step size. For example `3*random` would randomly rotate 0, 120 or 240 degrees.
+- `hammer_rotate_x [random]`: Randomly rotates around the X axis depending on the object shape (90 or 180 degrees precision).
+- `hammer_rotate_y [degrees/number*random/random]`: Rotates around the Y axis.
+- `hammer_rotate_y [number*random]`: Randomly rotates around the Y axis with a given step size. For example `3*random` would randomly rotate 0, 120 or 240 degrees.
+- `hammer_rotate_y [random]`: Randomly rotates around the Y axis depending on the object shape (90 or 180 degrees precision).
+- `hammer_rotate_z [degrees/number*random/random]`: Rotates around the Z axis.
+- `hammer_rotate_z [number*random]`: Randomly rotates around the Z axis with a given step size. For example `3*random` would randomly rotate 0, 120 or 240 degrees.
+- `hammer_rotate_z [random]`: Randomly rotates around the Z axis depending on the object shape (90 or 180 degrees precision).
 - `hammer_save [file name]`: Saves the selection to a blueprint.
 - `hammer_scale`: Resets the scale to 100%.
-- `hammer_scale [percentage] [direction=1]`: Scales the selection (if the object supports it).
-- `hammer_scale_x [percentage] [direction=1]`: Scales the x-axis (if the object supports it).
-- `hammer_scale_y [percentage] [direction=1]`: Scales the y-axis (if the object supports it).
-- `hammer_scale_z [percentage] [direction=1]`: Scales the z-axis (if the object supports it).
-- `hammer_stack [forward,up,right or z1-z2,y1-y2,x1-x2] [step=auto,auto,auto] [direction=1]`: Places multiple objects next to each other.
-- `hammer_stack_backward [amount or min-max] [step=auto] [direction=1]`: Places multiple objects towards the backward direction.
-- `hammer_stack_down [amount or min-max] [step=auto] [direction=1]`: Places multiple objects towards the down direction.
-- `hammer_stack_forward [amount or min-max] [step=auto] [direction=1]`: Places multiple objects towards the forward direction.
-- `hammer_stack_left [amount or min-max] [step=auto] [direction=1]`: Places multiple objects towards the left direction.
-- `hammer_stack_right [amount or min-max] [step=auto] [direction=1]`: Places multiple objects towards the right direction.
-- `hammer_stack_up [amount or min-max] [step=auto] [direction=1]`: Places multiple objects towards the up direction.
+- `hammer_scale [percentage]`: Scales the selection (if the object supports it).
+- `hammer_scale_x [percentage]`: Scales the x-axis (if the object supports it).
+- `hammer_scale_y [percentage]`: Scales the y-axis (if the object supports it).
+- `hammer_scale_z [percentage]`: Scales the z-axis (if the object supports it).
+- `hammer_stack [forward,up,right or z1-z2,y1-y2,x1-x2] [step=auto,auto,auto]`: Places multiple objects next to each other.
+- `hammer_stack_backward [amount or min-max] [step=auto]`: Places multiple objects towards the backward direction.
+- `hammer_stack_down [amount or min-max] [step=auto]`: Places multiple objects towards the down direction.
+- `hammer_stack_forward [amount or min-max] [step=auto]`: Places multiple objects towards the forward direction.
+- `hammer_stack_left [amount or min-max] [step=auto]`: Places multiple objects towards the left direction.
+- `hammer_stack_right [amount or min-max] [step=auto]`: Places multiple objects towards the right direction.
+- `hammer_stack_up [amount or min-max] [step=auto]`: Places multiple objects towards the up direction.
 - `hammer_undo`: Reverts placing or removing. Uses Server Devcommands undo system if installed.
 
 Note: Some interactions are quite complicated so please report any issues!
+
+Note: Some commands have a hidden direction parameter at the end. This are intended for mouse wheel binding (so that scroll up and down work differently).
+
 
 # Key bindings
 
@@ -123,22 +124,22 @@ Then bind movement to arrow keys:
 With Server Devcommands you can use modifier keys for the forward/backward direction:
 - `bind rightarrow hammer_move_right 0.1`
 - `bind leftarrow hammer_move_left 0.1`
-- `bind downarrow,-leftcontrol hammer_move_down 0.1`
-- `bind uparrow,-leftcontrol hammer_move_up 0.1`
+- `bind downarrow hammer_move_down 0.1`
+- `bind uparrow hammer_move_up 0.1`
 - `bind downarrow,leftcontrol hammer_move_backward 0.1`
 - `bind uparrow,leftcontrol hammer_move_forward 0.1`
 
 You can also use another modifier key for a bigger offset:
-- `bind rightarrow,-leftalt hammer_move_right 0.1`
-- `bind leftarrow,-leftalt hammer_move_left 0.1`
-- `bind downarrow,-leftalt,-leftcontrol hammer_move_down 0.1`
-- `bind uparrow,-leftalt,-leftcontrol hammer_move_up 0.1`
-- `bind downarrow,-leftalt,leftcontrol hammer_move_backward 0.1`
-- `bind uparrow,-leftalt,leftcontrol hammer_move_forward 0.1`
+- `bind rightarrow hammer_move_right 0.1`
+- `bind leftarrow hammer_move_left 0.1`
+- `bind downarrow hammer_move_down 0.1`
+- `bind uparrow hammer_move_up 0.1`
+- `bind downarrow,leftcontrol hammer_move_backward 0.1`
+- `bind uparrow,leftcontrol hammer_move_forward 0.1`
 - `bind rightarrow,leftalt hammer_move_right 1`
 - `bind leftarrow,leftalt hammer_move_left 1`
-- `bind downarrow,leftalt,-leftcontrol hammer_move_down 1`
-- `bind uparrow,leftalt,-leftcontrol hammer_move_up 1`
+- `bind downarrow,leftalt hammer_move_down 1`
+- `bind uparrow,leftalt hammer_move_up 1`
 - `bind downarrow,leftalt,leftcontrol hammer_move_backward 1`
 - `bind uparrow,leftalt,leftcontrol hammer_move_forward 1`
 

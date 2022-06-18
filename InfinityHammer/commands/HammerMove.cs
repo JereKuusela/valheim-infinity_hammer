@@ -6,10 +6,9 @@ public class HammerMoveCommand {
   private static void Command(string direction, Action<Terminal.ConsoleEventArgs, GameObject> action) {
     CommandWrapper.Register($"hammer_move_{direction}", (int index) => {
       if (index == 0) return CommandWrapper.Info($"Meters towards the {direction} direction (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
-      if (index == 1) return CommandWrapper.Info("Direction (default 1 or -1).");
       return null;
     });
-    Helper.Command($"hammer_move_{direction}", $"[value=auto] [direction=1] - Moves the placement towards the {direction} direction.", (args) => {
+    Helper.Command($"hammer_move_{direction}", $"[value=auto] - Moves the placement towards the {direction} direction.", (args) => {
       var ghost = Helper.GetPlacementGhost();
       action(args, ghost);
       Position.Print(args.Context);

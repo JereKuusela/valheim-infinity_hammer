@@ -6,6 +6,7 @@ public class RulerParameters {
   public float? Radius;
   public float? Width;
   public float? Depth;
+  public bool RotateWithPlayer;
 }
 public class Ruler {
   private static GameObject? Projector = null;
@@ -17,13 +18,17 @@ public class Ruler {
     BaseProjector = workbench.GetComponentInChildren<CircleProjector>();
     return BaseProjector;
   }
+  private static bool RotateWithPlayer = false;
   public static void Update() {
     if (Projector == null || !Player.m_localPlayer) return;
     var ghost = Player.m_localPlayer.m_placementGhost;
     Projector.SetActive(ghost);
     if (!ghost) return;
     Projector.transform.position = ghost.transform.position;
-    Projector.transform.rotation = ghost.transform.rotation;
+    if (RotateWithPlayer)
+      Projector.transform.rotation = Player.m_localPlayer.transform.rotation;
+    else
+      Projector.transform.rotation = Quaternion.Euler(0f, ghost.transform.rotation.eulerAngles.y, 0f);
     if (Projector.GetComponent<CircleProjector>() is { } circle) {
       circle.m_radius = ghost.transform.localScale.x;
       circle.m_nrOfSegments = Math.Max(3, (int)(circle.m_radius * 4));
@@ -43,6 +48,7 @@ public class Ruler {
   public static void InitializeProjector(RulerParameters pars, GameObject obj) {
     if (BaseProjector == null)
       BaseProjector = GetBaseProjector();
+    RotateWithPlayer = pars.RotateWithPlayer;
     if (pars.Radius.HasValue) {
       var circle = obj.AddComponent<CircleProjector>();
       circle.m_prefab = BaseProjector.m_prefab;

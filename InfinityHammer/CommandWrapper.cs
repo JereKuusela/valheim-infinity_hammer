@@ -6,6 +6,7 @@ using BepInEx.Bootstrap;
 namespace InfinityHammer;
 public static class CommandWrapper {
   public static Assembly? ServerDevcommands = null;
+  public static Assembly? WorldEditCommands = null;
   public static void Init() {
     if (Chainloader.PluginInfos.TryGetValue("valheim.jerekuusela.server_devcommands", out var info)) {
       if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 20) {
@@ -13,6 +14,9 @@ public static class CommandWrapper {
       } else {
         ServerDevcommands = info.Instance.GetType().Assembly;
       }
+    }
+    if (Chainloader.PluginInfos.TryGetValue("valheim.jerekuusela.world_edit_commands", out info)) {
+      WorldEditCommands = info.Instance.GetType().Assembly;
     }
   }
 #nullable disable

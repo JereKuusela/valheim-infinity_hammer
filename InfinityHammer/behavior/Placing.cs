@@ -46,9 +46,6 @@ public class PlacePiece {
     }
     return obj.gameObject;
   }
-  static bool IsParameter(string arg, string par) => arg == par || arg.EndsWith("=" + par, StringComparison.OrdinalIgnoreCase);
-  static string ReplaceEnd(string arg, string par, int amount) => arg.Substring(0, arg.Length - amount) + par;
-
   static void Postprocess(GameObject obj) {
     Helper.EnsurePiece(obj);
     var ghost = Helper.GetPlayer().m_placementGhost;
@@ -63,44 +60,15 @@ public class PlacePiece {
       var width = (2f * ghost.transform.localScale.x).ToString(CultureInfo.InvariantCulture);
       var depth = (2f * ghost.transform.localScale.z).ToString(CultureInfo.InvariantCulture);
       var angle = ghost.transform.rotation.eulerAngles.y.ToString(CultureInfo.InvariantCulture);
-      var args = Selection.Command.Split(' ');
-      for (var i = 0; i < args.Length; i++) {
-        var arg = args[i];
-        if (IsParameter(arg, "a"))
-          args[i] = ReplaceEnd(arg, angle, 1);
-        if (IsParameter(arg, "x"))
-          args[i] = ReplaceEnd(arg, x, 1);
-        if (IsParameter(arg, "y"))
-          args[i] = ReplaceEnd(arg, y, 1);
-        if (IsParameter(arg, "z"))
-          args[i] = ReplaceEnd(arg, z, 1);
-        if (IsParameter(arg, "x,y"))
-          args[i] = ReplaceEnd(arg, $"{x},{y}", 3);
-        if (IsParameter(arg, "x,z"))
-          args[i] = ReplaceEnd(arg, $"{x},{z}", 3);
-        if (IsParameter(arg, "y,x"))
-          args[i] = ReplaceEnd(arg, $"{y},{x}", 3);
-        if (IsParameter(arg, "y,z"))
-          args[i] = ReplaceEnd(arg, $"{y},{z}", 3);
-        if (IsParameter(arg, "z,x"))
-          args[i] = ReplaceEnd(arg, $"{z},{x}", 3);
-        if (IsParameter(arg, "z,y"))
-          args[i] = ReplaceEnd(arg, $"{z},{y}", 3);
-        if (IsParameter(arg, "x,y,z"))
-          args[i] = ReplaceEnd(arg, $"{x},{y},{z}", 5);
-        if (IsParameter(arg, "x,z,y"))
-          args[i] = ReplaceEnd(arg, $"{x},{z},{y}", 5);
-        if (IsParameter(arg, "y,x,z"))
-          args[i] = ReplaceEnd(arg, $"{y},{x},{z}", 5);
-        if (IsParameter(arg, "y,z,x"))
-          args[i] = ReplaceEnd(arg, $"{y},{z},{x}", 5);
-        if (IsParameter(arg, "z,x,y"))
-          args[i] = ReplaceEnd(arg, $"{z},{x},{y}", 5);
-        if (IsParameter(arg, "z,y,x"))
-          args[i] = ReplaceEnd(arg, $"{z},{y},{x}", 5);
-      }
-      var command = string.Join(" ", args);
-      command = command.Replace("#radius", radius).Replace("#diameter", diameter).Replace("#depth", depth).Replace("#width", width);
+      var command = Selection.Command;
+      command = command.Replace("#radius", radius);
+      command = command.Replace("#diameter", diameter);
+      command = command.Replace("#depth", depth);
+      command = command.Replace("#width", width);
+      command = command.Replace("#angle", angle);
+      command = command.Replace("#x", x);
+      command = command.Replace("#y", y);
+      command = command.Replace("#z", z);
       if (!Settings.DisableMessages)
         Console.instance.AddString($"Hammering command: {command}");
       Console.instance.TryRunCommand(command);

@@ -7,6 +7,7 @@ namespace InfinityHammer;
 [BepInDependency("com.rolopogo.gizmo.comfy", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("m3to.mods.GizmoReloaded", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("valheim.jerekuusela.server_devcommands", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("valheim.jerekuusela.world_edit_commands", BepInDependency.DependencyFlags.SoftDependency)]
 public class InfinityHammer : BaseUnityPlugin {
 #nullable disable
   public static ManualLogSource Log;
@@ -50,5 +51,17 @@ public class SetCommands {
     new HammerGridCommand();
     new HammerSaveCommand();
     new HammerCommandCommand();
+  }
+}
+
+
+[HarmonyPatch(typeof(FejdStartup), nameof(FejdStartup.Start))]
+public class FejdStartupStart {
+  static void Postfix() {
+    if (CommandWrapper.ServerDevcommands != null && CommandWrapper.WorldEditCommands != null) {
+      Console.instance.TryRunCommand("alias hammer_terrain hammer_command terrain from=x,z,y angle=a");
+      Console.instance.TryRunCommand("alias hammer_object hammer_command object center=x,z,y");
+      Console.instance.TryRunCommand("alias hammer_slope hammer_command terrain to=x,z,y slope rect=$");
+    }
   }
 }

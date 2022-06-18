@@ -21,30 +21,27 @@ public class HammerRotateCommand {
   public HammerRotateCommand() {
     CommandWrapper.Register("hammer_rotate_x", (int index) => {
       if (index == 0) return CommandWrapper.Info("Degrees to rotate. <color=yellow>step*random</color> randomly rotates within a given precision or <color=yellow>random</color> for 90/180 degrees depending on the object shape.");
-      if (index == 1) return CommandWrapper.Info("Direction (1 or -1).");
       return null;
     });
-    new Terminal.ConsoleCommand("hammer_rotate_x", "[degrees/random/number*random] [direction=1] - Rotates around the X axis.", (args) => {
+    new Terminal.ConsoleCommand("hammer_rotate_x", "[degrees/random/number*random] - Rotates around the X axis.", (args) => {
       if (args.Length < 2) return;
       var amount = ParseArgs(args.Context, args.Args, Helper.IsSquareX);
       Rotating.RotateX(amount);
     });
     CommandWrapper.Register("hammer_rotate_y", (int index) => {
       if (index == 0) return CommandWrapper.Info("Degrees to rotate. <color=yellow>step*random</color> randomly rotates within a given precision or <color=yellow>random</color> for 90/180 degrees depending on the object shape.");
-      if (index == 1) return CommandWrapper.Info("Direction (1 or -1).");
       return null;
     });
-    new Terminal.ConsoleCommand("hammer_rotate_y", "[degrees/random/number*random] [direction=1] - Rotates around the Y axis.", (args) => {
+    new Terminal.ConsoleCommand("hammer_rotate_y", "[degrees/random/number*random] - Rotates around the Y axis.", (args) => {
       if (args.Length < 2) return;
       var amount = ParseArgs(args.Context, args.Args, Helper.IsSquareY);
       Rotating.RotateY(amount);
     });
     CommandWrapper.Register("hammer_rotate_z", (int index) => {
       if (index == 0) return CommandWrapper.Info("Degrees to rotate. <color=yellow>step*random</color> randomly rotates within a given precision or <color=yellow>random</color> for 90/180 degrees depending on the object shape.");
-      if (index == 1) return CommandWrapper.Info("Direction (1 or -1).");
       return null;
     });
-    new Terminal.ConsoleCommand("hammer_rotate_z", "[degrees/random/number*random] [direction=1] - Rotates around the Z axis.", (args) => {
+    new Terminal.ConsoleCommand("hammer_rotate_z", "[degrees/random/number*random] - Rotates around the Z axis.", (args) => {
       if (args.Length < 2) return;
       var amount = ParseArgs(args.Context, args.Args, Helper.IsSquareZ);
       Rotating.RotateZ(amount);
