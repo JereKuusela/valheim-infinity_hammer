@@ -84,6 +84,8 @@ public static class Selection {
     // Prevents children from disappearing.
     Ghost.SetActive(false);
     Ghost.name = "Multiple";
+    Ghost.transform.position = views.First().transform.position;
+    Ghost.transform.rotation = views.First().transform.rotation;
     var piece = Ghost.AddComponent<Piece>();
     piece.m_name = "Multiple";
     piece.m_description = "";
@@ -103,7 +105,14 @@ public static class Selection {
     Type = SelectionType.Multiple;
     return Ghost;
   }
-
+  public static void Mirror() {
+    foreach (Transform item in Ghost.transform) {
+      item.localPosition = new(-item.localPosition.x, item.localPosition.y, item.localPosition.z);
+      var angles = item.localEulerAngles;
+      item.localRotation = Quaternion.Euler(angles.x, -angles.y, angles.z);
+    }
+    Helper.GetPlayer().SetupPlacementGhost();
+  }
   public static GameObject Set(string command, string original) {
     Clear();
     Command = command;

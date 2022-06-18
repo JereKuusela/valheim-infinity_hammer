@@ -87,11 +87,11 @@ public class HammerCommand {
       GameObject selected;
       if (pars.Radius.HasValue)
         selected = Selection.Set(GetNearby(pars.Position, pars.Radius.Value), pars.Scale);
-      else if (args.Length > 1 && !args[1].Contains("="))
+      else if (args.Length > 1 && !args[1].Contains("=") && args[1] != "connect")
         selected = Selection.Set(args[1], pars.Scale);
       else {
         var hovered = GetHovered();
-        if (pars.Connect == "piece")
+        if (pars.Connect)
           selected = Selection.Set(GetConnected(hovered), pars.Scale);
         else
           selected = Selection.Set(hovered, pars.Scale);

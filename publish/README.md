@@ -35,6 +35,7 @@ Client-side mod that is compatible with unmodded clients.
 - `hammer ... level=number`: Overrides the creature level (stars + 1).
 - `hammer ... stars=number`: Overrides the creature stars (level - 1).
 - `hammer ... from=x,z,y`: Overrides the player position when doing area selection.
+- `hammer ... connect`: Selects all connected pieces.
 - `hammer_add_piece_components`: Adds the Piece component to every object which allows copying them with PlanBuild mod.
 - `hammer_blueprint [file name]`: Selects a Build Share or a Plan Build blueprint located on your computer.
 - `hammer_command [command]`: Executes the given command. Replaces command values with coordinates, angle and scale.
@@ -42,6 +43,7 @@ Client-side mod that is compatible with unmodded clients.
 - `hammer_freeze`: Toggles whether the mouse affects placement position. Allows moving around while the object's position is frozen.
 - `hammer_grid [precision] [center=current]`: Restricts possible placement coordinates. Using the same command removes the restriction.
 - `hammer_location [location_id] [seed=0] [random damage]`: Selects a location by id. Allows setting the random result with seed ("all" value enables all child objects).
+- `hammer_mirror`: Mirrors the selection.
 - `hammer_move [forward,up,right]`: Moves the placement ghost offset for precise placement. Auto value can be used for the object size.
 - `hammer_move_backward [meters or number*auto]`: Moves the placement towards the backward direction.
 - `hammer_move_down [meters or number*auto]`: Moves the placement towards the down direction.
@@ -246,6 +248,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds new parameters `level` and `stars` to the `hammer` command which allows overriding the creature level.
 	- Adds a new parameter `text` to the `hammer` command which allows setting the sign text.
 	- Adds a new command `hammer_command` that allows executing console commands.
+	- Adds a new command `hammer_mirror` to mirror the selection.
 	- Adds new commands `hammer_scale_x`, `hammer_scale_y` and `hammer_scale_z` to scale up/down a single axis.
 	- Changes the `hammer_scale` command to scale up/down instead of setting the scale directly.
 	- Fixes the setting `copy_state` not working.

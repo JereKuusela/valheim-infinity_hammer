@@ -51,6 +51,7 @@ public class SetCommands {
     new HammerGridCommand();
     new HammerSaveCommand();
     new HammerCommandCommand();
+    new HammerMirrorCommand();
   }
 }
 

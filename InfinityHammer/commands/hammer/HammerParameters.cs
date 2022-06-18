@@ -8,7 +8,7 @@ public class HammerParameters {
   public string? Text;
   public int? Level;
   public float? Health;
-  public string? Connect;
+  public bool Connect;
 
   public HammerParameters(Terminal.ConsoleEventArgs args) {
     if (Player.m_localPlayer)
@@ -20,11 +20,11 @@ public class HammerParameters {
     foreach (var arg in args) {
       var split = arg.Split('=');
       var name = split[0].ToLower();
+      if (name == "connect")
+        Connect = true;
       if (split.Length < 2) continue;
       var value = split[1].ToLower();
       var values = Parse.Split(value);
-      if (name == "connect")
-        Connect = value;
       if (name == "level")
         Level = Parse.TryInt(value, 1);
       if (name == "stars")
