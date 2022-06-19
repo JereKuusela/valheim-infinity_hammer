@@ -242,6 +242,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 # Changelog
 
 - v1.16
+	- Adds a new setting to add custom commands to the build menu.
 	- Adds a new parameter `radius` to the `hammer` command which allows selecting all nearby objects.
 	- Adds a new parameter `connect=piece` to the `hammer` command which allows selecting the hovered object and connected pieces.
 	- Adds a new parameter `health` to the `hammer` command which allows overriding the object health.

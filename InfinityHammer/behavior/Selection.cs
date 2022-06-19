@@ -113,14 +113,16 @@ public static class Selection {
     }
     Helper.GetPlayer().SetupPlacementGhost();
   }
-  public static GameObject Set(string command, string original) {
+  public static GameObject Set(string name, string description, string command) {
     Clear();
+    var player = Helper.GetPlayer();
     Command = command;
     Ghost = new GameObject();
-    Ghost.name = "Command";
+    Ghost.name = name;
     var piece = Ghost.AddComponent<Piece>();
-    piece.m_name = "Command";
-    piece.m_description = original;
+    piece.m_name = name;
+    piece.m_description = description;
+    piece.m_icon = player.m_buildPieces?.m_availablePieces?.FirstOrDefault()?.FirstOrDefault()?.m_icon;
     piece.m_clipEverything = true;
     Helper.GetPlayer().SetupPlacementGhost();
     Type = SelectionType.Command;

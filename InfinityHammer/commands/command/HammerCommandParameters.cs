@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using Service;
 namespace InfinityHammer;
 public class HammerCommandParameters {
@@ -6,8 +7,15 @@ public class HammerCommandParameters {
   public float? Width = null;
   public float? Depth = null;
   public bool Angle = false;
+  public string Name = "Command";
+  public string Description = "";
 
+  public static string Join(string[] args) => string.Join(" ", args.Skip(1)
+    .Where(s => !s.StartsWith("cmd_name=", StringComparison.OrdinalIgnoreCase))
+    .Where(s => !s.StartsWith("cmd_desc=", StringComparison.OrdinalIgnoreCase))
+  );
   public HammerCommandParameters(Terminal.ConsoleEventArgs args) {
+    Description = Join(args.Args);
     ParseArgs(args.Args);
   }
 
@@ -33,6 +41,12 @@ public class HammerCommandParameters {
       if (split.Length < 2) continue;
       var value = split[1].ToLower();
       var values = Parse.Split(value);
+      if (name == "cmd_name") Name = split[1].Replace("_", " ");
+      if (name == "cmd_desc") Description = split[1].Replace("_", " ");
+      if (name == "radius") {
+        Radius = Parse.TryFloat(value, radius);
+        args[i] = $"{name}=#radius";
+      }
       if (name == "radius") {
         Radius = Parse.TryFloat(value, radius);
         args[i] = $"{name}=#radius";

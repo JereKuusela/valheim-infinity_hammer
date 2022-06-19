@@ -84,14 +84,25 @@ public class Settings {
   public static ConfigEntry<bool> configEnabled;
   public static bool Enabled => configEnabled.Value;
   private static HashSet<string> ParseList(string value) => value.Split(',').Select(s => s.Trim().ToLower()).ToHashSet();
+  private static List<string> ParseCommands(string value) => value.Split('|').Select(s => s.Trim()).Reverse().ToList();
   public static ConfigEntry<string> configRemoveBlacklist;
   public static HashSet<string> RemoveBlacklist => ParseList(configRemoveBlacklist.Value);
   public static ConfigEntry<string> configSelectBlacklist;
   public static HashSet<string> SelectBlacklist => ParseList(configSelectBlacklist.Value);
+  public static ConfigEntry<string> configTools;
+  public static HashSet<string> Tools => ParseList(configTools.Value);
+  public static ConfigEntry<string> configCommands;
+  public static List<string> Commands => ParseCommands(configCommands.Value);
   public static void Init(ConfigFile config) {
+    var defaultCommands = new string[] {
+      "hammer_command cmd_name=Area_pipette cmd_desc=Select_multiple_objects hammer radius=10 from=x,z,y",
+      "hammer_command cmd_name=Pipette cmd_desc=Shift_to_select_entire_buildings hammer keys=-leftshift;hammer keys=leftshift connect",
+    };
     var section = "General";
     configEnabled = config.Bind(section, "Enabled", true, "Whether this mod is enabled at all.");
     configBinds = config.Bind(section, "Binds", "", "Binds separated by ; that are set on the game start.");
+    configTools = config.Bind(section, "Tools", "hammer", "Tools affected by this mod.");
+    configCommands = config.Bind(section, "Commands", string.Join("|", defaultCommands), "Tools affected by this mod.");
     section = "Powers";
     configRemoveArea = config.Bind(section, "Remove area", "0", "Removes same objects within the radius.");
     configSelectRange = config.Bind(section, "Select range", "50", "Range for selecting objects.");
@@ -176,7 +187,8 @@ public class Settings {
     "reset_offset_on_unfreeze",
     "infinite_health",
     "plan_build_folder",
-    "build_share_folder"
+    "build_share_folder",
+    "tools"
   };
   private static string State(bool value) => value ? "enabled" : "disabled";
   private static string Flag(bool value) => value ? "removed" : "added";
@@ -283,5 +295,6 @@ public class Settings {
     }
     if (key == "remove_blacklist") ToggleFlag(context, configRemoveBlacklist, "Remove blacklist", value);
     if (key == "select_blacklist") ToggleFlag(context, configSelectBlacklist, "Select blacklist", value);
+    if (key == "tools") ToggleFlag(context, configTools, "Tools", value);
   }
 }

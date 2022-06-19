@@ -18,15 +18,18 @@ public static class Hammer {
     Selection.Clear();
     if (Settings.UnfreezeOnSelect) Position.Unfreeze();
   }
+  public static bool IsTool(string name) => Settings.Tools.Contains(name.ToLower());
+  public static bool IsTool(GameObject obj) => obj && IsTool(Utils.GetPrefabName(obj));
+  public static bool IsTool(ItemDrop.ItemData item) => item != null && IsTool(item.m_dropPrefab);
+  public static bool HasTool(Player player) => player && IsTool(player.GetRightItem());
   public static void Equip() {
     var player = Helper.GetPlayer();
     if (!Settings.AutoEquip) return;
-    if (player.GetRightItem()?.m_dropPrefab?.gameObject.name == "Hammer") return;
+    if (HasTool(player)) return;
     var inventory = player.GetInventory();
-    var hammer = inventory.m_inventory.Find(item => item.m_dropPrefab.gameObject.name == "Hammer");
-    if (hammer == null) return;
-
-    player.EquipItem(hammer);
+    var tool = inventory.m_inventory.Find(IsTool);
+    if (tool == null) return;
+    player.EquipItem(tool);
   }
   public static void Clear() {
     var player = Player.m_localPlayer;

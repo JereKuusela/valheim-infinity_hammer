@@ -47,6 +47,7 @@ public class PlacePiece {
     return obj.gameObject;
   }
   static void Postprocess(GameObject obj) {
+    var player = Helper.GetPlayer();
     Helper.EnsurePiece(obj);
     var ghost = Helper.GetPlayer().m_placementGhost;
     if (!ghost) return;
@@ -60,6 +61,7 @@ public class PlacePiece {
       var width = (2f * ghost.transform.localScale.x).ToString(CultureInfo.InvariantCulture);
       var depth = (2f * ghost.transform.localScale.z).ToString(CultureInfo.InvariantCulture);
       var angle = ghost.transform.rotation.eulerAngles.y.ToString(CultureInfo.InvariantCulture);
+
       var command = Selection.Command;
       command = command.Replace("#radius", radius);
       command = command.Replace("#diameter", diameter);

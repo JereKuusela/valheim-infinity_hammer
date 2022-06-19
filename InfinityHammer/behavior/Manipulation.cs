@@ -7,7 +7,7 @@ using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer;
-[HarmonyPatch(typeof(ZNetView), "Awake")]
+[HarmonyPatch(typeof(ZNetView), nameof(ZNetView.Awake))]
 public static class Bounds {
   private static int[] IgnoredLayers = new[] { LayerMask.NameToLayer("character_trigger"), LayerMask.NameToLayer("viewblock"), LayerMask.NameToLayer("pathblocker") };
 
