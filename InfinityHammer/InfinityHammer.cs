@@ -35,7 +35,7 @@ public class InfinityHammer : BaseUnityPlugin {
 public class SetCommands {
   static void Postfix() {
     new HammerAddPieceComponentsCommand();
-    new HammerCommand();
+    new HammerSelect();
     new HammerLocationCommand();
     new HammerBlueprintCommand();
     new HammerConfigCommand();
@@ -50,7 +50,10 @@ public class SetCommands {
     new HammerFreezeCommand();
     new HammerGridCommand();
     new HammerSaveCommand();
-    new HammerCommandCommand();
+    new HammerCommand();
+    new HoeCommand();
+    new HammerAddCommand();
+    new HoeAddCommand();
     new HammerMirrorCommand();
   }
 }
@@ -60,9 +63,9 @@ public class SetCommands {
 public class FejdStartupStart {
   static void Postfix() {
     if (CommandWrapper.ServerDevcommands != null && CommandWrapper.WorldEditCommands != null) {
-      Console.instance.TryRunCommand("alias hammer_terrain hammer_command terrain from=x,z,y angle=a");
-      Console.instance.TryRunCommand("alias hammer_object hammer_command object center=x,z,y");
-      Console.instance.TryRunCommand("alias hammer_slope hammer_command terrain to=x,z,y slope rect=$");
+      Console.instance.TryRunCommand("alias hoe_terrain hoe_command terrain from=x,z,y angle=a");
+      Console.instance.TryRunCommand("alias hoe_object hoe_command object center=x,z,y");
+      Console.instance.TryRunCommand("alias hoe_slope hoe_command terrain to=x,z,y slope rect=$");
     }
   }
 }

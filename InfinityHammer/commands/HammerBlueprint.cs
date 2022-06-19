@@ -183,7 +183,7 @@ public class HammerBlueprintCommand {
     Helper.Command("hammer_blueprint", "[blueprint file] - Selects the blueprint to be placed.", (args) => {
       Helper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
-      Hammer.Equip();
+      Hammer.Equip(Tool.Hammer);
       var bp = GetBluePrint(string.Join("_", args.Args.Skip(1)));
       var obj = Selection.Set(args.Context, bp);
       PrintSelected(args.Context, bp.Name);

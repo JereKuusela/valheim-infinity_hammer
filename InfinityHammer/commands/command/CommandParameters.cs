@@ -1,23 +1,30 @@
 using System;
 using System.Linq;
 using Service;
+using UnityEngine;
 namespace InfinityHammer;
-public class HammerCommandParameters {
+public class CommandParameters {
+  public static string CmdName = "cmd_name";
+  public static string CmdDesc = "cmd_desc";
+  public static string CmdIcon = "cmd_icon";
   public float? Radius = null;
   public float? Width = null;
   public float? Depth = null;
   public bool Angle = false;
   public string Name = "Command";
   public string Description = "";
+  public Sprite? Icon = null;
 
-  public static string Join(string[] args) => string.Join(" ", args.Skip(1)
-    .Where(s => !s.StartsWith("cmd_name=", StringComparison.OrdinalIgnoreCase))
-    .Where(s => !s.StartsWith("cmd_desc=", StringComparison.OrdinalIgnoreCase))
+  public static string Join(string[] args) => string.Join(" ", args
+    .Where(s => !s.StartsWith($"{CmdName}=", StringComparison.OrdinalIgnoreCase))
+    .Where(s => !s.StartsWith($"{CmdDesc}=", StringComparison.OrdinalIgnoreCase))
+    .Where(s => !s.StartsWith($"{CmdIcon}=", StringComparison.OrdinalIgnoreCase))
   );
-  public HammerCommandParameters(Terminal.ConsoleEventArgs args) {
-    Description = Join(args.Args);
-    ParseArgs(args.Args);
+  public CommandParameters(string[] args) {
+    Description = Join(args);
+    ParseArgs(args);
   }
+
 
   public RulerParameters ToRuler() => new() {
     Radius = Radius,
@@ -29,6 +36,21 @@ public class HammerCommandParameters {
   static bool IsParameter(string arg, string par) => arg == par || arg.EndsWith("=" + par, StringComparison.OrdinalIgnoreCase);
   static string ReplaceEnd(string arg, string par, int amount) => arg.Substring(0, arg.Length - amount) + par;
 
+  public static Sprite? FindSprite(string name) {
+    name = name.ToLower();
+    var prefab = ZNetScene.instance.GetPrefab(name);
+    var sprite = prefab?.GetComponent<Piece>()?.m_icon;
+    if (sprite) return sprite;
+    sprite = prefab?.GetComponent<ItemDrop>()?.m_itemData?.m_shared?.m_icons.FirstOrDefault();
+    if (sprite) return sprite;
+    var effect = ObjectDB.instance.m_StatusEffects.Find(se => se.name.ToLower() == name);
+    sprite = effect?.m_icon;
+    if (sprite) return sprite;
+    var skill = Player.m_localPlayer.m_skills.m_skills.Find(skill => skill.m_skill.ToString().ToLower() == name);
+    sprite = skill?.m_icon;
+    if (sprite) return sprite;
+    return null;
+  }
   protected void ParseArgs(string[] args) {
     var radius = Scaling.Value.x;
     var diameter = 2f * radius;
@@ -41,8 +63,9 @@ public class HammerCommandParameters {
       if (split.Length < 2) continue;
       var value = split[1].ToLower();
       var values = Parse.Split(value);
-      if (name == "cmd_name") Name = split[1].Replace("_", " ");
-      if (name == "cmd_desc") Description = split[1].Replace("_", " ");
+      if (name == CmdName) Name = split[1].Replace("_", " ");
+      if (name == CmdDesc) Description = split[1].Replace("_", " ");
+      if (name == CmdIcon) Icon = FindSprite(split[1]);
       if (name == "radius") {
         Radius = Parse.TryFloat(value, radius);
         args[i] = $"{name}=#radius";

@@ -84,25 +84,57 @@ public class Settings {
   public static ConfigEntry<bool> configEnabled;
   public static bool Enabled => configEnabled.Value;
   private static HashSet<string> ParseList(string value) => value.Split(',').Select(s => s.Trim().ToLower()).ToHashSet();
-  private static List<string> ParseCommands(string value) => value.Split('|').Select(s => s.Trim()).Reverse().ToList();
+  private static List<string> ParseCommands(string value) => value.Split('|').Select(s => s.Trim()).ToList();
   public static ConfigEntry<string> configRemoveBlacklist;
-  public static HashSet<string> RemoveBlacklist => ParseList(configRemoveBlacklist.Value);
+  public static HashSet<string> RemoveBlacklist = new();
   public static ConfigEntry<string> configSelectBlacklist;
-  public static HashSet<string> SelectBlacklist => ParseList(configSelectBlacklist.Value);
-  public static ConfigEntry<string> configTools;
-  public static HashSet<string> Tools => ParseList(configTools.Value);
-  public static ConfigEntry<string> configCommands;
-  public static List<string> Commands => ParseCommands(configCommands.Value);
+  public static HashSet<string> SelectBlacklist = new();
+  public static ConfigEntry<string> configHammerTools;
+  public static HashSet<string> HammerTools = new();
+  public static ConfigEntry<string> configHoeTools;
+  public static HashSet<string> HoeTools = new();
+  public static ConfigEntry<string> configHammerCommands;
+  public static List<string> HammerCommands = new();
+  public static ConfigEntry<string> configHoeCommands;
+  public static List<string> HoeCommands = new();
+  public static void AddHammerCommand(string command) {
+    HammerCommands.Add(command);
+    configHammerCommands.Value = string.Join("|", HammerCommands);
+  }
+  public static void AddHoeCommand(string command) {
+    HoeCommands.Add(command);
+    configHoeCommands.Value = string.Join("|", HoeCommands);
+  }
   public static void Init(ConfigFile config) {
-    var defaultCommands = new string[] {
-      "hammer_command cmd_name=Area_pipette cmd_desc=Select_multiple_objects hammer radius=10 from=x,z,y",
-      "hammer_command cmd_name=Pipette cmd_desc=Shift_to_select_entire_buildings hammer keys=-leftshift;hammer keys=leftshift connect",
+    var defaultHammerCommands = new string[] {
+      "hammer_command cmd_name=Area_pipette cmd_desc=Select_multiple_objects. hammer radius=10 from=x,z,y",
+      "hammer_command cmd_name=Pipette cmd_desc=Shift_to_select_entire_buildings. hammer keys=-leftshift;hammer keys=leftshift connect",
+    };
+    var defaultHoeCommands = new string[] {
+      "hoe_terrain cmd_name=Level cmd_desc=Flatters_terrain. cmd_icon=mud_road circle=10 level",
+      "hoe_terrain cmd_name=Raise cmd_desc=Raises_terrain. cmd_icon=raise circle=10 raise=0.5",
+      "hoe_terrain cmd_name=Lower cmd_desc=Lowers_terrain. cmd_icon=raise circle=10 lower=0.5",
+      "hoe_terrain cmd_name=Pave cmd_desc=Paves_terrain. cmd_icon=paved_road circle=10 paint=paved",
+      "hoe_terrain cmd_name=Grass cmd_desc=Grass. cmd_icon=replant circle=10 paint=grass",
+      "hoe_terrain cmd_name=Reset cmd_desc=Resets_terrain. cmd_icon=KnifeBlackMetal circle=10 reset",
+      "hoe_object cmd_name=Remove cmd_desc=Removes_objects. cmd_icon=softdeath radius=5 remove id=*",
+      "hoe_object cmd_name=Tame cmd_desc=Tames_creatures. cmd_icon=Burning radius=5 tame",
     };
     var section = "General";
     configEnabled = config.Bind(section, "Enabled", true, "Whether this mod is enabled at all.");
     configBinds = config.Bind(section, "Binds", "", "Binds separated by ; that are set on the game start.");
-    configTools = config.Bind(section, "Tools", "hammer", "Tools affected by this mod.");
-    configCommands = config.Bind(section, "Commands", string.Join("|", defaultCommands), "Tools affected by this mod.");
+    configHammerTools = config.Bind(section, "Hammer tools", "hammer", "List of hammers.");
+    configHammerTools.SettingChanged += (s, e) => HammerTools = ParseList(configHammerTools.Value);
+    HammerTools = ParseList(configHammerTools.Value);
+    configHoeTools = config.Bind(section, "Hoe tools", "hoe", "List of hoes.");
+    configHoeTools.SettingChanged += (s, e) => HoeTools = ParseList(configHoeTools.Value);
+    HoeTools = ParseList(configHoeTools.Value);
+    configHammerCommands = config.Bind(section, "Hammer commands", string.Join("|", defaultHammerCommands), "Available commands.");
+    configHammerCommands.SettingChanged += (s, e) => HammerCommands = ParseCommands(configHammerCommands.Value);
+    HammerCommands = ParseCommands(configHammerCommands.Value);
+    configHoeCommands = config.Bind(section, "Hoe commands", string.Join("|", defaultHoeCommands), "Available commands.");
+    configHoeCommands.SettingChanged += (s, e) => HoeCommands = ParseCommands(configHoeCommands.Value);
+    HoeCommands = ParseCommands(configHoeCommands.Value);
     section = "Powers";
     configRemoveArea = config.Bind(section, "Remove area", "0", "Removes same objects within the radius.");
     configSelectRange = config.Bind(section, "Select range", "50", "Range for selecting objects.");
@@ -135,7 +167,11 @@ public class Settings {
     configIgnoreOtherRestrictions = config.Bind(section, "Ignore other restrictions", true, "Ignores any other restrictions (material, biome, etc.)");
     section = "Items";
     configRemoveBlacklist = config.Bind(section, "Remove blacklist", "", "Object ids separated by , that can't be removed.");
+    configRemoveBlacklist.SettingChanged += (s, e) => RemoveBlacklist = ParseList(configRemoveBlacklist.Value);
+    RemoveBlacklist = ParseList(configRemoveBlacklist.Value);
     configSelectBlacklist = config.Bind(section, "Select blacklist", "", "Object ids separated by , that can't be selected.");
+    configSelectBlacklist.SettingChanged += (s, e) => SelectBlacklist = ParseList(configSelectBlacklist.Value);
+    SelectBlacklist = ParseList(configSelectBlacklist.Value);
     configPlanBuildFolder = config.Bind(section, "Plan Build folder", "BepInEx/config/PlanBuild", "Folder relative to the Valheim.exe.");
     configBuildShareFolder = config.Bind(section, "Build Share folder", "BuildShare/Builds", "Folder relative to the Valheim.exe.");
     section = "Messages";
@@ -295,6 +331,6 @@ public class Settings {
     }
     if (key == "remove_blacklist") ToggleFlag(context, configRemoveBlacklist, "Remove blacklist", value);
     if (key == "select_blacklist") ToggleFlag(context, configSelectBlacklist, "Select blacklist", value);
-    if (key == "tools") ToggleFlag(context, configTools, "Tools", value);
+    if (key == "tools") ToggleFlag(context, configHammerTools, "Tools", value);
   }
 }

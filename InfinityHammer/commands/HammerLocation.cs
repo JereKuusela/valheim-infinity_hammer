@@ -18,7 +18,7 @@ public class HammerLocationCommand {
     Helper.Command("hammer_location", "[location id] [seed=0] [random damage] - Selects the location to be placed.", (args) => {
       Helper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the location id.");
-      Hammer.Equip();
+      Hammer.Equip(Tool.Hammer);
       try {
         Hammer.AllLocationsObjects = args.Length > 2 && args[2] == "all";
         Hammer.RandomLocationDamage = args.Length > 3 && args[3] == "1";

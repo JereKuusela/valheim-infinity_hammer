@@ -1,6 +1,10 @@
 using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer;
+public enum Tool {
+  Hammer,
+  Hoe
+}
 public static class Hammer {
 
   public static bool AllLocationsObjects = false;
@@ -18,18 +22,18 @@ public static class Hammer {
     Selection.Clear();
     if (Settings.UnfreezeOnSelect) Position.Unfreeze();
   }
-  public static bool IsTool(string name) => Settings.Tools.Contains(name.ToLower());
-  public static bool IsTool(GameObject obj) => obj && IsTool(Utils.GetPrefabName(obj));
-  public static bool IsTool(ItemDrop.ItemData item) => item != null && IsTool(item.m_dropPrefab);
-  public static bool HasTool(Player player) => player && IsTool(player.GetRightItem());
-  public static void Equip() {
+  public static bool IsTool(string name, Tool tool) => tool == Tool.Hammer ? Settings.HammerTools.Contains(name.ToLower()) : Settings.HoeTools.Contains(name.ToLower());
+  public static bool IsTool(GameObject obj, Tool tool) => obj && IsTool(Utils.GetPrefabName(obj), tool);
+  public static bool IsTool(ItemDrop.ItemData item, Tool tool) => item != null && IsTool(item.m_dropPrefab, tool);
+  public static bool HasTool(Player player, Tool tool) => player && IsTool(player.GetRightItem(), tool);
+  public static void Equip(Tool tool) {
     var player = Helper.GetPlayer();
     if (!Settings.AutoEquip) return;
-    if (HasTool(player)) return;
+    if (HasTool(player, tool)) return;
     var inventory = player.GetInventory();
-    var tool = inventory.m_inventory.Find(IsTool);
-    if (tool == null) return;
-    player.EquipItem(tool);
+    var item = inventory.m_inventory.Find(item => IsTool(item, tool));
+    if (item == null) return;
+    player.EquipItem(item);
   }
   public static void Clear() {
     var player = Player.m_localPlayer;

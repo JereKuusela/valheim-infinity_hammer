@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using UnityEngine;
@@ -8,29 +10,44 @@ public class BuildMenuCommand : Piece {
 }
 [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpdateAvailable))]
 public static class UpdateAvailable {
+  private static bool IsName(string arg) {
+    if (arg == HammerCommand.Name || arg == HoeCommand.Name) return false;
+    if (arg.StartsWith("cmd_name=", StringComparison.OrdinalIgnoreCase)) return false;
+    if (arg.StartsWith("cmd_desc=", StringComparison.OrdinalIgnoreCase)) return false;
+    if (arg.StartsWith("cmd_icon=", StringComparison.OrdinalIgnoreCase)) return false;
+    if (arg.StartsWith("keys=", StringComparison.OrdinalIgnoreCase)) return false;
+    return true;
+  }
+  private static bool IsValid(string command) {
+    var args = command.Split(' ');
+    var name = args.FirstOrDefault(IsName);
+    if (name == null || name == "") return false;
+    if (!Terminal.commands.TryGetValue(name.ToLower(), out var obj)) return false;
+    if (!obj.IsValid(Console.instance)) return false;
+    return true;
+  }
+  private static Piece Build(string command, Sprite? defaultSprite) {
+    CommandParameters pars = new(command.Split(' '));
+    GameObject obj = new();
+    var piece = obj.AddComponent<BuildMenuCommand>();
+    piece.Command = command;
+    piece.m_description = pars.Description;
+    piece.m_name = pars.Name;
+    piece.m_icon = pars.Icon ?? defaultSprite;
+    return piece;
+  }
   static void Postfix(PieceTable __instance) {
-    if (!Hammer.HasTool(Helper.GetPlayer())) return;
+    List<string>? commands = null;
+    if (Hammer.HasTool(Helper.GetPlayer(), Tool.Hammer))
+      commands = Settings.HammerCommands;
+    if (Hammer.HasTool(Helper.GetPlayer(), Tool.Hoe))
+      commands = Settings.HoeCommands;
+    if (commands == null) return;
     var pieces = __instance.m_availablePieces.FirstOrDefault();
     if (pieces == null) return;
     var sprite = pieces.FirstOrDefault()?.m_icon;
-    foreach (var cmd in Settings.Commands) {
-      GameObject obj = new();
-      var piece = obj.AddComponent<BuildMenuCommand>();
-      piece.Command = cmd;
-      piece.m_description = cmd;
-      piece.m_name = "Command";
-      piece.m_icon = sprite;
-      var args = cmd.Split(' ');
-      foreach (var arg in args) {
-        var split = arg.Split('=');
-        var name = split[0].ToLower();
-        if (split.Length < 2) continue;
-        if (name == "cmd_name") piece.m_name = split[1].Replace("_", " ");
-        if (name == "cmd_desc") piece.m_description = split[1].Replace("_", " ");
-        if (name == "cmd_icon") piece.m_description = split[1].Replace("_", " ");
-      }
-      pieces.Insert(1, piece);
-    }
+    foreach (var command in commands.Where(IsValid).Reverse())
+      pieces.Insert(1, Build(command, sprite));
   }
 }
 

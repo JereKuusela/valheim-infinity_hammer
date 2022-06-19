@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 namespace InfinityHammer;
-public class HammerCommand {
+public class HammerSelect {
   ///<summary>Returns the hovered object.</summary>
   private static ZNetView GetHovered() {
     var range = Settings.SelectRange == 0 ? Player.m_localPlayer.m_maxInteractDistance : Settings.SelectRange;
@@ -62,7 +62,7 @@ public class HammerCommand {
       Selection.Objects[i].Data = zdo;
     }
   }
-  public HammerCommand() {
+  public HammerSelect() {
     List<string> named = new() {
       "scale", "radius", "Level", "stars", "connected", "from", "health"
     };
@@ -82,7 +82,7 @@ public class HammerCommand {
     });
     Helper.Command("hammer", "[item id] - Selects the object to be placed (the hovered object by default).", (args) => {
       Helper.EnabledCheck();
-      Hammer.Equip();
+      Hammer.Equip(Tool.Hammer);
       HammerParameters pars = new(args);
       GameObject selected;
       if (pars.Radius.HasValue)
