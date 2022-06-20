@@ -152,7 +152,6 @@ Following powers are available with `hammer_config` command:
 - Enabled (default: `true`, key: `enabled`): If false, disabled most features.
 - All objects (default: `true`, key: `all_objects`): Hammer can select and place any object. Any placed object can be removed with the hammer until the area is reloaded.
 - Allow in dungeons (default: `true`, key: `allow_in_dungeons`): Building is allowed in dungeons.
-- Auto equip (default: `true`, key: `auto_equip`): Automatically equips the hammer when selecting an object.
 - Binds (default: ` `, key: `binds`): Sets binds at the game start up. Any existing binds are cleared from those keys.
 - Build range (default: `0`, key: `build_range`): Range for building (capped at about 50 meters).
 - Build Share folder (default: `BuildShare/Builds`, key: `build_share_folder`): Folder relative to the Valheim.exe.
@@ -256,6 +255,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Fixes the `scale` parameter not working on the `hammer` command.
 	- Removes the setting `scaling_step` as obsolete.
 	- Removes the commands `hammer_scale_up` and `hammer_scale_down` as obsolete.
+	- Removes the setting `auto_equip` as obsolete (now always on so that the mod works properly).
 
 - v1.15
 	- Adds a new command `hammer_save` to create blueprints with data.

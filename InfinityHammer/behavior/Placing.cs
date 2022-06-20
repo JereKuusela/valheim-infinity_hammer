@@ -60,6 +60,9 @@ public class PlacePiece {
       var diameter = (2f * ghost.transform.localScale.x).ToString(CultureInfo.InvariantCulture);
       var width = (2f * ghost.transform.localScale.x).ToString(CultureInfo.InvariantCulture);
       var depth = (2f * ghost.transform.localScale.z).ToString(CultureInfo.InvariantCulture);
+      var sx = ghost.transform.localScale.x.ToString(CultureInfo.InvariantCulture);
+      var sy = ghost.transform.localScale.y.ToString(CultureInfo.InvariantCulture);
+      var sz = ghost.transform.localScale.z.ToString(CultureInfo.InvariantCulture);
       var angle = ghost.transform.rotation.eulerAngles.y.ToString(CultureInfo.InvariantCulture);
 
       var command = Selection.Command;
@@ -71,6 +74,9 @@ public class PlacePiece {
       command = command.Replace("#x", x);
       command = command.Replace("#y", y);
       command = command.Replace("#z", z);
+      command = command.Replace("#sx", sx);
+      command = command.Replace("#sy", sy);
+      command = command.Replace("#sz", sz);
       if (!Settings.DisableMessages)
         Console.instance.AddString($"Hammering command: {command}");
       Console.instance.TryRunCommand(command);
@@ -152,8 +158,7 @@ public class SetupPlacementGhost {
   public static void Postfix(Player __instance) {
     if (!__instance.m_placementGhost) return;
     // Ensures that the scale is reseted when selecting objects from the build menu.
-    Scaling.SetScale(__instance.m_placementGhost.transform.localScale);
-    Helper.CleanObject(__instance.m_placementGhost);
+    Scaling.Get()?.SetScale(__instance.m_placementGhost.transform.localScale);
     // When copying an existing object, the copy is inactive.
     // So the ghost must be manually activated while disabling ZNet stuff.
     if (__instance.m_placementGhost && !__instance.m_placementGhost.activeSelf) {
@@ -166,7 +171,7 @@ public class SetupPlacementGhost {
 [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
 public class UpdatePlacementGhost {
   static void Postfix(Player __instance) {
-    Scaling.UpdatePlacement();
+    Scaling.Set(__instance.m_placementGhost);
     var marker = __instance.m_placementMarkerInstance;
     if (marker) {
       // Max 2 to only affect default game markers.

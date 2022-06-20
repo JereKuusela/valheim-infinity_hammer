@@ -49,18 +49,19 @@ public class Ruler {
     if (BaseProjector == null)
       BaseProjector = GetBaseProjector();
     RotateWithPlayer = pars.RotateWithPlayer;
+    var scale = Scaling.Get();
     if (pars.Radius.HasValue) {
       var circle = obj.AddComponent<CircleProjector>();
       circle.m_prefab = BaseProjector.m_prefab;
       circle.m_mask = BaseProjector.m_mask;
       circle.m_nrOfSegments = 3;
-      Scaling.SetScale(pars.Radius.Value);
+      scale?.SetScale(pars.Radius.Value);
     }
     if (pars.Depth.HasValue && pars.Width.HasValue) {
       var rect = obj.AddComponent<RectangleProjector>();
       rect.m_prefab = BaseProjector.m_prefab;
       rect.m_mask = BaseProjector.m_mask;
-      Scaling.SetScale(new Vector3(pars.Width.Value / 2f, 1f, pars.Depth.Value / 2f));
+      scale?.SetScale(new Vector3(pars.Width.Value / 2f, 1f, pars.Depth.Value / 2f));
       rect.m_nrOfSegments = 3;
     }
   }

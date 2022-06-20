@@ -1,3 +1,4 @@
+using System;
 using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer;
@@ -28,11 +29,12 @@ public static class Hammer {
   public static bool HasTool(Player player, Tool tool) => player && IsTool(player.GetRightItem(), tool);
   public static void Equip(Tool tool) {
     var player = Helper.GetPlayer();
-    if (!Settings.AutoEquip) return;
     if (HasTool(player, tool)) return;
     var inventory = player.GetInventory();
     var item = inventory.m_inventory.Find(item => IsTool(item, tool));
-    if (item == null) return;
+    if (item == null) {
+      throw new InvalidOperationException($"Unable to find the tool {tool.ToString()}.");
+    };
     player.EquipItem(item);
   }
   public static void Clear() {

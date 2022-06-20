@@ -29,8 +29,6 @@ public class Settings {
   public static bool IgnoreOtherRestrictions => configIgnoreOtherRestrictions.Value && IsCheats;
   public static ConfigEntry<bool> configRemoveAnything;
   public static bool RemoveAnything => configRemoveAnything.Value && IsCheats;
-  public static ConfigEntry<bool> configAutoEquip;
-  public static bool AutoEquip => configAutoEquip.Value && Enabled;
   public static ConfigEntry<bool> configDisableMessages;
   public static bool DisableMessages => configDisableMessages.Value;
   public static ConfigEntry<bool> configDisableSelectMessages;
@@ -141,7 +139,6 @@ public class Settings {
     configRemoveRange = config.Bind(section, "Remove range", "0", "Range for removing objects (0 = default).");
     configRepairRange = config.Bind(section, "Repair range", "0", "Range for repairing objects (0 = default).");
     configBuildRange = config.Bind(section, "Build range", "0", "Range for placing objects (0 = default)");
-    configAutoEquip = config.Bind(section, "Auto equip", true, "Automatically equips the hammer when selecting an object.");
     configRepairTaming = config.Bind(section, "Repair taming", false, "Repairing full health creatures tames/untames them.");
     configRemoveEffects = config.Bind(section, "Remove effects", false, "Removes visual effects of building, etc.");
     configEnableUndo = config.Bind(section, "Enable undo", true, "Enabled undo and redo for placing/removing.");
@@ -208,7 +205,6 @@ public class Settings {
     "repair_taming",
     "disable_loot",
     "disable_marker",
-    "auto_equip",
     "remove_blacklist",
     "select_blacklist",
     "disable_messages",
@@ -271,7 +267,6 @@ public class Settings {
     if (key == "disable_scale_messages") Toggle(context, configDisableScaleMessages, "Scale messages", value, true);
     if (key == "disable_select_messages") Toggle(context, configDisableSelectMessages, "Select messages", value, true);
     if (key == "chat_output") Toggle(context, configChatOutput, "Chat output", value);
-    if (key == "auto_equip") Toggle(context, configAutoEquip, "Auto equip", value);
     if (key == "enable_undo") Toggle(context, configEnableUndo, "Undo", value);
     if (key == "disable_marker") Toggle(context, configHidePlacementMarker, "Placement marker", value, true);
     if (key == "disable_loot") Toggle(context, configDisableLoot, "Loot", value, true);

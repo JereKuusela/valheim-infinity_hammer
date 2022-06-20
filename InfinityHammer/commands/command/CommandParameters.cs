@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Service;
 using UnityEngine;
@@ -14,6 +15,7 @@ public class CommandParameters {
   public string Name = "Command";
   public string Description = "";
   public Sprite? Icon = null;
+  public HashSet<string> Variables = new();
 
   public static string Join(string[] args) => string.Join(" ", args
     .Where(s => !s.StartsWith($"{CmdName}=", StringComparison.OrdinalIgnoreCase))
@@ -36,6 +38,13 @@ public class CommandParameters {
   static bool IsParameter(string arg, string par) => arg == par || arg.EndsWith("=" + par, StringComparison.OrdinalIgnoreCase);
   static string ReplaceEnd(string arg, string par, int amount) => arg.Substring(0, arg.Length - amount) + par;
 
+  private string Replace(string arg, string par) {
+    if (IsParameter(arg, par)) {
+      Variables.Add(par);
+      return ReplaceEnd(arg, $"#{par}", par.Length);
+    }
+    return arg;
+  }
   public static Sprite? FindSprite(string name) {
     name = name.ToLower();
     var prefab = ZNetScene.instance.GetPrefab(name);
@@ -52,10 +61,12 @@ public class CommandParameters {
     return null;
   }
   protected void ParseArgs(string[] args) {
-    var radius = Scaling.Value.x;
+    var scale = Scaling.Get();
+    if (scale == null) return;
+    var radius = scale.Value.x;
     var diameter = 2f * radius;
-    var width = 2f * Scaling.Value.x;
-    var depth = 2f * Scaling.Value.z;
+    var width = 2f * scale.Value.x;
+    var depth = 2f * scale.Value.z;
     for (var i = 0; i < args.Length; i++) {
       var arg = args[i];
       var split = arg.Split('=');
@@ -94,6 +105,9 @@ public class CommandParameters {
     var z = "#z";
     for (var i = 0; i < args.Length; i++) {
       var arg = args[i];
+      args[i] = Replace(arg, "sx");
+      args[i] = Replace(arg, "sy");
+      args[i] = Replace(arg, "sz");
       if (IsParameter(arg, "a")) {
         Angle = true;
         args[i] = ReplaceEnd(arg, "#angle", 1);

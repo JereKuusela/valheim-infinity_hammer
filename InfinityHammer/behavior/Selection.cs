@@ -51,7 +51,7 @@ public static class Selection {
     if (prefab.GetComponent<ZNetView>().m_syncInitialScale)
       Ghost.transform.localScale = scale ?? Vector3.one;
     Selection.Objects.Add(new(name, Ghost.transform.localScale, null));
-    Scaling.SetScale(Ghost.transform.localScale);
+    Scaling.Get()?.SetScale(Ghost.transform.localScale);
     Helper.EnsurePiece(Ghost);
     Helper.GetPlayer().SetupPlacementGhost();
     return Ghost;
@@ -70,7 +70,7 @@ public static class Selection {
     if (view.m_syncInitialScale)
       Ghost.transform.localScale = scale ?? view.gameObject.transform.localScale;
     Objects.Add(new(name, Ghost.transform.localScale, data));
-    Scaling.SetScale(Ghost.transform.localScale);
+    Scaling.Get()?.SetScale(Ghost.transform.localScale);
     Helper.EnsurePiece(Ghost);
     Helper.GetPlayer().SetupPlacementGhost();
     Rotating.UpdatePlacementRotation(view.gameObject);
