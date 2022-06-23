@@ -3,19 +3,26 @@ using BepInEx.Bootstrap;
 using BepInEx.Logging;
 using HarmonyLib;
 namespace InfinityHammer;
-[BepInPlugin("valheim.jerekuusela.infinity_hammer", "Infinity Hammer", "1.16.0.0")]
+[BepInPlugin(GUID, NAME, VERSION)]
 [BepInDependency("com.rolopogo.gizmo.comfy", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("m3to.mods.GizmoReloaded", BepInDependency.DependencyFlags.SoftDependency)]
-[BepInDependency("valheim.jerekuusela.server_devcommands", BepInDependency.DependencyFlags.SoftDependency)]
-[BepInDependency("valheim.jerekuusela.world_edit_commands", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("server_devcommands", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("world_edit_commands", BepInDependency.DependencyFlags.SoftDependency)]
 public class InfinityHammer : BaseUnityPlugin {
+  public const string GUID = "infinity_hammer";
+  public const string NAME = "Infinity Hammer";
+  public const string VERSION = "1.16";
+  ServerSync.ConfigSync ConfigSync = new(GUID) {
+    DisplayName = NAME,
+    CurrentVersion = VERSION,
+  };
 #nullable disable
   public static ManualLogSource Log;
   public void Awake() {
     Log = Logger;
-    Harmony harmony = new("valheim.jerekuusela.infinity_hammer");
+    Harmony harmony = new(GUID);
     harmony.PatchAll();
-    Settings.Init(Config);
+    Configuration.Init(ConfigSync, Config);
   }
 
   public void Start() {
@@ -38,14 +45,12 @@ public class SetCommands {
     new HammerSelect();
     new HammerLocationCommand();
     new HammerBlueprintCommand();
-    new HammerConfigCommand();
     new HammerMoveCommand();
     new HammerOffsetCommand();
     new HammerPlaceCommand();
     new HammerRepairCommand();
     new HammerRotateCommand();
     new HammerScale();
-    new HoeScale();
     new HammerStackCommand();
     new HammerUndoCommand();
     new HammerFreezeCommand();

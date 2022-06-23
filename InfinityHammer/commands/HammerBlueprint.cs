@@ -7,15 +7,15 @@ using UnityEngine;
 namespace InfinityHammer;
 public class HammerBlueprintCommand {
   private static void PrintSelected(Terminal terminal, string name) {
-    if (Settings.DisableSelectMessages) return;
+    if (Configuration.DisableSelectMessages) return;
     Helper.AddMessage(terminal, $"Selected {name}.");
   }
 
   private static IEnumerable<string> Files() {
-    if (!Directory.Exists(Settings.PlanBuildFolder)) Directory.CreateDirectory(Settings.PlanBuildFolder);
-    if (!Directory.Exists(Settings.BuildShareFolder)) Directory.CreateDirectory(Settings.BuildShareFolder);
-    var planBuild = Directory.EnumerateFiles(Settings.PlanBuildFolder, "*.blueprint", SearchOption.AllDirectories);
-    var buildShare = Directory.EnumerateFiles(Settings.BuildShareFolder, "*.vbuild", SearchOption.AllDirectories);
+    if (!Directory.Exists(Configuration.PlanBuildFolder)) Directory.CreateDirectory(Configuration.PlanBuildFolder);
+    if (!Directory.Exists(Configuration.BuildShareFolder)) Directory.CreateDirectory(Configuration.BuildShareFolder);
+    var planBuild = Directory.EnumerateFiles(Configuration.PlanBuildFolder, "*.blueprint", SearchOption.AllDirectories);
+    var buildShare = Directory.EnumerateFiles(Configuration.BuildShareFolder, "*.vbuild", SearchOption.AllDirectories);
     return planBuild.Concat(buildShare).OrderBy(s => s);
   }
   private static List<string> GetBlueprints() => Files().Select(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_")).ToList();

@@ -14,8 +14,8 @@ public class Repair {
     obj.ClaimOwnership();
     var zdo = obj.GetZDO();
     var currentHealth = zdo.GetFloat("health", character.GetMaxHealth());
-    var maxHealth = Settings.OverwriteHealth > 0f ? Settings.OverwriteHealth : character.GetMaxHealth();
-    var newHealth = Settings.OverwriteHealth > 0f ? Settings.OverwriteHealth * 1.000001f : character.GetMaxHealth();
+    var maxHealth = Configuration.OverwriteHealth > 0f ? Configuration.OverwriteHealth : character.GetMaxHealth();
+    var newHealth = Configuration.OverwriteHealth > 0f ? Configuration.OverwriteHealth * 1.000001f : character.GetMaxHealth();
     zdo.Set("max_health", maxHealth);
     var heal = newHealth - currentHealth;
     if (heal != 0f) {
@@ -24,7 +24,7 @@ public class Repair {
       DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, character.GetTopPoint(), Mathf.Abs(heal));
       return true;
     }
-    if (Settings.RepairTaming) {
+    if (Configuration.RepairTaming) {
       Taming.SetTame(character, !character.IsTamed());
       if (character.IsTamed())
         ReplaceMessage.Message = "Tamed " + Localization.instance.Localize(character.m_name);
@@ -74,7 +74,7 @@ public class Repair {
     var area = mineRock.GetHitArea(index);
     obj.ClaimOwnership();
     var zdo = obj.GetZDO();
-    var max = Settings.OverwriteHealth > 0f ? Settings.OverwriteHealth : mineRock.m_health;
+    var max = Configuration.OverwriteHealth > 0f ? Configuration.OverwriteHealth : mineRock.m_health;
     var heal = max - area.m_health;
     if (heal != 0f) {
       area.m_health = max;
@@ -96,7 +96,7 @@ public class Repair {
   private static bool RepairShared(ZNetView obj, float maxHealth) {
     obj.ClaimOwnership();
     var zdo = obj.GetZDO();
-    var max = Settings.OverwriteHealth > 0f ? Settings.OverwriteHealth : maxHealth;
+    var max = Configuration.OverwriteHealth > 0f ? Configuration.OverwriteHealth : maxHealth;
     var heal = max - zdo.GetFloat("health", maxHealth);
     if (heal == 0f) return false;
     zdo.Set("health", max);
@@ -138,7 +138,7 @@ public class Repair {
   }
 
   private static bool RepairAnything(Player player) {
-    var range = Settings.RepairRange > 0f ? Settings.RepairRange : player.m_maxPlaceDistance;
+    var range = Configuration.RepairRange > 0f ? Configuration.RepairRange : player.m_maxPlaceDistance;
     var hovered = Helper.GetHovered(player, range, null, true);
     if (hovered == null) return false;
     var obj = hovered.Obj;
@@ -166,7 +166,7 @@ public class Repair {
   }
   public static void Postfix(Player __instance) {
     if (!__instance.InPlaceMode()) return;
-    if (!Repaired && Settings.RepairAnything)
+    if (!Repaired && Configuration.RepairAnything)
       Repaired = RepairAnything(__instance);
     if (Repaired) Hammer.PostProcessTool(__instance);
   }
@@ -180,8 +180,8 @@ public class Repair {
 public class UnlockRepairDistance {
   public static void Prefix(Player __instance, ref float __state) {
     __state = __instance.m_maxPlaceDistance;
-    if (Settings.RepairRange > 0f)
-      __instance.m_maxPlaceDistance = Settings.RepairRange;
+    if (Configuration.RepairRange > 0f)
+      __instance.m_maxPlaceDistance = Configuration.RepairRange;
   }
   public static void Postfix(Player __instance, float __state) {
     __instance.m_maxPlaceDistance = __state;
@@ -199,7 +199,7 @@ public class CheckRepair {
 [HarmonyPatch(typeof(WearNTear), nameof(WearNTear.Repair))]
 public class AdvancedRepair {
   public static bool Prefix(WearNTear __instance, ref bool __result) {
-    if (!Repair.IsRepairing || !Settings.Enabled || !__instance.m_nview || Settings.OverwriteHealth == 0f) return true;
+    if (!Repair.IsRepairing || !Configuration.Enabled || !__instance.m_nview || Configuration.OverwriteHealth == 0f) return true;
     __result = Repair.RepairStructure(__instance.m_nview);
     return false;
   }

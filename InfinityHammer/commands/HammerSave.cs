@@ -167,7 +167,7 @@ public class HammerSaveCommand {
       var bp = BuildBluePrint(player, ghost);
       var lines = GetPlanBuildFile(bp);
       var name = Path.GetFileNameWithoutExtension(args[1]) + ".blueprint";
-      File.WriteAllLines(Path.Combine(Settings.PlanBuildFolder, name), lines);
+      File.WriteAllLines(Path.Combine(Configuration.PlanBuildFolder, name), lines);
     });
   }
 }

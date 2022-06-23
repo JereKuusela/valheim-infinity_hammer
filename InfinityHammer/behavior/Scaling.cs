@@ -1,8 +1,10 @@
-using System;
 using UnityEngine;
 namespace InfinityHammer;
 public class ToolScaling {
   public Vector3 Value = Vector3.one;
+  public float X => Value.x;
+  public float Y => Value.y;
+  public float Z => Value.z;
   public void Scale(float amount, float percentage) {
     Value += new Vector3(amount, amount, amount);
     if (percentage < 0f) Value /= (1f - percentage);
@@ -27,25 +29,24 @@ public class ToolScaling {
   public void SetScale(float value) {
     Value = value * Vector3.one;
   }
+  public void SetScaleX(float value) {
+    Value.x = value;
+  }
+  public void SetScaleY(float value) {
+    Value.y = value;
+  }
+  public void SetScaleZ(float value) {
+    Value.z = value;
+  }
   public void SetScale(Vector3 value) {
     Value = value;
   }
 }
 
 public static class Scaling {
-  private static ToolScaling HammerScale = new();
-  private static ToolScaling HoeScale = new();
-  public static ToolScaling? Get() {
-    var player = Helper.GetPlayer();
-    if (Hammer.HasTool(player, Tool.Hammer)) return HammerScale;
-    if (Hammer.HasTool(player, Tool.Hoe)) return HoeScale;
-    return null;
-  }
-  public static ToolScaling Get(Tool tool) {
-    if (tool == Tool.Hammer) return HammerScale;
-    if (tool == Tool.Hoe) return HoeScale;
-    throw new NotImplementedException();
-  }
+  public static ToolScaling Build = new();
+  public static ToolScaling Command = new();
+  public static ToolScaling Get() => Selection.Type == SelectionType.Command ? Scaling.Command : Scaling.Build;
   private static bool IsScalingSupported() {
     var player = Helper.GetPlayer();
     var ghost = player.m_placementGhost;
@@ -57,14 +58,12 @@ public static class Scaling {
     return view && view != null && view.m_syncInitialScale;
   }
   public static void Set(GameObject ghost) {
-    var scale = Get();
-    if (scale == null) return;
-    if (Settings.Enabled && ghost && IsScalingSupported())
-      ghost.transform.localScale = scale.Value;
+    if (Configuration.Enabled && ghost && IsScalingSupported())
+      ghost.transform.localScale = Build.Value; ;
   }
-  public static void PrintScale(Terminal terminal, Tool tool) {
-    if (Settings.DisableScaleMessages) return;
-    var scale = Get(tool);
+  public static void PrintScale(Terminal terminal) {
+    if (Configuration.DisableScaleMessages) return;
+    var scale = Get();
     if (IsScalingSupported())
       Helper.AddMessage(terminal, $"Scale set to {scale.Value.y.ToString("P0")}.");
     else

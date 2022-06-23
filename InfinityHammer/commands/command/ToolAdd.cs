@@ -9,8 +9,8 @@ public class ToolAdd {
   protected static void Execute(Terminal.ConsoleEventArgs args, Tool tool) {
     Helper.ArgsCheck(args, 2, "Missing the command.");
     var command = string.Join(" ", args.Args.Skip(1));
-    if (tool == Tool.Hammer) Settings.AddHammerCommand(command);
-    if (tool == Tool.Hoe) Settings.AddHoeCommand(command);
+    if (tool == Tool.Hammer) Configuration.AddHammerCommand(command);
+    if (tool == Tool.Hoe) Configuration.AddHoeCommand(command);
     Helper.AddMessage(args.Context, $"Added command {command} to {tool.ToString()}.");
   }
 }

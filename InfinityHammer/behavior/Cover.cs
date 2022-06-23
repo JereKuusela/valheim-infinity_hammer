@@ -1,6 +1,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer;
 public static class CoverCheck {
@@ -75,3 +76,12 @@ public class AddCoverText {
     __instance.m_pieceDescription.text += " " + CoverCheck.CurrentCover;
   }
 }*/
+
+[HarmonyPatch(typeof(Hud), nameof(Hud.SetupPieceInfo))]
+public class AddCommandText {
+  public static void Postfix(Hud __instance, Piece piece) {
+    if (Selection.Type != SelectionType.Command) return;
+    if (!piece) return;
+    __instance.m_pieceDescription.text += "\n" + Ruler.Description();
+  }
+}

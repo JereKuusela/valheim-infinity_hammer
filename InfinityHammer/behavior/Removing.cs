@@ -9,8 +9,8 @@ namespace InfinityHammer;
 public class UnlockRemoveDistance {
   public static void Prefix(Player __instance, ref float __state) {
     __state = __instance.m_maxPlaceDistance;
-    if (Settings.RemoveRange > 0f)
-      __instance.m_maxPlaceDistance = Settings.RemoveRange;
+    if (Configuration.RemoveRange > 0f)
+      __instance.m_maxPlaceDistance = Configuration.RemoveRange;
   }
   public static void Postfix(Player __instance, float __state) {
     __instance.m_maxPlaceDistance = __state;
@@ -30,7 +30,7 @@ public class RemovePiece {
   }
 
   private static bool RemoveAnything(Player obj) {
-    var hovered = Helper.GetHovered(obj, obj.m_maxPlaceDistance, Settings.RemoveBlacklist);
+    var hovered = Helper.GetHovered(obj, obj.m_maxPlaceDistance, Configuration.RemoveBlacklist);
     if (hovered == null) return false;
     obj.m_removeEffects.Create(hovered.Obj.transform.position, Quaternion.identity, null, 1f, -1);
     SetRemovedObject(hovered.Obj);
@@ -66,9 +66,9 @@ public class RemovePiece {
   public static bool Prefix(Player __instance, ref bool __result) {
     DisableEffects.Active = true;
     Removing = true;
-    PreventPieceDrops.Active = Settings.DisableLoot;
-    PreventCreaturerops.Active = Settings.DisableLoot;
-    if (Settings.RemoveAnything) {
+    PreventPieceDrops.Active = Configuration.DisableLoot;
+    PreventCreaturerops.Active = Configuration.DisableLoot;
+    if (Configuration.RemoveAnything) {
       __result = RemoveAnything(__instance);
       return false;
     }
@@ -76,7 +76,7 @@ public class RemovePiece {
   }
   static void Finalizer() {
     if (RemovedObjects.Count > 0) {
-      RemoveInArea(RemovedObjects[0], Settings.RemoveArea);
+      RemoveInArea(RemovedObjects[0], Configuration.RemoveArea);
       UndoWrapper.Remove(RemovedObjects);
     }
     RemovedObjects.Clear();

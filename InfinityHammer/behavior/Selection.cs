@@ -44,7 +44,7 @@ public static class Selection {
     var prefab = ZNetScene.instance.GetPrefab(name);
     if (!prefab) throw new InvalidOperationException("Invalid prefab.");
     if (prefab.GetComponent<Player>()) throw new InvalidOperationException("Players are not valid objects.");
-    if (!Settings.AllObjects && !Helper.IsBuildPiece(prefab)) throw new InvalidOperationException("Only build pieces are allowed.");
+    if (!Configuration.AllObjects && !Helper.IsBuildPiece(prefab)) throw new InvalidOperationException("Only build pieces are allowed.");
     Clear();
     Type = SelectionType.Object;
     Ghost = Helper.SafeInstantiate(prefab);
@@ -58,12 +58,12 @@ public static class Selection {
   }
   public static GameObject Set(ZNetView view, Vector3? scale) {
     var name = Utils.GetPrefabName(view.gameObject);
-    var prefab = Settings.CopyState ? view.gameObject : ZNetScene.instance.GetPrefab(name);
-    var data = Settings.CopyState ? view.GetZDO() : null;
+    var prefab = Configuration.CopyState ? view.gameObject : ZNetScene.instance.GetPrefab(name);
+    var data = Configuration.CopyState ? view.GetZDO() : null;
 
     if (!prefab) throw new InvalidOperationException("Invalid prefab.");
     if (prefab.GetComponent<Player>()) throw new InvalidOperationException("Players are not valid objects.");
-    if (!Settings.AllObjects && !Helper.IsBuildPiece(prefab)) throw new InvalidOperationException("Only build pieces are allowed.");
+    if (!Configuration.AllObjects && !Helper.IsBuildPiece(prefab)) throw new InvalidOperationException("Only build pieces are allowed.");
     Clear();
     Type = SelectionType.Object;
     Ghost = Helper.SafeInstantiate(prefab);

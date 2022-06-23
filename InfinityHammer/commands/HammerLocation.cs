@@ -3,7 +3,7 @@ using UnityEngine;
 namespace InfinityHammer;
 public class HammerLocationCommand {
   private static void PrintSelected(Terminal terminal, GameObject obj) {
-    if (Settings.DisableSelectMessages) return;
+    if (Configuration.DisableSelectMessages) return;
     var name = obj ? Utils.GetPrefabName(obj) : "";
     Helper.AddMessage(terminal, $"Selected {name}.");
   }

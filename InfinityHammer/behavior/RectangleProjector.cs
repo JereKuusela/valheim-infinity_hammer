@@ -1,3 +1,4 @@
+using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer;
 public class RectangleProjector : CircleProjector {
@@ -96,6 +97,19 @@ public class RectangleProjector : CircleProjector {
       Set(index, pos);
       EdgeFix(index, percent, size, start, end, Vector3.left);
       Cast(index);
+    }
+  }
+}
+
+
+
+[HarmonyPatch(typeof(CircleProjector), nameof(CircleProjector.Update))]
+public class OffsetProjector {
+  static void Postfix(CircleProjector __instance) {
+    Vector3 offset = new(0f, Ruler.Height, 0f);
+    if (offset == Vector3.zero) return;
+    foreach (var segment in __instance.m_segments) {
+      segment.transform.localPosition += offset;
     }
   }
 }

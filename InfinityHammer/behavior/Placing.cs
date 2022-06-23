@@ -53,31 +53,26 @@ public class PlacePiece {
     if (!ghost) return;
     var piece = obj.GetComponent<Piece>();
     if (Selection.Type == SelectionType.Command) {
+      var scale = Scaling.Command;
       var x = ghost.transform.position.x.ToString(CultureInfo.InvariantCulture);
       var y = ghost.transform.position.y.ToString(CultureInfo.InvariantCulture);
       var z = ghost.transform.position.z.ToString(CultureInfo.InvariantCulture);
-      var radius = ghost.transform.localScale.x.ToString(CultureInfo.InvariantCulture);
-      var diameter = (2f * ghost.transform.localScale.x).ToString(CultureInfo.InvariantCulture);
-      var width = (2f * ghost.transform.localScale.x).ToString(CultureInfo.InvariantCulture);
-      var depth = (2f * ghost.transform.localScale.z).ToString(CultureInfo.InvariantCulture);
-      var sx = ghost.transform.localScale.x.ToString(CultureInfo.InvariantCulture);
-      var sy = ghost.transform.localScale.y.ToString(CultureInfo.InvariantCulture);
-      var sz = ghost.transform.localScale.z.ToString(CultureInfo.InvariantCulture);
+      var radius = scale.X.ToString(CultureInfo.InvariantCulture);
+      var width = scale.X.ToString(CultureInfo.InvariantCulture);
+      var depth = scale.Z.ToString(CultureInfo.InvariantCulture);
+      var height = scale.Y.ToString(CultureInfo.InvariantCulture);
       var angle = ghost.transform.rotation.eulerAngles.y.ToString(CultureInfo.InvariantCulture);
 
       var command = Selection.Command;
-      command = command.Replace("#radius", radius);
-      command = command.Replace("#diameter", diameter);
-      command = command.Replace("#depth", depth);
-      command = command.Replace("#width", width);
-      command = command.Replace("#angle", angle);
+      command = command.Replace("#r", radius);
+      command = command.Replace("#d", depth);
+      command = command.Replace("#w", width);
+      command = command.Replace("#a", angle);
       command = command.Replace("#x", x);
       command = command.Replace("#y", y);
       command = command.Replace("#z", z);
-      command = command.Replace("#sx", sx);
-      command = command.Replace("#sy", sy);
-      command = command.Replace("#sz", sz);
-      if (!Settings.DisableMessages)
+      command = command.Replace("#h", height);
+      if (!Configuration.DisableMessages)
         Console.instance.AddString($"Hammering command: {command}");
       Console.instance.TryRunCommand(command);
       UnityEngine.Object.Destroy(obj);
@@ -145,8 +140,10 @@ public class PostProcessToolOnPlace {
 public class UnlockBuildDistance {
   public static void Prefix(Player __instance, ref float __state) {
     __state = __instance.m_maxPlaceDistance;
-    if (Settings.BuildRange > 0f)
-      __instance.m_maxPlaceDistance = Settings.BuildRange;
+    if (Configuration.BuildRange > 0f)
+      __instance.m_maxPlaceDistance = Configuration.BuildRange;
+    if (Selection.Type == SelectionType.Command)
+      __instance.m_maxPlaceDistance = 100f;
   }
   public static void Postfix(Player __instance, float __state) {
     __instance.m_maxPlaceDistance = __state;
@@ -158,7 +155,7 @@ public class SetupPlacementGhost {
   public static void Postfix(Player __instance) {
     if (!__instance.m_placementGhost) return;
     // Ensures that the scale is reseted when selecting objects from the build menu.
-    Scaling.Get()?.SetScale(__instance.m_placementGhost.transform.localScale);
+    Scaling.Build.SetScale(__instance.m_placementGhost.transform.localScale);
     // When copying an existing object, the copy is inactive.
     // So the ghost must be manually activated while disabling ZNet stuff.
     if (__instance.m_placementGhost && !__instance.m_placementGhost.activeSelf) {
@@ -176,7 +173,7 @@ public class UpdatePlacementGhost {
     if (marker) {
       // Max 2 to only affect default game markers.
       for (var i = 0; i < marker.transform.childCount && i < 2; i++)
-        marker.transform.GetChild(i).gameObject.SetActive(!Settings.HidePlacementMarker);
+        marker.transform.GetChild(i).gameObject.SetActive(!Configuration.HidePlacementMarker);
     }
   }
 }

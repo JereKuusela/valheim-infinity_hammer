@@ -170,10 +170,10 @@ public static class Helper {
     AddMessage(context, $"Error: {message}", priority);
   }
   public static void AddMessage(Terminal context, string message, bool priority = true) {
-    if (context == Console.instance || Settings.ChatOutput)
+    if (context == Console.instance || Configuration.ChatOutput)
       context.AddString(message);
     var hud = MessageHud.instance;
-    if (!hud || Settings.DisableMessages) return;
+    if (!hud || Configuration.DisableMessages) return;
     if (priority) {
       var items = hud.m_msgQeue.ToArray();
       hud.m_msgQeue.Clear();
@@ -256,7 +256,7 @@ public static class Helper {
   }
   ///<summary>Removes scripts that try to run (for example placement needs only the model and Piece component).</summary>
   public static void CleanObject(GameObject obj) {
-    if (!obj || !Settings.Enabled) return;
+    if (!obj || !Configuration.Enabled) return;
     // Creature behavior.
     UnityEngine.Object.Destroy(obj.GetComponent<CharacterDrop>());
     UnityEngine.Object.Destroy(obj.GetComponent<BaseAI>());
@@ -300,10 +300,10 @@ public static class Helper {
   ///<summary>Helper to check object validity.</summary>
   public static bool IsValid(ZDO zdo) => zdo != null && zdo.IsValid();
   public static void CheatCheck() {
-    if (!Settings.IsCheats) throw new InvalidOperationException("This command is disabled.");
+    if (!Configuration.IsCheats) throw new InvalidOperationException("This command is disabled.");
   }
   public static void EnabledCheck() {
-    if (!Settings.Enabled) throw new InvalidOperationException("Infinity Hammer is disabled.");
+    if (!Configuration.Enabled) throw new InvalidOperationException("Infinity Hammer is disabled.");
   }
   public static void ArgsCheck(Terminal.ConsoleEventArgs args, int amount, string message) {
     if (args.Length < amount) throw new InvalidOperationException(message);

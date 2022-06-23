@@ -6,8 +6,8 @@ namespace InfinityHammer;
 public class HammerSelect {
   ///<summary>Returns the hovered object.</summary>
   private static ZNetView GetHovered() {
-    var range = Settings.SelectRange == 0 ? Player.m_localPlayer.m_maxInteractDistance : Settings.SelectRange;
-    var hovered = Helper.GetHovered(Player.m_localPlayer, range, Settings.SelectBlacklist);
+    var range = Configuration.SelectRange == 0 ? Player.m_localPlayer.m_maxInteractDistance : Configuration.SelectRange;
+    var hovered = Helper.GetHovered(Player.m_localPlayer, range, Configuration.SelectBlacklist);
     if (hovered == null) throw new InvalidOperationException("Nothing is being hovered.");
     return hovered.Obj;
   }
@@ -42,7 +42,7 @@ public class HammerSelect {
     return views.ToArray();
   }
   private static void PrintSelected(Terminal terminal, GameObject obj) {
-    if (Settings.DisableSelectMessages) return;
+    if (Configuration.DisableSelectMessages) return;
     var scale = obj.transform.localScale;
     var view = obj.GetComponent<ZNetView>();
     var name = Utils.GetPrefabName(obj);

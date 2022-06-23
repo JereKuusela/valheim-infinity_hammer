@@ -8,14 +8,14 @@ public static class CommandWrapper {
   public static Assembly? ServerDevcommands = null;
   public static Assembly? WorldEditCommands = null;
   public static void Init() {
-    if (Chainloader.PluginInfos.TryGetValue("valheim.jerekuusela.server_devcommands", out var info)) {
+    if (Chainloader.PluginInfos.TryGetValue("server_devcommands", out var info)) {
       if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 20) {
         InfinityHammer.Log.LogWarning($"Server devcommands v{info.Metadata.Version.Major}.{info.Metadata.Version.Minor} is outdated. Please update for better command instructions!");
       } else {
         ServerDevcommands = info.Instance.GetType().Assembly;
       }
     }
-    if (Chainloader.PluginInfos.TryGetValue("valheim.jerekuusela.world_edit_commands", out info)) {
+    if (Chainloader.PluginInfos.TryGetValue("world_edit_commands", out info)) {
       WorldEditCommands = info.Instance.GetType().Assembly;
     }
   }
@@ -75,5 +75,9 @@ public static class CommandWrapper {
   public static List<string> FRU(string description, int index) {
     if (ServerDevcommands == null) return null;
     return GetMethod(InfoType(), "XYZ", new[] { typeof(string), typeof(int) }).Invoke(null, new object[] { description, index }) as List<string>;
+  }
+  public static void AddSpecialCommand(string command) {
+    if (ServerDevcommands == null) return;
+    GetMethod(InfoType(), "AddSpecialCommand1", new[] { typeof(string) }).Invoke(null, new object[] { command });
   }
 }

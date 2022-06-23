@@ -12,7 +12,7 @@ public static class Hammer {
   public static bool RandomLocationDamage = false;
 
   public static void CopyState(ZNetView view, int index = 0) {
-    if (!Settings.CopyState || !view) return;
+    if (!Configuration.CopyState || !view) return;
     var zdo = view.GetZDO();
     if (zdo == null || !zdo.IsValid()) return;
     var data = Selection.GetData(index);
@@ -21,9 +21,9 @@ public static class Hammer {
   }
   public static void RemoveSelection() {
     Selection.Clear();
-    if (Settings.UnfreezeOnSelect) Position.Unfreeze();
+    if (Configuration.UnfreezeOnSelect) Position.Unfreeze();
   }
-  public static bool IsTool(string name, Tool tool) => tool == Tool.Hammer ? Settings.HammerTools.Contains(name.ToLower()) : Settings.HoeTools.Contains(name.ToLower());
+  public static bool IsTool(string name, Tool tool) => tool == Tool.Hammer ? Configuration.HammerTools.Contains(name.ToLower()) : Configuration.HoeTools.Contains(name.ToLower());
   public static bool IsTool(GameObject obj, Tool tool) => obj && IsTool(Utils.GetPrefabName(obj), tool);
   public static bool IsTool(ItemDrop.ItemData item, Tool tool) => item != null && IsTool(item.m_dropPrefab, tool);
   public static bool HasTool(Player player, Tool tool) => player && IsTool(player.GetRightItem(), tool);
@@ -95,28 +95,28 @@ public static class Hammer {
   ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
   public static void PostProcessPlaced(GameObject obj) {
     var view = obj.GetComponent<ZNetView>();
-    if (!Settings.Enabled || !view) return;
+    if (!Configuration.Enabled || !view) return;
     var zdo = view.GetZDO();
     var piece = obj.GetComponent<Piece>();
     if (piece) {
       piece.m_canBeRemoved = true;
       // Creator data is only interesting for actual targets. Dummy components will have these both as false.
       if (piece.m_randomTarget || piece.m_primaryTarget) {
-        if (Settings.NoCreator)
+        if (Configuration.NoCreator)
           zdo.Set("creator", 0L);
         else
           piece.SetCreator(Game.instance.GetPlayerProfile().GetPlayerID());
       }
     }
     var character = obj.GetComponent<Character>();
-    if (Settings.OverwriteHealth > 0f) {
+    if (Configuration.OverwriteHealth > 0f) {
       if (character)
-        zdo.Set("max_health", Settings.OverwriteHealth);
+        zdo.Set("max_health", Configuration.OverwriteHealth);
       if (obj.GetComponent<TreeLog>() || obj.GetComponent<WearNTear>() || obj.GetComponent<Destructible>() || obj.GetComponent<TreeBase>() || character)
-        zdo.Set("health", Settings.OverwriteHealth);
+        zdo.Set("health", Configuration.OverwriteHealth);
       var mineRock = obj.GetComponent<MineRock5>();
       if (mineRock) {
-        foreach (var area in mineRock.m_hitAreas) area.m_health = Settings.OverwriteHealth;
+        foreach (var area in mineRock.m_hitAreas) area.m_health = Configuration.OverwriteHealth;
         mineRock.SaveHealth();
       }
     }
@@ -127,9 +127,9 @@ public static class Hammer {
   public static void PostProcessTool(Player obj) {
     var item = obj.GetRightItem();
     if (item == null) return;
-    if (Settings.NoStaminaCost)
+    if (Configuration.NoStaminaCost)
       obj.UseStamina(-item.m_shared.m_attack.m_attackStamina);
-    if (Settings.NoDurabilityLoss && item.m_shared.m_useDurability)
+    if (Configuration.NoDurabilityLoss && item.m_shared.m_useDurability)
       item.m_durability += item.m_shared.m_useDurabilityDrain;
   }
 }
@@ -138,13 +138,13 @@ public static class Hammer {
 [HarmonyPatch(typeof(EffectList), nameof(EffectList.Create))]
 public class DisableEffects {
   public static bool Active = false;
-  static bool Prefix() => !Active || !Settings.RemoveEffects;
+  static bool Prefix() => !Active || !Configuration.RemoveEffects;
 }
 
 [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.UnequipItem))]
 public class UnfreezeOnUnequip {
   static void Prefix(Humanoid __instance, ItemDrop.ItemData item) {
     if (__instance != Player.m_localPlayer || item == null) return;
-    if (Settings.UnfreezeOnUnequip) Position.Unfreeze();
+    if (Configuration.UnfreezeOnUnequip) Position.Unfreeze();
   }
 }

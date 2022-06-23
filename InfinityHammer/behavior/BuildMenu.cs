@@ -26,28 +26,36 @@ public static class UpdateAvailable {
     if (!obj.IsValid(Console.instance)) return false;
     return true;
   }
-  private static Piece Build(string command, Sprite? defaultSprite) {
+  private static Piece Build(string command) {
     CommandParameters pars = new(command.Split(' '));
     GameObject obj = new();
     var piece = obj.AddComponent<BuildMenuCommand>();
     piece.Command = command;
     piece.m_description = pars.Description;
     piece.m_name = pars.Name;
-    piece.m_icon = pars.Icon ?? defaultSprite;
+    piece.m_icon = pars.Icon;
     return piece;
   }
   static void Postfix(PieceTable __instance) {
     List<string>? commands = null;
-    if (Hammer.HasTool(Helper.GetPlayer(), Tool.Hammer))
-      commands = Settings.HammerCommands;
-    if (Hammer.HasTool(Helper.GetPlayer(), Tool.Hoe))
-      commands = Settings.HoeCommands;
+    int tab = 0;
+    int index = 0;
+    if (Hammer.HasTool(Helper.GetPlayer(), Tool.Hammer)) {
+      commands = Configuration.HammerCommands;
+      tab = Configuration.HammerMenuTab;
+      index = Configuration.HammerMenuIndex;
+    }
+    if (Hammer.HasTool(Helper.GetPlayer(), Tool.Hoe)) {
+      commands = Configuration.HoeCommands;
+      tab = Configuration.HoeMenuTab;
+      index = Configuration.HoeMenuIndex;
+    }
     if (commands == null) return;
-    var pieces = __instance.m_availablePieces.FirstOrDefault();
-    if (pieces == null) return;
-    var sprite = pieces.FirstOrDefault()?.m_icon;
+    if (__instance.m_availablePieces.Count <= tab) return;
+    var pieces = __instance.m_availablePieces[tab];
+    index = Math.Min(index, pieces.Count);
     foreach (var command in commands.Where(IsValid).Reverse())
-      pieces.Insert(1, Build(command, sprite));
+      pieces.Insert(index, Build(command));
   }
 }
 

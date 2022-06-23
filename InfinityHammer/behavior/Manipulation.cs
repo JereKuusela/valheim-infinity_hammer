@@ -121,7 +121,7 @@ public static class Position {
   }
   public static void Unfreeze() {
     Override = null;
-    if (Settings.ResetOffsetOnUnfreeze) Offset = Vector3.zero;
+    if (Configuration.ResetOffsetOnUnfreeze) Offset = Vector3.zero;
   }
   public static Vector3 Apply(Vector3 point) {
     var ghost = Helper.GetPlayer().m_placementGhost;
@@ -169,13 +169,13 @@ public static class Position {
   }
 
   public static void Print(Terminal terminal) {
-    if (Settings.DisableOffsetMessages) return;
+    if (Configuration.DisableOffsetMessages) return;
     Helper.AddMessage(terminal, $"Offset set to forward: {Offset.z.ToString("F1", CultureInfo.InvariantCulture)}, up: {Offset.y.ToString("F1", CultureInfo.InvariantCulture)}, right: {Offset.x.ToString("F1", CultureInfo.InvariantCulture)}.");
   }
 }
 public static class Rotating {
   public static void UpdatePlacementRotation(GameObject obj) {
-    if (!Settings.CopyRotation) return;
+    if (!Configuration.CopyRotation) return;
     var player = Helper.GetPlayer();
     var rotation = obj.transform.rotation;
     player.m_placeRotation = Mathf.RoundToInt(rotation.eulerAngles.y / 22.5f);
