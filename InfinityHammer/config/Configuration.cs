@@ -136,9 +136,9 @@ public class Configuration {
     configEnabled = wrapper.Bind(section, "Enabled", true, "Whether this mod is enabled at all.");
     var defaultBinds = new[] {
       "wheel,leftshift hammer_scale build 5%",
-      "wheel,leftshift hammer_scale_x command 5",
+      "wheel,leftshift hammer_scale_x command 1",
       "wheel,leftshift,leftcontrol hammer_scale_y command 0.5",
-      "wheel,leftshift,leftalt hammer_scale_z command 5",
+      "wheel,leftshift,leftalt hammer_scale_z command 1",
     };
     configBinds = wrapper.BindList(section, "Binds", string.Join("|", defaultBinds), "Binds separated by ; that are set on the game start.");
     configHammerTools = wrapper.BindList(section, "Hammer tools", "hammer", "List of hammers.");

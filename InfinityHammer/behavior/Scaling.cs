@@ -1,51 +1,70 @@
 using UnityEngine;
 namespace InfinityHammer;
 public class ToolScaling {
+  private bool SanityY;
+  public ToolScaling(bool sanityY) {
+    SanityY = sanityY;
+  }
   public Vector3 Value = Vector3.one;
   public float X => Value.x;
   public float Y => Value.y;
   public float Z => Value.z;
+  private void Sanity() {
+    Value.x = Mathf.Max(0f, Value.x);
+    if (SanityY)
+      Value.y = Mathf.Max(0f, Value.y);
+    Value.z = Mathf.Max(0f, Value.z);
+  }
   public void Scale(float amount, float percentage) {
     Value += new Vector3(amount, amount, amount);
     if (percentage < 0f) Value /= (1f - percentage);
     else Value *= (1f + percentage);
+    Sanity();
   }
   public void ScaleX(float amount, float percentage) {
     Value.x += amount;
     if (percentage < 0f) Value.x /= (1f - percentage);
     else Value.x *= (1f + percentage);
+    Sanity();
   }
   public void ScaleY(float amount, float percentage) {
     Value.y += amount;
     if (percentage < 0f) Value.y /= (1f - percentage);
     else Value.y *= (1f + percentage);
+    Sanity();
   }
 
   public void ScaleZ(float amount, float percentage) {
     Value.z += amount;
     if (percentage < 0f) Value.z /= (1f - percentage);
     else Value.z *= (1f + percentage);
+    Sanity();
   }
   public void SetScale(float value) {
     Value = value * Vector3.one;
+    Sanity();
   }
   public void SetScaleX(float value) {
     Value.x = value;
+    Sanity();
   }
   public void SetScaleY(float value) {
     Value.y = value;
+    Sanity();
   }
   public void SetScaleZ(float value) {
     Value.z = value;
+    Sanity();
   }
   public void SetScale(Vector3 value) {
     Value = value;
+    Sanity();
   }
 }
 
 public static class Scaling {
-  public static ToolScaling Build = new();
-  public static ToolScaling Command = new();
+  public static ToolScaling Build = new(true);
+  public static ToolScaling Command = new(false);
   public static ToolScaling Get() => Selection.Type == SelectionType.Command ? Scaling.Command : Scaling.Build;
   private static bool IsScalingSupported() {
     var player = Helper.GetPlayer();
@@ -58,8 +77,8 @@ public static class Scaling {
     return view && view != null && view.m_syncInitialScale;
   }
   public static void Set(GameObject ghost) {
-    if (Configuration.Enabled && ghost && IsScalingSupported())
-      ghost.transform.localScale = Build.Value; ;
+    if (Configuration.Enabled && ghost && IsScalingSupported() && Selection.Type != SelectionType.Command)
+      ghost.transform.localScale = Build.Value;
   }
   public static void PrintScale(Terminal terminal) {
     if (Configuration.DisableScaleMessages) return;

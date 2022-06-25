@@ -98,6 +98,11 @@ public class RectangleProjector : CircleProjector {
       EdgeFix(index, percent, size, start, end, Vector3.left);
       Cast(index);
     }
+    Vector3 offset = new(0f, Ruler.Height, 0f);
+    if (offset == Vector3.zero) return;
+    foreach (var segment in m_segments) {
+      segment.transform.localPosition += offset;
+    }
   }
 }
 

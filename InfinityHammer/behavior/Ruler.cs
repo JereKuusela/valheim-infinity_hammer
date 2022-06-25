@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Linq;
 using UnityEngine;
 namespace InfinityHammer;
 
@@ -45,17 +46,27 @@ public class Ruler {
     }
   }
   public static float Height => UseHeight ? Scaling.Command.Y : 0f;
-  public static string Description() {
-    if (Projector == null || !Player.m_localPlayer) return "";
+
+  private static string DescriptionScale(GameObject projector) {
     var scale = Scaling.Command;
     var height = UseHeight ? $", h: {Format(scale.Y)}" : "";
-    if (Projector.GetComponent<CircleProjector>()) {
-      return $"r: {Format(scale.X)}" + height;
-    }
-    if (Projector.GetComponent<RectangleProjector>()) {
+    if (projector.GetComponent<RectangleProjector>()) {
       return $"w: {Format(scale.X)}, d: {Format(scale.Z)}" + height;
     }
+    if (projector.GetComponent<CircleProjector>()) {
+      return $"r: {Format(scale.X)}" + height;
+    }
     return "";
+  }
+  private static string DescriptionPosition(GameObject projector) {
+    var pos = projector.transform.position;
+    return $"x: {Format(pos.x)}, z: {Format(pos.z)}, y: {Format(pos.y)}";
+  }
+  public static string Description() {
+    if (Projector == null) return "";
+    if (Hud.instance.m_pieceSelectionWindow.activeSelf) return "";
+    var lines = new[] { DescriptionScale(Projector), DescriptionPosition(Projector) };
+    return string.Join("\n", lines.Where(s => s != ""));
   }
   private static string Format(float f) => f.ToString("F1", CultureInfo.InvariantCulture);
 
