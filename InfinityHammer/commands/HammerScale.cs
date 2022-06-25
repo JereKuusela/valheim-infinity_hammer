@@ -51,3 +51,27 @@ public class HammerScale {
     });
   }
 }
+
+public class HammerSetScale {
+
+  public HammerSetScale() {
+    var name = "hammer_set_scale";
+    CommandWrapper.Register(name, (int index, int subIndex) => {
+      if (index == 0) return new() { "all", "build", "command" };
+      if (index == 1) return CommandWrapper.XZY("Scale.", subIndex);
+      return null;
+    });
+    Helper.Command(name, "[all/build/command] [amount] - Sets the selection scale (if the object supports it).", (args) => {
+      Helper.ArgsCheck(args, 2, "Missing the type parameter (all, build or command).");
+      if (args[1] == "build" && Selection.Type == SelectionType.Command) return;
+      if (args[1] == "command" && Selection.Type != SelectionType.Command) return;
+      Helper.ArgsCheck(args, 3, "Missing the amount.");
+      var scale = Scaling.Get();
+      var split = args[2].Split(',');
+      scale.SetScaleX(Parse.TryFloat(split, 0, scale.X));
+      scale.SetScaleZ(Parse.TryFloat(split, 1, scale.Z));
+      scale.SetScaleY(Parse.TryFloat(split, 2, scale.Y));
+      Scaling.PrintScale(args.Context);
+    });
+  }
+}

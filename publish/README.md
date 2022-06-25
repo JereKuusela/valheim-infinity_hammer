@@ -149,7 +149,7 @@ You can also use another modifier key for a bigger offset:
 
 Following powers are available with `hammer_config` command:
 
-- Enabled (default: `true`, key: `enabled`): If false, disabled most features.
+- Enabled (default: `true`, key: `enabled`): If disabled, removes most features.
 - All objects (default: `true`, key: `all_objects`): Hammer can select and place any object. Any placed object can be removed with the hammer until the area is reloaded.
 - Allow in dungeons (default: `true`, key: `allow_in_dungeons`): Building is allowed in dungeons.
 - Binds (default: ` `, key: `binds`): Sets binds at the game start up. Any existing binds are cleared from those keys.
@@ -181,6 +181,7 @@ Following powers are available with `hammer_config` command:
 - Reset offset on unfreeze (default `true`, key: `reset_offset_on_unfreeze`): Removes the placement offset when unfreezing the placement.
 - Select blacklist (key: `select_blacklist`): Allows disabling select for given objects (ids separated by ,).
 - Select range (default: `0`, key: `select_range`): Range for selecting (capped at about 50 meters).
+- Server Devcommands undo (default: `true`, key: `server_devcommands_undo`): If disabled, uses Infinity Hammer's own undo system even if Server Devcommands is installed.
 - Unfreeze on select (default `false`, key: `unfreeze_on_select`): Removes the placement freeze when selecting a new object.
 - Unfreeze on unequip (defualt `true`, key: `unfreeze_on_unequip`): Removes the placement freeze when unequipping the hammer.
 
@@ -242,6 +243,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 
 - v1.16
 	- Adds a new setting to add custom commands to the build menu.
+	- Adds a new setting `server_devcommands_undo` to allow using Infinity Hammer's own undo system even with Server Devcommands installed (default `true`).
 	- Adds a new parameter `radius` to the `hammer` command which allows selecting all nearby objects.
 	- Adds a new parameter `connect=piece` to the `hammer` command which allows selecting the hovered object and connected pieces.
 	- Adds a new parameter `health` to the `hammer` command which allows overriding the object health.
@@ -251,11 +253,12 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds a new command `hammer_mirror` to mirror the selection.
 	- Adds new commands `hammer_scale_x`, `hammer_scale_y` and `hammer_scale_z` to scale up/down a single axis.
 	- Changes the `hammer_scale` command to scale up/down instead of setting the scale directly.
+	- Renames the `hammer_scale` command to `hammer_set_scale`.
+	- Removes the setting `scaling_step` as obsolete.
+	- Removes the commands `hammer_scale_up` and `hammer_scale_down` as obsolete (existing binds automatically migrate to use `hammer_scale`).
+	- Removes the setting `auto_equip` as obsolete (now always on so that the mod works properly).
 	- Fixes the setting `copy_state` not working.
 	- Fixes the `scale` parameter not working on the `hammer` command.
-	- Removes the setting `scaling_step` as obsolete.
-	- Removes the commands `hammer_scale_up` and `hammer_scale_down` as obsolete.
-	- Removes the setting `auto_equip` as obsolete (now always on so that the mod works properly).
 
 - v1.15
 	- Adds a new command `hammer_save` to create blueprints with data.

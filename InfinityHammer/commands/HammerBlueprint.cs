@@ -184,7 +184,7 @@ public class HammerBlueprintCommand {
       Helper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
       Hammer.Equip(Tool.Hammer);
-      var bp = GetBluePrint(string.Join("_", args.Args.Skip(1)));
+      var bp = GetBluePrint(string.Join("_", args.Args, 1, args.Length - 1));
       var obj = Selection.Set(args.Context, bp);
       PrintSelected(args.Context, bp.Name);
 

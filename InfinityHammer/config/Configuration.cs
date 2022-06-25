@@ -83,6 +83,8 @@ public class Configuration {
   public static bool HidePlacementMarker => configHidePlacementMarker.Value && Enabled;
   public static ConfigEntry<bool> configEnabled;
   public static bool Enabled => configEnabled.Value;
+  public static ConfigEntry<bool> configServerDevcommandsUndo;
+  public static bool ServerDevcommandsUndo => configServerDevcommandsUndo.Value;
   private static HashSet<string> ParseList(string value) => value.Split(',').Select(s => s.Trim().ToLower()).ToHashSet();
   private static List<string> ParseCommands(string value) => value.Split('|').Select(s => s.Trim()).ToList();
   public static ConfigEntry<string> configRemoveBlacklist;
@@ -134,9 +136,9 @@ public class Configuration {
     configEnabled = wrapper.Bind(section, "Enabled", true, "Whether this mod is enabled at all.");
     var defaultBinds = new[] {
       "wheel,leftshift hammer_scale build 5%",
-      "wheel,leftshift hammer_scale_x command 5%",
+      "wheel,leftshift hammer_scale_x command 5",
       "wheel,leftshift,leftcontrol hammer_scale_y command 0.5",
-      "wheel,leftshift,leftalt hammer_scale_z command 5%",
+      "wheel,leftshift,leftalt hammer_scale_z command 5",
     };
     configBinds = wrapper.BindList(section, "Binds", string.Join("|", defaultBinds), "Binds separated by ; that are set on the game start.");
     configHammerTools = wrapper.BindList(section, "Hammer tools", "hammer", "List of hammers.");
@@ -145,6 +147,7 @@ public class Configuration {
     configHoeTools = wrapper.Bind(section, "Hoe tools", "hoe", "List of hoes.");
     configHoeTools.SettingChanged += (s, e) => HoeTools = ParseList(configHoeTools.Value);
     HoeTools = ParseList(configHoeTools.Value);
+    configServerDevcommandsUndo = wrapper.Bind(section, "Server Devcommands undo", true, "If disabled, uses Infinity Hammer's own undo system even if Server Devcommands is installed.");
     section = "Commands";
     configCommandDefaultSize = wrapper.Bind(section, "Command default size", "10", "Default size for commands.");
     configCommandDefaultSize.SettingChanged += (s, e) => {

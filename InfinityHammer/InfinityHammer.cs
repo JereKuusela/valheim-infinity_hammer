@@ -51,6 +51,7 @@ public class SetCommands {
     new HammerRepairCommand();
     new HammerRotateCommand();
     new HammerScale();
+    new HammerSetScale();
     new HammerStackCommand();
     new HammerUndoCommand();
     new HammerFreezeCommand();
@@ -63,7 +64,6 @@ public class SetCommands {
     new HammerMirrorCommand();
   }
 }
-
 
 [HarmonyPatch(typeof(FejdStartup), nameof(FejdStartup.Start))]
 public class FejdStartupStart {

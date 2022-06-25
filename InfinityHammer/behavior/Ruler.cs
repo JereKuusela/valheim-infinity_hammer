@@ -49,10 +49,10 @@ public class Ruler {
     if (Projector == null || !Player.m_localPlayer) return "";
     var scale = Scaling.Command;
     var height = UseHeight ? $", h: {Format(scale.Y)}" : "";
-    if (Projector.GetComponent<CircleProjector>() is { } circle) {
+    if (Projector.GetComponent<CircleProjector>()) {
       return $"r: {Format(scale.X)}" + height;
     }
-    if (Projector.GetComponent<RectangleProjector>() is { } rect) {
+    if (Projector.GetComponent<RectangleProjector>()) {
       return $"w: {Format(scale.X)}, d: {Format(scale.Z)}" + height;
     }
     return "";

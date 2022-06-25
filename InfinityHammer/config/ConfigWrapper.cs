@@ -21,7 +21,7 @@ public class ConfigWrapper {
       if (args.Length == 2)
         handler(args.Context, "");
       else
-        handler(args.Context, string.Join(" ", args.Args.Skip(2)));
+        handler(args.Context, string.Join(" ", args.Args, 2, args.Length - 2));
     }, optionsFetcher: () => SettingHandlers.Keys.ToList());
   }
   public ConfigEntry<bool> BindLocking(string group, string name, bool value, ConfigDescription description) {
