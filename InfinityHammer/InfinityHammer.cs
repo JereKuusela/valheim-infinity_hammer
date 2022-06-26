@@ -68,6 +68,7 @@ public class SetCommands {
     new HammerMirrorCommand();
     new HammerListCommand();
     new HoeListCommand();
+    new HammerShapeCommand();
   }
 }
 

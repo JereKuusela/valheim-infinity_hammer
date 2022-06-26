@@ -1,14 +1,25 @@
+using Service;
+using UnityEngine;
 namespace InfinityHammer;
 
 public class ToolList {
   public ToolList(string name, Tool tool) {
-    Helper.Command(name, " - Lists commands from the menu.", (args) => Execute(args, tool));
-    CommandWrapper.Register(name, (int index, int subIndex) => null);
+    Helper.Command(name, " [index to clipboard] - Lists commands from the menu.", (args) => Execute(args, tool));
+    CommandWrapper.Register(name, (int index, int subIndex) => {
+      if (index == 0) return CommandWrapper.Info("Index to copy.");
+      return null;
+    });
   }
   protected static void Execute(Terminal.ConsoleEventArgs args, Tool tool) {
     var commands = Configuration.GetCommands(tool);
+    var index = -1;
+    if (args.Length > 1) {
+      index = Parse.TryInt(args.Args, 1, index);
+      GUIUtility.systemCopyBuffer = Configuration.GetCommand(tool, index);
+    }
     for (var i = 0; i < commands.Count; i++) {
-      args.Context.AddString($"<color=yellow>{i}:</color> {commands[i]}");
+      var color = index == i ? "green" : "yellow";
+      args.Context.AddString($"<color={color}>{i}:</color> {commands[i]}");
     }
   }
 }

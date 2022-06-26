@@ -4,12 +4,13 @@ using System.Linq;
 using UnityEngine;
 namespace InfinityHammer;
 public enum SelectionType {
+  Default,
   Object,
   Location,
   Multiple,
   Command,
-  Default
 }
+
 public class SelectionObject {
   public string Prefab = "";
   public Vector3 Scale;
@@ -113,7 +114,7 @@ public static class Selection {
     }
     Helper.GetPlayer().SetupPlacementGhost();
   }
-  public static GameObject Set(string name, string description, string command) {
+  public static GameObject Set(string name, string description, string command, Sprite? icon) {
     Clear();
     var player = Helper.GetPlayer();
     Command = command;
@@ -122,7 +123,7 @@ public static class Selection {
     var piece = Ghost.AddComponent<Piece>();
     piece.m_name = name;
     piece.m_description = description;
-    piece.m_icon = player.m_buildPieces?.m_availablePieces?.FirstOrDefault()?.FirstOrDefault()?.m_icon;
+    piece.m_icon = icon;
     piece.m_clipEverything = true;
     Helper.GetPlayer().SetupPlacementGhost();
     Type = SelectionType.Command;

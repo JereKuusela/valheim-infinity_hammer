@@ -1,6 +1,7 @@
 using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer;
+
 public class RectangleProjector : CircleProjector {
   public float m_width = 5f;
   public float m_depth = 5f;

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
@@ -54,16 +55,31 @@ public class PlacePiece {
     var piece = obj.GetComponent<Piece>();
     if (Selection.Type == SelectionType.Command) {
       var scale = Scaling.Command;
+      var shape = Ruler.GetShape();
       var x = ghost.transform.position.x.ToString(CultureInfo.InvariantCulture);
       var y = ghost.transform.position.y.ToString(CultureInfo.InvariantCulture);
       var z = ghost.transform.position.z.ToString(CultureInfo.InvariantCulture);
       var radius = scale.X.ToString(CultureInfo.InvariantCulture);
       var width = scale.X.ToString(CultureInfo.InvariantCulture);
       var depth = scale.Z.ToString(CultureInfo.InvariantCulture);
+      if (shape != RulerShape.Rectangle)
+        depth = width;
       var height = scale.Y.ToString(CultureInfo.InvariantCulture);
       var angle = ghost.transform.rotation.eulerAngles.y.ToString(CultureInfo.InvariantCulture);
 
       var command = Selection.Command;
+      var multiShape = command.Contains("#r") && (command.Contains("#w") || command.Contains("#d"));
+      if (multiShape) {
+        var circle = shape == RulerShape.Circle;
+        var args = command.Split(' ').ToList();
+        for (var i = args.Count - 1; i > -1; i--) {
+          if (circle && (args[i].Contains("#w") || args[i].Contains("#d")))
+            args.RemoveAt(i);
+          if (!circle && args[i].Contains("#r"))
+            args.RemoveAt(i);
+        }
+        command = string.Join(" ", args);
+      }
       command = command.Replace("#r", radius);
       command = command.Replace("#d", depth);
       command = command.Replace("#w", width);
@@ -143,7 +159,7 @@ public class UnlockBuildDistance {
     if (Configuration.BuildRange > 0f)
       __instance.m_maxPlaceDistance = Configuration.BuildRange;
     if (Selection.Type == SelectionType.Command)
-      __instance.m_maxPlaceDistance = 100f;
+      __instance.m_maxPlaceDistance = 1000f;
   }
   public static void Postfix(Player __instance, float __state) {
     __instance.m_maxPlaceDistance = __state;

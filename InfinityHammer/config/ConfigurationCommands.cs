@@ -56,11 +56,11 @@ public partial class Configuration {
       "hammer_command cmd_icon=hammer cmd_name=Area_pipette cmd_desc=Select_multiple_objects. hammer radius=r from=x,z,y",
     };
     var defaultHoeCommands = new[] {
-      "hoe_terrain cmd_icon=mud_road cmd_name=Level cmd_desc=Flattens_terrain. circle=r level",
-      "hoe_terrain cmd_icon=raise cmd_name=Raise cmd_desc=Raises_terrain. circle=r raise=h",
-      "hoe_terrain cmd_icon=paved_road cmd_name=Pave cmd_desc=Paves_terrain. circle=r paint=paved",
-      "hoe_terrain cmd_icon=replan cmd_name=Grass cmd_desc=Grass. circle=r paint=grass",
-      "hoe_terrain cmd_icon=KnifeBlackMetal cmd_name=Reset cmd_desc=Resets_terrain. circle=r reset",
+      "hoe_terrain cmd_icon=mud_road cmd_name=Level cmd_desc=Flattens_terrain. circle=r rect=w,d level",
+      "hoe_terrain cmd_icon=raise cmd_name=Raise cmd_desc=Raises_terrain. circle=r rect=w,d raise=h",
+      "hoe_terrain cmd_icon=paved_road cmd_name=Pave cmd_desc=Paves_terrain. circle=r rect=w,d paint=paved",
+      "hoe_terrain cmd_icon=replan cmd_name=Grass cmd_desc=Grass. circle=r rect=w,d paint=grass",
+      "hoe_terrain cmd_icon=KnifeBlackMetal cmd_name=Reset cmd_desc=Resets_terrain. circle=r rect=w,d reset",
       "hoe_object cmd_icon=softdeath cmd_name=Remove cmd_desc=Removes_objects. radius=r remove id=*",
       "hoe_object cmd_icon=Burning cmd_name=Tame cmd_desc=Tames_creatures. radius=r tame",
     };

@@ -12,7 +12,7 @@ public class ToolCommand {
     Helper.ArgsCheck(args, 2, "Missing the command.");
     Hammer.Equip(tool);
     CommandParameters pars = new CommandParameters(args.Args.Skip(1).ToArray());
-    Selection.Set(pars.Name, pars.Description, pars.Command);
+    Selection.Set(pars.Name, pars.Description, pars.Command, pars.Icon);
     GizmoWrapper.SetRotation(Quaternion.identity);
     Ruler.Create(pars.ToRuler());
     Helper.AddMessage(args.Context, $"Selected command {pars.Name}.");
