@@ -249,7 +249,10 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds a new parameter `health` to the `hammer` command which allows overriding the object health.
 	- Adds new parameters `level` and `stars` to the `hammer` command which allows overriding the creature level.
 	- Adds a new parameter `text` to the `hammer` command which allows setting the sign text.
-	- Adds a new command `hammer_command` that allows executing console commands.
+	- Adds new commands `hammer_command` and `hoe_command` that allow executing console commands.
+	- Adds new commands `hammer_add` and `hoe_add` that allow adding new commands to the build menu.
+	- Adds new commands `hammer_remove` and `hoe_remove` that allow removing commands to the build menu.
+	- Adds new commands `hammer_list` and `hoe_list` that allow listing commands on the build menu.
 	- Adds a new command `hammer_mirror` to mirror the selection.
 	- Adds new commands `hammer_scale_x`, `hammer_scale_y` and `hammer_scale_z` to scale up/down a single axis.
 	- Changes the `hammer_scale` command to scale up/down instead of setting the scale directly.

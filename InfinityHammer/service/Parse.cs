@@ -31,37 +31,37 @@ public static class Parse {
     else return new(range[0], range[1]);
 
   }
-  public static int TryInt(string arg, int defaultValue = 1) {
+  public static int TryInt(string arg, int defaultValue = 0) {
     if (!int.TryParse(arg, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
       return defaultValue;
     return result;
   }
-  public static int TryInt(string[] args, int index, int defaultValue = 1) {
+  public static int TryInt(string[] args, int index, int defaultValue = 0) {
     if (args.Length <= index) return defaultValue;
     return TryInt(args[index], defaultValue);
   }
-  public static Range<int> TryIntRange(string arg, int defaultValue = 1) {
+  public static Range<int> TryIntRange(string arg, int defaultValue = 0) {
     var range = TryRange(arg);
     return new(TryInt(range.Min, defaultValue), TryInt(range.Max, defaultValue));
   }
-  public static Range<int> TryIntRange(string[] args, int index, int defaultValue = 1) {
+  public static Range<int> TryIntRange(string[] args, int index, int defaultValue = 0) {
     if (args.Length <= index) return new(defaultValue);
     return TryIntRange(args[index], defaultValue);
   }
-  public static uint TryUInt(string arg, uint defaultValue = 1) {
+  public static uint TryUInt(string arg, uint defaultValue = 0) {
     if (!uint.TryParse(arg, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result))
       return defaultValue;
     return result;
   }
-  public static uint TryUInt(string[] args, int index, uint defaultValue = 1) {
+  public static uint TryUInt(string[] args, int index, uint defaultValue = 0) {
     if (args.Length <= index) return defaultValue;
     return TryUInt(args[index], defaultValue);
   }
-  public static Range<uint> TryUIntRange(string arg, uint defaultValue = 1) {
+  public static Range<uint> TryUIntRange(string arg, uint defaultValue = 0) {
     var range = TryRange(arg);
     return new(TryUInt(range.Min, defaultValue), TryUInt(range.Max, defaultValue));
   }
-  public static Range<uint> TryUIntRange(string[] args, int index, uint defaultValue = 1) {
+  public static Range<uint> TryUIntRange(string[] args, int index, uint defaultValue = 0) {
     if (args.Length <= index) return new(defaultValue);
     return TryUIntRange(args[index], defaultValue);
   }

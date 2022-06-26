@@ -1,15 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using BepInEx.Configuration;
-using ServerSync;
 using Service;
 namespace InfinityHammer;
-public class Configuration {
+public partial class Configuration {
 #nullable disable
   public static bool IsCheats => Enabled && ((ZNet.instance && ZNet.instance.IsServer()) || Console.instance.IsCheatsEnabled());
-
-  public static ConfigEntry<string> configBinds;
-  public static string Binds => configBinds.Value;
 
   public static ConfigEntry<bool> configNoBuildCost;
   public static bool NoBuildCost => configNoBuildCost.Value && IsCheats;
@@ -86,7 +82,6 @@ public class Configuration {
   public static ConfigEntry<bool> configServerDevcommandsUndo;
   public static bool ServerDevcommandsUndo => configServerDevcommandsUndo.Value;
   private static HashSet<string> ParseList(string value) => value.Split(',').Select(s => s.Trim().ToLower()).ToHashSet();
-  private static List<string> ParseCommands(string value) => value.Split('|').Select(s => s.Trim()).ToList();
   public static ConfigEntry<string> configRemoveBlacklist;
   public static HashSet<string> RemoveBlacklist = new();
   public static ConfigEntry<string> configSelectBlacklist;
@@ -95,52 +90,9 @@ public class Configuration {
   public static HashSet<string> HammerTools = new();
   public static ConfigEntry<string> configHoeTools;
   public static HashSet<string> HoeTools = new();
-  public static ConfigEntry<string> configHammerCommands;
-  public static List<string> HammerCommands = new();
-  public static ConfigEntry<string> configHoeCommands;
-  public static List<string> HoeCommands = new();
-  public static ConfigEntry<int> configHammerMenuTab;
-  public static int HammerMenuTab => configHammerMenuTab.Value;
-  public static ConfigEntry<int> configHammerMenuIndex;
-  public static int HammerMenuIndex => configHammerMenuIndex.Value;
-  public static ConfigEntry<int> configHoeMenuTab;
-  public static int HoeMenuTab => configHoeMenuTab.Value;
-  public static ConfigEntry<int> configHoeMenuIndex;
-  public static int HoeMenuIndex => configHoeMenuIndex.Value;
-  public static ConfigEntry<string> configCommandDefaultSize;
-  public static float CommandDefaultSize => ConfigWrapper.TryParseFloat(configCommandDefaultSize);
-  public static void AddHammerCommand(string command) {
-    HammerCommands.Add(command);
-    configHammerCommands.Value = string.Join("|", HammerCommands);
-  }
-  public static void AddHoeCommand(string command) {
-    HoeCommands.Add(command);
-    configHoeCommands.Value = string.Join("|", HoeCommands);
-  }
-  public static void Init(ConfigSync configSync, ConfigFile configFile) {
-    ConfigWrapper wrapper = new("hammer_config", configFile, configSync);
-    var defaultHammerCommands = new[] {
-      "hammer_command cmd_icon=hammer cmd_name=Pipette cmd_desc=Shift_to_select_entire_buildings. hammer keys=-leftshift;hammer keys=leftshift connect",
-      "hammer_command cmd_icon=hammer cmd_name=Area_pipette cmd_desc=Select_multiple_objects. hammer radius=r from=x,z,y",
-    };
-    var defaultHoeCommands = new[] {
-      "hoe_terrain cmd_icon=mud_road cmd_name=Level cmd_desc=Flattens_terrain. circle=r level",
-      "hoe_terrain cmd_icon=raise cmd_name=Raise cmd_desc=Raises_terrain. circle=r raise=h",
-      "hoe_terrain cmd_icon=paved_road cmd_name=Pave cmd_desc=Paves_terrain. circle=r paint=paved",
-      "hoe_terrain cmd_icon=replan cmd_name=Grass cmd_desc=Grass. circle=r paint=grass",
-      "hoe_terrain cmd_icon=KnifeBlackMetal cmd_name=Reset cmd_desc=Resets_terrain. circle=r reset",
-      "hoe_object cmd_icon=softdeath cmd_name=Remove cmd_desc=Removes_objects. radius=r remove id=*",
-      "hoe_object cmd_icon=Burning cmd_name=Tame cmd_desc=Tames_creatures. radius=r tame",
-    };
+  public static void Init(ConfigWrapper wrapper) {
     var section = "General";
     configEnabled = wrapper.Bind(section, "Enabled", true, "Whether this mod is enabled at all.");
-    var defaultBinds = new[] {
-      "wheel,leftshift hammer_scale build 5%",
-      "wheel,leftshift hammer_scale_x command 1",
-      "wheel,leftshift,leftcontrol hammer_scale_y command 0.5",
-      "wheel,leftshift,leftalt hammer_scale_z command 1",
-    };
-    configBinds = wrapper.BindList(section, "Binds", string.Join("|", defaultBinds), "Binds separated by ; that are set on the game start.");
     configHammerTools = wrapper.BindList(section, "Hammer tools", "hammer", "List of hammers.");
     configHammerTools.SettingChanged += (s, e) => HammerTools = ParseList(configHammerTools.Value);
     HammerTools = ParseList(configHammerTools.Value);
@@ -148,25 +100,7 @@ public class Configuration {
     configHoeTools.SettingChanged += (s, e) => HoeTools = ParseList(configHoeTools.Value);
     HoeTools = ParseList(configHoeTools.Value);
     configServerDevcommandsUndo = wrapper.Bind(section, "Server Devcommands undo", true, "If disabled, uses Infinity Hammer's own undo system even if Server Devcommands is installed.");
-    section = "Commands";
-    configCommandDefaultSize = wrapper.Bind(section, "Command default size", "10", "Default size for commands.");
-    configCommandDefaultSize.SettingChanged += (s, e) => {
-      Scaling.Command.SetScaleX(CommandDefaultSize);
-      Scaling.Command.SetScaleZ(CommandDefaultSize);
-    };
-    Scaling.Command.SetScaleX(CommandDefaultSize);
-    Scaling.Command.SetScaleZ(CommandDefaultSize);
-
-    configHammerCommands = wrapper.Bind(section, "Hammer commands", string.Join("|", defaultHammerCommands), "Available commands.");
-    configHammerCommands.SettingChanged += (s, e) => HammerCommands = ParseCommands(configHammerCommands.Value);
-    HammerCommands = ParseCommands(configHammerCommands.Value);
-    configHammerMenuTab = wrapper.Bind(section, "Hammer menu tab", 0, "Index of the menu tab.");
-    configHammerMenuIndex = wrapper.Bind(section, "Hammer menu index", 1, "Index on the menu.");
-    configHoeCommands = wrapper.Bind(section, "Hoe commands", string.Join("|", defaultHoeCommands), "Available commands.");
-    configHoeCommands.SettingChanged += (s, e) => HoeCommands = ParseCommands(configHoeCommands.Value);
-    HoeCommands = ParseCommands(configHoeCommands.Value);
-    configHoeMenuTab = wrapper.Bind(section, "Hoe menu tab", 0, "Index of the menu tab.");
-    configHoeMenuIndex = wrapper.Bind(section, "Hoe menu index", 5, "Index on the menu.");
+    InitCommands(wrapper);
     section = "Powers";
     configRemoveArea = wrapper.Bind(section, "Remove area", "0", "Removes same objects within the radius.");
     configSelectRange = wrapper.Bind(section, "Select range", "50", "Range for selecting objects.");

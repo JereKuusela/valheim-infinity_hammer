@@ -110,7 +110,9 @@ public class RectangleProjector : CircleProjector {
 
 [HarmonyPatch(typeof(CircleProjector), nameof(CircleProjector.Update))]
 public class OffsetProjector {
+  static bool Prefix(CircleProjector __instance) => __instance.m_radius > 0f;
   static void Postfix(CircleProjector __instance) {
+    if (__instance.m_radius == 0f) return;
     Vector3 offset = new(0f, Ruler.Height, 0f);
     if (offset == Vector3.zero) return;
     foreach (var segment in __instance.m_segments) {

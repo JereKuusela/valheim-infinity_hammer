@@ -2,7 +2,7 @@ using System;
 using System.Linq;
 using Service;
 namespace InfinityHammer;
-public class HammerScale {
+public class HammerScaleCommand {
   private static void Scale(string[] args, Action<float, float> action) {
     if (args[0].EndsWith("%", StringComparison.Ordinal)) {
       var amount = Parse.Direction(args, 1) * Parse.TryFloat(args[0].Substring(0, args[0].Length - 1), 5f) / 100f;
@@ -27,7 +27,7 @@ public class HammerScale {
       Scaling.PrintScale(args.Context);
     });
   }
-  public HammerScale() {
+  public HammerScaleCommand() {
     var name = "hammer_scale";
     Command(name, "x", (scale) => scale.ScaleX);
     Command(name, "y", (scale) => scale.ScaleY);
@@ -52,9 +52,9 @@ public class HammerScale {
   }
 }
 
-public class HammerSetScale {
+public class HammerSetScaleCommand {
 
-  public HammerSetScale() {
+  public HammerSetScaleCommand() {
     var name = "hammer_set_scale";
     CommandWrapper.Register(name, (int index, int subIndex) => {
       if (index == 0) return new() { "all", "build", "command" };

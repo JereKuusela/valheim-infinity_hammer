@@ -2,6 +2,7 @@
 using BepInEx.Bootstrap;
 using BepInEx.Logging;
 using HarmonyLib;
+using Service;
 namespace InfinityHammer;
 [BepInPlugin(GUID, NAME, VERSION)]
 [BepInDependency("com.rolopogo.gizmo.comfy", BepInDependency.DependencyFlags.SoftDependency)]
@@ -22,7 +23,8 @@ public class InfinityHammer : BaseUnityPlugin {
     Log = Logger;
     Harmony harmony = new(GUID);
     harmony.PatchAll();
-    Configuration.Init(ConfigSync, Config);
+    ConfigWrapper wrapper = new("hammer_config", Config, ConfigSync);
+    Configuration.Init(wrapper);
   }
 
   public void Start() {
@@ -50,8 +52,8 @@ public class SetCommands {
     new HammerPlaceCommand();
     new HammerRepairCommand();
     new HammerRotateCommand();
-    new HammerScale();
-    new HammerSetScale();
+    new HammerScaleCommand();
+    new HammerSetScaleCommand();
     new HammerStackCommand();
     new HammerUndoCommand();
     new HammerFreezeCommand();
@@ -61,7 +63,11 @@ public class SetCommands {
     new HoeCommand();
     new HammerAddCommand();
     new HoeAddCommand();
+    new HammerRemoveCommand();
+    new HoeRemoveCommand();
     new HammerMirrorCommand();
+    new HammerListCommand();
+    new HoeListCommand();
   }
 }
 
