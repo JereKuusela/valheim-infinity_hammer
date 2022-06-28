@@ -23,6 +23,7 @@ public class HammerScaleCommand {
       Helper.ArgsCheck(args, 3, "Missing the amount.");
       if (args[1] == "build" && Selection.Type == SelectionType.Command) return;
       if (args[1] == "command" && Selection.Type != SelectionType.Command) return;
+      if (!Helper.GetPlayer().InPlaceMode()) return;
       Scale(args.Args.Skip(2).ToArray(), action(Scaling.Get()));
       Scaling.PrintScale(args.Context);
     });
@@ -41,6 +42,7 @@ public class HammerScaleCommand {
       Helper.ArgsCheck(args, 2, "Missing the type parameter (all, build or command).");
       if (args[1] == "build" && Selection.Type == SelectionType.Command) return;
       if (args[1] == "command" && Selection.Type != SelectionType.Command) return;
+      if (!Helper.GetPlayer().InPlaceMode()) return;
       var scale = Scaling.Get();
       if (args.Length < 3)
         scale.SetScale(1f);

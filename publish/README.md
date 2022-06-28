@@ -23,11 +23,34 @@ Client-side mod that is compatible with unmodded clients.
 5. Optionally also install the [Configuration manager](https://github.com/BepInEx/BepInEx.ConfigurationManager/releases/tag/v16.4) to configure the hammer more easily.
 6. Recommended to also install [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) for improved autocomplete and to use it as an admin on servers.
 
+# Selecting objects
+
+The main feature of this mod is the ability to build any object with the hammer.
+
+This is done by using the `hammer` console command which works in four ways:
+
+- `hammer` without any parameter selects (and copies) the hovered object.
+- `hammer [object id]` selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)).
+- `hammer connect` selects the hovered building.
+- `hammer [number]` selects all objects within a radius.
+
+To make the mod easier to use, the hammer build menu contains Pipette and Area select tools. For advanced users, it's recommended to bind these commands to [key codes](https://docs.unity3d.com/ScriptReference/KeyCode.html).
+
+The `hammer` command has following extra parameters which allow modifying the selected objects:
+- `scale=number` or `scale=x,z,y`: Overrides the size (if the object can be scaled).
+- `health=number`: Overrides the health.
+- `text=string`: Overrides the sign text.
+- `level=number`: Overrides the creature level (stars + 1).
+- `stars=number`: Overrides the creature stars (level - 1).
+- `from=x,z,y`: Overrides the player position when doing area selection.
+
+For example `hammer Beech1 scale=2 health=1000` would select a beech tree with a double size and 1000 health.
+
 # Commands
 
 - `hammer`: Selects the hovered object to be placed.
 - `hammer [item id]`: Selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)) to be placed.
-- `hammer connect=piece`: Selects the hovered object and all connected pieces.
+- `hammer connect`: Selects the hovered object and all connected pieces.
 - `hammer radius=number`: Selects all nearby objects.
 - `hammer ... scale=number`: Overrides the initial scale (if the object can be scaled). Number or x,z,y.
 - `hammer ... health=number`: Overrides the object health.
@@ -91,59 +114,11 @@ Note: Some commands have a hidden direction parameter at the end. This are inten
 
 Bind frequently used commands to ([key codes](https://docs.unity3d.com/ScriptReference/KeyCode.html)).
 
-When sharing the config file, put bindings to the `binds` setting with format `keycode1 command1;keycode2 command2`. For example `keypad0 hammer;keypad7 hammer_undo;keypad9 hammer_redo`.
+When sharing the config file, put bindings to the `custom_binds` setting with format `keycode1 command1;keycode2 command2`. For example `keypad0 hammer;keypad7 hammer_undo;keypad9 hammer_redo`.
 
 It's recommended to install Server Devcommands mod which allows using modifier keys on bindings.
 
 Remember that you can copy-paste commands to the console.
-
-## General usage
-
-Quickly selects the hovered object and undo/redo:
-- `bind keypad5 hammer`
-- `bind keypad7 hammer_undo`
-- `bind keypad9 hammer_redo`
-
-Object scaling and reset: 
-- `bind keypad1 hammer_scale_down`
-- `bind keypad2 hammer_scale`
-- `bind keypad3 hammer_scale_up`
-
-Toggles all features on/off (if even needed):
-- `bind keypad8 hammer_config enabled`
-
-## Precise placement / placement offset
-
-Bind freezing or offset reset near arrow keys:
-- `bind keypad0 hammer_freeze` or `bind keypad0 hammer_offset`
-
-Then bind movement to arrow keys:
-- `bind rightarrow hammer_move_right 0.1`
-- `bind leftarrow hammer_move_left 0.1`
-- `bind downarrow hammer_move_down 0.1`
-- `bind uparrow hammer_move_up 0.1`
-
-With Server Devcommands you can use modifier keys for the forward/backward direction:
-- `bind rightarrow hammer_move_right 0.1`
-- `bind leftarrow hammer_move_left 0.1`
-- `bind downarrow hammer_move_down 0.1`
-- `bind uparrow hammer_move_up 0.1`
-- `bind downarrow,leftcontrol hammer_move_backward 0.1`
-- `bind uparrow,leftcontrol hammer_move_forward 0.1`
-
-You can also use another modifier key for a bigger offset:
-- `bind rightarrow hammer_move_right 0.1`
-- `bind leftarrow hammer_move_left 0.1`
-- `bind downarrow hammer_move_down 0.1`
-- `bind uparrow hammer_move_up 0.1`
-- `bind downarrow,leftcontrol hammer_move_backward 0.1`
-- `bind uparrow,leftcontrol hammer_move_forward 0.1`
-- `bind rightarrow,leftalt hammer_move_right 1`
-- `bind leftarrow,leftalt hammer_move_left 1`
-- `bind downarrow,leftalt hammer_move_down 1`
-- `bind uparrow,leftalt hammer_move_up 1`
-- `bind downarrow,leftalt,leftcontrol hammer_move_backward 1`
-- `bind uparrow,leftalt,leftcontrol hammer_move_forward 1`
 
 # Configuration
 
@@ -152,11 +127,11 @@ Following powers are available with `hammer_config` command:
 - Enabled (default: `true`, key: `enabled`): If disabled, removes most features.
 - All objects (default: `true`, key: `all_objects`): Hammer can select and place any object. Any placed object can be removed with the hammer until the area is reloaded.
 - Allow in dungeons (default: `true`, key: `allow_in_dungeons`): Building is allowed in dungeons.
-- Binds (default: ` `, key: `binds`): Sets binds at the game start up. Any existing binds are cleared from those keys.
 - Build range (default: `0`, key: `build_range`): Range for building (capped at about 50 meters).
 - Build Share folder (default: `BuildShare/Builds`, key: `build_share_folder`): Folder relative to the Valheim.exe.
 - Copy rotation (default: `true`, key: `copy_rotation`): Copies rotation of the selected object.
 - Copy state (default: `true`, key: `copy_state`): Object state is copied (for example chest contents or item stand items).
+- Custom binds (default: ` `, key: `custom_binds`): Sets binds at the game start up. Any existing binds are cleared from those keys.
 - Disable loot (default: `false`, key: `disable_loot`): Creatures and structures won't drop loot when destroyed with the hammer.
 - Disable marker (default: `false`, key: `disable_marker`): Whether the placement ghost is visualized.
 - Enable undo (default: `true`, key: `enable_undo`): Whether the undo/redo feature is enabled.
@@ -242,6 +217,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 # Changelog
 
 - v1.16
+	- Adds a new setting section for pre-defined key binds.
 	- Adds a new setting to add custom commands to the build menu.
 	- Adds a new setting `server_devcommands_undo` to allow using Infinity Hammer's own undo system even with Server Devcommands installed (default `true`).
 	- Adds a new parameter `radius` to the `hammer` command which allows selecting all nearby objects.

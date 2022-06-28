@@ -3,9 +3,14 @@ using HarmonyLib;
 namespace InfinityHammer;
 [HarmonyPatch(typeof(Chat), nameof(Chat.Awake))]
 public class SetupBinds {
+
+  private static void SetupThing(string oldBindsStr, string newBindsStr) {
+    var oldBinds = oldBindsStr.Split('|').Select(s => s.Trim()).Where(s => s != "").ToArray();
+    var newBinds = newBindsStr.Split('|').Select(s => s.Trim()).Where(s => s != "").ToArray();
+  }
   private static void Setup() {
-    if (Configuration.Binds == "") return;
-    var binds = Configuration.Binds.Split('|').Select(s => s.Trim()).ToArray();
+    if (Configuration.CustomBinds == "") return;
+    var binds = Configuration.CustomBinds.Split('|').Select(s => s.Trim()).ToArray();
     var keys = binds.Select(bind => bind.Split(' ').First().Split(',').First()).ToHashSet();
     foreach (var key in keys) Console.instance.TryRunCommand($"unbind {key}");
     foreach (var bind in binds) Console.instance.TryRunCommand($"bind {bind}");
@@ -29,5 +34,6 @@ public class SetupBinds {
   static void Postfix() {
     MigrateBinds();
     Setup();
+    Configuration.Wrapper.SetupBinds();
   }
 }

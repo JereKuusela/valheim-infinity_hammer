@@ -122,7 +122,7 @@ public static class Selection {
     Ghost.name = name;
     var piece = Ghost.AddComponent<Piece>();
     piece.m_name = name;
-    piece.m_description = description;
+    piece.m_description = description.Replace("\\n", "\n");
     piece.m_icon = icon;
     piece.m_clipEverything = true;
     Helper.GetPlayer().SetupPlacementGhost();

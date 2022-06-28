@@ -1,4 +1,5 @@
-﻿using BepInEx;
+﻿using System.IO;
+using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Logging;
 using HarmonyLib;
@@ -25,6 +26,32 @@ public class InfinityHammer : BaseUnityPlugin {
     harmony.PatchAll();
     ConfigWrapper wrapper = new("hammer_config", Config, ConfigSync);
     Configuration.Init(wrapper);
+    SetupWatcher();
+  }
+
+  private void OnDestroy() {
+    Config.Save();
+  }
+
+  private void SetupWatcher() {
+    FileSystemWatcher watcher = new(Path.GetDirectoryName(Config.ConfigFilePath), Path.GetFileName(Config.ConfigFilePath));
+    watcher.Changed += ReadConfigValues;
+    watcher.Created += ReadConfigValues;
+    watcher.Renamed += ReadConfigValues;
+    watcher.IncludeSubdirectories = true;
+    watcher.SynchronizingObject = ThreadingHelper.SynchronizingObject;
+    watcher.EnableRaisingEvents = true;
+  }
+
+  private void ReadConfigValues(object sender, FileSystemEventArgs e) {
+    if (!File.Exists(Config.ConfigFilePath)) return;
+    try {
+      Log.LogDebug("ReadConfigValues called");
+      Config.Reload();
+    } catch {
+      Log.LogError($"There was an issue loading your {Config.ConfigFilePath}");
+      Log.LogError("Please check your config entries for spelling and format!");
+    }
   }
 
   public void Start() {

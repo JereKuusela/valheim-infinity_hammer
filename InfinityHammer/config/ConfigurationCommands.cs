@@ -7,8 +7,8 @@ namespace InfinityHammer;
 
 public partial class Configuration {
 #nullable disable
-  public static ConfigEntry<string> configBinds;
-  public static string Binds => configBinds.Value;
+  public static ConfigEntry<string> configCustomBinds;
+  public static string CustomBinds => configCustomBinds.Value;
   public static ConfigEntry<string> configHammerCommands;
   public static List<string> HammerCommands = new();
   public static ConfigEntry<string> configHoeCommands;
@@ -61,16 +61,11 @@ public partial class Configuration {
       "hoe_terrain cmd_icon=paved_road cmd_name=Pave cmd_desc=Paves_terrain. circle=r rect=w,d paint=paved",
       "hoe_terrain cmd_icon=replan cmd_name=Grass cmd_desc=Grass. circle=r rect=w,d paint=grass",
       "hoe_terrain cmd_icon=KnifeBlackMetal cmd_name=Reset cmd_desc=Resets_terrain. circle=r rect=w,d reset",
-      "hoe_object cmd_icon=softdeath cmd_name=Remove cmd_desc=Removes_objects. radius=r remove id=*",
+      "hoe_object cmd_icon=softdeath cmd_name=Remove cmd_desc=Removes_objects.\nPress_shift_to_also_reset_the_terrain. radius=r remove id=*;terrain keys=leftshift circle=r from=x,z,y reset",
       "hoe_object cmd_icon=Burning cmd_name=Tame cmd_desc=Tames_creatures. radius=r tame",
     };
-    var defaultBinds = new[] {
-      "wheel,leftshift hammer_scale build 5%",
-      "wheel,leftshift hammer_scale_x command 1",
-      "wheel,leftshift,leftcontrol hammer_scale_y command 0.5",
-      "wheel,leftshift,leftalt hammer_scale_z command 1",
-    };
-    var section = "Commands";
+    var section = "6. Commands";
+    configCustomBinds = wrapper.BindList(section, "Custom binds", "", "Binds separated by ; that are set on the game start.");
     configCommandDefaultSize = wrapper.Bind(section, "Command default size", "10", "Default size for commands.");
     configCommandDefaultSize.SettingChanged += (s, e) => {
       Scaling.Command.SetScaleX(CommandDefaultSize);
@@ -78,7 +73,6 @@ public partial class Configuration {
     };
     Scaling.Command.SetScaleX(CommandDefaultSize);
     Scaling.Command.SetScaleZ(CommandDefaultSize);
-    configBinds = wrapper.BindList(section, "Binds", string.Join("|", defaultBinds), "Binds separated by ; that are set on the game start.");
 
     configHammerCommands = wrapper.Bind(section, "Hammer commands", string.Join("|", defaultHammerCommands), "Available commands.");
     configHammerCommands.SettingChanged += (s, e) => HammerCommands = ParseCommands(configHammerCommands.Value);

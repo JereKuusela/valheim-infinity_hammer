@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Service;
 using UnityEngine;
 namespace InfinityHammer;
 public class HammerSelect {
@@ -72,7 +73,6 @@ public class HammerSelect {
       return named;
     }, new() {
       { "scale", (int index) => CommandWrapper.Scale("scale", "Size of the object (if the object can be scaled).", index) },
-      { "radius", (int index) => CommandWrapper.Info("Radius.") },
       { "level", (int index) => CommandWrapper.Info("Level.") },
       { "stars", (int index) => CommandWrapper.Info("Stars.") },
       { "from", (int index) => CommandWrapper.Info("Position.") },
@@ -80,13 +80,14 @@ public class HammerSelect {
       { "health", (int index) => CommandWrapper.Info("Health.") },
       { "connect", (int index) => CommandWrapper.Info("piece") },
     });
-    Helper.Command("hammer", "[item id] - Selects the object to be placed (the hovered object by default).", (args) => {
+    Helper.Command("hammer", "[object id or radius] - Selects the object to be placed (the hovered object by default).", (args) => {
       Helper.EnabledCheck();
       Hammer.Equip(Tool.Hammer);
       HammerParameters pars = new(args);
       GameObject selected;
-      if (pars.Radius.HasValue)
-        selected = Selection.Set(GetNearby(pars.Position, pars.Radius.Value), pars.Scale);
+      var radius = Parse.TryFloat(args.Args, 1, 0f);
+      if (radius > 0f)
+        selected = Selection.Set(GetNearby(pars.Position, radius), pars.Scale);
       else if (args.Length > 1 && !args[1].Contains("=") && args[1] != "connect")
         selected = Selection.Set(args[1], pars.Scale);
       else {

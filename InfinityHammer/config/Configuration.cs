@@ -90,8 +90,11 @@ public partial class Configuration {
   public static HashSet<string> HammerTools = new();
   public static ConfigEntry<string> configHoeTools;
   public static HashSet<string> HoeTools = new();
+  public static ConfigWrapper Wrapper;
+#nullable enable
   public static void Init(ConfigWrapper wrapper) {
-    var section = "General";
+    Wrapper = wrapper;
+    var section = "1. General";
     configEnabled = wrapper.Bind(section, "Enabled", true, "Whether this mod is enabled at all.");
     configHammerTools = wrapper.BindList(section, "Hammer tools", "hammer", "List of hammers.");
     configHammerTools.SettingChanged += (s, e) => HammerTools = ParseList(configHammerTools.Value);
@@ -100,8 +103,10 @@ public partial class Configuration {
     configHoeTools.SettingChanged += (s, e) => HoeTools = ParseList(configHoeTools.Value);
     HoeTools = ParseList(configHoeTools.Value);
     configServerDevcommandsUndo = wrapper.Bind(section, "Server Devcommands undo", true, "If disabled, uses Infinity Hammer's own undo system even if Server Devcommands is installed.");
-    InitCommands(wrapper);
-    section = "Powers";
+    configPlanBuildFolder = wrapper.Bind(section, "Plan Build folder", "BepInEx/config/PlanBuild", "Folder relative to the Valheim.exe.");
+    configBuildShareFolder = wrapper.Bind(section, "Build Share folder", "BuildShare/Builds", "Folder relative to the Valheim.exe.");
+    InitBinds(wrapper);
+    section = "3. Powers";
     configRemoveArea = wrapper.Bind(section, "Remove area", "0", "Removes same objects within the radius.");
     configSelectRange = wrapper.Bind(section, "Select range", "50", "Range for selecting objects.");
     configRemoveRange = wrapper.Bind(section, "Remove range", "0", "Range for removing objects (0 = default).");
@@ -130,20 +135,19 @@ public partial class Configuration {
     configUnfreezeOnUnequip = wrapper.Bind(section, "Unfreeze on unequip", true, "Removes the placement freeze when unequipping the hammer.");
     configHidePlacementMarker = wrapper.Bind(section, "No placement marker", false, "Hides the yellow placement marker (also affects Gizmo mod).");
     configIgnoreOtherRestrictions = wrapper.Bind(section, "Ignore other restrictions", true, "Ignores any other restrictions (material, biome, etc.)");
-    section = "Items";
+    section = "4. Items";
     configRemoveBlacklist = wrapper.BindList(section, "Remove blacklist", "", "Object ids separated by , that can't be removed.");
     configRemoveBlacklist.SettingChanged += (s, e) => RemoveBlacklist = ParseList(configRemoveBlacklist.Value);
     RemoveBlacklist = ParseList(configRemoveBlacklist.Value);
     configSelectBlacklist = wrapper.BindList(section, "Select blacklist", "", "Object ids separated by , that can't be selected.");
     configSelectBlacklist.SettingChanged += (s, e) => SelectBlacklist = ParseList(configSelectBlacklist.Value);
     SelectBlacklist = ParseList(configSelectBlacklist.Value);
-    configPlanBuildFolder = wrapper.Bind(section, "Plan Build folder", "BepInEx/config/PlanBuild", "Folder relative to the Valheim.exe.");
-    configBuildShareFolder = wrapper.Bind(section, "Build Share folder", "BuildShare/Builds", "Folder relative to the Valheim.exe.");
-    section = "Messages";
+    section = "5. Messages";
     configDisableMessages = wrapper.Bind(section, "Disable messages", false, "Disables all messages from this mod.");
     configDisableOffsetMessages = wrapper.Bind(section, "Disable offset messages", false, "Disables messages from changing placement offset.");
     configDisableScaleMessages = wrapper.Bind(section, "Disable scale messages", false, "Disables messages from changing the scale.");
     configDisableSelectMessages = wrapper.Bind(section, "Disable select messages", false, "Disables messages from selecting objects.");
     configChatOutput = wrapper.Bind(section, "Chat output", false, "Sends messages to the chat window from bound keys.");
+    InitCommands(wrapper);
   }
 }

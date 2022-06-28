@@ -4,7 +4,6 @@ namespace InfinityHammer;
 public class HammerParameters {
   public Vector3 Position = Vector3.zero;
   public Vector3? Scale;
-  public float? Radius;
   public string? Text;
   public int? Level;
   public float? Health;
@@ -33,8 +32,6 @@ public class HammerParameters {
         Text = value.Replace("_", " ");
       if (name == "health")
         Health = Parse.TryFloat(value, 0f);
-      if (name == "radius")
-        Radius = Parse.TryFloat(value, 0f);
       if (name == "from")
         Position = Parse.TryVectorXZY(values, Position);
       if (name == "scale")
