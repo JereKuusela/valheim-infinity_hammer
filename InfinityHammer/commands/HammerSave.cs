@@ -77,11 +77,11 @@ public class HammerSaveCommand {
   }
   private static void AddSingleObject(Blueprint bp, GameObject obj) {
     var zdo = Selection.GetData();
-    bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), Vector3.zero, Quaternion.identity, obj.transform.localScale, "", zdo));
+    bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), Vector3.zero, Quaternion.identity, obj.transform.localScale, zdo));
   }
   private static void AddObject(Blueprint bp, GameObject obj, int index = 0) {
     var zdo = Selection.GetData(index);
-    bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), obj.transform.localPosition, obj.transform.localRotation, obj.transform.localScale, "", zdo));
+    bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), obj.transform.localPosition, obj.transform.localRotation, obj.transform.localScale, zdo));
   }
   private static Blueprint BuildBluePrint(Player player, GameObject obj) {
     Blueprint bp = new();
@@ -144,14 +144,14 @@ public class HammerSaveCommand {
     var scaleX = InvariantString(obj.Scale.x);
     var scaleY = InvariantString(obj.Scale.y);
     var scaleZ = InvariantString(obj.Scale.z);
-    var info = obj.ExtraInfo;
+    var info = obj.Data == null ? "" : obj.Data.GetString("text", "");
     var data = "";
     if (obj.Data != null) {
       ZPackage pkg = new();
       Serialize(obj.Data, pkg);
       data = pkg.GetBase64();
     }
-    return $"{name};;{posX};{posY};{posZ};{rotX};{rotY};{rotZ};{rotW};{scaleX};{scaleY};{scaleZ};{info};{data}";
+    return $"{name};;{posX};{posY};{posZ};{rotX};{rotY};{rotZ};{rotW};{info};{scaleX};{scaleY};{scaleZ};{data}";
   }
 
   public HammerSaveCommand() {

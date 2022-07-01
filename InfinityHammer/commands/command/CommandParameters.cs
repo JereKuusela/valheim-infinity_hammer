@@ -54,8 +54,9 @@ public class CommandParameters {
   }
   private static Dictionary<string, int> PrefabNames = new();
   public static Sprite? FindSprite(string name) {
-    if (PrefabNames.Count == 0)
-      PrefabNames = ZNetScene.instance.m_namedPrefabs.ToDictionary(kvp => kvp.Value.name.ToLower(), kvp => kvp.Key);
+    if (PrefabNames.Count == 0) {
+      PrefabNames = ZNetScene.instance.m_namedPrefabs.GroupBy(kvp => kvp.Value.name.ToLower()).ToDictionary(kvp => kvp.Key, kvp => kvp.First().Key);
+    }
 
     name = name.ToLower();
     Sprite? sprite;

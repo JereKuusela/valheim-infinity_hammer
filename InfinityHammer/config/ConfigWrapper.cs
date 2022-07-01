@@ -32,33 +32,32 @@ public class ConfigWrapper {
     return configEntry;
   }
   public ConfigEntry<bool> BindLocking(string group, string name, bool value, string description) => BindLocking(group, name, value, new ConfigDescription(description));
-  public ConfigEntry<T> Bind<T>(string group, string name, T value, ConfigDescription description, bool synchronizedSetting = true) {
+  private ConfigEntry<T> Create<T>(string group, string name, T value, ConfigDescription description, bool synchronizedSetting = true) {
     var configEntry = ConfigFile.Bind(group, name, value, description);
-    Register(configEntry);
     var syncedConfigEntry = ConfigSync.AddConfigEntry(configEntry);
     syncedConfigEntry.SynchronizedConfig = synchronizedSetting;
+    return configEntry;
+  }
+  private ConfigEntry<T> Create<T>(string group, string name, T value, string description, bool synchronizedSetting = true) => Create(group, name, value, new ConfigDescription(description), synchronizedSetting);
+  public ConfigEntry<T> Bind<T>(string group, string name, T value, ConfigDescription description, bool synchronizedSetting = true) {
+    var configEntry = Create(group, name, value, description);
+    Register(configEntry);
     return configEntry;
   }
   public ConfigEntry<string> BindList(string group, string name, string value, string description, bool synchronizedSetting = true) => Bind(group, name, value, new ConfigDescription(description), synchronizedSetting);
   public ConfigEntry<string> BindList(string group, string name, string value, ConfigDescription description, bool synchronizedSetting = true) {
-    var configEntry = ConfigFile.Bind(group, name, value, description);
+    var configEntry = Create(group, name, value, description);
     RegisterList(configEntry);
-    var syncedConfigEntry = ConfigSync.AddConfigEntry(configEntry);
-    syncedConfigEntry.SynchronizedConfig = synchronizedSetting;
     return configEntry;
   }
   public ConfigEntry<KeyboardShortcut> BindCommand(string command, string group, string name, KeyboardShortcut value, string description) {
-    var configEntry = ConfigFile.Bind(group, name, value, description);
+    var configEntry = Create(group, name, value, description, false);
     RegisterCommand(configEntry, command);
-    var syncedConfigEntry = ConfigSync.AddConfigEntry(configEntry);
-    syncedConfigEntry.SynchronizedConfig = false;
     return configEntry;
   }
   public ConfigEntry<KeyboardShortcut> BindWheelCommand(string command, string group, string name, KeyboardShortcut value, string description) {
-    var configEntry = ConfigFile.Bind(group, name, value, description);
+    var configEntry = Create(group, name, value, description, false);
     RegisterWheelCommand(configEntry, command);
-    var syncedConfigEntry = ConfigSync.AddConfigEntry(configEntry);
-    syncedConfigEntry.SynchronizedConfig = false;
     return configEntry;
   }
   public ConfigEntry<T> Bind<T>(string group, string name, T value, string description, bool synchronizedSetting = true) => Bind(group, name, value, new ConfigDescription(description), synchronizedSetting);

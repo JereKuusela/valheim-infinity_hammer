@@ -20,6 +20,7 @@ public class InfinityHammer : BaseUnityPlugin {
   };
 #nullable disable
   public static ManualLogSource Log;
+#nullable enable
   public void Awake() {
     Log = Logger;
     Harmony harmony = new(GUID);
