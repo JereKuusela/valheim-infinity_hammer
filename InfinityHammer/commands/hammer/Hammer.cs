@@ -58,7 +58,7 @@ public class HammerSelect {
   private void UpdateZDOs(Action<ZDO> action) {
     for (var i = 0; i < Selection.Objects.Count; i++) {
       var zdo = Selection.Objects[i].Data;
-      if (zdo == null) zdo = new ZDO();
+      zdo ??= new ZDO();
       action(zdo);
       Selection.Objects[i].Data = zdo;
     }

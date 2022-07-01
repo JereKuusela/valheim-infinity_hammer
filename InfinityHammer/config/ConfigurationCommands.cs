@@ -53,7 +53,7 @@ public partial class Configuration {
   private static void InitCommands(ConfigWrapper wrapper) {
     var defaultHammerCommands = new[] {
       "hammer_command cmd_icon=hammer cmd_name=Pipette cmd_desc=Shift_to_select_entire_buildings. hammer keys=-leftshift;hammer keys=leftshift connect",
-      "hammer_command cmd_icon=hammer cmd_name=Area_pipette cmd_desc=Select_multiple_objects. hammer radius=r from=x,z,y",
+      "hammer_command cmd_icon=hammer cmd_name=Area_pipette cmd_desc=Select_multiple_objects. hammer r from=x,z,y",
     };
     var defaultHoeCommands = new[] {
       "hoe_terrain cmd_icon=mud_road cmd_name=Level cmd_desc=Flattens_terrain. circle=r rect=w,d level",

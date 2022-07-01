@@ -144,11 +144,7 @@ public class HammerBlueprintCommand {
       zdo = new();
       Deserialize(zdo, pkg);
     }
-    if (info != "") {
-      if (zdo == null) zdo = new();
-      zdo.Set("text", info);
-    }
-    return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), new(scaleX, scaleY, scaleZ), zdo);
+    return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), new(scaleX, scaleY, scaleZ), info, zdo);
   }
   private static Vector3 GetPlanBuildSnapPoint(string row) {
     if (row.IndexOf(',') > -1) row = row.Replace(',', '.');
@@ -173,7 +169,7 @@ public class HammerBlueprintCommand {
     var posX = InvariantFloat(split, 5);
     var posY = InvariantFloat(split, 6);
     var posZ = InvariantFloat(split, 7);
-    return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), Vector3.one, null);
+    return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), Vector3.one, "", null);
   }
   private static float InvariantFloat(string[] row, int index, float defaultValue = 0f) {
     if (index >= row.Length) return defaultValue;

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using HarmonyLib;
+using Service;
 using UnityEngine;
 namespace InfinityHammer;
 public enum SelectionType {
@@ -99,7 +101,8 @@ public static class Selection {
       obj.transform.rotation = item.transform.rotation;
       if (item.m_syncInitialScale)
         obj.transform.localScale = scale ?? item.transform.localScale;
-      Objects.Add(new SelectionObject(name, obj.transform.localScale, item.GetZDO()));
+      var zdo = SetData(obj, "", item.GetZDO());
+      Objects.Add(new SelectionObject(name, obj.transform.localScale, zdo));
     }
     ZNetView.m_forceDisableInit = false;
     Helper.GetPlayer().SetupPlacementGhost();
@@ -143,6 +146,65 @@ public static class Selection {
     Type = SelectionType.Location;
     return Ghost;
   }
+  private static ZDO? SetData(GameObject obj, string data, ZDO? zdo) {
+    if (obj.GetComponent<Sign>() is { } sign) {
+      zdo ??= new();
+      if (data == "")
+        data = zdo.GetString("text", data);
+      else
+        zdo.Set("text", data);
+      sign.m_textWidget.text = data;
+    }
+    if (obj.GetComponent<TeleportWorld>() && data != "") {
+      zdo ??= new();
+      zdo.Set("tag", data);
+    }
+    if (obj.GetComponent<Tameable>() && data != "") {
+      zdo ??= new();
+      zdo.Set("TamedName", data);
+    }
+    if (obj.GetComponent<ItemStand>() is { } itemStand) {
+      zdo ??= new();
+      var split = data.Split(':');
+      var name = split[0];
+      var variant = Parse.TryInt(split, 1, 0);
+      if (data == "") {
+        name = zdo.GetString("item", name);
+        variant = zdo.GetInt("item", variant);
+      } else {
+        zdo.Set("item", name);
+        zdo.Set("variant", variant);
+      }
+      itemStand.SetVisualItem(name, variant);
+    }
+    if (obj.GetComponent<ArmorStand>() is { } armorStand) {
+      zdo ??= new();
+      var split = data.Split(':');
+      var pose = Parse.TryInt(split, 0, 0);
+      if (data == "")
+        pose = zdo.GetInt("Pose", pose);
+      else
+        zdo.Set("pose", pose);
+      armorStand.m_pose = pose;
+      armorStand.m_poseAnimator.SetInteger("Pose", pose);
+      SetItemHack.Hack = true;
+      for (var i = 0; i < armorStand.m_slots.Count; i++) {
+        var name = Parse.TryString(split, i * 2 + 2, "");
+        var variant = Parse.TryInt(split, i * 2 + 3, 0);
+        if (data == "") {
+          name = zdo.GetString($"{i}_item", name);
+          variant = zdo.GetInt($"{i}_variant", variant);
+        } else {
+          zdo.Set($"{i}_item", name);
+          zdo.Set($"{i}_variant", variant);
+        }
+        armorStand.SetVisualItem(i, name, variant);
+      }
+      SetItemHack.Hack = false;
+
+    }
+    return zdo;
+  }
   public static GameObject Set(Terminal terminal, Blueprint bp) {
     Clear();
     Ghost = new GameObject();
@@ -160,6 +222,7 @@ public static class Selection {
         obj.transform.localPosition = item.Pos;
         obj.transform.localRotation = item.Rot;
         obj.transform.localScale = item.Scale;
+        item.Data = SetData(obj, item.ExtraInfo, item.Data);
         Objects.Add(new SelectionObject(item.Prefab, item.Scale, item.Data));
 
       } catch (InvalidOperationException e) {
@@ -180,5 +243,56 @@ public static class Selection {
     Helper.GetPlayer().SetupPlacementGhost();
     Type = SelectionType.Multiple;
     return Ghost;
+  }
+}
+///<summary>Removes resource usage.</summary>
+[HarmonyPatch(typeof(VisEquipment), nameof(VisEquipment.SetItem))]
+public class SetItemHack {
+  public static bool Hack = false;
+
+  static void SetItem(VisEquipment obj, VisSlot slot, string name, int variant) {
+    switch (slot) {
+      case VisSlot.HandLeft:
+        obj.m_leftItem = name;
+        obj.m_leftItemVariant = variant;
+        return;
+      case VisSlot.HandRight:
+        obj.m_rightItem = name;
+        return;
+      case VisSlot.BackLeft:
+        obj.m_leftBackItem = name;
+        obj.m_leftBackItemVariant = variant;
+        return;
+      case VisSlot.BackRight:
+        obj.m_rightBackItem = name;
+        return;
+      case VisSlot.Chest:
+        obj.m_chestItem = name;
+        return;
+      case VisSlot.Legs:
+        obj.m_legItem = name;
+        return;
+      case VisSlot.Helmet:
+        obj.m_helmetItem = name;
+        return;
+      case VisSlot.Shoulder:
+        obj.m_shoulderItem = name;
+        obj.m_shoulderItemVariant = variant;
+        return;
+      case VisSlot.Utility:
+        obj.m_utilityItem = name;
+        return;
+      case VisSlot.Beard:
+        obj.m_beardItem = name;
+        return;
+      case VisSlot.Hair:
+        obj.m_hairItem = name;
+        return;
+    }
+  }
+  static bool Prefix(VisEquipment __instance, VisSlot slot, string name, int variant) {
+    if (Hack)
+      SetItem(__instance, slot, name, variant);
+    return !Hack;
   }
 }
