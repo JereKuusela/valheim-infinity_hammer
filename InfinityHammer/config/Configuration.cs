@@ -102,10 +102,12 @@ public partial class Configuration {
     configHoeTools = wrapper.Bind(section, "Hoe tools", "hoe", "List of hoes.");
     configHoeTools.SettingChanged += (s, e) => HoeTools = ParseList(configHoeTools.Value);
     HoeTools = ParseList(configHoeTools.Value);
-    configServerDevcommandsUndo = wrapper.Bind(section, "Server Devcommands undo", true, "If disabled, uses Infinity Hammer's own undo system even if Server Devcommands is installed.");
+    if (CommandWrapper.ServerDevcommands != null)
+      configServerDevcommandsUndo = wrapper.Bind(section, "Server Devcommands undo", true, "If disabled, uses Infinity Hammer's own undo system even if Server Devcommands is installed.");
     configPlanBuildFolder = wrapper.Bind(section, "Plan Build folder", "BepInEx/config/PlanBuild", "Folder relative to the Valheim.exe.");
     configBuildShareFolder = wrapper.Bind(section, "Build Share folder", "BuildShare/Builds", "Folder relative to the Valheim.exe.");
-    InitBinds(wrapper);
+    if (CommandWrapper.ServerDevcommands != null)
+      InitBinds(wrapper);
     section = "3. Powers";
     configRemoveArea = wrapper.Bind(section, "Remove area", "0", "Removes same objects within the radius.");
     configSelectRange = wrapper.Bind(section, "Select range", "50", "Range for selecting objects.");

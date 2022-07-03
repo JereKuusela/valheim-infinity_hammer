@@ -52,18 +52,27 @@ public partial class Configuration {
 
   private static void InitCommands(ConfigWrapper wrapper) {
     var defaultHammerCommands = new[] {
-      "hammer_command cmd_icon=hammer cmd_name=Pipette cmd_desc=Shift_to_select_entire_buildings. hammer keys=-leftshift;hammer keys=leftshift connect",
+      "hammer_command cmd_icon=hammer cmd_name=Pipette cmd_desc=Press_alt_to_select_entire_buildings. hammer keys=-leftalt;hammer keys=leftalt connect",
       "hammer_command cmd_icon=hammer cmd_name=Area_pipette cmd_desc=Select_multiple_objects. hammer r from=x,z,y",
     };
     var defaultHoeCommands = new[] {
-      "hoe_terrain cmd_icon=mud_road cmd_name=Level cmd_desc=Flattens_terrain. circle=r rect=w,d level",
-      "hoe_terrain cmd_icon=raise cmd_name=Raise cmd_desc=Raises_terrain. circle=r rect=w,d raise=h",
-      "hoe_terrain cmd_icon=paved_road cmd_name=Pave cmd_desc=Paves_terrain. circle=r rect=w,d paint=paved",
-      "hoe_terrain cmd_icon=replan cmd_name=Grass cmd_desc=Grass. circle=r rect=w,d paint=grass",
-      "hoe_terrain cmd_icon=KnifeBlackMetal cmd_name=Reset cmd_desc=Resets_terrain. circle=r rect=w,d reset",
-      "hoe_object cmd_icon=softdeath cmd_name=Remove cmd_desc=Removes_objects.\nPress_shift_to_also_reset_the_terrain. radius=r remove id=*;terrain keys=leftshift circle=r from=x,z,y reset",
-      "hoe_object cmd_icon=Burning cmd_name=Tame cmd_desc=Tames_creatures. radius=r tame",
+      "hoe_terrain cmd_icon=mud_road cmd_name=Level cmd_desc=Flattens_terrain. level",
+      "hoe_terrain cmd_icon=raise cmd_name=Raise cmd_desc=Raises_terrain. raise=h",
+      "hoe_terrain cmd_icon=paved_road cmd_name=Pave cmd_desc=Paves_terrain. paint=paved",
+      "hoe_terrain cmd_icon=replant cmd_name=Grass cmd_desc=Grass. paint=grass",
+      "hoe_terrain cmd_icon=Hoe cmd_name=Reset cmd_desc=Resets_terrain. reset",
+      "hoe_object cmd_icon=softdeath cmd_name=Remove cmd_desc=Removes_objects.\nPress_alt_to_also_reset_the_terrain. remove id=*;terrain keys=leftalt circle=r from=x,z,y reset",
+      "hoe_object cmd_icon=Carrot cmd_name=Tame cmd_desc=Tames_creatures. tame",
     };
+    if (CommandWrapper.ServerDevcommands == null) {
+      defaultHammerCommands = new[] {
+        "hammer_command cmd_icon=hammer cmd_name=Pipette cmd_desc=Select_object. hammer",
+        "hammer_command cmd_icon=hammer cmd_name=Area_pipette cmd_desc=Select_multiple_objects. hammer r from=x,z,y",
+      };
+    }
+    if (CommandWrapper.WorldEditCommands == null)
+      defaultHoeCommands = new string[0];
+
     var section = "6. Commands";
     configCustomBinds = wrapper.BindList(section, "Custom binds", "", "Binds separated by ; that are set on the game start.");
     configCommandDefaultSize = wrapper.Bind(section, "Command default size", "10", "Default size for commands.");

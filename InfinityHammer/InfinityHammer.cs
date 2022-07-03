@@ -25,6 +25,7 @@ public class InfinityHammer : BaseUnityPlugin {
     Log = Logger;
     Harmony harmony = new(GUID);
     harmony.PatchAll();
+    CommandWrapper.Init();
     ConfigWrapper wrapper = new("hammer_config", Config, ConfigSync);
     Configuration.Init(wrapper);
     SetupWatcher();
@@ -56,7 +57,6 @@ public class InfinityHammer : BaseUnityPlugin {
   }
 
   public void Start() {
-    CommandWrapper.Init();
     if (Chainloader.PluginInfos.TryGetValue("com.rolopogo.gizmo.comfy", out var info))
       GizmoWrapper.InitComfy(info.Instance.GetType().Assembly);
     if (Chainloader.PluginInfos.TryGetValue("m3to.mods.GizmoReloaded", out info))
@@ -104,8 +104,8 @@ public class SetCommands {
 public class FejdStartupStart {
   static void Postfix() {
     if (CommandWrapper.ServerDevcommands != null && CommandWrapper.WorldEditCommands != null) {
-      Console.instance.TryRunCommand("alias hoe_terrain hoe_command terrain from=x,z,y angle=a");
-      Console.instance.TryRunCommand("alias hoe_object hoe_command object center=x,z,y");
+      Console.instance.TryRunCommand("alias hoe_terrain hoe_command terrain from=x,z,y circle=r rect=w,d angle=a");
+      Console.instance.TryRunCommand("alias hoe_object hoe_command object center=x,z,y radius=r");
       Console.instance.TryRunCommand("alias hoe_slope hoe_command terrain to=x,z,y slope rect=$");
     }
   }

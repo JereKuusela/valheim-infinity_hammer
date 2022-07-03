@@ -21,7 +21,7 @@ public class HammerLocationCommand {
       Hammer.Equip(Tool.Hammer);
       try {
         Hammer.AllLocationsObjects = args.Length > 2 && args[2] == "all";
-        Hammer.RandomLocationDamage = args.Length > 3 && args[3] == "1";
+        Hammer.RandomLocationDamage = args.Length > 3;
         var rng = new System.Random();
         var seed = args.TryParameterInt(2, rng.Next());
         if (seed == 0) seed = rng.Next();

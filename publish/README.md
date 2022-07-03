@@ -4,6 +4,10 @@ Bend the rules of building! Copy any object, make structures indestructible, rem
 
 Client-side mod that is compatible with unmodded clients.
 
+Check any modding [guide](https://youtu.be/WfvA5a5tNHo) for installation instructions.
+
+Install [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) to enable key binds and use this on a server (as an admin).
+
 # Features
 
 - Build anything. Trees, rocks, creatures... All can be placed with the hammer, with a precise placement!
@@ -13,15 +17,6 @@ Client-side mod that is compatible with unmodded clients.
 - Build without restrictions. Dungeons and even the start temple become valid for building.
 - QoL improvements: Extended range, no resouce costs, no item drops, no visual effects and more!
 - Tame anything. Powerful creatures, or even bosses can become your protectors. Or just pit them against each other!
-
-# Manual Installation:
-
-1. Install the [BepInExPack Valheim](https://valheim.thunderstore.io/package/denikson/BepInExPack_Valheim).
-2. Download the latest zip.
-3. Extract it in the \<GameDirectory\>\BepInEx\plugins\ folder.
-4. Recommended to also install [Comfy Gizmo](https://github.com/redseiko/ValheimMods/releases/latest) or [Gizmo Reloaded](https://valheim.thunderstore.io/package/Tyrenheim/M3TO_Gizmo_Reloaded/) for better rotating.
-5. Optionally also install the [Configuration manager](https://github.com/BepInEx/BepInEx.ConfigurationManager/releases/tag/v16.4) to configure the hammer more easily.
-6. Recommended to also install [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) for improved autocomplete and to use it as an admin on servers.
 
 # Selecting objects
 
@@ -34,7 +29,9 @@ This is done by using the `hammer` console command which works in four ways:
 - `hammer connect` selects the hovered building.
 - `hammer [number]` selects all objects within a radius.
 
-To make the mod easier to use, the hammer build menu contains Pipette and Area select tools. For advanced users, it's recommended to bind these commands to [key codes](https://docs.unity3d.com/ScriptReference/KeyCode.html).
+Selecting the hovered object can be quickly done by pressing NumPad5. Holding alt key will select the entire building.
+
+The hammer build menu also contains Pipette and Area select tools.
 
 The `hammer` command has following extra parameters which allow modifying the selected objects:
 - `scale=number` or `scale=x,z,y`: Overrides the size (if the object can be scaled).
@@ -46,27 +43,57 @@ The `hammer` command has following extra parameters which allow modifying the se
 
 For example `hammer Beech1 scale=2 health=1000` would select a beech tree with a double size and 1000 health.
 
-# Commands
+## Scaling
 
-- `hammer`: Selects the hovered object to be placed.
-- `hammer [item id]`: Selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)) to be placed.
-- `hammer connect`: Selects the hovered object and all connected pieces.
-- `hammer radius=number`: Selects all nearby objects.
-- `hammer ... scale=number`: Overrides the initial scale (if the object can be scaled). Number or x,z,y.
-- `hammer ... health=number`: Overrides the object health.
-- `hammer ... text=string`: Overrides the sign text.
-- `hammer ... level=number`: Overrides the creature level (stars + 1).
-- `hammer ... stars=number`: Overrides the creature stars (level - 1).
-- `hammer ... from=x,z,y`: Overrides the player position when doing area selection.
-- `hammer ... connect`: Selects all connected pieces.
-- `hammer_add_piece_components`: Adds the Piece component to every object which allows copying them with PlanBuild mod.
-- `hammer_blueprint [file name]`: Selects a Build Share or a Plan Build blueprint located on your computer.
-- `hammer_command [command]`: Executes the given command. Replaces command values with coordinates, angle and scale.
-- `hammer_config [key] [value]`: Toggles or sets configuration values. For lists, the given value is toggled on or off (`remove_blacklist` or `select_blacklist`).
-- `hammer_freeze`: Toggles whether the mouse affects placement position. Allows moving around while the object's position is frozen.
-- `hammer_grid [precision] [center=current]`: Restricts possible placement coordinates. Using the same command removes the restriction.
-- `hammer_location [location_id] [seed=0] [random damage]`: Selects a location by id. Allows setting the random result with seed ("all" value enables all child objects).
-- `hammer_mirror`: Mirrors the selection.
+Shift + mouse wheel will scale up/down the selection.
+
+This can be also done with following commands:
+
+- `hammer_scale build`: Resets the scale to 100%.
+- `hammer_scale build [percentage or amount]`: Scales the size.
+- `hammer_scale_x build [percentage or amount]`: Scales only the x-axis.
+- `hammer_scale_y build [percentage or amount]`: Scales only the y-axis.
+- `hammer_scale_z build [percentage or amount]`: Scales only the z-axis.
+
+For example `hammer_scale build 5%` would scale from 100 % to 105 % or 200 % to 210 %. While `hammer_scale build -5%` would scale from 100 % to 95.2 % or 200 % to 190.5 %. 
+
+For example `hammer_scale build 0.1` would scale from 100 % to 110 % or 200 % to 210 %. While `hammer_scale build -0.1%` would scale from 100 % to 90 % or 200 % to 190 %. 
+
+Note: If you notice using these commands frequency, make a [key binding](https://docs.unity3d.com/ScriptReference/KeyCode.html) for them.
+
+## Locations
+
+Locations (or [Points of Interests](https://valheim.fandom.com/wiki/Points_of_Interest_(POI))) usually include multiple objects so copying them with the `hammer` command is not simple.
+
+They also have special behavior like random parts or random damage.
+
+That's why there is another command for creating them: `hammer_location [location_id] [seed=0] [random damage]`
+
+The `seed` parameter can be used to set the random parts. If missing or `0`, then the result is randomized. If set to `all` then all parts are forced to be on which allows building complete locations (which are normally very rare).
+
+By the default, the location doesn't get randomly damaged. To set this on, put any value to the fourth parameter.
+
+For example:
+- `hammer_location StoneTowerRuins04` creates a stone fortress with random parts (which change when using the command again).
+- `hammer_location StoneTowerRuins04 100` creates a stone fortress with some parts (always the same).
+- `hammer_location StoneTowerRuins04 all` creates a stone fortress with all parts.
+- `hammer_location StoneTowerRuins04 0 1` creates a stone fortress with random parts and random damage.
+
+## Precise placement
+
+Default key bindings allow freezing the placement by pressing NumPad0. This allows moving around while the placement ghost stays in the same place.
+
+Then the placement can be fine tuned with following keys:
+
+- PageUp / PageDown: Move up/down 0.1 meters.
+- LeftArrow / RightArrow: Move left/right 0.1 meters.
+- UpArrow / DownARrow: Move forward/backward 0.1 meters.
+
+Holding alt key will move by 1 meter instead of 0.1 meters.
+
+Note: Placement keys also work without freezing.
+
+Following commands exist for this:
 - `hammer_move [forward,up,right]`: Moves the placement ghost offset for precise placement. Auto value can be used for the object size.
 - `hammer_move_backward [meters or number*auto]`: Moves the placement towards the backward direction.
 - `hammer_move_down [meters or number*auto]`: Moves the placement towards the down direction.
@@ -78,47 +105,146 @@ For example `hammer Beech1 scale=2 health=1000` would select a beech tree with a
 - `hammer_offset_x [value]`: Sets the offset in the right / left direction.
 - `hammer_offset_y [value]`: Sets the offset in the up / down direction.
 - `hammer_offset_z [value]`: Sets the offset in the forward / backward direction.
-- `hammer_place`: Allows placing with a key press (for command bindings).
-- `hammer_redo`: Restores reverted actions. Uses Server Devcommands undo system if installed.
-- `hammer_repair`: Selects the repair tool. Useful for clearing the selection.
-- `hammer_rotate_x [degrees]`: Rotates around the X axis.
-- `hammer_rotate_x [number*random]`: Randomly rotates around the X axis with a given step size. For example `3*random` would randomly rotate 0, 120 or 240 degrees.
-- `hammer_rotate_x [random]`: Randomly rotates around the X axis depending on the object shape (90 or 180 degrees precision).
-- `hammer_rotate_y [degrees/number*random/random]`: Rotates around the Y axis.
-- `hammer_rotate_y [number*random]`: Randomly rotates around the Y axis with a given step size. For example `3*random` would randomly rotate 0, 120 or 240 degrees.
-- `hammer_rotate_y [random]`: Randomly rotates around the Y axis depending on the object shape (90 or 180 degrees precision).
-- `hammer_rotate_z [degrees/number*random/random]`: Rotates around the Z axis.
-- `hammer_rotate_z [number*random]`: Randomly rotates around the Z axis with a given step size. For example `3*random` would randomly rotate 0, 120 or 240 degrees.
-- `hammer_rotate_z [random]`: Randomly rotates around the Z axis depending on the object shape (90 or 180 degrees precision).
-- `hammer_save [file name]`: Saves the selection to a blueprint.
-- `hammer_scale`: Resets the scale to 100%.
-- `hammer_scale [percentage]`: Scales the selection (if the object supports it).
-- `hammer_scale_x [percentage]`: Scales the x-axis (if the object supports it).
-- `hammer_scale_y [percentage]`: Scales the y-axis (if the object supports it).
-- `hammer_scale_z [percentage]`: Scales the z-axis (if the object supports it).
-- `hammer_stack [forward,up,right or z1-z2,y1-y2,x1-x2] [step=auto,auto,auto]`: Places multiple objects next to each other.
-- `hammer_stack_backward [amount or min-max] [step=auto]`: Places multiple objects towards the backward direction.
-- `hammer_stack_down [amount or min-max] [step=auto]`: Places multiple objects towards the down direction.
-- `hammer_stack_forward [amount or min-max] [step=auto]`: Places multiple objects towards the forward direction.
-- `hammer_stack_left [amount or min-max] [step=auto]`: Places multiple objects towards the left direction.
-- `hammer_stack_right [amount or min-max] [step=auto]`: Places multiple objects towards the right direction.
-- `hammer_stack_up [amount or min-max] [step=auto]`: Places multiple objects towards the up direction.
-- `hammer_undo`: Reverts placing or removing. Uses Server Devcommands undo system if installed.
 
-Note: Some interactions are quite complicated so please report any issues!
+## Free rotation
 
-Note: Some commands have a hidden direction parameter at the end. This are intended for mouse wheel binding (so that scroll up and down work differently).
+Requires installing either [Comfy Gizmo](https://github.com/redseiko/ValheimMods/releases/latest) or [Gizmo Reloaded](https://valheim.thunderstore.io/package/Tyrenheim/M3TO_Gizmo_Reloaded/). Check their documentation how to use them if needed.
 
+For basic usage that is all you need but extra commands are provided for advanced usage.
 
-# Key bindings
+Fine-tuning the rotation:
+- `hammer_rotate_x [degrees]`
+- `hammer_rotate_y [degrees]`
+- `hammer_rotate_z [degrees]`
 
-Bind frequently used commands to ([key codes](https://docs.unity3d.com/ScriptReference/KeyCode.html)).
+Random rotation (90 or 180 degrees depending on the object shape)
+- `hammer_rotate_x random`
+- `hammer_rotate_y random`
+- `hammer_rotate_z random`
 
-When sharing the config file, put bindings to the `custom_binds` setting with format `keycode1 command1;keycode2 command2`. For example `keypad0 hammer;keypad7 hammer_undo;keypad9 hammer_redo`.
+Random rotation with custom precision. For example `3*random` would randomly rotate 0, 120 or 240 degrees.
+- `hammer_rotate_x [number]*random`
+- `hammer_rotate_y [number]*random`
+- `hammer_rotate_z [number]*random`
 
-It's recommended to install Server Devcommands mod which allows using modifier keys on bindings.
+## Undo / redo
 
-Remember that you can copy-paste commands to the console.
+Building and removing objects can be quickly reversed by pressing NumPad7. Reversed actions can be redone with NumPad9.
+
+Note: Any other removal like buildings collapsing due to lack of support or destroyed by enemies is not tracked. Only your direct actions can be undone.
+
+Internally this is done by using commands `hammer_undo` and `hammer_redo`.
+
+If [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) mod is installed, this integrates with its undo system (unless overridden in the config). So commmands `undo` and `redo` would also work.
+
+## Multiplacement
+
+Objects can be placed multiple times in a row with the command `hammer_stack_[direction] [amount or min-max] [step=auto]`
+
+Possible directions are `backward`, `down`, `forward`,`left`, `right` and `up`.
+
+The amount simply determines how many objects are placed. This can be fine-tuned by giving a range.
+
+The step sets the distance between placed objects. By default this is the size of the object. 
+
+Note: Choosing the correction direction can be difficult when rotating the selection. But you can easily try things by reverting the changes with `hammer_undo`.
+
+Note: Determining the size of the object is not fully reliable. Be prepared to give the distance manually.
+
+Examples:
+-  `hammer_stack_up 10`: Places 10 objects on top of each other.
+-  `hammer_stack_up -5-4`: Places 10 objects with 5 below and 4 on top of the main object.
+-  `hammer_stack_left 5 10`: Places 5 objects with 10 meters between each of them.
+-  `hammer_stack_left 5 2*auto`: Places 5 objects while leaving a gap between them (equal to the object size).
+-  `hammer_stack_left 3-4`: Places 2 objects some distance away from the selected position.
+
+To place objects in a rectangle or a box, use the following command:
+
+- `hammer_stack [forward,up,right or z1-z2,y1-y2,x1-x2] [step=auto,auto,auto]`
+
+## Blueprints
+
+Basic support is provided for BuildShare .vbuild and [PlanBuild](https://valheim.thunderstore.io/package/MathiasDecrock/PlanBuild/) .blueprint files.
+
+The command `hammer_blueprint [file name]` allows placing them. If no files are found, configure the source folder.
+
+New PlanBuild blueprints can also be created with `hammer_save [file name]` command.
+
+Note: Infinity Hammer will also store the object data when creating blueprints. This can significantly increase the file size and cause incompatibility with future PlanBuild versions.
+
+## Utility
+
+Some special commands exist for advaced cases. Usually you want to bind these.
+
+- `hammer_grid [precision] [center=current]`: Restricts possible placement coordinates. Using the same command removes the restriction.
+- `hammer_place`: Allows placing with a key press.
+- `hammer_repair`: Selects the repair tool for quickly clearing the selection.
+- `hammer_mirror`: Mirrors the selection.
+- `hammer_add_piece_components`: Adds the Piece component to every object which allows copying them with PlanBuild mod.
+
+For example with [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) you could bind command `hammer_rotate_y random;hammer_place` to build objects with a random rotation.
+
+# Executing commands
+
+The hammer (and hoe) can execute any console commands, which provides a quick and an intuitive way to use them. These commands can be found at the build menu with a configurable position.
+
+Unfortunately adding new commands won't be that simple. Probably the easiest way is editing the config directly. That way you can see how the default commands are done.
+
+Commands also exist for this:
+- `hammer_add [command]` or `hoe_add [command]`: Adds a new command. Useful for sharing commands with other players.
+- `hammer_list` or `hoe_list`: Prints added commmand and their index numbers.
+- `hammer_remove [index]` or `hoe_remove [index]`: Removes the command with the given index.
+- `hammer_remove [command]` or `hoe_remove [command]`: Removes all commands that start with the given parameter.
+
+For example `hammer_add killall` would add a new item to the hammer menu that killed all nearby creatures when clicked.
+
+## Command style
+
+By default all added commands have name "Command" and have the command as the description.
+
+This can be customized with parameters `cmd_name`, `cmd_desc` and `cmd_icon`. Valid icons are object ids, skill ids and status effect ids.
+
+For example `hammer_add cmd_name=Kill cmd_desc=Kills_everything cmd_icon=softdeath killall`
+
+## Command placement
+
+Some commands have coordinates as their parameters. These can be set with hammer/hoe by using commands `hammer_command` or `hoe_command`.
+
+For example using `hammer_command hammer 10 from=x,z,y` would select every object within 10 meters of the hovered position.
+
+The radius can be modified by using shift + mousewheel, when using `hammer_command hammer r from=x,z,y` (10 changed to r). This also makes the mod highlight the affected area!
+
+This command can be added to the menu with `hammer_add hammer_command hammer r from=x,z,y`. It's recommended to always test commands first before adding them.
+
+## World Edit Commands
+
+The full potential of commands can be unlocked by installing [World Edit Commands](https://valheim.thunderstore.io/package/JereKuusela/World_Edit_Commands/) mod. This automatically adds new commands to the hoe (mainly for terrain modifications).
+
+Full list of parameters:
+- `x`: X coordinate.
+- `y`: Y coordinate.
+- `z`: Z coordinate.
+- `a`: Angle. Mostly matters for rectangles.
+- `r`: Radius. Enables circle shape.
+- `w`: Rectangle width. Enables square shape.
+- `d`: Rectangle depth. Enables rectangle shape.
+- `h`: Height.
+
+For example `hoe_command terrain from=x,z,y circle=r rect=w,d angle=a raise=h` raises terrain by a variable height.
+
+To reduce typing, use aliases `hoe_terrain` and `hoe_object`. For example `hoe_terrain raise=h` or `hoe_object tame`.
+
+Key binds to change values:
+- Q: Changes the shape (uses `hammer_shape` command).
+- Shift + Mouse wheel: Circle radius and rectangle width.
+- Shift + Alt + Mouse wheel: Rectangle depth.
+- Shift + Control + Mouse wheel: Height.
+
+The current values are shared between different commands. For example if you changed radius to 20 while leveling then the radius would still be 20 when switching to the raise command.
+
+It's possible to restrict the starting value with parameters `cmd_r`, `cmd_w`, `cmd_d` and `cmd_h`. This is generally not recommended (unless you really need it).
+
+For example `hoe_object tame cmd_r=10-20` would restrict the starting radius between 10 and 20 meters. If the radius was 15 it would stay at 15. But a radius of 5 would become 10 and a radius of 50 would become 20.
 
 # Configuration
 
@@ -169,6 +295,19 @@ Messages from the mod can be configured with following settings:
 - `disable_offset_messages`: Disables messages from changing the placement offset.
 - `disable_scale_messages`: Disables messages from changing the object scale.
 - `disable_select_messages`: Disables messages from selecting objects.
+
+## Key bindings
+
+Some commonly used features have pre-made key binds in the configuration. Internally these use the `bind` command.
+
+This means that [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) mod is needed for multi-key binds or for using the mouse wheel.
+
+If you don't wish to use this system you can set all binds to none and make your own bindings with the `bind` command.
+
+Binds can also be shared with others with the `custom_binds` setting but this isn't really recommended.
+
+The format is `keycode1 command1;keycode2 command2`. For example `keypad0 hammer;keypad7 hammer_undo;keypad9 hammer_redo`.
+
 
 # Building
 
@@ -243,7 +382,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds a new command `hammer_save` to create blueprints with data.
 	- Adds support for PlanBuild scaling.
 	- Adds a new setting `chat_output` to control is the output show on the chat window (default `false`).
-	- Removes the setting `max_undo_steps` as obsolete (usually Server Devcommands installed).
+	- Removes the setting `max_undo_steps` as obsolete (usually Server Devcommands is installed).
 
 - v1.14
 	- Adds support for PlanBuild snappoints.
@@ -305,7 +444,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 - v1.7
 	- Adds new setting `remove_blacklist` that allows disabling remove for some objects.
 	- Adds new setting `select_blacklist` that allows disabling select for some objects.
-	- Changes Server devcommands compatibility to work with the newest version (old versions won't work anymore as the name was changed).
+	- Changes [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) compatibility to work with the newest version (old versions won't work anymore as the name was changed).
 	- Fixes `ignore_other_restrictions` being able to ignore no build zones, etc.
 	- Fixes `ignore_other_restrictions` allowing placement to arbitrary position when the placement ghost is not active.
 	- Fixes undo/redo not working for locations and creature stars.
@@ -315,15 +454,15 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 
 - v1.6:
 	- Adds a new setting `auto_equip` to automatically equip the hammer when selecting an object (enabled by default).
-	- Adds a version number check to the Server devcommands mod compatibility.
+	- Adds a version number check to the Server Devcommands mod compatibility.
 	- Fixes `disable_marker` setting also disabling the Gizmo visual or the Plan Build visual.
 	- Fixes scale not being set when selecting objects from the build menu (better compatibility with some mods).
 	- Fixes Piece components being added to the object library when selecting objects (no known issues).
 
 - v1.5
-	- Adds support for the undo system of Server devcommands mod (if installed).
+	- Adds support for the undo system of Server Devcommands mod (if installed).
 	- Adds a new command `hammer_add_piece_components` to allow copying anything with PlanBuild.
-	- Removes the `hammer_setup_binds_DEV` command as obsolete (Server devcommands mod is used automatically, if installed).
+	- Removes the `hammer_setup_binds_DEV` command as obsolete (Server Devcommands mod is used automatically, if installed).
 	- Fixes some error messages appearing when placing spawners and other objects.
 	- Fixes error messages when using the hoe.
 
