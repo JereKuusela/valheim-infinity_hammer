@@ -24,10 +24,10 @@ The main feature of this mod is the ability to build any object with the hammer.
 
 This is done by using the `hammer` console command which works in four ways:
 
-- `hammer` without any parameter selects (and copies) the hovered object.
-- `hammer [object id]` selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)).
-- `hammer connect` selects the hovered building.
-- `hammer [number]` selects all objects within a radius.
+- `hammer`: Selects (and copies) the hovered object.
+- `hammer [object id]`: Selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)).
+- `hammer connect`: Selects the hovered building.
+- `hammer [number]`: Selects all objects within a radius.
 
 Selecting the hovered object can be quickly done by pressing NumPad5. Holding alt key will select the entire building.
 
@@ -122,10 +122,12 @@ Random rotation (90 or 180 degrees depending on the object shape)
 - `hammer_rotate_y random`
 - `hammer_rotate_z random`
 
-Random rotation with custom precision. For example `3*random` would randomly rotate 0, 120 or 240 degrees.
+Random rotation with custom precision.
 - `hammer_rotate_x [number]*random`
 - `hammer_rotate_y [number]*random`
 - `hammer_rotate_z [number]*random`
+
+For example `3*random` would randomly rotate 0, 120 or 240 degrees.
 
 ## Undo / redo
 
@@ -139,7 +141,9 @@ If [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Serv
 
 ## Multiplacement
 
-Objects can be placed multiple times in a row with the command `hammer_stack_[direction] [amount or min-max] [step=auto]`
+Objects can be placed multiple times in a row with the command:
+
+- `hammer_stack_[direction] [amount or min-max] [step=auto]`
 
 Possible directions are `backward`, `down`, `forward`,`left`, `right` and `up`.
 
@@ -192,7 +196,7 @@ Unfortunately adding new commands won't be that simple. Probably the easiest way
 
 Commands also exist for this:
 - `hammer_add [command]` or `hoe_add [command]`: Adds a new command. Useful for sharing commands with other players.
-- `hammer_list` or `hoe_list`: Prints added commmand and their index numbers.
+- `hammer_list [index to clipboard]` or `hoe_list [index to clipboard]`: Prints added commmand and their index numbers. If indes is given, copies to the command to the clipboard for easier sharing.
 - `hammer_remove [index]` or `hoe_remove [index]`: Removes the command with the given index.
 - `hammer_remove [command]` or `hoe_remove [command]`: Removes all commands that start with the given parameter.
 
@@ -357,10 +361,10 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 
 - v1.16
 	- Adds a new setting section for pre-defined key binds.
-	- Adds a new setting to add custom commands to the build menu.
+	- Adds new settings to add custom commands to the build menus.
 	- Adds a new setting `server_devcommands_undo` to allow using Infinity Hammer's own undo system even with Server Devcommands installed (default `true`).
-	- Adds a new parameter `radius` to the `hammer` command which allows selecting all nearby objects.
-	- Adds a new parameter `connect=piece` to the `hammer` command which allows selecting the hovered object and connected pieces.
+	- Adds a new parameter to the `hammer` command which allows selecting all nearby objects.
+	- Adds a new parameter `connect` to the `hammer` command which allows selecting the hovered object and connected pieces.
 	- Adds a new parameter `health` to the `hammer` command which allows overriding the object health.
 	- Adds new parameters `level` and `stars` to the `hammer` command which allows overriding the creature level.
 	- Adds a new parameter `text` to the `hammer` command which allows setting the sign text.
@@ -371,6 +375,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds a new command `hammer_mirror` to mirror the selection.
 	- Adds new commands `hammer_scale_x`, `hammer_scale_y` and `hammer_scale_z` to scale up/down a single axis.
 	- Changes the `hammer_scale` command to scale up/down instead of setting the scale directly.
+	- Improves PlanBuild compatibility.
 	- Renames the `hammer_scale` command to `hammer_set_scale`.
 	- Removes the setting `scaling_step` as obsolete.
 	- Removes the commands `hammer_scale_up` and `hammer_scale_down` as obsolete (existing binds automatically migrate to use `hammer_scale`).

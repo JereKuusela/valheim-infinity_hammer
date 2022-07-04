@@ -4,6 +4,7 @@ public class ToolAdd {
   public ToolAdd(string name, Tool tool) {
     Helper.Command(name, "[command] - Adds command to the menu.", (args) => Execute(args, tool));
     CommandWrapper.Register(name, (int index, int subIndex) => null);
+    CommandWrapper.AddSpecialCommand(name);
   }
   protected static void Execute(Terminal.ConsoleEventArgs args, Tool tool) {
     Helper.ArgsCheck(args, 2, "Missing the command.");
