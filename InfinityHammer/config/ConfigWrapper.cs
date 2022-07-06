@@ -41,7 +41,12 @@ public class ConfigWrapper {
   private ConfigEntry<T> Create<T>(string group, string name, T value, string description, bool synchronizedSetting = true) => Create(group, name, value, new ConfigDescription(description), synchronizedSetting);
   public ConfigEntry<T> Bind<T>(string group, string name, T value, ConfigDescription description, bool synchronizedSetting = true) {
     var configEntry = Create(group, name, value, description);
-    Register(configEntry);
+    if (configEntry is ConfigEntry<bool> boolEntry)
+      Register(boolEntry);
+    else if (configEntry is ConfigEntry<KeyboardShortcut> keyEntry)
+      Register(keyEntry);
+    else
+      Register(configEntry);
     return configEntry;
   }
   public ConfigEntry<string> BindList(string group, string name, string value, string description, bool synchronizedSetting = true) => Bind(group, name, value, new ConfigDescription(description), synchronizedSetting);
@@ -111,11 +116,6 @@ public class ConfigWrapper {
     var name = setting.Definition.Key;
     var key = ToKey(name);
     SettingHandlers.Add(key, (Terminal terminal, string value) => SetKey(terminal, setting, name, value));
-  }
-  private void Register(ConfigEntry<string> setting) {
-    var name = setting.Definition.Key;
-    var key = ToKey(name);
-    SettingHandlers.Add(key, (Terminal terminal, string value) => SetValue(terminal, setting, name, value));
   }
   private void RegisterList(ConfigEntry<string> setting) {
     var name = setting.Definition.Key;

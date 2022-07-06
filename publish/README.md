@@ -359,6 +359,9 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 
 # Changelog
 
+- v1.17
+	- Fixes `hammer_config` command not working.
+
 - v1.16
 	- Adds a new setting section for pre-defined key binds.
 	- Adds new settings to add custom commands to the build menus.
