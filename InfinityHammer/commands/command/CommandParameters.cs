@@ -28,9 +28,8 @@ public class CommandParameters {
     .Where(s => !s.StartsWith($"{CmdIcon}=", StringComparison.OrdinalIgnoreCase))
   );
   public CommandParameters(string[] args) {
-    Description = Join(args);
-    ParseArgs(args);
     Command = Join(args);
+    ParseArgs(args);
   }
 
 
@@ -114,5 +113,7 @@ public class CommandParameters {
       if (args[i].Contains("#h"))
         Height = height;
     }
+    if (Description != "") Description += "\n";
+    Description += Command;
   }
 }

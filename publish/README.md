@@ -365,6 +365,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
   - Adds new settings `move_amount` and `move_amount_large` to configure default bindings.
 	- Adds new command aliases `hammer_area`, `hammer_object` and `hammer_terrain`.
 	- Changes most default bindings only work when the hammer or hoe is equipped.
+	- Changes the command description to always show the actual command.
 
 - v1.17
 	- Fixes `hammer_config` command not working.
