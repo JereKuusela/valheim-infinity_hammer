@@ -90,18 +90,22 @@ public partial class Configuration {
   public static HashSet<string> HammerTools = new();
   public static ConfigEntry<string> configHoeTools;
   public static HashSet<string> HoeTools = new();
+  public static HashSet<string> Tools = new();
   public static ConfigWrapper Wrapper;
 #nullable enable
+  private static void UpdateTools() {
+    HammerTools = ParseList(configHammerTools.Value);
+    HoeTools = ParseList(configHoeTools.Value);
+    Tools = HammerTools.Concat(HoeTools).ToHashSet();
+  }
   public static void Init(ConfigWrapper wrapper) {
     Wrapper = wrapper;
     var section = "1. General";
     configEnabled = wrapper.Bind(section, "Enabled", true, "Whether this mod is enabled at all.");
     configHammerTools = wrapper.BindList(section, "Hammer tools", "hammer", "List of hammers.");
-    configHammerTools.SettingChanged += (s, e) => HammerTools = ParseList(configHammerTools.Value);
-    HammerTools = ParseList(configHammerTools.Value);
+    configHammerTools.SettingChanged += (s, e) => UpdateTools();
     configHoeTools = wrapper.Bind(section, "Hoe tools", "hoe", "List of hoes.");
-    configHoeTools.SettingChanged += (s, e) => HoeTools = ParseList(configHoeTools.Value);
-    HoeTools = ParseList(configHoeTools.Value);
+    configHoeTools.SettingChanged += (s, e) => UpdateTools(); UpdateTools();
     if (CommandWrapper.ServerDevcommands != null)
       configServerDevcommandsUndo = wrapper.Bind(section, "Server Devcommands undo", true, "If disabled, uses Infinity Hammer's own undo system even if Server Devcommands is installed.");
     configPlanBuildFolder = wrapper.Bind(section, "Plan Build folder", "BepInEx/config/PlanBuild", "Folder relative to the Valheim.exe.");

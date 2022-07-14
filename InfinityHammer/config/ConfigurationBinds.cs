@@ -27,28 +27,36 @@ public partial class Configuration {
   public static ConfigEntry<KeyboardShortcut> configSelectAll;
   public static ConfigEntry<KeyboardShortcut> configUndo;
   public static ConfigEntry<KeyboardShortcut> configRedo;
+  public static ConfigEntry<string> configMoveAmount;
+  public static ConfigEntry<string> configMoveAmountLarge;
 #nullable enable
-
   private static void InitBinds(ConfigWrapper wrapper) {
     var section = "2. Binds";
-    configShapeKey = wrapper.BindCommand("hammer_shape", section, "Change shape", new KeyboardShortcut(KeyCode.Q), "Changes the selection shape.");
-    configBuildScale = wrapper.BindWheelCommand("hammer_scale build 5%", section, "Build scaling (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift), "Changes the selection scale.");
-    configCommandRadius = wrapper.BindWheelCommand("hammer_scale_x command 1", section, "Command radius (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift), "Changes the command radius.");
-    configCommandDepth = wrapper.BindWheelCommand("hammer_scale_z command 1", section, "Command depth (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift, KeyCode.LeftAlt), "Changes the command rectangle depth.");
-    configCommandHeight = wrapper.BindWheelCommand("hammer_scale_y command 0.5", section, "Command height (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift, KeyCode.LeftControl), "Changes the command height.");
-    configMoveUp = wrapper.BindCommand("hammer_move_up 0.1", section, "Move up", new KeyboardShortcut(KeyCode.PageUp), "Precise placement.");
-    configMoveUpLarge = wrapper.BindCommand("hammer_move_up 1", section, "Move up (large)", new KeyboardShortcut(KeyCode.PageUp, KeyCode.LeftAlt), "Precise placement.");
-    configMoveDown = wrapper.BindCommand("hammer_move_down 0.1", section, "Move down", new KeyboardShortcut(KeyCode.PageDown), "Precise placement.");
-    configMoveDownLarge = wrapper.BindCommand("hammer_move_down 1", section, "Move down (large)", new KeyboardShortcut(KeyCode.PageDown, KeyCode.LeftAlt), "Precise placement.");
-    configMoveLeft = wrapper.BindCommand("hammer_move_left 0.1", section, "Move left", new KeyboardShortcut(KeyCode.LeftArrow), "Precise placement.");
-    configMoveLeftLarge = wrapper.BindCommand("hammer_move_left 1", section, "Move left (large)", new KeyboardShortcut(KeyCode.LeftArrow, KeyCode.LeftAlt), "Precise placement.");
-    configMoveRight = wrapper.BindCommand("hammer_move_right 0.1", section, "Move right", new KeyboardShortcut(KeyCode.RightArrow), "Precise placement.");
-    configMoveRightLarge = wrapper.BindCommand("hammer_move_right 1", section, "Move right (large)", new KeyboardShortcut(KeyCode.RightArrow, KeyCode.LeftAlt), "Precise placement.");
-    configMoveForward = wrapper.BindCommand("hammer_move_forward 0.1", section, "Move forward", new KeyboardShortcut(KeyCode.UpArrow), "Precise placement.");
-    configMoveForwardLarge = wrapper.BindCommand("hammer_move_forward 1", section, "Move forward (large)", new KeyboardShortcut(KeyCode.UpArrow, KeyCode.LeftAlt), "Precise placement.");
-    configMoveBackward = wrapper.BindCommand("hammer_move_backward 0.1", section, "Move backward", new KeyboardShortcut(KeyCode.DownArrow), "Precise placement.");
-    configMoveBackwardLarge = wrapper.BindCommand("hammer_move_backward 1", section, "Move backward (large)", new KeyboardShortcut(KeyCode.DownArrow, KeyCode.LeftAlt), "Precise placement.");
-    configFreeze = wrapper.BindCommand("hammer_freeze", section, "Freeze selection", new KeyboardShortcut(KeyCode.Keypad0), "Precise placement.");
+    configMoveAmount = wrapper.Bind(section, "Move amount", "0.1", "Meters to move with move binds.");
+    configMoveAmount.SettingChanged += (s, e) => wrapper.SetupBinds();
+    configMoveAmountLarge = wrapper.Bind(section, "Move amount large", "1", "Meters to move with large move binds.");
+    configMoveAmountLarge.SettingChanged += (s, e) => wrapper.SetupBinds();
+    configHammerTools.SettingChanged += (s, e) => wrapper.SetupBinds();
+    configHoeTools.SettingChanged += (s, e) => wrapper.SetupBinds();
+
+    configShapeKey = wrapper.BindCommand("hammer_shape", section, "Change shape", new KeyboardShortcut(KeyCode.Q), "Changes the selection shape.", () => Tools);
+    configBuildScale = wrapper.BindWheelCommand("hammer_scale build 5%", section, "Build scaling (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift), "Changes the selection scale.", () => Tools);
+    configCommandRadius = wrapper.BindWheelCommand("hammer_scale_x command 1", section, "Command radius (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift), "Changes the command radius.", () => Tools);
+    configCommandDepth = wrapper.BindWheelCommand("hammer_scale_z command 1", section, "Command depth (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift, KeyCode.LeftAlt), "Changes the command rectangle depth.", () => Tools);
+    configCommandHeight = wrapper.BindWheelCommand("hammer_scale_y command 0.5", section, "Command height (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift, KeyCode.LeftControl), "Changes the command height.", () => Tools);
+    configMoveUp = wrapper.BindCommand(() => $"hammer_move_up {configMoveAmount.Value}", section, "Move up", new KeyboardShortcut(KeyCode.PageUp), "Precise placement.", () => Tools);
+    configMoveUpLarge = wrapper.BindCommand(() => $"hammer_move_up {configMoveAmountLarge.Value}", section, "Move up (large)", new KeyboardShortcut(KeyCode.PageUp, KeyCode.LeftAlt), "Precise placement.", () => Tools);
+    configMoveDown = wrapper.BindCommand(() => $"hammer_move_down {configMoveAmount.Value}", section, "Move down", new KeyboardShortcut(KeyCode.PageDown), "Precise placement.", () => Tools);
+    configMoveDownLarge = wrapper.BindCommand(() => $"hammer_move_down {configMoveAmountLarge.Value}", section, "Move down (large)", new KeyboardShortcut(KeyCode.PageDown, KeyCode.LeftAlt), "Precise placement.", () => Tools);
+    configMoveLeft = wrapper.BindCommand(() => $"hammer_move_left {configMoveAmount.Value}", section, "Move left", new KeyboardShortcut(KeyCode.LeftArrow), "Precise placement.", () => Tools);
+    configMoveLeftLarge = wrapper.BindCommand(() => $"hammer_move_left {configMoveAmountLarge.Value}", section, "Move left (large)", new KeyboardShortcut(KeyCode.LeftArrow, KeyCode.LeftAlt), "Precise placement.", () => Tools);
+    configMoveRight = wrapper.BindCommand(() => $"hammer_move_right {configMoveAmount.Value}", section, "Move right", new KeyboardShortcut(KeyCode.RightArrow), "Precise placement.", () => Tools);
+    configMoveRightLarge = wrapper.BindCommand(() => $"hammer_move_right {configMoveAmountLarge.Value}", section, "Move right (large)", new KeyboardShortcut(KeyCode.RightArrow, KeyCode.LeftAlt), "Precise placement.", () => Tools);
+    configMoveForward = wrapper.BindCommand(() => $"hammer_move_forward {configMoveAmount.Value}", section, "Move forward", new KeyboardShortcut(KeyCode.UpArrow), "Precise placement.", () => Tools);
+    configMoveForwardLarge = wrapper.BindCommand(() => $"hammer_move_forward {configMoveAmountLarge.Value}", section, "Move forward (large)", new KeyboardShortcut(KeyCode.UpArrow, KeyCode.LeftAlt), "Precise placement.", () => Tools);
+    configMoveBackward = wrapper.BindCommand(() => $"hammer_move_backward {configMoveAmount.Value}", section, "Move backward", new KeyboardShortcut(KeyCode.DownArrow), "Precise placement.", () => Tools);
+    configMoveBackwardLarge = wrapper.BindCommand(() => $"hammer_move_backward {configMoveAmountLarge.Value}", section, "Move backward (large)", new KeyboardShortcut(KeyCode.DownArrow, KeyCode.LeftAlt), "Precise placement.", () => Tools);
+    configFreeze = wrapper.BindCommand("hammer_freeze", section, "Freeze selection", new KeyboardShortcut(KeyCode.Keypad0), "Precise placement.", () => Tools);
     configSelect = wrapper.BindCommand("hammer", section, "Select", new KeyboardShortcut(KeyCode.Keypad5), "Select the hovered object.");
     configSelectAll = wrapper.BindCommand("hammer connect", section, "Select building", new KeyboardShortcut(KeyCode.Keypad5, KeyCode.LeftAlt), "Select entire buildings.");
     configUndo = wrapper.BindCommand("hammer_undo", section, "Undo", new KeyboardShortcut(KeyCode.Keypad7), "Undo actions.");

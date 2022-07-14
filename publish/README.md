@@ -216,9 +216,9 @@ Some commands have coordinates as their parameters. These can be set with hammer
 
 For example using `hammer_command hammer 10 from=x,z,y` would select every object within 10 meters of the hovered position.
 
-The radius can be modified by using shift + mousewheel, when using `hammer_command hammer r from=x,z,y` (10 changed to r). This also makes the mod highlight the affected area!
+The radius can be modified by using shift + mousewheel, when using `hammer_command hammer r from=x,z,y` (10 changed to r). This also makes the mod highlight the affected area! For less typing you can use the lias `hammer_area`.
 
-This command can be added to the menu with `hammer_add hammer_command hammer r from=x,z,y`. It's recommended to always test commands first before adding them.
+This command can be added to the menu with `hammer_add hammer_area`. It's recommended to always test commands first before adding them.
 
 ## World Edit Commands
 
@@ -236,7 +236,9 @@ Full list of parameters:
 
 For example `hoe_command terrain from=x,z,y circle=r rect=w,d angle=a raise=h` raises terrain by a variable height.
 
-To reduce typing, use aliases `hoe_terrain` and `hoe_object`. For example `hoe_terrain raise=h` or `hoe_object tame`.
+To reduce typing, use aliases `hoe_object` and `hoe_terrain`. For example `hoe_object tame` or `hoe_terrain raise=h`.
+
+Similar aliases also exist for the hammer (`hammer_object` and `hammer_terrain`).
 
 Key binds to change values:
 - Q: Changes the shape (uses `hammer_shape` command).
@@ -358,6 +360,11 @@ If "Disable loot" is enabled, destroying creatures or structures won't drop loot
 Blacklist can be used to avoid destroying critical objects like locations. For example `hammer_config remove_blacklist LocationProxy`.
 
 # Changelog
+
+- v1.18
+  - Adds new settings `move_amount` and `move_amount_large` to configure default bindings.
+	- Adds new command aliases `hammer_area`, `hammer_object` and `hammer_terrain`.
+	- Changes most default bindings only work when the hammer or hoe is equipped.
 
 - v1.17
 	- Fixes `hammer_config` command not working.
