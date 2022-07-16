@@ -64,7 +64,7 @@ public static class UpdateAvailable {
 public class RunBuildMenuCommands {
   public static void Postfix(Player __instance) {
     var piece = __instance.GetSelectedPiece();
-    if (piece.GetComponent<BuildMenuCommand>() is { } cmd) Console.instance.TryRunCommand(cmd.Command);
+    if (piece && piece.GetComponent<BuildMenuCommand>() is { } cmd) Console.instance.TryRunCommand(cmd.Command);
   }
 }
 

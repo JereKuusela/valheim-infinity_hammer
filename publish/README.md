@@ -366,6 +366,8 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds new command aliases `hammer_area`, `hammer_object` and `hammer_terrain`.
 	- Changes most default bindings only work when the hammer or hoe is equipped.
 	- Changes the command description to always show the actual command.
+	- Fixes clicking an empty slot on build menus causing an error message.
+	- Removes the rotation normalize from multiselects (didn't really work at all).
 
 - v1.17
 	- Fixes `hammer_config` command not working.

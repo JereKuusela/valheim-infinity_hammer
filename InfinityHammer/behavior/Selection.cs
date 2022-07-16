@@ -88,7 +88,7 @@ public static class Selection {
     Ghost.SetActive(false);
     Ghost.name = "Multiple";
     Ghost.transform.position = views.First().transform.position;
-    Ghost.transform.rotation = views.First().transform.rotation;
+    //Ghost.transform.rotation = views.First().transform.rotation;
     var piece = Ghost.AddComponent<Piece>();
     piece.m_name = "Multiple";
     piece.m_description = "";

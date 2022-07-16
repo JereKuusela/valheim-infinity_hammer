@@ -28,8 +28,8 @@ public class CommandParameters {
     .Where(s => !s.StartsWith($"{CmdIcon}=", StringComparison.OrdinalIgnoreCase))
   );
   public CommandParameters(string[] args) {
-    Command = Join(args);
     ParseArgs(args);
+    Command = Join(args);
   }
 
 
@@ -94,6 +94,8 @@ public class CommandParameters {
       if (name == CmdD) depth = Mathf.Clamp(depth, range.Min, range.Max);
       if (name == CmdH) height = Mathf.Clamp(height, range.Min, range.Max);
     }
+    if (Description != "") Description += "\n";
+    Description += Join(args);
     var parameters = new[]{
       "r", "d", "w", "h", "a", "w,d", "x", "y", "z",
       "x,y", "x,z", "y,x", "y,z", "z,x", "z,y",
@@ -113,7 +115,5 @@ public class CommandParameters {
       if (args[i].Contains("#h"))
         Height = height;
     }
-    if (Description != "") Description += "\n";
-    Description += Command;
   }
 }
