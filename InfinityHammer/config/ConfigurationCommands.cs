@@ -83,6 +83,7 @@ public partial class Configuration {
     };
     Scaling.Command.SetScaleX(CommandDefaultSize);
     Scaling.Command.SetScaleZ(CommandDefaultSize);
+    Scaling.Command.SetScaleY(0f);
 
     configHammerCommands = wrapper.Bind(section, "Hammer commands", string.Join("|", defaultHammerCommands), "Available commands.");
     configHammerCommands.SettingChanged += (s, e) => HammerCommands = ParseCommands(configHammerCommands.Value);

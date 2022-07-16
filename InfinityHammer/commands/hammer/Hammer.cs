@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Service;
 using UnityEngine;
 namespace InfinityHammer;
 public class HammerSelect {
@@ -12,9 +11,25 @@ public class HammerSelect {
     if (hovered == null) throw new InvalidOperationException("Nothing is being hovered.");
     return hovered.Obj;
   }
-  private static ZNetView[] GetNearby(Vector3 center, float distance) {
+  private static float GetX(float x, float y, float angle) => Mathf.Cos(angle) * x - Mathf.Sin(angle) * y;
+  private static float GetY(float x, float y, float angle) => Mathf.Sin(angle) * x + Mathf.Cos(angle) * y;
+  private static bool Within(Vector3 position, Vector3 center, float angle, float width, float depth, float height) {
+    var dx = position.x - center.x;
+    var dz = position.z - center.z;
+    var distanceX = GetX(dx, dz, angle);
+    var distanceZ = GetY(dx, dz, angle);
+    if (position.y - center.y > (height == 0f ? 1000f : height)) return false;
+    if (Mathf.Abs(distanceX) > width) return false;
+    if (Mathf.Abs(distanceZ) > depth) return false;
+    return true;
+  }
+  private static bool Within(Vector3 position, Vector3 center, float radius, float height) {
+    return Utils.DistanceXZ(position, center) <= radius && position.y - center.y <= (height == 0f ? 1000f : height);
+  }
+  private static bool ValidName(string name) => name != "Player" && !name.StartsWith("_", StringComparison.Ordinal);
+  private static ZNetView[] GetNearby(Func<Vector3, bool> checker) {
     var scene = ZNetScene.instance.m_instances.Values;
-    var views = scene.Where(view => view.GetZDO() != null && view.GetZDO().IsValid()).Where(view => Utils.GetPrefabName(view.gameObject) != "Player").Where(view => Vector3.Distance(view.GetZDO().GetPosition(), center) <= distance).ToArray();
+    var views = scene.Where(view => view.GetZDO() != null && view.GetZDO().IsValid()).Where(view => ValidName(Utils.GetPrefabName(view.gameObject))).Where(view => checker(view.GetZDO().GetPosition())).ToArray();
     if (views.Length == 0) throw new InvalidOperationException("Nothing is nearby.");
     return views;
   }
@@ -85,9 +100,10 @@ public class HammerSelect {
       Hammer.Equip(Tool.Hammer);
       HammerParameters pars = new(args);
       GameObject selected;
-      var radius = Parse.TryFloat(args.Args, 1, 0f);
-      if (radius > 0f)
-        selected = Selection.Set(GetNearby(pars.Position, radius), pars.Scale);
+      if (pars.Radius.HasValue)
+        selected = Selection.Set(GetNearby(pos => Within(pos, pars.Position, pars.Radius.Value, pars.Height)), pars.Scale);
+      else if (pars.Width.HasValue && pars.Depth.HasValue)
+        selected = Selection.Set(GetNearby(pos => Within(pos, pars.Position, pars.Angle, pars.Width.Value, pars.Depth.Value, pars.Height)), pars.Scale);
       else if (args.Length > 1 && !args[1].Contains("=") && args[1] != "connect")
         selected = Selection.Set(args[1], pars.Scale);
       else {

@@ -267,6 +267,8 @@ public static class Helper {
     UnityEngine.Object.Destroy(obj.GetComponent<Growup>());
     UnityEngine.Object.Destroy(obj.GetComponent<FootStep>());
     UnityEngine.Object.Destroy(obj.GetComponent<Humanoid>());
+    UnityEngine.Object.Destroy(obj.GetComponent<RandomFlyingBird>());
+    UnityEngine.Object.Destroy(obj.GetComponent<Fish>());
     // Destructible behavior.
     UnityEngine.Object.Destroy(obj.GetComponent<TreeLog>());
     UnityEngine.Object.Destroy(obj.GetComponent<TreeBase>());

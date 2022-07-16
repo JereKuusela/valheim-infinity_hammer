@@ -27,7 +27,7 @@ This is done by using the `hammer` console command which works in four ways:
 - `hammer`: Selects (and copies) the hovered object.
 - `hammer [object id]`: Selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)).
 - `hammer connect`: Selects the hovered building.
-- `hammer [number]`: Selects all objects within a radius.
+- `hammer circle=[radius]` or `hammer rect=[width,depth] angle=[degrees]`: Selects all nearby objects.
 
 Selecting the hovered object can be quickly done by pressing NumPad5. Holding alt key will select the entire building.
 
@@ -364,6 +364,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 - v1.18
   - Adds new settings `move_amount` and `move_amount_large` to configure default bindings.
 	- Adds new command aliases `hammer_area`, `hammer_object` and `hammer_terrain`.
+	- Adds rectangle shape to `hammer_area`.
 	- Changes most default bindings only work when the hammer or hoe is equipped.
 	- Changes the command description to always show the actual command.
 	- Fixes clicking an empty slot on build menus causing an error message.

@@ -88,7 +88,6 @@ public static class Selection {
     Ghost.SetActive(false);
     Ghost.name = "Multiple";
     Ghost.transform.position = views.First().transform.position;
-    //Ghost.transform.rotation = views.First().transform.rotation;
     var piece = Ghost.AddComponent<Piece>();
     piece.m_name = "Multiple";
     piece.m_description = "";
@@ -107,6 +106,7 @@ public static class Selection {
     ZNetView.m_forceDisableInit = false;
     Helper.GetPlayer().SetupPlacementGhost();
     Type = SelectionType.Multiple;
+    Rotating.UpdatePlacementRotation(Ghost);
     return Ghost;
   }
   public static void Mirror() {

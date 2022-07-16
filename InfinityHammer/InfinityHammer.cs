@@ -112,14 +112,15 @@ public class SetCommands {
 [HarmonyPatch(typeof(FejdStartup), nameof(FejdStartup.Start))]
 public class FejdStartupStart {
   static void Postfix() {
+    var pars = "from=x,z,y circle=r angle=a rect=w,d";
     if (CommandWrapper.ServerDevcommands != null) {
-      Console.instance.TryRunCommand("alias hammer_area hammer_command hammer r from=x,z,y");
+      Console.instance.TryRunCommand($"alias hammer_area hammer_command hammer {pars} height=h");
     }
     if (CommandWrapper.ServerDevcommands != null && CommandWrapper.WorldEditCommands != null) {
-      Console.instance.TryRunCommand("alias hammer_terrain hammer_command terrain from=x,z,y circle=r rect=w,d angle=a");
-      Console.instance.TryRunCommand("alias hammer_object hammer_command object center=x,z,y radius=r");
-      Console.instance.TryRunCommand("alias hoe_terrain hoe_command terrain from=x,z,y circle=r rect=w,d angle=a");
-      Console.instance.TryRunCommand("alias hoe_object hoe_command object center=x,z,y radius=r");
+      Console.instance.TryRunCommand($"alias hammer_terrain hammer_command terrain {pars}");
+      Console.instance.TryRunCommand($"alias hammer_object hammer_command object {pars} height=h");
+      Console.instance.TryRunCommand($"alias hoe_terrain hoe_command terrain {pars}");
+      Console.instance.TryRunCommand($"alias hoe_object hoe_command object {pars} height=h");
       Console.instance.TryRunCommand("alias hoe_slope hoe_command terrain to=x,z,y slope rect=$");
     }
   }

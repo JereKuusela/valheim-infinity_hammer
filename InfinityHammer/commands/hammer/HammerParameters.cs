@@ -1,3 +1,4 @@
+using System;
 using Service;
 using UnityEngine;
 namespace InfinityHammer;
@@ -7,7 +8,12 @@ public class HammerParameters {
   public string? Text;
   public int? Level;
   public float? Health;
+  public float Angle = 0f;
   public bool Connect;
+  public float? Radius;
+  public float? Width;
+  public float? Depth;
+  public float Height = 0f;
 
   public HammerParameters(Terminal.ConsoleEventArgs args) {
     if (Player.m_localPlayer)
@@ -36,6 +42,19 @@ public class HammerParameters {
         Position = Parse.TryVectorXZY(values, Position);
       if (name == "scale")
         Scale = Parse.TryScale(values);
+      if (name == "circle")
+        Radius = Parse.TryFloat(value, 0f);
+      if (name == "rect") {
+        var size = Parse.TryScale(values);
+        Width = size.x;
+        Depth = size.z;
+      }
+      if (name == "height")
+        Height = Parse.TryFloat(value, 0f);
+      if (name == "angle")
+        Angle = Parse.TryFloat(value, 0f) * Mathf.PI / 180f;
     }
+    if (Radius.HasValue && Depth.HasValue)
+      throw new InvalidOperationException($"<color=yellow>circle</color> and <color=yellow>rect</color> parameters can't be used together.");
   }
 }
