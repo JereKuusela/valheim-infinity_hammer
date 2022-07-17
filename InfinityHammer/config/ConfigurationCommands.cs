@@ -87,7 +87,8 @@ public partial class Configuration {
 
     configHammerCommands = wrapper.Bind(section, "Hammer commands", string.Join("|", defaultHammerCommands), "Available commands.");
     configHammerCommands.SettingChanged += (s, e) => HammerCommands = ParseCommands(configHammerCommands.Value);
-    HammerCommands = ParseCommands(configHammerCommands.Value);
+    HammerCommands = ParseCommands(configHammerCommands.Value).Select(command => command.Replace("hammer r from=x,z,y", "hammer_area")).ToList();
+    configHammerCommands.Value = string.Join("|", HammerCommands);
     configHammerMenuTab = wrapper.Bind(section, "Hammer menu tab", 0, "Index of the menu tab.");
     configHammerMenuIndex = wrapper.Bind(section, "Hammer menu index", 1, "Index on the menu.");
     configHoeCommands = wrapper.Bind(section, "Hoe commands", string.Join("|", defaultHoeCommands), "Available commands.");
