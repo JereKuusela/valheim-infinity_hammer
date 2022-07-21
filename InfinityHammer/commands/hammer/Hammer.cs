@@ -18,13 +18,14 @@ public class HammerSelect {
     var dz = position.z - center.z;
     var distanceX = GetX(dx, dz, angle);
     var distanceZ = GetY(dx, dz, angle);
+    if (center.y - position.y > 1000f) return false;
     if (position.y - center.y > (height == 0f ? 1000f : height)) return false;
     if (Mathf.Abs(distanceX) > width) return false;
     if (Mathf.Abs(distanceZ) > depth) return false;
     return true;
   }
   private static bool Within(Vector3 position, Vector3 center, float radius, float height) {
-    return Utils.DistanceXZ(position, center) <= radius && position.y - center.y <= (height == 0f ? 1000f : height);
+    return Utils.DistanceXZ(position, center) <= radius && center.y - position.y < 1000f && position.y - center.y <= (height == 0f ? 1000f : height);
   }
   private static bool ValidName(string name) => name != "Player" && !name.StartsWith("_", StringComparison.Ordinal);
   private static ZNetView[] GetNearby(Func<Vector3, bool> checker) {

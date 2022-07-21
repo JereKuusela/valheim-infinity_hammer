@@ -270,7 +270,7 @@ Following powers are available with `hammer_config` command:
 - Ignore no build (default: `true`, key: `ignore_no_build`): "Mystical power" no longer prevents building.
 - Ignore other restrictions (default: `true`, key: `ignore_other_restrictions`): Removes any other restrictions (for example campfires can be built on wood floors).
 - Ignore wards (default: `true`, key: `ignore_wards`): Wards no longer prevent building.
-- Infinite health (default: `false`, key: `infinite_health`): Sets the Overwrite health setting to 10E30.
+- Infinite health (default: `false`, key: `infinite_health`): Sets the Overwrite health setting to 1E30.
 - No build cost (default: `true`, key: `no_build_cost`): Removes resource cost and crafting station requirement.
 - No creator (default: `false`, key: `no_creator`): Builds without setting the creator information.
 - No durability loss (default: `true`, key: `no_durability_loss`): Hammer auto-repairs used durability.
@@ -368,6 +368,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Changes most default bindings only work when the hammer or hoe is equipped.
 	- Changes the command description to always show the actual command.
 	- Fixes clicking an empty slot on build menus causing an error message.
+	- Fixes the `no_creator` setting not working.
 	- Removes the rotation normalize from multiselects (didn't really work at all).
 
 - v1.17

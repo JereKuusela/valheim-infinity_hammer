@@ -102,9 +102,10 @@ public static class Hammer {
       piece.m_canBeRemoved = true;
       // Creator data is only interesting for actual targets. Dummy components will have these both as false.
       if (piece.m_randomTarget || piece.m_primaryTarget) {
-        if (Configuration.NoCreator)
+        if (Configuration.NoCreator) {
           zdo.Set("creator", 0L);
-        else
+          piece.m_creator = 0;
+        } else
           piece.SetCreator(Game.instance.GetPlayerProfile().GetPlayerID());
       }
     }

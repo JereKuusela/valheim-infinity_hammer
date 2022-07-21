@@ -52,7 +52,7 @@ public partial class Configuration {
   public static ConfigEntry<bool> configUnfreezeOnSelect;
   public static bool UnfreezeOnSelect => configUnfreezeOnSelect.Value;
   public static ConfigEntry<string> configOverwriteHealth;
-  public static float OverwriteHealth => IsCheats ? InfiniteHealth ? 10E20f : Helper.ParseFloat(configOverwriteHealth.Value, 0f) : 0f;
+  public static float OverwriteHealth => IsCheats ? InfiniteHealth ? 1E30f : Helper.ParseFloat(configOverwriteHealth.Value, 0f) : 0f;
   public static ConfigEntry<string> configPlanBuildFolder;
   public static string PlanBuildFolder => configPlanBuildFolder.Value;
   public static ConfigEntry<string> configBuildShareFolder;
@@ -134,8 +134,8 @@ public partial class Configuration {
     configDisableLoot = wrapper.Bind(section, "Disable loot", false, "Prevents creatures and structures dropping loot when removed with the hammer.");
     configRepairAnything = wrapper.Bind(section, "Repair anything", false, "Allows reparing anything.");
     configOverwriteHealth = wrapper.Bind(section, "Overwrite health", "0", "Overwrites the health of built or repaired objects.");
-    configInfiniteHealth = wrapper.Bind(section, "Infinite health", false, "Sets the Overwrite health to 10E30.");
-    configNoCreator = wrapper.Bind(section, "No creator", false, "Build without setting the creator (ignored by enemies).");
+    configInfiniteHealth = wrapper.Bind(section, "Infinite health", false, "Sets the Overwrite health to 1E30.");
+    configNoCreator = wrapper.Bind(section, "No creator", false, "Build without setting the creator.");
     configUnfreezeOnSelect = wrapper.Bind(section, "Unfreeze on select", false, "Removes the placement freeze when selecting a new object.");
     configResetOffsetOnUnfreeze = wrapper.Bind(section, "Reset offset on unfreeze", true, "Removes the placement offset when unfreezing the placement.");
     configUnfreezeOnUnequip = wrapper.Bind(section, "Unfreeze on unequip", true, "Removes the placement freeze when unequipping the hammer.");
