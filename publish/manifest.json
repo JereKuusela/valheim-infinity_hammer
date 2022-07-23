@@ -2,10 +2,10 @@
   "name": "Infinity_Hammer",
   "version_number": "1.18.0",
   "website_url": "https://github.com/JereKuusela/valheim-infinity_hammer",
-  "description": "Bend the rules of building! Copy any object, make structures indestructible, remove all restrictions, destroy anything and more... Compatible with unmodded clients.",
+  "description": "Bend the rules of building! Copy any object, make structures indestructible, remove all restrictions, destroy anything and more...",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.1901",
-    "JereKuusela-Server_devcommands-1.22.0",
-    "JereKuusela-World_Edit_Commands-1.5.0"
+    "JereKuusela-Server_devcommands-1.23.0",
+    "JereKuusela-World_Edit_Commands-1.6.0"
   ]
 }

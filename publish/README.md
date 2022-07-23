@@ -2,11 +2,11 @@
 
 Bend the rules of building! Copy any object, make structures indestructible, remove all restrictions, destroy anything and more...
 
-Client-side mod that is compatible with unmodded clients.
+Install on the admin client (modding [guide](https://youtu.be/WfvA5a5tNHo)).
 
-Check any modding [guide](https://youtu.be/WfvA5a5tNHo) for installation instructions.
+Install also [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) to enable key binds and use this on a server (as an admin).
 
-Install [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) to enable key binds and use this on a server (as an admin).
+Install also [World Edit Commands](https://valheim.thunderstore.io/package/JereKuusela/World_Edit_Commands/) for terrain tools.
 
 # Features
 
@@ -214,9 +214,9 @@ For example `hammer_add cmd_name=Kill cmd_desc=Kills_everything cmd_icon=softdea
 
 Some commands have coordinates as their parameters. These can be set with hammer/hoe by using commands `hammer_command` or `hoe_command`.
 
-For example using `hammer_command hammer 10 from=x,z,y` would select every object within 10 meters of the hovered position.
+For example using `hammer_command hammer circle=10 from=x,z,y` would select every object within 10 meters of the hovered position.
 
-The radius can be modified by using shift + mousewheel, when using `hammer_command hammer r from=x,z,y` (10 changed to r). This also makes the mod highlight the affected area! For less typing you can use the lias `hammer_area`.
+The radius can be modified by using shift + mousewheel, when using `hammer_command hammer circle=r from=x,z,y` (10 changed to r). This also makes the mod highlight the affected area! For less typing you can use the alias `hammer_area`.
 
 This command can be added to the menu with `hammer_add hammer_area`. It's recommended to always test commands first before adding them.
 
@@ -410,123 +410,5 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds a new command `hammer_grid` to restrict the possible placement coordinates.
 	- Improves error handling.
 	- Fixes the snapping disconnecting with the precise placement (non-freeze).
-
-- v1.13
-	- Improves compatibility with automatic repair mods.
-
-- v1.12
-	- Adds a new command `hammer_blueprint` to place new instances of Build Share and Plan Build blueprints.
-	- Adds a new command `hammer_location` to place new instances of locations.
-	- Adds a new command `hammer_freeze` to prevent mouse position affecting the placement (allows moving around).
-	- Adds a new setting `build_share_folder` to configure the blueprint folder.
-	- Adds a new setting `plan_build_folder` to configure the blueprint folder.
-	- Adds a new setting `unfreeze_on_unequip` to automatically unfreeze the placement when unequipping the hammer (default `true`).
-	- Adds a new setting `unfreeze_on_select` to automatically unfreeze the placement when selecting a new piece (default `false`).
-	- Adds a new setting `reset_offset_on_unfreeze` to automatically reset the placement offset when a freeze is removed (default `true`).
-	- Adds a new setting `infinite_health` to set a very high Overwrite health (default `false`).
-	- Adds more supported truthy/falsy values for the `hammer_config` command.
-	- Improves how the placement rule are checked with the placement offset.
-	- Removes the `hammer_setup_binds` as obsolete (probably just caused conflicts for most people).
-	- Fixes item drop data not being copied.
-
-- v1.11
-	- Adds compatibility with Gizmo Reloaded.
-	- Adds a new setting `binds` to automatically set binds at the game start up.
-	- Adds support for random rotation to `hammer_rotate_*` commands.
-
-- v1.10
-	- Renames and splits commands `hammer_move_*` to be more clear about the direction.
-	- Renames and splits commands `hammer_stack_*` to be more clear about the direction.
-	- Improves autocomplete and output for most commands.
-	- Fixes the undo feature breaking hoe usage.
-
-- v1.9
-	- Fixes `hammer_move_*` commands not working properly.
-	- Fixes `hammer_stack_*` not working with rotated objects.
-
-- v1.8
-	- Adds compatibility with Comfy Gizmo.
-	- Adds supports for `number*auto` value to the commands `hammer_move_x`, `hammer_move_y` and `hammer_move_z` (automatically sets the step size). 
-	- Adds a new direction parameter to the commands `hammer_move_x`, `hammer_move_y` and `hammer_move_z` for Server Devcommands mouse wheel binding.
-	- Adds a new command `hammer_repair` to select the repair tool.
-	- Adds a new command `hammer_place` to place pieces with commands.
-	- Adds new commands `hammer_rotate_x`, `hammer_rotate_y` and `hammer_rotate_z` to change rotation with commands.
-	- Adds new commands `hammer_stack_x`, `hammer_stack_y`, `hammer_stack_z` and `hammer_stack` to place multiple objects next to each other.
-	- Adds new settings `disable_messages`, `disable_offset_messages`, `disable_scale_messages` and `disable_select_messages` to configure the output.
-	- Adds a new setting `remove_area` for removing the same objects within a radius.
-	- Improves autocomplete with Server Devcommands.
-	- Improves the `hammer_config` command to allow directly setting flags with values 1 and 0.
-	- Improves the `hammer_config` command to work better when giving multiple values to some commands.
-	- Improves the `hammer_config` command to print the current value for non-flags if no parameter is given.
-	- Fixes repair range not working for creatures and other non-piece objects.
-	- Fixes repair taming.
-
-- v1.7
-	- Adds new setting `remove_blacklist` that allows disabling remove for some objects.
-	- Adds new setting `select_blacklist` that allows disabling select for some objects.
-	- Changes [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) compatibility to work with the newest version (old versions won't work anymore as the name was changed).
-	- Fixes `ignore_other_restrictions` being able to ignore no build zones, etc.
-	- Fixes `ignore_other_restrictions` allowing placement to arbitrary position when the placement ghost is not active.
-	- Fixes undo/redo not working for locations and creature stars.
-	- Fixes taming and untaming not working with the repair.
-	- Fixes `hammer_add_piece_components` affecting players.
-	- Fixes incompatibility with some remove mods.
-
-- v1.6:
-	- Adds a new setting `auto_equip` to automatically equip the hammer when selecting an object (enabled by default).
-	- Adds a version number check to the Server Devcommands mod compatibility.
-	- Fixes `disable_marker` setting also disabling the Gizmo visual or the Plan Build visual.
-	- Fixes scale not being set when selecting objects from the build menu (better compatibility with some mods).
-	- Fixes Piece components being added to the object library when selecting objects (no known issues).
-
-- v1.5
-	- Adds support for the undo system of Server Devcommands mod (if installed).
-	- Adds a new command `hammer_add_piece_components` to allow copying anything with PlanBuild.
-	- Removes the `hammer_setup_binds_DEV` command as obsolete (Server Devcommands mod is used automatically, if installed).
-	- Fixes some error messages appearing when placing spawners and other objects.
-	- Fixes error messages when using the hoe.
-
-- v1.4
-	- Adds new commands to offset the placement to precisely set the position.
-	- Adds new commands to set recommended key bindings.
-	- Adds new setting to disable the placement marker.
-	- Adds new parameter to hammer command to set the initial scale.
-	- Adds messages for undo and redo actions.
-	- Changes overwrite health to set the current health slightly higher than the maximum (makes it less likely to reset).
-	- Fixes scale being applied to objects that don't support it.
-	- Fixes tamed status not being copied for creatures.
-	- Fixes hammer_scale not working with different scales per axis.
-	- Fixes "Select range" setting not working.
-	- Fixes "Remove range" setting not working.
-
-- v1.3
-	- Fixes health not being copied for creatures (got overwritten by stars).
-
-- v1.2
-	- Adds object names to the build overlay.
-	- Adds setting to disable build, repair and destroy effects.
-	- Adds setting to tame/untame creatures with repair.
-	- Adds setting to disable creature and structure loot when destroyed with the hammer.
-	- Fixes creature stars not getting copied.
-	- Fixes error when copying creatures.
-	- Fixed "creator" data being added to non-piece objects.
-	- Fixes structures having a higher destroy priority even with "Destroy anything" enabled.
-	- Fixes "Overwrite health" not working when selecting a piece from the build menu.
-
-- v1.1
-	- Adds new setting to overwrite the health of built and repaired objects (including creatures).
-	- Adds no stamina and durability cost to also affect repairing.
-	- Adds new setting to change repair range.
-	- Adds new setting to repair anything (including creatures).
-	- Adds support for non-uniform scaling with hammer_scale command.
-	- Changes Auto rotate setting to Copy rotation.
-	- Changes messages to have a high priority (fixes scaling messages lagging behind).
-	- Fixes size being shown for objects that don't support changing it.
-	- Fixes creator not being set for copied objects (unless "No Creator" is on).
-	- Fixes selection keeping the hover color when selecting a structure.
-	- Fixes selection being removed when the selected objects is destroyed.
-
-- v1.0
-	- Initial release.
 
 Thanks for Azumatt for creating the mod icon!
