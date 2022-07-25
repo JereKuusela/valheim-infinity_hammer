@@ -1,5 +1,6 @@
 using System.Linq;
 using HarmonyLib;
+using Service;
 using UnityEngine;
 // Code related to repairing objects.
 namespace InfinityHammer;
@@ -139,7 +140,7 @@ public class Repair {
 
   private static bool RepairAnything(Player player) {
     var range = Configuration.RepairRange > 0f ? Configuration.RepairRange : player.m_maxPlaceDistance;
-    var hovered = Helper.GetHovered(player, range, null, true);
+    var hovered = Selector.GetHovered(player, range, null, true);
     if (hovered == null) return false;
     var obj = hovered.Obj;
     var repaired = RepairObject(obj, hovered.Index);

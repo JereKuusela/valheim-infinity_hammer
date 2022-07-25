@@ -39,7 +39,6 @@ public class InfinityHammer : BaseUnityPlugin {
     Configuration.Init(wrapper);
     SetupWatcher();
   }
-
   private void OnDestroy() {
     Config.Save();
   }

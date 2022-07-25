@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using Service;
 using UnityEngine;
 // Code related to removing objects.
 namespace InfinityHammer;
@@ -30,7 +31,7 @@ public class RemovePiece {
   }
 
   private static bool RemoveAnything(Player obj) {
-    var hovered = Helper.GetHovered(obj, obj.m_maxPlaceDistance, Configuration.RemoveBlacklist);
+    var hovered = Selector.GetHovered(obj, obj.m_maxPlaceDistance, Configuration.RemoveBlacklist);
     if (hovered == null) return false;
     obj.m_removeEffects.Create(hovered.Obj.transform.position, Quaternion.identity, null, 1f, -1);
     SetRemovedObject(hovered.Obj);
@@ -108,7 +109,7 @@ public class PostProcessToolOnRemove {
 [HarmonyPatch(typeof(Piece), nameof(Piece.CanBeRemoved))]
 public class AccessTargetedObject {
   public static void Prefix(Piece __instance) {
-    if (RemovePiece.Removing && Helper.IsValid(__instance.m_nview))
+    if (RemovePiece.Removing && Selector.IsValid(__instance.m_nview))
       RemovePiece.SetRemovedObject(__instance.m_nview);
   }
 }

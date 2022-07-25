@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using HarmonyLib;
@@ -25,7 +24,7 @@ public static class Helper {
     return player.m_placementGhost;
   }
   public static void RemoveZDO(ZDO zdo) {
-    if (!IsValid(zdo)) return;
+    if (!Selector.IsValid(zdo)) return;
     if (!zdo.IsOwner())
       zdo.SetOwner(ZDOMan.instance.GetMyID());
     if (ZNetScene.instance.m_instances.TryGetValue(zdo, out var view))
@@ -186,41 +185,6 @@ public static class Helper {
     }
   }
 
-  public static Hovered? GetHovered(Player obj, float maxDistance, HashSet<string>? blacklist, bool allowOtherPlayers = false) {
-    var raycast = Math.Max(maxDistance + 5f, 50f);
-    var mask = LayerMask.GetMask(new string[]
-    {
-      "item",
-      "piece",
-      "piece_nonsolid",
-      "Default",
-      "static_solid",
-      "Default_small",
-      "character",
-      "character_net",
-      "terrain",
-      "vehicle",
-      "character_trigger" // Added to remove spawners with ESP mod.
-    });
-    var hits = Physics.RaycastAll(GameCamera.instance.transform.position, GameCamera.instance.transform.forward, raycast, mask);
-    Array.Sort<RaycastHit>(hits, (RaycastHit x, RaycastHit y) => x.distance.CompareTo(y.distance));
-    foreach (var hit in hits) {
-      if (Vector3.Distance(hit.point, obj.m_eye.position) >= maxDistance) continue;
-      var netView = hit.collider.GetComponentInParent<ZNetView>();
-      if (!IsValid(netView)) continue;
-      if (blacklist != null && blacklist.Contains(Utils.GetPrefabName(netView.gameObject).ToLower())) continue;
-      if (hit.collider.GetComponent<EffectArea>() is { } area) continue;
-      var player = netView.GetComponentInChildren<Player>();
-      if (player == obj) continue;
-      if (!allowOtherPlayers && player) continue;
-      var mineRock = netView.GetComponent<MineRock5>();
-      var index = 0;
-      if (mineRock)
-        index = mineRock.GetAreaIndex(hit.collider);
-      return new(netView, index);
-    }
-    return null;
-  }
   public static Player GetPlayer() {
     var player = Player.m_localPlayer;
     if (!player) throw new InvalidOperationException("No player.");
@@ -297,10 +261,6 @@ public static class Helper {
       piece.m_name = Utils.GetPrefabName(obj);
     piece.m_clipEverything = true;
   }
-  ///<summary>Helper to check object validity.</summary>
-  public static bool IsValid(ZNetView view) => view && IsValid(view.GetZDO());
-  ///<summary>Helper to check object validity.</summary>
-  public static bool IsValid(ZDO zdo) => zdo != null && zdo.IsValid();
   public static void CheatCheck() {
     if (!Configuration.IsCheats) throw new InvalidOperationException("This command is disabled.");
   }
@@ -322,14 +282,6 @@ public static class Helper {
         Helper.AddError(args.Context, e.Message);
       }
     };
-}
-public class Hovered {
-  public ZNetView Obj;
-  public int Index;
-  public Hovered(ZNetView obj, int index) {
-    Obj = obj;
-    Index = index;
-  }
 }
 [HarmonyPatch(typeof(Player), nameof(Player.Message))]
 public class ReplaceMessage {

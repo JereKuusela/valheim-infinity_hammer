@@ -1,63 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using Service;
 using UnityEngine;
 namespace InfinityHammer;
 public class HammerSelect {
-  ///<summary>Returns the hovered object.</summary>
-  private static ZNetView GetHovered() {
-    var range = Configuration.SelectRange == 0 ? Player.m_localPlayer.m_maxInteractDistance : Configuration.SelectRange;
-    var hovered = Helper.GetHovered(Player.m_localPlayer, range, Configuration.SelectBlacklist);
-    if (hovered == null) throw new InvalidOperationException("Nothing is being hovered.");
-    return hovered.Obj;
-  }
-  private static float GetX(float x, float y, float angle) => Mathf.Cos(angle) * x - Mathf.Sin(angle) * y;
-  private static float GetY(float x, float y, float angle) => Mathf.Sin(angle) * x + Mathf.Cos(angle) * y;
-  private static bool Within(Vector3 position, Vector3 center, float angle, float width, float depth, float height) {
-    var dx = position.x - center.x;
-    var dz = position.z - center.z;
-    var distanceX = GetX(dx, dz, angle);
-    var distanceZ = GetY(dx, dz, angle);
-    if (center.y - position.y > 1000f) return false;
-    if (position.y - center.y > (height == 0f ? 1000f : height)) return false;
-    if (Mathf.Abs(distanceX) > width) return false;
-    if (Mathf.Abs(distanceZ) > depth) return false;
-    return true;
-  }
-  private static bool Within(Vector3 position, Vector3 center, float radius, float height) {
-    return Utils.DistanceXZ(position, center) <= radius && center.y - position.y < 1000f && position.y - center.y <= (height == 0f ? 1000f : height);
-  }
-  private static bool ValidName(string name) => name != "Player" && !name.StartsWith("_", StringComparison.Ordinal);
-  private static ZNetView[] GetNearby(Func<Vector3, bool> checker) {
-    var scene = ZNetScene.instance.m_instances.Values;
-    var views = scene.Where(view => view.GetZDO() != null && view.GetZDO().IsValid()).Where(view => ValidName(Utils.GetPrefabName(view.gameObject))).Where(view => checker(view.GetZDO().GetPosition())).ToArray();
-    if (views.Length == 0) throw new InvalidOperationException("Nothing is nearby.");
-    return views;
-  }
-  private static ZNetView[] GetConnected(ZNetView baseView) {
-    var baseWear = baseView.GetComponent<WearNTear>();
-    if (baseWear == null) throw new InvalidOperationException("Connected doesn't work for this object.");
-    HashSet<ZNetView> views = new() { baseView };
-    Queue<WearNTear> todo = new();
-    todo.Enqueue(baseWear);
-    while (todo.Count > 0) {
-      var wear = todo.Dequeue();
-      if (wear.m_colliders == null) wear.SetupColliders();
-      foreach (var boundData in wear.m_bounds) {
-        var boxes = Physics.OverlapBoxNonAlloc(boundData.m_pos, boundData.m_size, WearNTear.m_tempColliders, boundData.m_rot, WearNTear.m_rayMask);
-        for (int i = 0; i < boxes; i++) {
-          var collider = WearNTear.m_tempColliders[i];
-          if (collider.isTrigger || collider.attachedRigidbody != null || wear.m_colliders.Contains(collider)) continue;
-          var wear2 = collider.GetComponentInParent<WearNTear>();
-          if (!wear2 || !wear2.m_nview) continue;
-          if (views.Contains(wear2.m_nview)) continue;
-          views.Add(wear2.m_nview);
-          todo.Enqueue(wear2);
-        }
-      }
-    }
-    return views.ToArray();
-  }
+
+
   private static void PrintSelected(Terminal terminal, GameObject obj) {
     if (Configuration.DisableSelectMessages) return;
     var scale = obj.transform.localScale;
@@ -102,15 +50,15 @@ public class HammerSelect {
       HammerParameters pars = new(args);
       GameObject selected;
       if (pars.Radius.HasValue)
-        selected = Selection.Set(GetNearby(pos => Within(pos, pars.Position, pars.Radius.Value, pars.Height)), pars.Scale);
+        selected = Selection.Set(Selector.GetNearby(pars.Position, pars.Radius.Value, pars.Height), pars.Scale);
       else if (pars.Width.HasValue && pars.Depth.HasValue)
-        selected = Selection.Set(GetNearby(pos => Within(pos, pars.Position, pars.Angle, pars.Width.Value, pars.Depth.Value, pars.Height)), pars.Scale);
+        selected = Selection.Set(Selector.GetNearby(pars.Position, pars.Angle, pars.Width.Value, pars.Depth.Value, pars.Height), pars.Scale);
       else if (args.Length > 1 && !args[1].Contains("=") && args[1] != "connect")
         selected = Selection.Set(args[1], pars.Scale);
       else {
-        var hovered = GetHovered();
+        var hovered = Selector.GetHovered(Configuration.SelectRange, Configuration.SelectBlacklist);
         if (pars.Connect)
-          selected = Selection.Set(GetConnected(hovered), pars.Scale);
+          selected = Selection.Set(Selector.GetConnected(hovered), pars.Scale);
         else
           selected = Selection.Set(hovered, pars.Scale);
       }
