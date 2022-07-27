@@ -90,13 +90,11 @@ public partial class Configuration {
   public static HashSet<string> HammerTools = new();
   public static ConfigEntry<string> configHoeTools;
   public static HashSet<string> HoeTools = new();
-  public static HashSet<string> Tools = new();
   public static ConfigWrapper Wrapper;
 #nullable enable
   private static void UpdateTools() {
     HammerTools = ParseList(configHammerTools.Value);
     HoeTools = ParseList(configHoeTools.Value);
-    Tools = HammerTools.Concat(HoeTools).ToHashSet();
   }
   public static void Init(ConfigWrapper wrapper) {
     Wrapper = wrapper;

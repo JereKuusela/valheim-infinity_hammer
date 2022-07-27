@@ -192,15 +192,29 @@ public static class Helper {
   }
   ///<summary>Initializing the copy as inactive is the best way to avoid any script errors. ZNet stuff also won't run.</summary>
   public static GameObject SafeInstantiate(GameObject obj) {
+    var wear = obj.GetComponent<WearNTear>();
+    var highlight = wear && wear.m_oldMaterials != null;
+    if (highlight)
+      wear.ResetHighlight();
     obj.SetActive(false);
     var ret = UnityEngine.Object.Instantiate(obj);
+    Helper.CleanObject(ret);
     obj.SetActive(true);
+    if (highlight)
+      wear.Highlight();
     return ret;
   }
   public static GameObject SafeInstantiate(GameObject obj, GameObject parent) {
+    var wear = obj.GetComponent<WearNTear>();
+    var highlight = wear && wear.m_oldMaterials != null;
+    if (highlight)
+      wear.ResetHighlight();
     obj.SetActive(false);
     var ret = UnityEngine.Object.Instantiate(obj, parent.transform);
+    Helper.CleanObject(ret);
     obj.SetActive(true);
+    if (highlight)
+      wear.Highlight();
     return ret;
   }
   public static GameObject SafeInstantiate(string name, GameObject parent) {
@@ -226,8 +240,9 @@ public static class Helper {
     if (!obj || !Configuration.Enabled) return;
     // Creature behavior.
     UnityEngine.Object.Destroy(obj.GetComponent<CharacterDrop>());
-    UnityEngine.Object.Destroy(obj.GetComponent<BaseAI>());
     UnityEngine.Object.Destroy(obj.GetComponent<MonsterAI>());
+    UnityEngine.Object.Destroy(obj.GetComponent<AnimalAI>());
+    UnityEngine.Object.Destroy(obj.GetComponent<BaseAI>());
     UnityEngine.Object.Destroy(obj.GetComponent<Character>());
     UnityEngine.Object.Destroy(obj.GetComponent<Tameable>());
     UnityEngine.Object.Destroy(obj.GetComponent<Procreation>());
@@ -236,6 +251,7 @@ public static class Helper {
     UnityEngine.Object.Destroy(obj.GetComponent<Humanoid>());
     UnityEngine.Object.Destroy(obj.GetComponent<RandomFlyingBird>());
     UnityEngine.Object.Destroy(obj.GetComponent<Fish>());
+    UnityEngine.Object.Destroy(obj.GetComponentInChildren<CharacterAnimEvent>());
     // Destructible behavior.
     UnityEngine.Object.Destroy(obj.GetComponent<TreeLog>());
     UnityEngine.Object.Destroy(obj.GetComponent<TreeBase>());

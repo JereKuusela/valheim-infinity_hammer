@@ -55,19 +55,19 @@ public class ConfigWrapper {
     RegisterList(configEntry);
     return configEntry;
   }
-  public ConfigEntry<KeyboardShortcut> BindCommand(Func<string> command, string group, string name, KeyboardShortcut value, string description, Func<HashSet<string>>? tools = null) {
+  public ConfigEntry<KeyboardShortcut> BindCommand(Func<string> command, string group, string name, KeyboardShortcut value, string description, string mode = "") {
     var configEntry = Create(group, name, value, description, false);
-    RegisterCommand(configEntry, command, tools);
+    RegisterCommand(configEntry, command, mode);
     return configEntry;
   }
-  public ConfigEntry<KeyboardShortcut> BindCommand(string command, string group, string name, KeyboardShortcut value, string description, Func<HashSet<string>>? tools = null) {
+  public ConfigEntry<KeyboardShortcut> BindCommand(string command, string group, string name, KeyboardShortcut value, string description, string mode = "") {
     var configEntry = Create(group, name, value, description, false);
-    RegisterCommand(configEntry, () => command, tools);
+    RegisterCommand(configEntry, () => command, mode);
     return configEntry;
   }
-  public ConfigEntry<KeyboardShortcut> BindWheelCommand(string command, string group, string name, KeyboardShortcut value, string description, Func<HashSet<string>>? tools = null) {
+  public ConfigEntry<KeyboardShortcut> BindWheelCommand(string command, string group, string name, KeyboardShortcut value, string description, string mode = "") {
     var configEntry = Create(group, name, value, description, false);
-    RegisterWheelCommand(configEntry, command, tools);
+    RegisterWheelCommand(configEntry, command, mode);
     return configEntry;
   }
   public ConfigEntry<T> Bind<T>(string group, string name, T value, string description, bool synchronizedSetting = true) => Bind(group, name, value, new ConfigDescription(description), synchronizedSetting);
@@ -82,15 +82,13 @@ public class ConfigWrapper {
     var key = ToKey(name);
     SettingHandlers.Add(key, (Terminal terminal, string value) => Toggle(terminal, setting, name, value));
   }
-  private static void UpdateKey(string name, KeyboardShortcut key, Func<string> command, Func<HashSet<string>>? tools = null) {
+  private static void UpdateKey(string name, KeyboardShortcut key, Func<string> command, string mode = "") {
     Console.instance.TryRunCommand($"unbind {name} silent");
     if (key.MainKey == KeyCode.None) return;
     var keys = key.MainKey.ToString().ToLower();
     if (key.Modifiers.Count() > 0) keys += "," + string.Join(",", key.Modifiers);
-    if (tools != null) {
-      var tool = tools();
-      if (tool.Count > 0) keys += "," + string.Join(",", tool);
-    }
+    if (mode != "")
+      keys += $",{mode}";
     var bind = $"bind {keys} tag={name} {command()}";
     Console.instance.TryRunCommand(bind);
   }
@@ -99,30 +97,28 @@ public class ConfigWrapper {
     foreach (var call in BindCalls) call();
   }
   private string ToKey(string name) => name.ToLower().Replace(' ', '_').Replace("(", "").Replace(")", "");
-  private void RegisterCommand(ConfigEntry<KeyboardShortcut> setting, Func<string> command, Func<HashSet<string>>? tools = null) {
+  private void RegisterCommand(ConfigEntry<KeyboardShortcut> setting, Func<string> command, string mode = "") {
     var name = setting.Definition.Key;
     var key = ToKey(name);
-    setting.SettingChanged += (s, e) => UpdateKey(key, setting.Value, command, tools);
-    BindCalls.Add(() => UpdateKey(key, setting.Value, command, tools));
+    setting.SettingChanged += (s, e) => UpdateKey(key, setting.Value, command, mode);
+    BindCalls.Add(() => UpdateKey(key, setting.Value, command, mode));
     SettingHandlers.Add(key, (Terminal terminal, string value) => SetKey(terminal, setting, name, value));
   }
-  private static void UpdateWheelKey(string name, KeyboardShortcut key, string command, Func<HashSet<string>>? tools = null) {
+  private static void UpdateWheelKey(string name, KeyboardShortcut key, string command, string mode = "") {
     Console.instance.TryRunCommand($"unbind {name} silent");
     if (key.MainKey == KeyCode.None) return;
     var keys = key.MainKey.ToString().ToLower();
     if (key.Modifiers.Count() > 0) keys += "," + string.Join(",", key.Modifiers);
-    if (tools != null) {
-      var tool = tools();
-      if (tool.Count > 0) keys += "," + string.Join(",", tool);
-    }
+    if (mode != "")
+      keys += $",{mode}";
     var bind = $"bind wheel,{keys} tag={name} {command}";
     Console.instance.TryRunCommand(bind);
   }
-  private void RegisterWheelCommand(ConfigEntry<KeyboardShortcut> setting, string command, Func<HashSet<string>>? tools = null) {
+  private void RegisterWheelCommand(ConfigEntry<KeyboardShortcut> setting, string command, string mode = "") {
     var name = setting.Definition.Key;
     var key = ToKey(name);
-    setting.SettingChanged += (s, e) => UpdateWheelKey(key, setting.Value, command, tools);
-    BindCalls.Add(() => UpdateWheelKey(key, setting.Value, command, tools));
+    setting.SettingChanged += (s, e) => UpdateWheelKey(key, setting.Value, command, mode);
+    BindCalls.Add(() => UpdateWheelKey(key, setting.Value, command, mode));
     SettingHandlers.Add(key, (Terminal terminal, string value) => SetKey(terminal, setting, name, value));
   }
   private void Register(ConfigEntry<KeyboardShortcut> setting) {
