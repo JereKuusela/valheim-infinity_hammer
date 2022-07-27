@@ -15,19 +15,19 @@ public class SetupBinds {
     foreach (var key in keys) Console.instance.TryRunCommand($"unbind {key}");
     foreach (var bind in binds) Console.instance.TryRunCommand($"bind {bind}");
   }
-  private static string MigrateScaleUp(string bind) {
-    if (!bind.Contains("hammer_scale_up ")) return bind;
-    return bind.Replace("hammer_scale_up ", "hammer_scale build 5%");
+  private static string MigrateHammerScale(string bind) {
+    if (!bind.Contains("hammer_scale build ")) return bind;
+    return bind.Replace("hammer_scale build ", "hammer_zoom ");
   }
-  private static string MigrateScaleDown(string bind) {
-    if (!bind.Contains("hammer_scale_down ")) return bind;
-    return bind.Replace("hammer_scale_down ", "hammer_scale build -5%");
+  private static string MigrateHammerScaleCmd(string bind) {
+    if (!bind.Contains("hammer_scale command ")) return bind;
+    return bind.Replace("hammer_scale command ", "hammer_zoom_cmd ");
   }
   private static void MigrateBinds() {
-    if (!Terminal.m_bindList.Any(bind => bind.Contains("hammer_scale_up ") || bind.Contains("hammer_scale_down "))) return;
+    if (!Terminal.m_bindList.Any(bind => bind.Contains("hammer_scale build ") || bind.Contains("hammer_scale command "))) return;
     for (var i = 0; i < Terminal.m_bindList.Count; i++) {
-      Terminal.m_bindList[i] = MigrateScaleUp(Terminal.m_bindList[i]);
-      Terminal.m_bindList[i] = MigrateScaleDown(Terminal.m_bindList[i]);
+      Terminal.m_bindList[i] = MigrateHammerScale(Terminal.m_bindList[i]);
+      Terminal.m_bindList[i] = MigrateHammerScaleCmd(Terminal.m_bindList[i]);
     }
     Terminal.updateBinds();
   }

@@ -59,9 +59,22 @@ public static class Selection {
     Helper.GetPlayer().SetupPlacementGhost();
     return Ghost;
   }
+  private static void ResetColliders(GameObject obj, GameObject original) {
+    var colliders = obj.GetComponentsInChildren<Collider>();
+    var originalColliders = original.GetComponentsInChildren<Collider>();
+    if (colliders.Length != originalColliders.Length) {
+      InfinityHammer.Log.LogWarning("Object has a different amount of colliders than the original: Unable to reset colliders.");
+      return;
+    }
+    for (var i = 0; i < colliders.Length; i++) {
+      colliders[i].enabled = originalColliders[i].enabled;
+      colliders[i].isTrigger = originalColliders[i].isTrigger;
+    }
+  }
   public static GameObject Set(ZNetView view, Vector3? scale) {
     var name = Utils.GetPrefabName(view.gameObject);
-    var prefab = Configuration.CopyState ? view.gameObject : ZNetScene.instance.GetPrefab(name);
+    var originalPrefab = ZNetScene.instance.GetPrefab(name);
+    var prefab = Configuration.CopyState ? view.gameObject : originalPrefab;
     var data = Configuration.CopyState ? view.GetZDO() : null;
 
     if (!prefab) throw new InvalidOperationException("Invalid prefab.");
@@ -72,9 +85,10 @@ public static class Selection {
     Ghost = Helper.SafeInstantiate(prefab);
     if (view.m_syncInitialScale)
       Ghost.transform.localScale = scale ?? view.gameObject.transform.localScale;
+    ResetColliders(Ghost, originalPrefab);
+    Helper.EnsurePiece(Ghost);
     Objects.Add(new(name, Ghost.transform.localScale, data));
     Scaling.Get()?.SetScale(Ghost.transform.localScale);
-    Helper.EnsurePiece(Ghost);
     Helper.GetPlayer().SetupPlacementGhost();
     Rotating.UpdatePlacementRotation(view.gameObject);
     return Ghost;
@@ -92,15 +106,19 @@ public static class Selection {
     piece.m_name = "Multiple";
     piece.m_description = "";
     ZNetView.m_forceDisableInit = true;
-    foreach (var item in views) {
-      var name = Utils.GetPrefabName(item.gameObject);
-      var obj = Helper.SafeInstantiate(name, Ghost);
+    foreach (var view in views) {
+      var name = Utils.GetPrefabName(view.gameObject);
+      var originalPrefab = ZNetScene.instance.GetPrefab(name);
+      var prefab = Configuration.CopyState ? view.gameObject : originalPrefab;
+      var data = Configuration.CopyState ? view.GetZDO() : null;
+      var obj = Helper.SafeInstantiate(prefab, Ghost);
       obj.SetActive(true);
-      obj.transform.position = item.transform.position;
-      obj.transform.rotation = item.transform.rotation;
-      if (item.m_syncInitialScale)
-        obj.transform.localScale = scale ?? item.transform.localScale;
-      var zdo = SetData(obj, "", item.GetZDO());
+      obj.transform.position = view.transform.position;
+      obj.transform.rotation = view.transform.rotation;
+      if (view.m_syncInitialScale)
+        obj.transform.localScale = scale ?? view.transform.localScale;
+      ResetColliders(obj, originalPrefab);
+      var zdo = SetData(obj, "", data);
       Objects.Add(new SelectionObject(name, obj.transform.localScale, zdo));
     }
     ZNetView.m_forceDisableInit = false;

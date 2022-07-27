@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using UnityEngine;
@@ -103,6 +104,25 @@ public static class Parse {
   public static string TryString(string[] args, int index, string defaultValue = "") {
     if (args.Length <= index) return defaultValue;
     return args[index];
+  }
+  private static HashSet<string> Truthies = new() {
+    "1",
+    "true",
+    "yes",
+    "on"
+  };
+  private static bool IsTruthy(string value) => Truthies.Contains(value);
+  private static HashSet<string> Falsies = new() {
+    "0",
+    "false",
+    "no",
+    "off"
+  };
+  private static bool IsFalsy(string value) => Falsies.Contains(value);
+  public static bool? Boolean(string arg) {
+    if (IsTruthy(arg)) return true;
+    if (IsFalsy(arg)) return false;
+    return null;
   }
   public static Quaternion TryAngleYXZ(string arg) => TryAngleYXZ(arg, Quaternion.identity);
   public static Quaternion TryAngleYXZ(string arg, Quaternion defaultValue) {

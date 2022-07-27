@@ -89,7 +89,7 @@ public class SetCommands {
     new HammerRepairCommand();
     new HammerRotateCommand();
     new HammerScaleCommand();
-    new HammerSetScaleCommand();
+    new HammerZoomCommand();
     new HammerStackCommand();
     new HammerUndoCommand();
     new HammerFreezeCommand();

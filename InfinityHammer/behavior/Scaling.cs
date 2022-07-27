@@ -15,26 +15,26 @@ public class ToolScaling {
       Value.y = Mathf.Max(0f, Value.y);
     Value.z = Mathf.Max(0f, Value.z);
   }
-  public void Scale(float amount, float percentage) {
+  public void Zoom(float amount, float percentage) {
     Value += new Vector3(amount, amount, amount);
     if (percentage < 0f) Value /= (1f - percentage);
     else Value *= (1f + percentage);
     Sanity();
   }
-  public void ScaleX(float amount, float percentage) {
+  public void ZoomX(float amount, float percentage) {
     Value.x += amount;
     if (percentage < 0f) Value.x /= (1f - percentage);
     else Value.x *= (1f + percentage);
     Sanity();
   }
-  public void ScaleY(float amount, float percentage) {
+  public void ZoomY(float amount, float percentage) {
     Value.y += amount;
     if (percentage < 0f) Value.y /= (1f - percentage);
     else Value.y *= (1f + percentage);
     Sanity();
   }
 
-  public void ScaleZ(float amount, float percentage) {
+  public void ZoomZ(float amount, float percentage) {
     Value.z += amount;
     if (percentage < 0f) Value.z /= (1f - percentage);
     else Value.z *= (1f + percentage);
@@ -70,7 +70,7 @@ public static class Scaling {
     var player = Helper.GetPlayer();
     var ghost = player.m_placementGhost;
     if (!ghost) return false;
-    if (Selection.Type == SelectionType.Command) return true;
+    if (Selection.Type == SelectionType.Command || Selection.Type == SelectionType.Multiple) return true;
     // Ghost won't have netview so the selected piece must be used.
     // This technically also works for the build window if other mods add scalable objects there.
     var view = player.GetSelectedPiece()?.GetComponent<ZNetView>();
@@ -82,10 +82,14 @@ public static class Scaling {
   }
   public static void PrintScale(Terminal terminal) {
     if (Configuration.DisableScaleMessages) return;
-    var scale = Get();
-    if (IsScalingSupported())
-      Helper.AddMessage(terminal, $"Scale set to {scale.Value.y.ToString("P0")}.");
-    else
+    var scaling = Get();
+    if (IsScalingSupported()) {
+      if (scaling.X != scaling.Y || scaling.X != scaling.Z)
+        Helper.AddMessage(terminal, $"Scale set to X: {scaling.X.ToString("P0")}, Z: {scaling.Z.ToString("P0")}, Y: {scaling.Y.ToString("P0")}.");
+      else
+        Helper.AddMessage(terminal, $"Scale set to {scaling.Y.ToString("P0")}.");
+
+    } else
       Helper.AddMessage(terminal, "Selected object doesn't support scaling.");
   }
   public static void SetPieceScale(ZNetView view, GameObject ghost) {
