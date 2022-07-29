@@ -37,6 +37,7 @@ The `hammer` command has following extra parameters which allow modifying the se
 - `scale=number` or `scale=x,z,y`: Overrides the size (if the object can be scaled).
 - `health=number`: Overrides the health.
 - `text=string`: Overrides the sign text.
+- `type=creature/structure`: Select only certain object types.
 - `level=number`: Overrides the creature level (stars + 1).
 - `stars=number`: Overrides the creature stars (level - 1).
 - `from=x,z,y`: Overrides the player position when doing area selection.
@@ -378,6 +379,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 # Changelog
 
 - v1.19
+	- Adds a new paramater `type` to the `hammer` command to filter by object type.
 	- Renames commands `hammer_scale* build` to `hammer_zoom*`.
 	- Renames commands `hammer_scale* command` to `hammer_zoom_cmd*`.
 	- Adds new commands `hammer_scale*` and  `hammer_´scale_cmd*` to directly set the scale.

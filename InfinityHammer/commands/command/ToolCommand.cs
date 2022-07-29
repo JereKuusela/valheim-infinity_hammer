@@ -6,12 +6,12 @@ public class ToolCommand {
   public ToolCommand(string name, Tool tool) {
     Helper.Command(name, "[command] - Executes command at the targeted position.", (args) => Execute(args, tool));
     CommandWrapper.Register(name, (int index, int subIndex) => null);
-    CommandWrapper.AddSpecialCommand(name);
+    CommandWrapper.AddCompositeCommand(name);
   }
   protected static void Execute(Terminal.ConsoleEventArgs args, Tool tool) {
     Helper.ArgsCheck(args, 2, "Missing the command.");
     Hammer.Equip(tool);
-    CommandParameters pars = new CommandParameters(args.Args.Skip(1).ToArray());
+    CommandParameters pars = new CommandParameters(args.Args.Skip(1).ToArray(), false);
     Selection.Set(pars.ToRuler(), pars.Name, pars.Description, pars.Command, pars.Icon);
     GizmoWrapper.SetRotation(Quaternion.identity);
     Helper.AddMessage(args.Context, $"Selected command {pars.Name}.");

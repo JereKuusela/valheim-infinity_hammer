@@ -190,7 +190,7 @@ public class Selected {
     Clear();
     var player = Helper.GetPlayer();
     RulerParameters = ruler;
-    Command = command;
+    Command = command.Replace("hammer_command ", "").Replace("hoe_command ", "");
     Ghost = new GameObject();
     Ghost.name = name;
     var piece = Ghost.AddComponent<Piece>();

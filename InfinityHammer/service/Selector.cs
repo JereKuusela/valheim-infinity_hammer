@@ -5,7 +5,11 @@ using System.Linq;
 using UnityEngine;
 
 namespace Service;
-
+public enum ObjectType {
+  All,
+  Character,
+  Structure
+}
 public class Hovered {
   public ZNetView Obj;
   public int Index;
@@ -80,32 +84,27 @@ public static class Selector {
     return Utils.DistanceXZ(position, center) <= radius && center.y - position.y < 1000f && position.y - center.y <= (height == 0f ? 1000f : height);
   }
   private static bool ValidName(string name) => name != "Player" && !name.StartsWith("_", StringComparison.Ordinal);
-  public static ZNetView[] GetNearby(Vector3 center, float radius, float height) {
+  public static ZNetView[] GetNearby(ObjectType type, Vector3 center, float radius, float height) {
     var checker = (Vector3 pos) => Within(pos, center, radius, height);
-    return GetNearby(checker);
+    return GetNearby(type, checker);
   }
-  public static ZNetView[] GetNearby(Vector3 center, float angle, float width, float depth, float height) {
+  public static ZNetView[] GetNearby(ObjectType type, Vector3 center, float angle, float width, float depth, float height) {
     var checker = (Vector3 pos) => Within(pos, center, angle, width, depth, height);
-    return GetNearby(checker);
+    return GetNearby(type, checker);
   }
-  public static ZNetView[] GetNearby(Func<Vector3, bool> checker) {
-    var scene = ZNetScene.instance.m_instances.Values;
-    var views = scene.Where(view => view.GetZDO() != null && view.GetZDO().IsValid()).Where(view => ValidName(Utils.GetPrefabName(view.gameObject))).Where(view => checker(view.GetZDO().GetPosition())).ToArray();
-    if (views.Length == 0) throw new InvalidOperationException("Nothing is nearby.");
-    return views;
-  }
-  public static ZNetView[] GetNearby<T>(Vector3 center, float radius, float height) where T : MonoBehaviour {
-    var checker = (Vector3 pos) => Within(pos, center, radius, height);
-    return GetNearby<T>(checker);
-  }
-  public static ZNetView[] GetNearby<T>(Vector3 center, float angle, float width, float depth, float height) where T : MonoBehaviour {
-    var checker = (Vector3 pos) => Within(pos, center, angle, width, depth, height);
-    return GetNearby<T>(checker);
-  }
-  public static ZNetView[] GetNearby<T>(Func<Vector3, bool> checker) where T : MonoBehaviour {
-    var views = GetNearby(checker).Where(view => view.GetComponent<T>()).ToArray();
-    if (views.Length == 0) throw new InvalidOperationException("Nothing is nearby.");
-    return views;
+  public static ZNetView[] GetNearby(ObjectType type, Func<Vector3, bool> checker) {
+    var scene = ZNetScene.instance;
+    var objects = ZNetScene.instance.m_instances.Values;
+    var views = objects.Where(view => view.GetZDO() != null && view.GetZDO().IsValid());
+    views = views.Where(view => ValidName(Utils.GetPrefabName(view.gameObject)));
+    views = views.Where(view => checker(view.GetZDO().GetPosition()));
+    if (type == ObjectType.Structure)
+      views = views.Where(view => scene.GetPrefab(view.GetZDO().GetPrefab()).GetComponent<Piece>());
+    if (type == ObjectType.Character)
+      views = views.Where(view => scene.GetPrefab(view.GetZDO().GetPrefab()).GetComponent<Character>());
+    var objs = views.ToArray();
+    if (objs.Length == 0) throw new InvalidOperationException("Nothing is nearby.");
+    return objs;
   }
 
   ///<summary>Returns connected WearNTear objects.</summary>

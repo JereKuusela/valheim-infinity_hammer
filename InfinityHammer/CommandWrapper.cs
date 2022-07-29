@@ -9,14 +9,14 @@ public static class CommandWrapper {
   public static Assembly? WorldEditCommands = null;
   public static void Init() {
     if (Chainloader.PluginInfos.TryGetValue("server_devcommands", out var info)) {
-      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 23)
+      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 24)
         InfinityHammer.Log.LogWarning($"Server Devcommands v{info.Metadata.Version.Major}.{info.Metadata.Version.Minor} is outdated. Please update!");
       else
         ServerDevcommands = info.Instance.GetType().Assembly;
 
     }
     if (Chainloader.PluginInfos.TryGetValue("world_edit_commands", out info)) {
-      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 6)
+      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 7)
         InfinityHammer.Log.LogWarning($"World Edit Commands v{info.Metadata.Version.Major}.{info.Metadata.Version.Minor} is outdated. Please update!");
       else
         WorldEditCommands = info.Instance.GetType().Assembly;
@@ -83,8 +83,8 @@ public static class CommandWrapper {
     if (ServerDevcommands == null) return null;
     return GetMethod(InfoType(), "XYZ", new[] { typeof(string), typeof(int) }).Invoke(null, new object[] { description, index }) as List<string>;
   }
-  public static void AddSpecialCommand(string command) {
+  public static void AddCompositeCommand(string command) {
     if (ServerDevcommands == null) return;
-    GetMethod(InfoType(), "AddSpecialCommand1", new[] { typeof(string) }).Invoke(null, new object[] { command });
+    GetMethod(InfoType(), "AddCompositeCommand", new[] { typeof(string) }).Invoke(null, new object[] { command });
   }
 }

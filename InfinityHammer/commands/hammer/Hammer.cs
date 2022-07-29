@@ -29,7 +29,11 @@ public class HammerSelect {
   }
   public HammerSelect() {
     List<string> named = new() {
-      "scale", "radius", "Level", "stars", "connected", "from", "health"
+      "scale", "radius", "level", "stars", "connected", "from", "health", "type"
+    };
+    List<string> ObjectTypes = new() {
+      "creature",
+      "structure"
     };
     named.Sort();
     CommandWrapper.Register("hammer", (int index, int subIndex) => {
@@ -43,6 +47,7 @@ public class HammerSelect {
       { "text", (int index) => CommandWrapper.Info("Text.") },
       { "health", (int index) => CommandWrapper.Info("Health.") },
       { "connect", (int index) => CommandWrapper.Info("piece") },
+      { "type", (int index) => ObjectTypes },
     });
     Helper.Command("hammer", "[object id or radius] - Selects the object to be placed (the hovered object by default).", (args) => {
       Helper.EnabledCheck();
@@ -50,9 +55,9 @@ public class HammerSelect {
       HammerParameters pars = new(args);
       GameObject selected;
       if (pars.Radius.HasValue)
-        selected = Selection.Set(Selector.GetNearby(pars.Position, pars.Radius.Value, pars.Height));
+        selected = Selection.Set(Selector.GetNearby(pars.ObjectType, pars.Position, pars.Radius.Value, pars.Height));
       else if (pars.Width.HasValue && pars.Depth.HasValue)
-        selected = Selection.Set(Selector.GetNearby(pars.Position, pars.Angle, pars.Width.Value, pars.Depth.Value, pars.Height));
+        selected = Selection.Set(Selector.GetNearby(pars.ObjectType, pars.Position, pars.Angle, pars.Width.Value, pars.Depth.Value, pars.Height));
       else if (args.Length > 1 && !args[1].Contains("=") && args[1] != "connect")
         selected = Selection.Set(args[1]);
       else {

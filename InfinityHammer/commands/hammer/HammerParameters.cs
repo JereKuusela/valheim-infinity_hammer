@@ -14,6 +14,7 @@ public class HammerParameters {
   public float? Width;
   public float? Depth;
   public float Height = 0f;
+  public ObjectType ObjectType = ObjectType.All;
 
   public HammerParameters(Terminal.ConsoleEventArgs args) {
     if (Player.m_localPlayer)
@@ -53,6 +54,8 @@ public class HammerParameters {
         Height = Parse.TryFloat(value, 0f);
       if (name == "angle")
         Angle = Parse.TryFloat(value, 0f) * Mathf.PI / 180f;
+      if (name == "type" && value == "creature") ObjectType = ObjectType.Character;
+      if (name == "type" && value == "structure") ObjectType = ObjectType.Structure;
     }
     if (Radius.HasValue && Depth.HasValue)
       throw new InvalidOperationException($"<color=yellow>circle</color> and <color=yellow>rect</color> parameters can't be used together.");

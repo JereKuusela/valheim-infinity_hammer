@@ -27,8 +27,8 @@ public class CommandParameters {
     .Where(s => !s.StartsWith($"{CmdDesc}=", StringComparison.OrdinalIgnoreCase))
     .Where(s => !s.StartsWith($"{CmdIcon}=", StringComparison.OrdinalIgnoreCase))
   );
-  public CommandParameters(string[] args) {
-    ParseArgs(args);
+  public CommandParameters(string[] args, bool showCommand) {
+    ParseArgs(args, showCommand);
     Command = Join(args);
   }
 
@@ -74,7 +74,7 @@ public class CommandParameters {
     if (sprite) return sprite;
     return null;
   }
-  protected void ParseArgs(string[] args) {
+  protected void ParseArgs(string[] args, bool showCommand) {
     var scale = Scaling.Command;
     var radius = scale.Value.x;
     var width = scale.Value.x;
@@ -94,8 +94,10 @@ public class CommandParameters {
       if (name == CmdD) depth = Mathf.Clamp(depth, range.Min, range.Max);
       if (name == CmdH) height = Mathf.Clamp(height, range.Min, range.Max);
     }
-    if (Description != "") Description += "\n";
-    Description += Join(args);
+    if (showCommand || Description == "") {
+      if (Description != "") Description += "\n";
+      Description += Join(args);
+    }
     var parameters = new[]{
       "r", "d", "w", "h", "a", "w,d", "x", "y", "z",
       "x,y", "x,z", "y,x", "y,z", "z,x", "z,y",

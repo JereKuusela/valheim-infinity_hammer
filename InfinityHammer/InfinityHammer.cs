@@ -14,7 +14,7 @@ public class InfinityHammer : BaseUnityPlugin {
   public const string GUID = "infinity_hammer";
   public const string NAME = "Infinity Hammer";
   const string LEGACY_GUID = "valheim.jerekuusela.infinity_hammer";
-  public const string VERSION = "1.18";
+  public const string VERSION = "1.19";
   ServerSync.ConfigSync ConfigSync = new(GUID) {
     DisplayName = NAME,
     CurrentVersion = VERSION,

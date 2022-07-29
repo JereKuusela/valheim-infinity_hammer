@@ -10,24 +10,8 @@ public class BuildMenuCommand : Piece {
 }
 [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpdateAvailable))]
 public static class UpdateAvailable {
-  private static bool IsName(string arg) {
-    if (arg == HammerCommand.Name || arg == HoeCommand.Name) return false;
-    if (arg.StartsWith("cmd_name=", StringComparison.OrdinalIgnoreCase)) return false;
-    if (arg.StartsWith("cmd_desc=", StringComparison.OrdinalIgnoreCase)) return false;
-    if (arg.StartsWith("cmd_icon=", StringComparison.OrdinalIgnoreCase)) return false;
-    if (arg.StartsWith("keys=", StringComparison.OrdinalIgnoreCase)) return false;
-    return true;
-  }
-  private static bool IsValid(string command) {
-    var args = command.Split(' ');
-    var name = args.FirstOrDefault(IsName);
-    if (name == null || name == "") return false;
-    if (!Terminal.commands.TryGetValue(name.ToLower(), out var obj)) return false;
-    if (!obj.IsValid(Console.instance)) return false;
-    return true;
-  }
   private static Piece Build(string command) {
-    CommandParameters pars = new(command.Split(' '));
+    CommandParameters pars = new(command.Split(' '), true);
     GameObject obj = new();
     var piece = obj.AddComponent<BuildMenuCommand>();
     piece.Command = command;
@@ -55,7 +39,7 @@ public static class UpdateAvailable {
     if (__instance.m_availablePieces.Count <= tab) return;
     var pieces = __instance.m_availablePieces[tab];
     index = Math.Min(index, pieces.Count);
-    foreach (var command in commands.Where(IsValid).Reverse())
+    foreach (var command in commands.Reverse<string>())
       pieces.Insert(index, Build(command));
   }
 }
