@@ -23,6 +23,11 @@ public static class Helper {
     if (!player.m_placementGhost) throw new InvalidOperationException("Not currently placing anything.");
     return player.m_placementGhost;
   }
+  public static string GetTool() {
+    var player = GetPlayer();
+    var item = player.GetRightItem();
+    return item?.m_dropPrefab?.name ?? "";
+  }
   public static void RemoveZDO(ZDO zdo) {
     if (!Selector.IsValid(zdo)) return;
     if (!zdo.IsOwner())
@@ -239,16 +244,15 @@ public static class Helper {
   public static void CleanObject(GameObject obj) {
     if (!obj || !Configuration.Enabled) return;
     // Creature behavior.
+    if (obj.GetComponent<Character>() is { } character) character.enabled = false;
     UnityEngine.Object.Destroy(obj.GetComponent<CharacterDrop>());
     UnityEngine.Object.Destroy(obj.GetComponent<MonsterAI>());
     UnityEngine.Object.Destroy(obj.GetComponent<AnimalAI>());
     UnityEngine.Object.Destroy(obj.GetComponent<BaseAI>());
-    UnityEngine.Object.Destroy(obj.GetComponent<Character>());
     UnityEngine.Object.Destroy(obj.GetComponent<Tameable>());
     UnityEngine.Object.Destroy(obj.GetComponent<Procreation>());
     UnityEngine.Object.Destroy(obj.GetComponent<Growup>());
     UnityEngine.Object.Destroy(obj.GetComponent<FootStep>());
-    UnityEngine.Object.Destroy(obj.GetComponent<Humanoid>());
     UnityEngine.Object.Destroy(obj.GetComponent<RandomFlyingBird>());
     UnityEngine.Object.Destroy(obj.GetComponent<Fish>());
     UnityEngine.Object.Destroy(obj.GetComponentInChildren<CharacterAnimEvent>());

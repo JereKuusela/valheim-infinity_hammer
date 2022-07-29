@@ -15,8 +15,7 @@ public class HammerScaleCommand {
     });
     Helper.Command(name, $"[amount] - Sets the scale of {axis} axis (if the object supports it).", (args) => {
       Helper.ArgsCheck(args, 2, "Missing the amount.");
-      if (!isCommand && Selection.Type == SelectionType.Command) return;
-      if (isCommand && Selection.Type != SelectionType.Command) return;
+      if (Selection.IsCommand() != isCommand) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;
       var direction = args.Length > 2 ? args[2] : "";
       Scale(args[1], direction, action(Scaling.Get()));
@@ -32,8 +31,7 @@ public class HammerScaleCommand {
     });
     Helper.Command(name, "[amount or x,z,y] - Sets the scale (if the object supports it).", (args) => {
       Helper.ArgsCheck(args, 2, "Missing the amount.");
-      if (!isCommand && Selection.Type == SelectionType.Command) return;
-      if (isCommand && Selection.Type != SelectionType.Command) return;
+      if (Selection.IsCommand() != isCommand) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;
       var scaling = Scaling.Get();
       var scale = Parse.TryScale(Parse.Split(args[1])) * Parse.Direction(args.Args, 2);

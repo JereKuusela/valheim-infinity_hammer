@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.Linq;
+using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer;
 
@@ -178,5 +179,12 @@ public class Ruler {
     Circle = null;
     Rectangle = null;
     Square = null;
+  }
+}
+
+[HarmonyPatch(typeof(Player), nameof(Player.SetPlaceMode))]
+public class InitializeRuler {
+  static void Postfix() {
+    Ruler.Create(Selection.RulerParameters);
   }
 }

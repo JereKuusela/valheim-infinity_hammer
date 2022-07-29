@@ -43,21 +43,37 @@ The `hammer` command has following extra parameters which allow modifying the se
 
 For example `hammer Beech1 scale=2 health=1000` would select a beech tree with a double size and 1000 health.
 
-## Scaling
+## Scale
 
-Shift + mouse wheel will scale up/down the selection.
+The scale can be directly set with following commands:
+
+- `hammer_scale [x,z,y or amount]`: Sets the size.
+- `hammer_scale_x [amount]`: Sets only the x-axis.
+- `hammer_scale_y [amount]`: Sets only the y-axis.
+- `hammer_scale_z [amount]`: Sets only the z-axis.
+- `hammer_scale_cmd [x,z,y or amount]`: Sets the size of commands.
+- `hammer_scale_x_cmd [amount]`: Sets only the x-axis.
+- `hammer_scale_y_cmd [amount]`: Sets only the y-axis.
+- `hammer_scale_z_cmd [amount]`: Sets only the z-axis.
+
+## Zoom
+
+Shift + mouse wheel will zoom up/down the selection.
 
 This can be also done with following commands:
 
-- `hammer_scale build`: Resets the scale to 100%.
-- `hammer_scale build [percentage or amount]`: Scales the size.
-- `hammer_scale_x build [percentage or amount]`: Scales only the x-axis.
-- `hammer_scale_y build [percentage or amount]`: Scales only the y-axis.
-- `hammer_scale_z build [percentage or amount]`: Scales only the z-axis.
+- `hammer_zoom [x,z,y or percentage or amount]`: Zooms the size.
+- `hammer_zoom_x [percentage or amount]`: Zooms only the x-axis.
+- `hammer_zoom_y [percentage or amount]`: Zooms only the y-axis.
+- `hammer_zoom_z [percentage or amount]`: Zooms only the z-axis.
+- `hammer_zoom_cmd [x,z,y or percentage or amount]`: Zooms the size of commands.
+- `hammer_zoom_x_cmd [percentage or amount]`: Zooms only the x-axis.
+- `hammer_zoom_y_cmd [percentage or amount]`: Zooms only the y-axis.
+- `hammer_zoom_z_cmd [percentage or amount]`: Zooms only the z-axis.
 
-For example `hammer_scale build 5%` would scale from 100 % to 105 % or 200 % to 210 %. While `hammer_scale build -5%` would scale from 100 % to 95.2 % or 200 % to 190.5 %. 
+For example `hammer_zoom 5%` changes 100 % to 105 % or 200 % to 210 %. While `hammer_zoom -5%` changes 100 % to 95.2 % or 200 % to 190.5 %. 
 
-For example `hammer_scale build 0.1` would scale from 100 % to 110 % or 200 % to 210 %. While `hammer_scale build -0.1%` would scale from 100 % to 90 % or 200 % to 190 %. 
+For example `hammer_zoom 0.1` changes 100 % to 110 % or 200 % to 210 %. While `hammer_zoom -0.1` changes 100 % to 90 % or 200 % to 190 %. 
 
 Note: If you notice using these commands frequency, make a [key binding](https://docs.unity3d.com/ScriptReference/KeyCode.html) for them.
 
@@ -361,6 +377,14 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 
 # Changelog
 
+- v1.19
+	- Renames commands `hammer_scale* build` to `hammer_zoom*`.
+	- Renames commands `hammer_scale* command` to `hammer_zoom_cmd*`.
+	- Adds new commands `hammer_scale*` and  `hammer_´scale_cmd*` to directly set the scale.
+	- Fixes the mod not working with modded tools like PlanBuild rune.
+	- Fixes selection being shared across all tools.
+	- Fixes starred creatures having wrong color/size on the placement ghost.
+
 - v1.18
   - Adds new settings `move_amount` and `move_amount_large` to configure default bindings.
 	- Adds new command aliases `hammer_area`, `hammer_object` and `hammer_terrain`.
@@ -403,12 +427,5 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds support for PlanBuild scaling.
 	- Adds a new setting `chat_output` to control is the output show on the chat window (default `false`).
 	- Removes the setting `max_undo_steps` as obsolete (usually Server Devcommands is installed).
-
-- v1.14
-	- Adds support for PlanBuild snappoints.
-	- Adds support for placing blueprints even when some objects are missing.
-	- Adds a new command `hammer_grid` to restrict the possible placement coordinates.
-	- Improves error handling.
-	- Fixes the snapping disconnecting with the precise placement (non-freeze).
 
 Thanks for Azumatt for creating the mod icon!

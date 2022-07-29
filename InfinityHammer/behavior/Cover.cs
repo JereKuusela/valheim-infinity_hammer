@@ -80,7 +80,7 @@ public class AddCoverText {
 [HarmonyPatch(typeof(Hud), nameof(Hud.SetupPieceInfo))]
 public class AddCommandText {
   public static void Postfix(Hud __instance, Piece piece) {
-    if (Selection.Type != SelectionType.Command) return;
+    if (!Selection.IsCommand()) return;
     if (!piece) return;
     __instance.m_pieceDescription.text += "\n" + Ruler.Description();
   }

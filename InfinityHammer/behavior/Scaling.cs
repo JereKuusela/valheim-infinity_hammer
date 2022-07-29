@@ -65,19 +65,19 @@ public class ToolScaling {
 public static class Scaling {
   public static ToolScaling Build = new(true);
   public static ToolScaling Command = new(false);
-  public static ToolScaling Get() => Selection.Type == SelectionType.Command ? Scaling.Command : Scaling.Build;
+  public static ToolScaling Get() => Selection.IsCommand() ? Scaling.Command : Scaling.Build;
   private static bool IsScalingSupported() {
     var player = Helper.GetPlayer();
     var ghost = player.m_placementGhost;
     if (!ghost) return false;
-    if (Selection.Type == SelectionType.Command || Selection.Type == SelectionType.Multiple) return true;
+    if (Selection.Type == SelectedType.Command || Selection.Type == SelectedType.Multiple) return true;
     // Ghost won't have netview so the selected piece must be used.
     // This technically also works for the build window if other mods add scalable objects there.
     var view = player.GetSelectedPiece()?.GetComponent<ZNetView>();
     return view && view != null && view.m_syncInitialScale;
   }
   public static void Set(GameObject ghost) {
-    if (Configuration.Enabled && ghost && IsScalingSupported() && Selection.Type != SelectionType.Command)
+    if (Configuration.Enabled && ghost && IsScalingSupported() && Selection.Type != SelectedType.Command)
       ghost.transform.localScale = Build.Value;
   }
   public static void PrintScale(Terminal terminal) {

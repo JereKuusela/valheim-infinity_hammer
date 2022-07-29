@@ -20,8 +20,7 @@ public class HammerZoomCommand {
     });
     Helper.Command(name, $"[amount or percentage] - Zooms the {axis} axis (if the object supports it).", (args) => {
       Helper.ArgsCheck(args, 2, "Missing the amount.");
-      if (!isCommand && Selection.Type == SelectionType.Command) return;
-      if (isCommand && Selection.Type != SelectionType.Command) return;
+      if (Selection.IsCommand() != isCommand) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;
       var direction = args.Length > 2 ? args[2] : "";
       Zoom(args[1], direction, action(Scaling.Get()));
@@ -37,8 +36,7 @@ public class HammerZoomCommand {
     });
     Helper.Command(name, "[amount/percentage or x,z,y] - Zooms the selection (if the object supports it).", (args) => {
       Helper.ArgsCheck(args, 2, "Missing the amount.");
-      if (!isCommand && Selection.Type == SelectionType.Command) return;
-      if (isCommand && Selection.Type != SelectionType.Command) return;
+      if (Selection.IsCommand() != isCommand) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;
       var scale = Scaling.Get();
       var split = args[1].Split(',');

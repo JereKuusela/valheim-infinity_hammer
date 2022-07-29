@@ -15,7 +15,7 @@ public static class GizmoWrapper {
   public static void InitReloaded(Assembly assembly) {
     Reloaded = assembly;
   }
-  static bool Prefix() => Selection.Type != SelectionType.Command;
+  static bool Prefix() => !Selection.IsCommand();
   private static void SetComfyRotation(Quaternion rotation) {
     if (Comfy == null) return;
     var euler = rotation.eulerAngles;

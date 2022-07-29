@@ -50,17 +50,17 @@ public class HammerSelect {
       HammerParameters pars = new(args);
       GameObject selected;
       if (pars.Radius.HasValue)
-        selected = Selection.Set(Selector.GetNearby(pars.Position, pars.Radius.Value, pars.Height), pars.Scale);
+        selected = Selection.Set(Selector.GetNearby(pars.Position, pars.Radius.Value, pars.Height));
       else if (pars.Width.HasValue && pars.Depth.HasValue)
-        selected = Selection.Set(Selector.GetNearby(pars.Position, pars.Angle, pars.Width.Value, pars.Depth.Value, pars.Height), pars.Scale);
+        selected = Selection.Set(Selector.GetNearby(pars.Position, pars.Angle, pars.Width.Value, pars.Depth.Value, pars.Height));
       else if (args.Length > 1 && !args[1].Contains("=") && args[1] != "connect")
-        selected = Selection.Set(args[1], pars.Scale);
+        selected = Selection.Set(args[1]);
       else {
         var hovered = Selector.GetHovered(Configuration.SelectRange, Configuration.SelectBlacklist);
         if (pars.Connect)
-          selected = Selection.Set(Selector.GetConnected(hovered), pars.Scale);
+          selected = Selection.Set(Selector.GetConnected(hovered));
         else
-          selected = Selection.Set(hovered, pars.Scale);
+          selected = Selection.Set(hovered);
       }
       if (pars.Health.HasValue)
         UpdateZDOs(zdo => zdo.Set("health", pars.Health.Value));
@@ -68,6 +68,7 @@ public class HammerSelect {
         UpdateZDOs(zdo => zdo.Set("level", pars.Level.Value));
       if (pars.Text != null)
         UpdateZDOs(zdo => zdo.Set("text", pars.Text));
+      Selection.Postprocess(pars.Scale);
       PrintSelected(args.Context, selected);
     }, CommandWrapper.ObjectIds);
   }

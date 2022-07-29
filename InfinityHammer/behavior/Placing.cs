@@ -31,16 +31,16 @@ public class SetSelectedPiece {
 public class PlacePiece {
   static GameObject GetPrefab(Piece obj) {
     var type = Selection.Type;
-    if (type == SelectionType.Default) return obj.gameObject;
+    if (type == SelectedType.Default) return obj.gameObject;
     var ghost = Helper.GetPlayer().m_placementGhost;
     if (!ghost) return obj.gameObject;
     var name = Utils.GetPrefabName(ghost);
 
-    if (type == SelectionType.Object)
+    if (type == SelectedType.Object)
       return ZNetScene.instance.GetPrefab(name);
-    if (type == SelectionType.Location)
+    if (type == SelectedType.Location)
       return ZoneSystem.instance.m_locationProxyPrefab;
-    if (type == SelectionType.Multiple) {
+    if (type == SelectedType.Multiple) {
       var dummy = new GameObject();
       dummy.name = "Blueprint";
       return dummy;
@@ -53,7 +53,7 @@ public class PlacePiece {
     var ghost = Helper.GetPlayer().m_placementGhost;
     if (!ghost) return;
     var piece = obj.GetComponent<Piece>();
-    if (Selection.Type == SelectionType.Command) {
+    if (Selection.Type == SelectedType.Command) {
       var scale = Scaling.Command;
       var shape = Ruler.GetShape();
       var x = ghost.transform.position.x.ToString(CultureInfo.InvariantCulture);
@@ -94,7 +94,7 @@ public class PlacePiece {
       UnityEngine.Object.Destroy(obj);
       return;
     }
-    if (Selection.Type == SelectionType.Multiple) {
+    if (Selection.Type == SelectedType.Multiple) {
       UndoHelper.StartTracking();
       for (var i = 0; i < ghost.transform.childCount; i++) {
         var ghostObj = ghost.transform.GetChild(i).gameObject;
@@ -115,7 +115,7 @@ public class PlacePiece {
     var view = obj.GetComponent<ZNetView>();
     // Hoe adds pieces too.
     if (!view) return;
-    if (Selection.Type == SelectionType.Location && obj.GetComponent<LocationProxy>()) {
+    if (Selection.Type == SelectedType.Location && obj.GetComponent<LocationProxy>()) {
       UndoHelper.StartTracking();
       Hammer.SpawnLocation(view);
       UndoHelper.StopTracking();
@@ -158,7 +158,7 @@ public class UnlockBuildDistance {
     __state = __instance.m_maxPlaceDistance;
     if (Configuration.BuildRange > 0f)
       __instance.m_maxPlaceDistance = Configuration.BuildRange;
-    if (Selection.Type == SelectionType.Command)
+    if (Selection.Type == SelectedType.Command)
       __instance.m_maxPlaceDistance = 1000f;
   }
   public static void Postfix(Player __instance, float __state) {

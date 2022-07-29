@@ -119,14 +119,14 @@ public class HammerSaveCommand {
       bp.Name = Localization.instance.Localize(piece.m_name);
       bp.Description = piece.m_description;
     }
-    if (Selection.Type == SelectionType.Object) {
+    if (Selection.Type == SelectedType.Object) {
       AddSingleObject(bp, obj);
       foreach (Transform child in obj.transform) {
         if (child.gameObject.tag == "snappoint")
           bp.SnapPoints.Add(child.localPosition);
       }
     }
-    if (Selection.Type == SelectionType.Multiple || Selection.Type == SelectionType.Location) {
+    if (Selection.Type == SelectedType.Multiple || Selection.Type == SelectedType.Location) {
       for (var i = 0; i < obj.transform.childCount; i++) {
         var child = obj.transform.GetChild(i);
         if (child.gameObject.tag == "snappoint")
