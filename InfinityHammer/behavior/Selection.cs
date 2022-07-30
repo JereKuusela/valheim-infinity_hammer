@@ -339,8 +339,7 @@ public class Selected {
         tag = "snappoint"
       };
       obj.SetActive(false);
-      obj.transform.SetParent(obj.transform);
-      obj.transform.localPosition = position;
+      UnityEngine.Object.Instantiate(obj, position, Quaternion.identity, Ghost.transform);
     }
     ZNetView.m_forceDisableInit = false;
     Scaling.Get().SetScale(Ghost.transform.localScale);

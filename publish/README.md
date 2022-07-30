@@ -391,6 +391,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Renames commands `hammer_scale* command` to `hammer_zoom_cmd*`.
 	- Adds new commands `hammer_scale*` and  `hammer_´scale_cmd*` to directly set the scale.
 	- Fixes the mod not working with modded tools like PlanBuild rune.
+	- Fixes PlanBuild snap points not working.
 	- Fixes selection being shared across all tools.
 	- Fixes starred creatures having wrong color/size on the placement ghost.
 

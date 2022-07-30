@@ -21,7 +21,7 @@ public static class UpdateAvailable {
     return piece;
   }
   static void Postfix(PieceTable __instance) {
-    if (!Configuration.Enabled) return;
+    if (!Configuration.IsCheats) return;
     List<string>? commands = null;
     int tab = 0;
     int index = 0;
