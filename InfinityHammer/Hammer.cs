@@ -56,11 +56,11 @@ public static class Hammer {
     var character = obj.GetComponent<Character>();
     if (character) {
       // SetLevel would also overwrite the health (when copying a creature with a custom health).
-      var level = zdo.GetInt("level", 1);
+      var level = zdo.GetInt(Hash.Level, 1);
       character.m_level = level;
-      zdo.Set("level", level);
+      zdo.Set(Hash.Level, level);
       if (character.m_onLevelSet != null) character.m_onLevelSet(character.m_level);
-      character.SetTamed(zdo.GetBool("tamed", false));
+      character.SetTamed(zdo.GetBool(Hash.Tamed, false));
     }
     obj.GetComponentInChildren<ItemDrop>()?.Load();
     obj.GetComponentInChildren<ArmorStand>()?.UpdateVisual();
@@ -76,8 +76,8 @@ public static class Hammer {
     Helper.RemoveZDO(view.GetZDO());
     var data = Selection.GetData();
     if (data == null) return;
-    var prefab = data.GetInt("location", 0);
-    var seed = data.GetInt("seed", 0);
+    var prefab = data.GetInt(Hash.Location, 0);
+    var seed = data.GetInt(Hash.Seed, 0);
     var location = ZoneSystem.instance.GetLocation(prefab);
     var ghost = Helper.GetPlacementGhost();
     var position = ghost.transform.position;
@@ -103,7 +103,7 @@ public static class Hammer {
       // Creator data is only interesting for actual targets. Dummy components will have these both as false.
       if (piece.m_randomTarget || piece.m_primaryTarget) {
         if (Configuration.NoCreator) {
-          zdo.Set("creator", 0L);
+          zdo.Set(Hash.Creator, 0L);
           piece.m_creator = 0;
         } else
           piece.SetCreator(Game.instance.GetPlayerProfile().GetPlayerID());
@@ -112,13 +112,29 @@ public static class Hammer {
     var character = obj.GetComponent<Character>();
     if (Configuration.OverwriteHealth > 0f) {
       if (character)
-        zdo.Set("max_health", Configuration.OverwriteHealth);
+        zdo.Set(Hash.MaxHealth, Configuration.OverwriteHealth);
       if (obj.GetComponent<TreeLog>() || obj.GetComponent<WearNTear>() || obj.GetComponent<Destructible>() || obj.GetComponent<TreeBase>() || character)
-        zdo.Set("health", Configuration.OverwriteHealth);
+        zdo.Set(Hash.Health, Configuration.OverwriteHealth);
       var mineRock = obj.GetComponent<MineRock5>();
       if (mineRock) {
         foreach (var area in mineRock.m_hitAreas) area.m_health = Configuration.OverwriteHealth;
         mineRock.SaveHealth();
+      }
+    }
+    if (!zdo.GetBool(Hash.Render, true)) {
+      var renderers = view.GetComponentsInChildren<Renderer>();
+      foreach (var renderer in renderers)
+        renderer.enabled = false;
+    }
+    if (!zdo.GetBool(Hash.Collision, true)) {
+      var colliders = view.GetComponentsInChildren<Collider>();
+      if (zdo.GetPrefab() == Hash.Portal) {
+        foreach (var collider in colliders)
+          collider.enabled = false;
+
+      } else {
+        foreach (var collider in colliders)
+          collider.isTrigger = true;
       }
     }
     FixData(view);

@@ -4,7 +4,19 @@ using Service;
 using UnityEngine;
 namespace InfinityHammer;
 public class HammerSelect {
-
+  private static int WearNumber(Wear wear) {
+    if (wear == Wear.Broken) return 0;
+    if (wear == Wear.Damaged) return 1;
+    if (wear == Wear.Healthy) return 2;
+    return -1;
+  }
+  private static int GrowthNumber(Growth growth) {
+    if (growth == Growth.Healthy) return 0;
+    if (growth == Growth.Unhealthy) return 1;
+    if (growth == Growth.HealthyGrown) return 2;
+    if (growth == Growth.UnhealthyGrown) return 3;
+    return -1;
+  }
 
   private static void PrintSelected(Terminal terminal, GameObject obj) {
     if (Configuration.DisableSelectMessages) return;
@@ -29,11 +41,33 @@ public class HammerSelect {
   }
   public HammerSelect() {
     List<string> named = new() {
-      "scale", "radius", "level", "stars", "connected", "from", "health", "type"
+      "scale", "radius", "level", "stars", "connected", "from", "health", "type",
+    };
+    if (CommandWrapper.StructureTweaks != null) {
+      List<string> namedStructure = new() {
+        "growth", "wear", "show", "collision", "interact"
+      };
+      named.AddRange(namedStructure);
+    }
+    List<string> Wears = new() {
+      "default",
+      "broken",
+      "damaged",
+      "healthy"
+    };
+    List<string> Growths = new() {
+      "big",
+      "big_bad",
+      "default",
+      "small",
+      "small_bad"
     };
     List<string> ObjectTypes = new() {
       "creature",
       "structure"
+    };
+    List<string> False = new() {
+      "false",
     };
     named.Sort();
     CommandWrapper.Register("hammer", (int index, int subIndex) => {
@@ -48,6 +82,11 @@ public class HammerSelect {
       { "health", (int index) => CommandWrapper.Info("Health.") },
       { "connect", (int index) => CommandWrapper.Info("piece") },
       { "type", (int index) => ObjectTypes },
+      { "wear", (int index) => Wears },
+      { "growth", (int index) => Growths },
+      { "show", (int index) => False },
+      { "collision", (int index) => False },
+      { "interact", (int index) => False },
     });
     Helper.Command("hammer", "[object id or radius] - Selects the object to be placed (the hovered object by default).", (args) => {
       Helper.EnabledCheck();
@@ -68,11 +107,23 @@ public class HammerSelect {
           selected = Selection.Set(hovered);
       }
       if (pars.Health.HasValue)
-        UpdateZDOs(zdo => zdo.Set("health", pars.Health.Value));
+        UpdateZDOs(zdo => zdo.Set(Hash.Health, pars.Health.Value));
       if (pars.Level.HasValue)
-        UpdateZDOs(zdo => zdo.Set("level", pars.Level.Value));
+        UpdateZDOs(zdo => zdo.Set(Hash.Level, pars.Level.Value));
+      if (pars.Growth != Growth.Default) {
+        UpdateZDOs(zdo => zdo.Set(Hash.Growth, GrowthNumber(pars.Growth)));
+        UpdateZDOs(zdo => zdo.Set(Hash.PlantTime, DateTime.MaxValue.Ticks / 2L));
+      }
+      if (pars.Wear != Wear.Default)
+        UpdateZDOs(zdo => zdo.Set(Hash.Wear, WearNumber(pars.Wear)));
+      if (!pars.Collision)
+        UpdateZDOs(zdo => zdo.Set(Hash.Collision, false));
+      if (!pars.Show)
+        UpdateZDOs(zdo => zdo.Set(Hash.Render, false));
+      if (!pars.Interact)
+        UpdateZDOs(zdo => zdo.Set(Hash.Interact, false));
       if (pars.Text != null)
-        UpdateZDOs(zdo => zdo.Set("text", pars.Text));
+        UpdateZDOs(zdo => zdo.Set(Hash.Text, pars.Text));
       Selection.Postprocess(pars.Scale);
       PrintSelected(args.Context, selected);
     }, CommandWrapper.ObjectIds);

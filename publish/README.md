@@ -42,6 +42,12 @@ The `hammer` command has following extra parameters which allow modifying the se
 - `stars=number`: Overrides the creature stars (level - 1).
 - `from=x,z,y`: Overrides the player position when doing area selection.
 
+- `collision=false`: Removes collision(requires Structure Tweaks mod.)
+- `grown=big/big_bad/small/small_bad`: Overrides the plant growth (requires Structure Tweaks mod.)
+- `interact=false`: Removes interaction (requires Structure Tweaks mod.)
+- `show=false`: Removes visibility (requires Structure Tweaks mod.)
+- `wear=broken/damaged/healthy`: Overrides the structure wear (requires Structure Tweaks mod.)
+
 For example `hammer Beech1 scale=2 health=1000` would select a beech tree with a double size and 1000 health.
 
 ## Scale
@@ -380,6 +386,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 
 - v1.19
 	- Adds a new paramater `type` to the `hammer` command to filter by object type.
+	- Adds new paramaters to the `hammer` command for Structure Tweaks mod.
 	- Renames commands `hammer_scale* build` to `hammer_zoom*`.
 	- Renames commands `hammer_scale* command` to `hammer_zoom_cmd*`.
 	- Adds new commands `hammer_scale*` and  `hammer_´scale_cmd*` to directly set the scale.

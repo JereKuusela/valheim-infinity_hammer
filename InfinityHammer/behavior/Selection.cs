@@ -52,7 +52,7 @@ public static class Selection {
   public static GameObject Set(IEnumerable<ZNetView> views) => GetOrAdd().Set(views);
   public static GameObject Set(RulerParameters ruler, string name, string description, string command, Sprite? icon) => GetOrAdd().Set(ruler, name, description, command, icon);
   public static GameObject Set(ZoneSystem.ZoneLocation location, int seed) => GetOrAdd().Set(location, seed);
-  public static GameObject Set(Terminal terminal, Blueprint bp) => GetOrAdd().Set(terminal, bp);
+  public static GameObject Set(Terminal terminal, Blueprint bp, Vector3 scale) => GetOrAdd().Set(terminal, bp, scale);
 }
 
 public class Selected {
@@ -102,20 +102,51 @@ public class Selected {
     }
   }
   private static void SetScale(GameObject obj, Vector3? scale) {
-    if (obj.GetComponent<ZNetView>() is { } view && view.m_syncInitialScale)
+    if (obj.GetComponent<ZNetView>() is not { } view) return;
+    if (view.m_syncInitialScale)
       obj.transform.localScale = scale ?? view.gameObject.transform.localScale;
   }
   private static void SetLevel(GameObject obj, int level) {
-    if (obj.GetComponent<Character>() is { } character && obj.GetComponentInChildren<LevelEffects>() is { } effect) {
-      effect.m_character = character;
-      effect.SetupLevelVisualization(level);
+    if (level == -1) return;
+    if (obj.GetComponent<Character>() is not { } character) return;
+    if (obj.GetComponentInChildren<LevelEffects>() is not { } effect) return;
+    effect.m_character = character;
+    effect.SetupLevelVisualization(level);
+  }
+  private static float Convert(int value, float defaultValue) {
+    if (value == 0) return 0.1f;
+    if (value == 1) return 0.5f;
+    if (value == 2) return 1f;
+    return defaultValue;
+  }
+  private static void SetWear(GameObject obj, int wear) {
+    if (wear == -1) return;
+    if (obj.GetComponent<WearNTear>() is not { } wearNTear) return;
+    wearNTear.SetHealthVisual(Convert(wear, 1f), false);
+  }
+  private static void SetGrowth(GameObject obj, int growth) {
+    if (growth == -1) return;
+    if (obj.GetComponent<Plant>() is not { } plant) return;
+    var healthy = growth == 0;
+    var unhealthy = growth == 1;
+    var healthyGrown = growth == 2;
+    var unhealthyGrown = growth == 3;
+    if (plant.m_healthyGrown) {
+      plant.m_healthy.SetActive(healthy);
+      plant.m_unhealthy.SetActive(unhealthy);
+      plant.m_healthyGrown.SetActive(healthyGrown);
+      plant.m_unhealthyGrown.SetActive(unhealthyGrown);
+    } else {
+      plant.m_healthy.SetActive(healthy || healthyGrown);
+      plant.m_unhealthy.SetActive(unhealthy || unhealthyGrown);
     }
   }
   private void Postprocess(GameObject obj, ZDO? zdo, Vector3? scale) {
     SetScale(obj, scale);
     if (zdo == null) return;
-    var level = zdo.GetInt("level", -1);
-    if (level > -1) SetLevel(obj, level);
+    SetLevel(obj, zdo.GetInt(Hash.Level, -1));
+    SetGrowth(obj, zdo.GetInt(Hash.Growth, -1));
+    SetWear(obj, zdo.GetInt(Hash.Wear, -1));
   }
   public void Postprocess(Vector3? scale) {
     if (Type == SelectedType.Object) {
@@ -210,8 +241,8 @@ public class Selected {
     Ghost = Helper.SafeInstantiateLocation(location, Hammer.AllLocationsObjects ? null : seed);
     Helper.EnsurePiece(Ghost);
     ZDO data = new();
-    data.Set("location", location.m_prefab.name.GetStableHashCode());
-    data.Set("seed", seed);
+    data.Set(Hash.Location, location.m_prefab.name.GetStableHashCode());
+    data.Set(Hash.Seed, seed);
     Objects.Add(new(location.m_prefab.name, Vector3.one, data));
     Helper.GetPlayer().SetupPlacementGhost();
     Type = SelectedType.Location;
@@ -221,18 +252,18 @@ public class Selected {
     if (obj.GetComponent<Sign>() is { } sign) {
       zdo ??= new();
       if (data == "")
-        data = zdo.GetString("text", data);
+        data = zdo.GetString(Hash.Text, data);
       else
-        zdo.Set("text", data);
+        zdo.Set(Hash.Text, data);
       sign.m_textWidget.text = data;
     }
     if (obj.GetComponent<TeleportWorld>() && data != "") {
       zdo ??= new();
-      zdo.Set("tag", data);
+      zdo.Set(Hash.Tag, data);
     }
     if (obj.GetComponent<Tameable>() && data != "") {
       zdo ??= new();
-      zdo.Set("TamedName", data);
+      zdo.Set(Hash.TamedName, data);
     }
     if (obj.GetComponent<ItemStand>() is { } itemStand) {
       zdo ??= new();
@@ -240,11 +271,11 @@ public class Selected {
       var name = split[0];
       var variant = Parse.TryInt(split, 1, 0);
       if (data == "") {
-        name = zdo.GetString("item", name);
-        variant = zdo.GetInt("item", variant);
+        name = zdo.GetString(Hash.Item, name);
+        variant = zdo.GetInt(Hash.Variant, variant);
       } else {
-        zdo.Set("item", name);
-        zdo.Set("variant", variant);
+        zdo.Set(Hash.Item, name);
+        zdo.Set(Hash.Variant, variant);
       }
       itemStand.SetVisualItem(name, variant);
     }
@@ -253,9 +284,9 @@ public class Selected {
       var split = data.Split(':');
       var pose = Parse.TryInt(split, 0, 0);
       if (data == "")
-        pose = zdo.GetInt("Pose", pose);
+        pose = zdo.GetInt(Hash.Pose, pose);
       else
-        zdo.Set("pose", pose);
+        zdo.Set(Hash.Pose, pose);
       armorStand.m_pose = pose;
       armorStand.m_poseAnimator.SetInteger("Pose", pose);
       SetItemHack.Hack = true;
@@ -276,12 +307,13 @@ public class Selected {
     }
     return zdo;
   }
-  public GameObject Set(Terminal terminal, Blueprint bp) {
+  public GameObject Set(Terminal terminal, Blueprint bp, Vector3 scale) {
     Clear();
     Ghost = new GameObject();
     // Prevents children from disappearing.
     Ghost.SetActive(false);
     Ghost.name = bp.Name;
+    Ghost.transform.localScale = scale;
     var piece = Ghost.AddComponent<Piece>();
     piece.m_name = bp.Name;
     piece.m_description = bp.Description;
@@ -311,6 +343,7 @@ public class Selected {
       obj.transform.localPosition = position;
     }
     ZNetView.m_forceDisableInit = false;
+    Scaling.Get().SetScale(Ghost.transform.localScale);
     Helper.GetPlayer().SetupPlacementGhost();
     Type = SelectedType.Multiple;
     return Ghost;

@@ -179,13 +179,21 @@ public class HammerBlueprintCommand {
   }
 
   public HammerBlueprintCommand() {
-    CommandWrapper.Register("hammer_blueprint", (int index, int subIndex) => GetBlueprints());
+    List<string> named = new() { "scale" };
+    CommandWrapper.Register("hammer_blueprint", (int index, int subIndex) => {
+      if (index == 0) return GetBlueprints();
+      return named;
+    }, new() {
+      { "scale", (int index) => CommandWrapper.Scale("scale", "Size of the object (if the object can be scaled).", index) },
+    });
     Helper.Command("hammer_blueprint", "[blueprint file] - Selects the blueprint to be placed.", (args) => {
       Helper.CheatCheck();
+      HammerBlueprintParameters pars = new(args);
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
       Hammer.Equip(Tool.Hammer);
-      var bp = GetBluePrint(string.Join("_", args.Args, 1, args.Length - 1));
-      var obj = Selection.Set(args.Context, bp);
+      var name = args.Args.Skip(1).Where(arg => !arg.StartsWith("scale=", StringComparison.OrdinalIgnoreCase));
+      var bp = GetBluePrint(string.Join("_", name));
+      var obj = Selection.Set(args.Context, bp, pars.Scale ?? Vector3.one);
       PrintSelected(args.Context, bp.Name);
 
     }, GetBlueprints);

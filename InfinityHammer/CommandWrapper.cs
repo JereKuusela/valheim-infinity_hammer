@@ -7,6 +7,7 @@ namespace InfinityHammer;
 public static class CommandWrapper {
   public static Assembly? ServerDevcommands = null;
   public static Assembly? WorldEditCommands = null;
+  public static Assembly? StructureTweaks = null;
   public static void Init() {
     if (Chainloader.PluginInfos.TryGetValue("server_devcommands", out var info)) {
       if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 24)
@@ -20,6 +21,12 @@ public static class CommandWrapper {
         InfinityHammer.Log.LogWarning($"World Edit Commands v{info.Metadata.Version.Major}.{info.Metadata.Version.Minor} is outdated. Please update!");
       else
         WorldEditCommands = info.Instance.GetType().Assembly;
+    }
+    if (Chainloader.PluginInfos.TryGetValue("structure_tweaks", out info)) {
+      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 2)
+        InfinityHammer.Log.LogWarning($"StructureTweaks v{info.Metadata.Version.Major}.{info.Metadata.Version.Minor} is outdated. Please update!");
+      else
+        StructureTweaks = info.Instance.GetType().Assembly;
     }
   }
 #nullable disable

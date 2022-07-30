@@ -68,7 +68,7 @@ public partial class Configuration {
     if (CommandWrapper.ServerDevcommands == null) {
       defaultHammerCommands = new[] {
         "hammer_command cmd_icon=hammer cmd_name=Pipette cmd_desc=Select_object. hammer",
-        "hammer_command cmd_icon=hammer cmd_name=Area_pipette cmd_desc=Select_multiple_objects. hammer r from=x,z,y",
+        "hammer_area cmd_icon=hammer cmd_name=Area_pipette cmd_desc=Select_multiple_objects.",
       };
     }
     if (CommandWrapper.WorldEditCommands == null)
