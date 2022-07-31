@@ -2,7 +2,7 @@
 
 Bend the rules of building! Copy any object, make structures indestructible, remove all restrictions, destroy anything and more...
 
-Install on the admin client (modding [guide](https://youtu.be/WfvA5a5tNHo)).
+Install on the admin client (modding [guide](https://youtu.be/L9ljm2eKLrk)).
 
 Install also [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) to enable key binds and use this on a server (as an admin).
 
@@ -34,19 +34,21 @@ Selecting the hovered object can be quickly done by pressing NumPad5. Holding al
 The hammer build menu also contains Pipette and Area select tools.
 
 The `hammer` command has following extra parameters which allow modifying the selected objects:
-- `scale=number` or `scale=x,z,y`: Overrides the size (if the object can be scaled).
+- `from=x,z,y`: Overrides the player position when doing an area selection.
 - `health=number`: Overrides the health.
+- `level=number`: Overrides the creature level (stars + 1).
+- `scale=number` or `scale=x,z,y`: Overrides the size (if the object can be scaled).
+- `stars=number`: Overrides the creature stars (level - 1).
 - `text=string`: Overrides the sign text.
 - `type=creature/structure`: Select only certain object types.
-- `level=number`: Overrides the creature level (stars + 1).
-- `stars=number`: Overrides the creature stars (level - 1).
-- `from=x,z,y`: Overrides the player position when doing area selection.
 
-- `collision=false`: Removes collision(requires Structure Tweaks mod.)
-- `grown=big/big_bad/small/small_bad`: Overrides the plant growth (requires Structure Tweaks mod.)
-- `interact=false`: Removes interaction (requires Structure Tweaks mod.)
-- `show=false`: Removes visibility (requires Structure Tweaks mod.)
-- `wear=broken/damaged/healthy`: Overrides the structure wear (requires Structure Tweaks mod.)
+For Structure Tweaks mod:
+
+- `collision=false`: Removes collision.
+- `growth=big/big_bad/small/small_bad`: Overrides the plant growth.
+- `interact=false`: Removes interaction.
+- `show=false`: Removes visibility.
+- `wear=broken/damaged/healthy`: Overrides the structure wear.
 
 For example `hammer Beech1 scale=2 health=1000` would select a beech tree with a double size and 1000 health.
 

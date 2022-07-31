@@ -204,7 +204,7 @@ public class CustomizeSpawnLocation {
     if (AllViews) {
       var data = Selection.GetData();
       if (data != null) {
-        var location = ZoneSystem.instance.GetLocation(data.GetInt("location", 0));
+        var location = ZoneSystem.instance.GetLocation(data.GetInt(Hash.Location, 0));
         if (location != null) {
           foreach (var view in location.m_netViews)
             view.gameObject.SetActive(true);

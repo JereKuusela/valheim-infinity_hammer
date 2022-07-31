@@ -78,15 +78,15 @@ public class HammerSaveCommand {
   private static string GetExtraInfo(GameObject obj, ZDO? zdo) {
     var info = "";
     if (obj.GetComponent<Sign>() && zdo != null)
-      info = zdo.GetString("text", "");
+      info = zdo.GetString(Hash.Text, "");
     if (obj.GetComponent<TeleportWorld>() && zdo != null)
-      info = zdo.GetString("tag", "");
+      info = zdo.GetString(Hash.Tag, "");
     if (obj.GetComponent<Tameable>() && zdo != null)
-      info = zdo.GetString("TamedName", "");
+      info = zdo.GetString(Hash.TamedName, "");
 
-    if (obj.GetComponent<ItemStand>() is { } itemStand && zdo?.GetString("item") != "") {
-      var item = zdo?.GetString("item") ?? "";
-      var variant = zdo?.GetInt("variant") ?? 0;
+    if (obj.GetComponent<ItemStand>() is { } itemStand && zdo?.GetString(Hash.Item) != "") {
+      var item = zdo?.GetString(Hash.Item) ?? "";
+      var variant = zdo?.GetInt(Hash.Variant) ?? 0;
       if (variant != 0)
         info = $"{item}:{variant}";
       else

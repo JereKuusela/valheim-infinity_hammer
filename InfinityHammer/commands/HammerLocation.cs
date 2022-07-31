@@ -25,7 +25,7 @@ public class HammerLocationCommand {
         var rng = new System.Random();
         var seed = args.TryParameterInt(2, rng.Next());
         if (seed == 0) seed = rng.Next();
-        var location = ZoneSystem.instance.GetLocation(args[1]);
+        var location = ZoneSystem.instance.GetLocation(args[1].GetStableHashCode());
         var selected = Selection.Set(location, seed);
 
         PrintSelected(args.Context, selected);
