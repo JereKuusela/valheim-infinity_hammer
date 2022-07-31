@@ -56,6 +56,7 @@ For example `hammer Beech1 scale=2 health=1000` would select a beech tree with a
 
 The scale can be directly set with following commands:
 
+- `hammer_scale `: Resets the size.
 - `hammer_scale [x,z,y or amount]`: Sets the size.
 - `hammer_scale_x [amount]`: Sets only the x-axis.
 - `hammer_scale_y [amount]`: Sets only the y-axis.
