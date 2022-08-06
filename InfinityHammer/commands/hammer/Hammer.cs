@@ -17,6 +17,12 @@ public class HammerSelect {
     if (growth == Growth.UnhealthyGrown) return 3;
     return -1;
   }
+  private static int FallNumber(Fall fall) {
+    if (fall == Fall.Off) return 0;
+    if (fall == Fall.Terrain) return 1;
+    if (fall == Fall.Solid) return 2;
+    return -1;
+  }
 
   private static void PrintSelected(Terminal terminal, GameObject obj) {
     if (Configuration.DisableSelectMessages) return;
@@ -45,7 +51,7 @@ public class HammerSelect {
     };
     if (CommandWrapper.StructureTweaks != null) {
       List<string> namedStructure = new() {
-        "growth", "wear", "show", "collision", "interact"
+        "growth", "wear", "show", "collision", "interact", "fall"
       };
       named.AddRange(namedStructure);
     }
@@ -66,6 +72,11 @@ public class HammerSelect {
       "creature",
       "structure"
     };
+    List<string> Falls = new() {
+      "off",
+      "solid",
+      "terrain"
+    };
     List<string> False = new() {
       "false",
     };
@@ -83,6 +94,7 @@ public class HammerSelect {
       { "connect", (int index) => CommandWrapper.Info("piece") },
       { "type", (int index) => ObjectTypes },
       { "wear", (int index) => Wears },
+      { "fall", (int index) => Falls },
       { "growth", (int index) => Growths },
       { "show", (int index) => False },
       { "collision", (int index) => False },
@@ -114,6 +126,8 @@ public class HammerSelect {
         UpdateZDOs(zdo => zdo.Set(Hash.Growth, GrowthNumber(pars.Growth)));
         UpdateZDOs(zdo => zdo.Set(Hash.PlantTime, DateTime.MaxValue.Ticks / 2L));
       }
+      if (pars.Fall != Fall.Default)
+        UpdateZDOs(zdo => zdo.Set(Hash.Fall, FallNumber(pars.Fall)));
       if (pars.Wear != Wear.Default)
         UpdateZDOs(zdo => zdo.Set(Hash.Wear, WearNumber(pars.Wear)));
       if (!pars.Collision)

@@ -15,6 +15,12 @@ public enum Wear {
   Damaged,
   Healthy
 }
+public enum Fall {
+  Default,
+  Off,
+  Terrain,
+  Solid
+}
 public class HammerParameters {
   public Vector3 Position = Vector3.zero;
   public Vector3? Scale;
@@ -33,6 +39,7 @@ public class HammerParameters {
   public ObjectType ObjectType = ObjectType.All;
   public Wear Wear = Wear.Default;
   public Growth Growth = Growth.Default;
+  public Fall Fall = Fall.Default;
 
   public HammerParameters(Terminal.ConsoleEventArgs args) {
     if (Player.m_localPlayer)
@@ -81,6 +88,9 @@ public class HammerParameters {
       if (name == "growth" && value == "big_bad") Growth = Growth.UnhealthyGrown;
       if (name == "growth" && value == "small") Growth = Growth.Healthy;
       if (name == "growth" && value == "small_bad") Growth = Growth.Unhealthy;
+      if (name == "fall" && value == "solid") Fall = Fall.Solid;
+      if (name == "fall" && value == "terrain") Fall = Fall.Terrain;
+      if (name == "fall" && value == "off") Fall = Fall.Off;
       if (name == "show") Show = Parse.Boolean(value) ?? true;
       if (name == "collision") Collision = Parse.Boolean(value) ?? true;
       if (name == "interact") Interact = Parse.Boolean(value) ?? true;

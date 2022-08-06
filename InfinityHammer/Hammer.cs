@@ -92,6 +92,13 @@ public static class Hammer {
     CustomizeSpawnLocation.RandomDamage = null;
     CustomizeSpawnLocation.AllViews = false;
   }
+  private static void SetFall(GameObject obj, int fall) {
+    if (fall == -1) return;
+    if (obj.GetComponent<StaticPhysics>() is not { } sp) return;
+    sp.m_fall = fall > 0;
+    sp.m_pushUp = fall > 0;
+    sp.m_checkSolids = fall > 1;
+  }
   ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
   public static void PostProcessPlaced(GameObject obj) {
     var view = obj.GetComponent<ZNetView>();
@@ -121,6 +128,7 @@ public static class Hammer {
         mineRock.SaveHealth();
       }
     }
+    SetFall(obj.gameObject, zdo.GetInt(Hash.Fall, -1));
     if (!zdo.GetBool(Hash.Render, true)) {
       var renderers = view.GetComponentsInChildren<Renderer>();
       foreach (var renderer in renderers)

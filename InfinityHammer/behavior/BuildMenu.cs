@@ -11,7 +11,7 @@ public class BuildMenuCommand : Piece {
 [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpdateAvailable))]
 public static class UpdateAvailable {
   private static Piece Build(string command) {
-    CommandParameters pars = new(command.Split(' '), true);
+    CommandParameters pars = new(command, true);
     GameObject obj = new();
     var piece = obj.AddComponent<BuildMenuCommand>();
     piece.Command = command;

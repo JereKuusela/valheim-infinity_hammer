@@ -11,6 +11,7 @@ public class RulerParameters {
   public float? Depth;
   public float? Height;
   public bool RotateWithPlayer;
+  public bool IsTargeted;
 }
 public enum RulerShape {
   Circle,
@@ -32,6 +33,7 @@ public class Ruler {
   }
   private static bool RotateWithPlayer = false;
   private static bool UseHeight = false;
+  private static bool IsTargeted = false;
   public static RulerShape Shape = RulerShape.Circle;
   public static RulerShape? GetShape() {
     if (Projector == null) return null;
@@ -41,16 +43,26 @@ public class Ruler {
     return null;
   }
   public static void Update() {
-    if (Projector == null || !Player.m_localPlayer) return;
-    var ghost = Player.m_localPlayer.m_placementGhost;
+    var player = Player.m_localPlayer;
+    if (Projector == null || !player) return;
+    var ghost = player.m_placementGhost;
+    var ptr = player.transform;
+    var gtr = ghost.transform;
     Projector.SetActive(ghost);
     if (!ghost) return;
     var scale = Scaling.Command;
-    Projector.transform.position = ghost.transform.position;
-    if (RotateWithPlayer)
-      Projector.transform.rotation = Player.m_localPlayer.transform.rotation;
+    if (IsTargeted)
+      Projector.transform.position = (ptr.position + gtr.position) / 2f;
     else
-      Projector.transform.rotation = Quaternion.Euler(0f, ghost.transform.rotation.eulerAngles.y, 0f);
+      Projector.transform.position = gtr.position;
+    var angle = gtr.rotation.eulerAngles.y;
+    if (RotateWithPlayer)
+      angle = Vector3.SignedAngle(Vector3.forward, Utils.DirectionXZ(gtr.position - ptr.position), Vector3.up);
+    Projector.transform.rotation = Quaternion.Euler(0f, angle, 0f);
+    if (IsTargeted) {
+      var distance = Utils.DistanceXZ(ptr.position, gtr.position) / 2f;
+      scale.SetScaleX(distance);
+    }
     if (Circle != null) {
       Circle.SetActive((!Rectangle && !Square) || Shape == RulerShape.Circle);
       var proj = Circle.GetComponent<CircleProjector>();
@@ -80,8 +92,8 @@ public class Ruler {
       Rectangle.SetActive(!disabled);
       var proj = Rectangle.GetComponent<RectangleProjector>();
       if (Rectangle.activeSelf) {
-        proj.m_width = scale.X;
-        proj.m_depth = scale.Z;
+        proj.m_width = scale.Z;
+        proj.m_depth = scale.X;
         proj.m_nrOfSegments = Math.Max(3, (int)((proj.m_depth + proj.m_width) * 2));
       } else if (proj.m_nrOfSegments > 0) {
         proj.m_nrOfSegments = 0;
@@ -135,6 +147,7 @@ public class Ruler {
     if (BaseProjector == null)
       BaseProjector = GetBaseProjector();
     RotateWithPlayer = pars.RotateWithPlayer;
+    IsTargeted = pars.IsTargeted;
     var scale = Scaling.Command;
     if (pars.Width.HasValue) {
       Square = CreateChild(obj);
@@ -144,14 +157,14 @@ public class Ruler {
       proj.m_nrOfSegments = 3;
       scale.SetScaleX(pars.Width.Value);
     }
-    if (pars.Depth.HasValue && pars.Width.HasValue) {
+    if (pars.Width.HasValue && pars.Depth.HasValue) {
       Rectangle = CreateChild(obj);
       var proj = Rectangle.AddComponent<RectangleProjector>();
       proj.m_prefab = BaseProjector.m_prefab;
       proj.m_mask = BaseProjector.m_mask;
       proj.m_nrOfSegments = 3;
-      scale.SetScaleX(pars.Width.Value);
-      scale.SetScaleZ(pars.Depth.Value);
+      scale.SetScaleX(pars.Depth.Value);
+      scale.SetScaleZ(pars.Width.Value);
     }
     if (pars.Radius.HasValue) {
       Circle = CreateChild(obj);

@@ -5,18 +5,6 @@ using HarmonyLib;
 using Service;
 using UnityEngine;
 namespace InfinityHammer;
-public class Range<T> {
-  public T Min;
-  public T Max;
-  public Range(T value) {
-    Min = value;
-    Max = value;
-  }
-  public Range(T min, T max) {
-    Min = min;
-    Max = max;
-  }
-}
 public static class Helper {
   public static GameObject GetPlacementGhost() {
     var player = GetPlayer();

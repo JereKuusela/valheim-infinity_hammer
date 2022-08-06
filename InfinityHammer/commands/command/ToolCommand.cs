@@ -11,7 +11,7 @@ public class ToolCommand {
   protected static void Execute(Terminal.ConsoleEventArgs args, Tool tool) {
     Helper.ArgsCheck(args, 2, "Missing the command.");
     Hammer.Equip(tool);
-    CommandParameters pars = new CommandParameters(args.Args.Skip(1).ToArray(), false);
+    CommandParameters pars = new CommandParameters(string.Join(" ", args.Args.Skip(1)), false);
     Selection.Set(pars.ToRuler(), pars.Name, pars.Description, pars.Command, pars.Icon);
     GizmoWrapper.SetRotation(Quaternion.identity);
     Helper.AddMessage(args.Context, $"Selected command {pars.Name}.");

@@ -29,6 +29,12 @@ public class SetSelectedPiece {
 
 [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
 public class PlacePiece {
+  static void Prefix() {
+    DisableEffects.Active = true;
+  }
+  static void Finalizer() {
+    DisableEffects.Active = false;
+  }
   static GameObject GetPrefab(Piece obj) {
     var type = Selection.Type;
     if (type == SelectedType.Default) return obj.gameObject;
@@ -60,10 +66,10 @@ public class PlacePiece {
       var y = ghost.transform.position.y.ToString(CultureInfo.InvariantCulture);
       var z = ghost.transform.position.z.ToString(CultureInfo.InvariantCulture);
       var radius = scale.X.ToString(CultureInfo.InvariantCulture);
-      var width = scale.X.ToString(CultureInfo.InvariantCulture);
-      var depth = scale.Z.ToString(CultureInfo.InvariantCulture);
+      var depth = scale.X.ToString(CultureInfo.InvariantCulture);
+      var width = scale.Z.ToString(CultureInfo.InvariantCulture);
       if (shape != RulerShape.Rectangle)
-        depth = width;
+        width = depth;
       var height = scale.Y.ToString(CultureInfo.InvariantCulture);
       var angle = ghost.transform.rotation.eulerAngles.y.ToString(CultureInfo.InvariantCulture);
 
@@ -87,6 +93,9 @@ public class PlacePiece {
       command = command.Replace("#x", x);
       command = command.Replace("#y", y);
       command = command.Replace("#z", z);
+      command = command.Replace("#tx", x);
+      command = command.Replace("#ty", y);
+      command = command.Replace("#tz", z);
       command = command.Replace("#h", height);
       if (!Configuration.DisableMessages)
         Console.instance.AddString($"Hammering command: {command}");

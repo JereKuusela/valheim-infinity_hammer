@@ -12,24 +12,44 @@ public class CommandParameters {
   public static string CmdW = "cmd_w";
   public static string CmdD = "cmd_d";
   public static string CmdH = "cmd_h";
+  public Range<float> RadiusCap = new(float.MinValue, float.MaxValue);
+  public Range<float> WidthCap = new(float.MinValue, float.MaxValue);
+  public Range<float> DepthCap = new(float.MinValue, float.MaxValue);
+  public Range<float> HeightCap = new(float.MinValue, float.MaxValue);
   public float? Radius = null;
   public float? Width = null;
   public float? Depth = null;
   public float? Height = null;
   public bool Angle = false;
+  public bool IsTargeted = false;
   public string Name = "Command";
   public string Description = "";
   public Sprite? Icon = null;
   public string Command = "";
 
-  public static string Join(string[] args) => string.Join(" ", args
+  public static string Join(string command) => string.Join(";", command.Split(';').Select(s => s.Trim()).Select(s => string.Join(" ", s.Split(' ')
     .Where(s => !s.StartsWith($"{CmdName}=", StringComparison.OrdinalIgnoreCase))
     .Where(s => !s.StartsWith($"{CmdDesc}=", StringComparison.OrdinalIgnoreCase))
-    .Where(s => !s.StartsWith($"{CmdIcon}=", StringComparison.OrdinalIgnoreCase))
-  );
-  public CommandParameters(string[] args, bool showCommand) {
-    ParseArgs(args, showCommand);
-    Command = Join(args);
+    .Where(s => !s.StartsWith($"{CmdR}=", StringComparison.OrdinalIgnoreCase))
+    .Where(s => !s.StartsWith($"{CmdW}=", StringComparison.OrdinalIgnoreCase))
+    .Where(s => !s.StartsWith($"{CmdD}=", StringComparison.OrdinalIgnoreCase))
+    .Where(s => !s.StartsWith($"{CmdH}=", StringComparison.OrdinalIgnoreCase))
+  )));
+  public CommandParameters(string command, bool showCommand) {
+    var split = command.Split(';').Select(s => s.Trim()).ToArray();
+    Command = string.Join(";", split.Select(ParseArgs));
+    if (Radius.HasValue)
+      Radius = Mathf.Clamp(Radius.Value, RadiusCap.Min, RadiusCap.Max);
+    if (Height.HasValue)
+      Height = Mathf.Clamp(Height.Value, HeightCap.Min, HeightCap.Max);
+    if (Width.HasValue)
+      Width = Mathf.Clamp(Width.Value, WidthCap.Min, WidthCap.Max);
+    if (Depth.HasValue)
+      Depth = Mathf.Clamp(Depth.Value, DepthCap.Min, DepthCap.Max);
+    if (showCommand || Description == "") {
+      if (Description != "") Description += "\n";
+      Description += Join(command);
+    }
   }
 
 
@@ -38,6 +58,7 @@ public class CommandParameters {
     Width = Width,
     Depth = Depth,
     RotateWithPlayer = !Angle,
+    IsTargeted = IsTargeted,
     Height = Height
   };
 
@@ -45,7 +66,7 @@ public class CommandParameters {
   static string ReplaceEnd(string arg, string par, int amount) => arg.Substring(0, arg.Length - amount) + par;
 
   private string Replace(string arg, string par) {
-    if (IsParameter(arg, par)) {
+    while (IsParameter(arg, par)) {
       var str = string.Join(",", par.Split(',').Select(s => $"#{s}"));
       return ReplaceEnd(arg, str, par.Length);
     }
@@ -74,12 +95,9 @@ public class CommandParameters {
     if (sprite) return sprite;
     return null;
   }
-  protected void ParseArgs(string[] args, bool showCommand) {
+  protected string ParseArgs(string command) {
     var scale = Scaling.Command;
-    var radius = scale.Value.x;
-    var width = scale.Value.x;
-    var depth = scale.Value.z;
-    var height = scale.Value.y;
+    var args = command.Split(' ').ToArray();
     foreach (var arg in args) {
       var split = arg.Split('=');
       var name = split[0].ToLower();
@@ -89,19 +107,16 @@ public class CommandParameters {
       if (name == CmdName) Name = split[1].Replace("_", " ");
       if (name == CmdDesc) Description = split[1].Replace("_", " ");
       if (name == CmdIcon) Icon = FindSprite(split[1]);
-      if (name == CmdR) radius = Mathf.Clamp(radius, range.Min, range.Max);
-      if (name == CmdW) width = Mathf.Clamp(width, range.Min, range.Max);
-      if (name == CmdD) depth = Mathf.Clamp(depth, range.Min, range.Max);
-      if (name == CmdH) height = Mathf.Clamp(height, range.Min, range.Max);
-    }
-    if (showCommand || Description == "") {
-      if (Description != "") Description += "\n";
-      Description += Join(args);
+      if (name == CmdR) RadiusCap = Parse.TryFloatRange(value);
+      if (name == CmdW) WidthCap = Parse.TryFloatRange(value);
+      if (name == CmdD) DepthCap = Parse.TryFloatRange(value);
+      if (name == CmdH) HeightCap = Parse.TryFloatRange(value);
     }
     var parameters = new[]{
-      "r", "d", "w", "h", "a", "w,d", "x", "y", "z",
-      "x,y", "x,z", "y,x", "y,z", "z,x", "z,y",
+      "r", "d", "w", "h", "a", "w,d", "x", "y", "z", "tx", "ty", "tz",
+      "x,y", "x,z", "y,x", "y,z", "z,x", "z,y", "tx,ty", "tx,tz", "ty,tx", "ty,tz", "tz,tx", "tz,ty",
       "x,y,z", "x,z,y", "y,x,z", "y,z,x", "z,x,y", "z,y,x",
+      "tx,ty,tz", "tx,tz,ty", "ty,tx,tz", "ty,tz,tx", "tz,tx,ty", "tz,ty,tx",
     };
     for (var i = 0; i < args.Length; i++) {
       foreach (var par in parameters)
@@ -109,13 +124,20 @@ public class CommandParameters {
       if (args[i].Contains("#a"))
         Angle = true;
       if (args[i].Contains("#r"))
-        Radius = radius;
+        Radius = scale.Value.x;
       if (args[i].Contains("#w"))
-        Width = width;
+        Width = scale.Value.z;
       if (args[i].Contains("#d"))
-        Depth = depth;
+        Depth = scale.Value.x;
       if (args[i].Contains("#h"))
-        Height = height;
+        Height = scale.Value.y;
+      if (args[i].Contains("#tx"))
+        IsTargeted = true;
+      if (args[i].Contains("#ty"))
+        IsTargeted = true;
+      if (args[i].Contains("#tz"))
+        IsTargeted = true;
     }
+    return string.Join(" ", args);
   }
 }

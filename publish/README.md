@@ -45,6 +45,7 @@ The `hammer` command has following extra parameters which allow modifying the se
 For Structure Tweaks mod:
 
 - `collision=false`: Removes collision.
+- `fall=off/solid/terrain`: Overrides the fall behavior.
 - `growth=big/big_bad/small/small_bad`: Overrides the plant growth.
 - `interact=false`: Removes interaction.
 - `show=false`: Removes visibility.
@@ -278,6 +279,18 @@ It's possible to restrict the starting value with parameters `cmd_r`, `cmd_w`, `
 
 For example `hoe_object tame cmd_r=10-20` would restrict the starting radius between 10 and 20 meters. If the radius was 15 it would stay at 15. But a radius of 5 would become 10 and a radius of 50 would become 20.
 
+### Edge targeted commands
+
+By default, the visualization expects the targeted coordinates to be at the center of the command. Edge targeting can be enabled by switching parameters `x,z,y` to `tx,tz,ty`.
+
+This changes the visualization and causes `r` and `d` parameters to be automatically calculated from the distance between the player and the targeted position.
+
+Otherwise the logic and usage stays the same as before.
+
+To reduce typing, use aliases `hammer_terrain_to` and `hoe_terrain_to` which also automatically switch to the rectangle mode.
+
+For slopes, you can use `hammer_slope [width]` and `hoe_slope [width]`. For example `hoe_slope 5 paint=paved;hoe_terrain_to lower=1 smooth=.25`.
+
 # Configuration
 
 Following powers are available with `hammer_config` command:
@@ -387,6 +400,12 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 
 # Changelog
 
+- v1.20
+	- Adds a new parameter `fall` to the `hammer` command for Structure Tweaks mod.
+	- Adds new aliases `hammer_terrain_to`, `hoe_terrain_to`, `hammer_slope` and `hoe_slope` for World Edit Commands mod.
+	- Adds visualization for edge targeted commands (instead of the usual center targeted).
+	- Improves multi command support.
+
 - v1.19
 	- Adds a new paramater `type` to the `hammer` command to filter by object type.
 	- Adds new paramaters to the `hammer` command for Structure Tweaks mod.
@@ -434,11 +453,5 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Removes the setting `auto_equip` as obsolete (now always on so that the mod works properly).
 	- Fixes the setting `copy_state` not working.
 	- Fixes the `scale` parameter not working on the `hammer` command.
-
-- v1.15
-	- Adds a new command `hammer_save` to create blueprints with data.
-	- Adds support for PlanBuild scaling.
-	- Adds a new setting `chat_output` to control is the output show on the chat window (default `false`).
-	- Removes the setting `max_undo_steps` as obsolete (usually Server Devcommands is installed).
 
 Thanks for Azumatt for creating the mod icon!
