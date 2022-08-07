@@ -229,6 +229,8 @@ Commands also exist for this:
 
 For example `hammer_add killall` would add a new item to the hammer menu that killed all nearby creatures when clicked.
 
+For example `hammer_add goto 5000 cmd_name=Up cmd_icon=Shelter` and `hammer_add goto cmd_name=Down cmd_icon=Shelter` would add buttons to quickly teleport up and down.
+
 ## Command style
 
 By default all added commands have name "Command" and have the command as the description.
@@ -405,6 +407,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds new aliases `hammer_terrain_to`, `hoe_terrain_to`, `hammer_slope` and `hoe_slope` for World Edit Commands mod.
 	- Adds visualization for edge targeted commands (instead of the usual center targeted).
 	- Improves multi command support.
+	- Improves instant command support.
 
 - v1.19
 	- Adds a new paramater `type` to the `hammer` command to filter by object type.

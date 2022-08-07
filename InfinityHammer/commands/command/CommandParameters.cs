@@ -30,6 +30,7 @@ public class CommandParameters {
   public static string Join(string command) => string.Join(";", command.Split(';').Select(s => s.Trim()).Select(s => string.Join(" ", s.Split(' ')
     .Where(s => !s.StartsWith($"{CmdName}=", StringComparison.OrdinalIgnoreCase))
     .Where(s => !s.StartsWith($"{CmdDesc}=", StringComparison.OrdinalIgnoreCase))
+    .Where(s => !s.StartsWith($"{CmdIcon}=", StringComparison.OrdinalIgnoreCase))
     .Where(s => !s.StartsWith($"{CmdR}=", StringComparison.OrdinalIgnoreCase))
     .Where(s => !s.StartsWith($"{CmdW}=", StringComparison.OrdinalIgnoreCase))
     .Where(s => !s.StartsWith($"{CmdD}=", StringComparison.OrdinalIgnoreCase))

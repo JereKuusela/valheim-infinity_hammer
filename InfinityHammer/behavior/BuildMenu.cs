@@ -46,9 +46,26 @@ public static class UpdateAvailable {
 
 [HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece))]
 public class RunBuildMenuCommands {
-  public static void Postfix(Player __instance) {
-    var piece = __instance.GetSelectedPiece();
+  public static bool InstantCommand = false;
+  public static bool Prefix(Player __instance, Vector2Int p) {
+    var piece = __instance.GetPiece(p);
+    InstantCommand = false;
     if (piece && piece.GetComponent<BuildMenuCommand>() is { } cmd) Console.instance.TryRunCommand(cmd.Command);
+    return !InstantCommand;
   }
 }
 
+
+[HarmonyPatch(typeof(Terminal), nameof(Terminal.TryRunCommand))]
+public class RemoveCmdParameters {
+
+  [HarmonyPriority(Priority.Low)]
+  static void Prefix(Terminal __instance, ref string text) {
+    if (text.StartsWith("hammer_command", StringComparison.OrdinalIgnoreCase)) return;
+    if (text.StartsWith("hoe_command", StringComparison.OrdinalIgnoreCase)) return;
+    if (text.StartsWith("hammer_add", StringComparison.OrdinalIgnoreCase)) return;
+    if (text.StartsWith("hoe_add", StringComparison.OrdinalIgnoreCase)) return;
+    text = CommandParameters.Join(text);
+    RunBuildMenuCommands.InstantCommand = true;
+  }
+}
