@@ -35,6 +35,7 @@ public class HammerParameters {
   public bool Show = true;
   public bool Collision = true;
   public bool Interact = true;
+  public bool Restrict = true;
   public float Height = 0f;
   public ObjectType ObjectType = ObjectType.All;
   public Wear Wear = Wear.Default;
@@ -94,6 +95,7 @@ public class HammerParameters {
       if (name == "show") Show = Parse.Boolean(value) ?? true;
       if (name == "collision") Collision = Parse.Boolean(value) ?? true;
       if (name == "interact") Interact = Parse.Boolean(value) ?? true;
+      if (name == "restrict") Restrict = Parse.Boolean(value) ?? true;
     }
     if (Radius.HasValue && Depth.HasValue)
       throw new InvalidOperationException($"<color=yellow>circle</color> and <color=yellow>rect</color> parameters can't be used together.");

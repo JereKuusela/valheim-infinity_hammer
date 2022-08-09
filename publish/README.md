@@ -29,7 +29,9 @@ This is done by using the `hammer` console command which works in four ways:
 - `hammer connect`: Selects the hovered building.
 - `hammer circle=[radius]` or `hammer rect=[width,depth] angle=[degrees]`: Selects all nearby objects.
 
-Selecting the hovered object can be quickly done by pressing NumPad5. Holding alt key will select the entire building.
+Selecting the hovered object can be quickly done by pressing NumPad5.
+
+Holding alt key will select the entire building. Holding ctrl key picks up the objects instead (copy + delete).
 
 The hammer build menu also contains Pipette and Area select tools.
 
@@ -49,6 +51,7 @@ For Structure Tweaks mod:
 - `growth=big/big_bad/small/small_bad`: Overrides the plant growth.
 - `interact=false`: Removes interaction.
 - `show=false`: Removes visibility.
+- `restricts=false`: Removes portal item restrictions.
 - `wear=broken/damaged/healthy`: Overrides the structure wear.
 
 For example `hammer Beech1 scale=2 health=1000` would select a beech tree with a double size and 1000 health.
@@ -403,10 +406,13 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 # Changelog
 
 - v1.20
-	- Adds a new parameter `fall` to the `hammer` command for Structure Tweaks mod.
+	- Adds new parameters `fall` and `restrict` to the `hammer` command for Structure Tweaks mod.
 	- Adds new aliases `hammer_terrain_to`, `hoe_terrain_to`, `hammer_slope` and `hoe_slope` for World Edit Commands mod.
 	- Adds visualization for edge targeted commands (instead of the usual center targeted).
-	- Improves multi command support.
+	- Adds new key bindings for picking the hovered object and picking the whole building.
+	- Adds a new key binding for resetting offset (unbound by default).
+	- Fixes multiselect being always scalable. Now only scales if all child objects can be scaled.
+	- Improves multicommand support.
 	- Improves instant command support.
 
 - v1.19

@@ -47,14 +47,21 @@ public static class UpdateAvailable {
 [HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece))]
 public class RunBuildMenuCommands {
   public static bool InstantCommand = false;
+
+  [HarmonyPriority(Priority.Low)]
   public static bool Prefix(Player __instance, Vector2Int p) {
     var piece = __instance.GetPiece(p);
-    InstantCommand = false;
-    if (piece && piece.GetComponent<BuildMenuCommand>() is { } cmd) Console.instance.TryRunCommand(cmd.Command);
-    return !InstantCommand;
+    if (piece && piece.GetComponent<BuildMenuCommand>() is { } cmd) {
+      InstantCommand = false;
+      Console.instance.TryRunCommand(cmd.Command);
+      if (!InstantCommand) {
+        __instance.m_buildPieces.SetSelected(p);
+      }
+      return false;
+    }
+    return true;
   }
 }
-
 
 [HarmonyPatch(typeof(Terminal), nameof(Terminal.TryRunCommand))]
 public class RemoveCmdParameters {

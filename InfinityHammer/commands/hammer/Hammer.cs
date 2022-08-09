@@ -51,7 +51,7 @@ public class HammerSelect {
     };
     if (CommandWrapper.StructureTweaks != null) {
       List<string> namedStructure = new() {
-        "growth", "wear", "show", "collision", "interact", "fall"
+        "growth", "wear", "show", "collision", "interact", "fall", "restrict"
       };
       named.AddRange(namedStructure);
     }
@@ -91,7 +91,7 @@ public class HammerSelect {
       { "from", (int index) => CommandWrapper.Info("Position.") },
       { "text", (int index) => CommandWrapper.Info("Text.") },
       { "health", (int index) => CommandWrapper.Info("Health.") },
-      { "connect", (int index) => CommandWrapper.Info("piece") },
+      { "connect", (int index) => CommandWrapper.Info("Selects whole building.") },
       { "type", (int index) => ObjectTypes },
       { "wear", (int index) => Wears },
       { "fall", (int index) => Falls },
@@ -99,6 +99,7 @@ public class HammerSelect {
       { "show", (int index) => False },
       { "collision", (int index) => False },
       { "interact", (int index) => False },
+      { "restrict", (int index) => False },
     });
     Helper.Command("hammer", "[object id or radius] - Selects the object to be placed (the hovered object by default).", (args) => {
       Helper.EnabledCheck();
@@ -106,9 +107,9 @@ public class HammerSelect {
       HammerParameters pars = new(args);
       GameObject selected;
       if (pars.Radius.HasValue)
-        selected = Selection.Set(Selector.GetNearby(pars.ObjectType, pars.Position, pars.Radius.Value, pars.Height));
+        selected = Selection.Set(Selector.GetNearby("", pars.ObjectType, pars.Position, pars.Radius.Value, pars.Height));
       else if (pars.Width.HasValue && pars.Depth.HasValue)
-        selected = Selection.Set(Selector.GetNearby(pars.ObjectType, pars.Position, pars.Angle, pars.Width.Value, pars.Depth.Value, pars.Height));
+        selected = Selection.Set(Selector.GetNearby("", pars.ObjectType, pars.Position, pars.Angle, pars.Width.Value, pars.Depth.Value, pars.Height));
       else if (args.Length > 1 && !args[1].Contains("=") && args[1] != "connect")
         selected = Selection.Set(args[1]);
       else {
@@ -134,6 +135,8 @@ public class HammerSelect {
         UpdateZDOs(zdo => zdo.Set(Hash.Collision, false));
       if (!pars.Show)
         UpdateZDOs(zdo => zdo.Set(Hash.Render, false));
+      if (!pars.Restrict)
+        UpdateZDOs(zdo => zdo.Set(Hash.Restrict, false));
       if (!pars.Interact)
         UpdateZDOs(zdo => zdo.Set(Hash.Interact, false));
       if (pars.Text != null)

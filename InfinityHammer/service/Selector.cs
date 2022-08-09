@@ -83,20 +83,39 @@ public static class Selector {
   public static bool Within(Vector3 position, Vector3 center, float radius, float height) {
     return Utils.DistanceXZ(position, center) <= radius && center.y - position.y < 1000f && position.y - center.y <= (height == 0f ? 1000f : height);
   }
-  private static bool ValidName(string name) => name != "Player" && !name.StartsWith("_", StringComparison.Ordinal);
-  public static ZNetView[] GetNearby(ObjectType type, Vector3 center, float radius, float height) {
+  private static bool IsIncluded(string id, string name) {
+    if (id.StartsWith("*", StringComparison.Ordinal) && id.EndsWith("*", StringComparison.Ordinal))
+      return name.Contains(id.Substring(1, id.Length - 3));
+    if (id.StartsWith("*", StringComparison.Ordinal)) return name.EndsWith(id.Substring(1), StringComparison.Ordinal);
+    if (id.EndsWith("*", StringComparison.Ordinal)) return name.StartsWith(id.Substring(0, id.Length - 2), StringComparison.Ordinal);
+    return id == name;
+  }
+  public static HashSet<int> GetPrefabs(string id) {
+    id = id.ToLower();
+    IEnumerable<GameObject> values = ZNetScene.instance.m_namedPrefabs.Values;
+    values = values.Where(prefab => prefab.name != "Player");
+    if (id == "*" || id == "")
+      values = values.Where(prefab => !prefab.name.StartsWith("_", StringComparison.Ordinal));
+    else if (id.Contains("*"))
+      values = values.Where(prefab => IsIncluded(id, prefab.name.ToLower()));
+    else
+      values = values.Where(prefab => prefab.name.ToLower() == id);
+    return values.Select(prefab => prefab.name.GetStableHashCode()).ToHashSet();
+  }
+  public static ZNetView[] GetNearby(string id, ObjectType type, Vector3 center, float radius, float height) {
     var checker = (Vector3 pos) => Within(pos, center, radius, height);
-    return GetNearby(type, checker);
+    return GetNearby(id, type, checker);
   }
-  public static ZNetView[] GetNearby(ObjectType type, Vector3 center, float angle, float width, float depth, float height) {
+  public static ZNetView[] GetNearby(string id, ObjectType type, Vector3 center, float angle, float width, float depth, float height) {
     var checker = (Vector3 pos) => Within(pos, center, angle, width, depth, height);
-    return GetNearby(type, checker);
+    return GetNearby(id, type, checker);
   }
-  public static ZNetView[] GetNearby(ObjectType type, Func<Vector3, bool> checker) {
+  public static ZNetView[] GetNearby(string id, ObjectType type, Func<Vector3, bool> checker) {
+    var codes = GetPrefabs(id);
     var scene = ZNetScene.instance;
     var objects = ZNetScene.instance.m_instances.Values;
     var views = objects.Where(view => view.GetZDO() != null && view.GetZDO().IsValid());
-    views = views.Where(view => ValidName(Utils.GetPrefabName(view.gameObject)));
+    views = views.Where(view => codes.Contains(view.GetZDO().GetPrefab()));
     views = views.Where(view => checker(view.GetZDO().GetPosition()));
     if (type == ObjectType.Structure)
       views = views.Where(view => scene.GetPrefab(view.GetZDO().GetPrefab()).GetComponent<Piece>());

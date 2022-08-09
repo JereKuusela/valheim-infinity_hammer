@@ -16,8 +16,10 @@ public enum SelectedType {
 public class SelectedObject {
   public string Prefab = "";
   public ZDO? Data;
-  public SelectedObject(string name, Vector3 scale, ZDO? data) {
+  public bool Scalable;
+  public SelectedObject(string name, bool scalable, ZDO? data) {
     Prefab = name;
+    Scalable = scalable;
     Data = data == null ? data : data.Clone();
   }
 }
@@ -86,7 +88,7 @@ public class Selected {
     Clear();
     Type = SelectedType.Object;
     Ghost = Helper.SafeInstantiate(prefab);
-    Objects.Add(new(name, Ghost.transform.localScale, null));
+    Objects.Add(new(name, prefab.GetComponent<ZNetView>().m_syncInitialScale, null));
     return Ghost;
   }
   private static void ResetColliders(GameObject obj, GameObject original) {
@@ -174,7 +176,7 @@ public class Selected {
     Type = SelectedType.Object;
     Ghost = Helper.SafeInstantiate(prefab);
     ResetColliders(Ghost, originalPrefab);
-    Objects.Add(new(name, Ghost.transform.localScale, data));
+    Objects.Add(new(name, view.m_syncInitialScale, data));
     Rotating.UpdatePlacementRotation(view.gameObject);
     return Ghost;
   }
@@ -202,7 +204,7 @@ public class Selected {
       obj.transform.rotation = view.transform.rotation;
       ResetColliders(obj, originalPrefab);
       var zdo = SetData(obj, "", data);
-      Objects.Add(new SelectedObject(name, obj.transform.localScale, zdo));
+      Objects.Add(new SelectedObject(name, view.m_syncInitialScale, zdo));
     }
     ZNetView.m_forceDisableInit = false;
     Type = SelectedType.Multiple;
@@ -243,7 +245,7 @@ public class Selected {
     ZDO data = new();
     data.Set(Hash.Location, location.m_prefab.name.GetStableHashCode());
     data.Set(Hash.Seed, seed);
-    Objects.Add(new(location.m_prefab.name, Vector3.one, data));
+    Objects.Add(new(location.m_prefab.name, false, data));
     Helper.GetPlayer().SetupPlacementGhost();
     Type = SelectedType.Location;
     return Ghost;
@@ -326,7 +328,7 @@ public class Selected {
         obj.transform.localRotation = item.Rot;
         obj.transform.localScale = item.Scale;
         item.Data = SetData(obj, item.ExtraInfo, item.Data);
-        Objects.Add(new SelectedObject(item.Prefab, item.Scale, item.Data));
+        Objects.Add(new SelectedObject(item.Prefab, obj.GetComponent<ZNetView>().m_syncInitialScale, item.Data));
 
       } catch (InvalidOperationException e) {
         Helper.AddMessage(terminal, $"Warning: {e.Message}");

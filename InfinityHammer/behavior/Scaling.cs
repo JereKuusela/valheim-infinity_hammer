@@ -1,3 +1,4 @@
+using System.Linq;
 using UnityEngine;
 namespace InfinityHammer;
 public class ToolScaling {
@@ -70,7 +71,8 @@ public static class Scaling {
     var player = Helper.GetPlayer();
     var ghost = player.m_placementGhost;
     if (!ghost) return false;
-    if (Selection.Type == SelectedType.Command || Selection.Type == SelectedType.Multiple) return true;
+    if (Selection.Type == SelectedType.Command) return true;
+    if (Selection.Type == SelectedType.Multiple) return Selection.Objects.All(obj => obj.Scalable);
     // Ghost won't have netview so the selected piece must be used.
     // This technically also works for the build window if other mods add scalable objects there.
     var view = player.GetSelectedPiece()?.GetComponent<ZNetView>();
