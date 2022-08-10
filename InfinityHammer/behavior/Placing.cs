@@ -115,7 +115,7 @@ public class PlacePiece {
           var childView = childObj.GetComponent<ZNetView>();
           Hammer.CopyState(childView, i);
           Hammer.PostProcessPlaced(childObj);
-          Scaling.SetPieceScale(childView, ghost);
+          Scaling.SetPieceScale(childView, ghostObj);
         }
       }
       UndoHelper.StopTracking();

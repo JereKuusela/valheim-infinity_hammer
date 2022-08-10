@@ -412,6 +412,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds new key bindings for picking the hovered object and picking the whole building.
 	- Adds a new key binding for resetting offset (unbound by default).
 	- Fixes multiselect being always scalable. Now only scales if all child objects can be scaled.
+	- Fixes multiselect not copying the child scale.
 	- Improves multicommand support.
 	- Improves instant command support.
 
