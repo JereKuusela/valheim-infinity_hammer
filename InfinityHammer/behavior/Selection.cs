@@ -187,14 +187,16 @@ public class Selected {
     Ghost = new GameObject();
     // Prevents children from disappearing.
     Ghost.SetActive(false);
-    Ghost.name = "Multiple";
+    Ghost.name = $"Multiple ({views.Count()})";
     Ghost.transform.position = views.First().transform.position;
     var piece = Ghost.AddComponent<Piece>();
-    piece.m_name = "Multiple";
-    piece.m_description = "";
+    piece.m_name = Ghost.name;
+    Dictionary<string, int> counts = new();
     ZNetView.m_forceDisableInit = true;
     foreach (var view in views) {
       var name = Utils.GetPrefabName(view.gameObject);
+      if (!counts.ContainsKey(name)) counts[name] = 0;
+      counts[name] += 1;
       var originalPrefab = ZNetScene.instance.GetPrefab(name);
       var prefab = Configuration.CopyState ? view.gameObject : originalPrefab;
       var data = Configuration.CopyState ? view.GetZDO() : null;
@@ -207,6 +209,15 @@ public class Selected {
       Objects.Add(new SelectedObject(name, view.m_syncInitialScale, zdo));
     }
     ZNetView.m_forceDisableInit = false;
+    var topKeys = counts.OrderBy(kvp => kvp.Value).Reverse().ToArray();
+    if (topKeys.Length <= 5)
+      piece.m_description = string.Join("\n", topKeys.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
+    else {
+      piece.m_description = string.Join("\n", topKeys.Take(4).Select(kvp => $"{kvp.Key}: {kvp.Value}"));
+      piece.m_description += $"\n{topKeys.Length - 4} other types: {topKeys.Skip(4).Sum(kvp => kvp.Value)}";
+    }
+
+
     Type = SelectedType.Multiple;
     Rotating.UpdatePlacementRotation(Ghost);
     return Ghost;

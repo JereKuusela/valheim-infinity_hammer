@@ -10,6 +10,9 @@ public partial class Configuration {
   public static ConfigEntry<KeyboardShortcut> configCommandRadius;
   public static ConfigEntry<KeyboardShortcut> configCommandDepth;
   public static ConfigEntry<KeyboardShortcut> configCommandHeight;
+  public static ConfigEntry<KeyboardShortcut> configStackHorizontal;
+  public static ConfigEntry<KeyboardShortcut> configStackVertical;
+  public static ConfigEntry<KeyboardShortcut> configStackForward;
   public static ConfigEntry<KeyboardShortcut> configMoveUp;
   public static ConfigEntry<KeyboardShortcut> configMoveUpLarge;
   public static ConfigEntry<KeyboardShortcut> configMoveDown;
@@ -30,11 +33,24 @@ public partial class Configuration {
   public static ConfigEntry<KeyboardShortcut> configResetOffset;
   public static ConfigEntry<KeyboardShortcut> configUndo;
   public static ConfigEntry<KeyboardShortcut> configRedo;
+  public static ConfigEntry<KeyboardShortcut> configCommandModifier1;
+  public static ConfigEntry<KeyboardShortcut> configCommandModifier2;
   public static ConfigEntry<string> configMoveAmount;
   public static ConfigEntry<string> configMoveAmountLarge;
 #nullable enable
+  public static string ModifierKey1() {
+    if (configCommandModifier1 == null) return "leftalt";
+    return ConfigWrapper.GetKeys(configCommandModifier1.Value);
+  }
+  public static string ModifierKey2() {
+    if (configCommandModifier2 == null) return "leftcontrol";
+    return ConfigWrapper.GetKeys(configCommandModifier2.Value);
+  }
   private static void InitBinds(ConfigWrapper wrapper) {
     var section = "2. Binds";
+    configCommandModifier1 = wrapper.Bind(section, "Command modifier 1", new KeyboardShortcut(KeyCode.LeftAlt), "");
+    configCommandModifier2 = wrapper.Bind(section, "Command modifier 2", new KeyboardShortcut(KeyCode.LeftControl), "");
+
     configMoveAmount = wrapper.Bind(section, "Move amount", "0.1", "Meters to move with move binds.");
     configMoveAmount.SettingChanged += (s, e) => wrapper.SetupBinds();
     configMoveAmountLarge = wrapper.Bind(section, "Move amount large", "1", "Meters to move with large move binds.");
@@ -47,6 +63,9 @@ public partial class Configuration {
     configCommandRadius = wrapper.BindWheelCommand("hammer_zoom_x_cmd 1", section, "Command radius (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift), "Changes the command radius.", "build");
     configCommandDepth = wrapper.BindWheelCommand("hammer_zoom_z_cmd 1", section, "Command depth (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift, KeyCode.LeftAlt), "Changes the command rectangle depth.", "build");
     configCommandHeight = wrapper.BindWheelCommand("hammer_zoom_y_cmd 0.5", section, "Command height (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift, KeyCode.LeftControl), "Changes the command height.", "build");
+    configStackForward = wrapper.BindWheelCommand("hammer_place;hammer_move_forward auto", section, "Stacking forward (mouse wheel)", new KeyboardShortcut(KeyCode.None), "Places next to each other.", "build");
+    configStackHorizontal = wrapper.BindWheelCommand("hammer_place;hammer_move_right auto", section, "Stacking horizontal (mouse wheel)", new KeyboardShortcut(KeyCode.None), "Places next to each other.", "build");
+    configStackVertical = wrapper.BindWheelCommand("hammer_place;hammer_move_up auto", section, "Stacking vertical (mouse wheel)", new KeyboardShortcut(KeyCode.None), "Places next to each other.", "build");
     configMoveUp = wrapper.BindCommand(() => $"hammer_move_up {configMoveAmount.Value}", section, "Move up", new KeyboardShortcut(KeyCode.PageUp), "Precise placement.", "build");
     configMoveUpLarge = wrapper.BindCommand(() => $"hammer_move_up {configMoveAmountLarge.Value}", section, "Move up (large)", new KeyboardShortcut(KeyCode.PageUp, KeyCode.LeftAlt), "Precise placement.", "build");
     configMoveDown = wrapper.BindCommand(() => $"hammer_move_down {configMoveAmount.Value}", section, "Move down", new KeyboardShortcut(KeyCode.PageDown), "Precise placement.", "build");

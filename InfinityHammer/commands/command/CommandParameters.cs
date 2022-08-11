@@ -12,6 +12,8 @@ public class CommandParameters {
   public static string CmdW = "cmd_w";
   public static string CmdD = "cmd_d";
   public static string CmdH = "cmd_h";
+  public static string CmdMod1 = "cmd_mod1";
+  public static string CmdMod2 = "cmd_mod2";
   public Range<float> RadiusCap = new(float.MinValue, float.MaxValue);
   public Range<float> WidthCap = new(float.MinValue, float.MaxValue);
   public Range<float> DepthCap = new(float.MinValue, float.MaxValue);
@@ -27,15 +29,15 @@ public class CommandParameters {
   public Sprite? Icon = null;
   public string Command = "";
 
-  public static string Join(string command) => string.Join(";", command.Split(';').Select(s => s.Trim()).Select(s => string.Join(" ", s.Split(' ')
+  public static string RemoveCmdParameters(string command) => string.Join(";", command.Split(';').Select(s => s.Trim()).Select(s => string.Join(" ", FilterCmd(s.Split(' ')))));
+  private static IEnumerable<string> FilterCmd(IEnumerable<string> args) => args
     .Where(s => !s.StartsWith($"{CmdName}=", StringComparison.OrdinalIgnoreCase))
     .Where(s => !s.StartsWith($"{CmdDesc}=", StringComparison.OrdinalIgnoreCase))
     .Where(s => !s.StartsWith($"{CmdIcon}=", StringComparison.OrdinalIgnoreCase))
     .Where(s => !s.StartsWith($"{CmdR}=", StringComparison.OrdinalIgnoreCase))
     .Where(s => !s.StartsWith($"{CmdW}=", StringComparison.OrdinalIgnoreCase))
     .Where(s => !s.StartsWith($"{CmdD}=", StringComparison.OrdinalIgnoreCase))
-    .Where(s => !s.StartsWith($"{CmdH}=", StringComparison.OrdinalIgnoreCase))
-  )));
+    .Where(s => !s.StartsWith($"{CmdH}=", StringComparison.OrdinalIgnoreCase));
   public CommandParameters(string command, bool showCommand) {
     var split = command.Split(';').Select(s => s.Trim()).ToArray();
     Command = string.Join(";", split.Select(ParseArgs));
@@ -49,7 +51,7 @@ public class CommandParameters {
       Depth = Mathf.Clamp(Depth.Value, DepthCap.Min, DepthCap.Max);
     if (showCommand || Description == "") {
       if (Description != "") Description += "\n";
-      Description += Join(command);
+      Description += RemoveCmdParameters(command);
     }
   }
 
@@ -98,6 +100,8 @@ public class CommandParameters {
   }
   protected string ParseArgs(string command) {
     var scale = Scaling.Command;
+    command = command.Replace(CmdMod1, Configuration.ModifierKey1());
+    command = command.Replace(CmdMod2, Configuration.ModifierKey2());
     var args = command.Split(' ').ToArray();
     foreach (var arg in args) {
       var split = arg.Split('=');
@@ -139,6 +143,6 @@ public class CommandParameters {
       if (args[i].Contains("#tz"))
         IsTargeted = true;
     }
-    return string.Join(" ", args);
+    return string.Join(" ", FilterCmd(args));
   }
 }

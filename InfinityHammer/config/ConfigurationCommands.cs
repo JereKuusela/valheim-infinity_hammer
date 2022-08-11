@@ -50,11 +50,19 @@ public partial class Configuration {
   }
   private static List<string> ParseCommands(string value) => value.Split('|').Select(s => s.Trim()).ToList();
 
+  private const string LEGACY_AREA_SELECT = "hammer_area cmd_icon=hammer cmd_name=Area_pipette cmd_desc=Select_multiple_objects.";
+  private const string SELECT = "hammer_command cmd_icon=hammer cmd_name=Pipette cmd_desc=Select_object. hammer";
+  private const string LEGACY_SELECT = "hammer_command cmd_icon=hammer cmd_name=Pipette cmd_desc=Press_alt_to_select_entire_buildings. hammer keys=-leftalt;hammer keys=leftalt connect";
+  private const string SELECT_DEVCOMMANDS = "hammer_command cmd_icon=hammer cmd_name=Pipette cmd_desc=Press_cmd_mod1_to_select_entire_buildings.\nPress_cmd_mod2_to_pick_up. hammer keys=-cmd_mod1;hammer keys=cmd_mod1 connect;object remove keys=-cmd_mod1,cmd_mod2;object remove connect id=* keys=cmd_mod1,cmd_mod2";
+  private const string AREA_SELECT = "hammer_area cmd_icon=hammer cmd_name=Area_pipette cmd_desc=Select_multiple_objects.";
+  private const string AREA_SELECT_DEVCOMMANDS = "hammer_area cmd_icon=hammer cmd_name=Area_pipette cmd_desc=Select_multiple_objects.\nPress_cmd_mod2_to_pick_up.;hammer_object remove id=* keys=cmd_mod2";
+  private static void Migrate() {
+    if (CommandWrapper.WorldEditCommands != null)
+      configHammerCommands.Value = configHammerCommands.Value.Replace(LEGACY_AREA_SELECT, AREA_SELECT_DEVCOMMANDS);
+    configHammerCommands.Value = configHammerCommands.Value.Replace(LEGACY_SELECT, SELECT_DEVCOMMANDS);
+  }
   private static void InitCommands(ConfigWrapper wrapper) {
-    var defaultHammerCommands = new[] {
-      "hammer_command cmd_icon=hammer cmd_name=Pipette cmd_desc=Press_alt_to_select_entire_buildings. hammer keys=-leftalt;hammer keys=leftalt connect",
-      "hammer_area cmd_icon=hammer cmd_name=Area_pipette cmd_desc=Select_multiple_objects.",
-    };
+    var defaultHammerCommands = new[] { SELECT_DEVCOMMANDS, AREA_SELECT_DEVCOMMANDS };
     var defaultHoeCommands = new[] {
       "hoe_terrain cmd_icon=mud_road cmd_name=Level cmd_desc=Flattens_terrain. level",
       "hoe_terrain cmd_icon=raise cmd_name=Raise cmd_desc=Raises_terrain. raise=h",
@@ -62,17 +70,13 @@ public partial class Configuration {
       "hoe_terrain cmd_icon=replant cmd_name=Grass cmd_desc=Grass. paint=grass",
       "hoe_terrain cmd_icon=Hoe cmd_name=Dirt cmd_desc=Dirt. paint=dirt",
       "hoe_terrain cmd_icon=Hoe cmd_name=Reset cmd_desc=Resets_terrain. reset",
-      "hoe_object cmd_icon=softdeath cmd_name=Remove cmd_desc=Removes_objects.\nPress_alt_to_also_reset_the_terrain. remove id=*;hoe_terrain keys=leftalt reset",
+      "hoe_object cmd_icon=softdeath cmd_name=Remove cmd_desc=Removes_objects.\nPress_cmd_mod1_to_also_reset_the_terrain. remove id=*;hoe_terrain keys=cmd_mod1 reset",
       "hoe_object cmd_icon=Carrot cmd_name=Tame cmd_desc=Tames_creatures. tame",
     };
-    if (CommandWrapper.ServerDevcommands == null) {
-      defaultHammerCommands = new[] {
-        "hammer_command cmd_icon=hammer cmd_name=Pipette cmd_desc=Select_object. hammer",
-        "hammer_area cmd_icon=hammer cmd_name=Area_pipette cmd_desc=Select_multiple_objects.",
-      };
-    }
-    if (CommandWrapper.WorldEditCommands == null)
+    if (CommandWrapper.WorldEditCommands == null) {
+      defaultHammerCommands = new[] { SELECT, AREA_SELECT };
       defaultHoeCommands = new string[0];
+    }
 
     var section = "6. Commands";
     configCustomBinds = wrapper.BindList(section, "Custom binds", "", "Binds separated by ; that are set on the game start.");
@@ -96,5 +100,6 @@ public partial class Configuration {
     HoeCommands = ParseCommands(configHoeCommands.Value);
     configHoeMenuTab = wrapper.Bind(section, "Hoe menu tab", 0, "Index of the menu tab.");
     configHoeMenuIndex = wrapper.Bind(section, "Hoe menu index", 5, "Index on the menu.");
+    Migrate();
   }
 }

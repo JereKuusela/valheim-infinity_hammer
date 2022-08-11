@@ -82,11 +82,16 @@ public class ConfigWrapper {
     var key = ToKey(name);
     SettingHandlers.Add(key, (Terminal terminal, string value) => Toggle(terminal, setting, name, value));
   }
+  public static string GetKeys(KeyboardShortcut key) {
+    if (key.MainKey == KeyCode.None) return "";
+    var keys = key.MainKey.ToString().ToLower();
+    if (key.Modifiers.Count() > 0) keys += "," + string.Join(",", key.Modifiers);
+    return keys;
+  }
   private static void UpdateKey(string name, KeyboardShortcut key, Func<string> command, string mode = "") {
     Console.instance.TryRunCommand($"unbind {name} silent");
     if (key.MainKey == KeyCode.None) return;
-    var keys = key.MainKey.ToString().ToLower();
-    if (key.Modifiers.Count() > 0) keys += "," + string.Join(",", key.Modifiers);
+    var keys = GetKeys(key);
     if (mode != "")
       keys += $",{mode}";
     var bind = $"bind {keys} tag={name} {command()}";

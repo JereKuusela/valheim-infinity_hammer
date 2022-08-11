@@ -242,6 +242,16 @@ This can be customized with parameters `cmd_name`, `cmd_desc` and `cmd_icon`. Va
 
 For example `hammer_add cmd_name=Kill cmd_desc=Kills_everything cmd_icon=softdeath killall`
 
+## Modifier keys
+
+Multiple commands can be executed by having ; between them. For example `hammer_add goto 5000;killall` would both teleport to the sky and kill all nearby creatures.
+
+`keys` parameter can be used to decide which commands get executed. For example `hammer_add goto 5000 keys=-leftalt;goto keys=leftalt` would teleport up or down depending on whether the left alt key was pressed.
+
+The config has keybindings for two modifier keys. These can be used in the commands with a value of `cmd_mod1` (default value is left alt) and `cmd_mod2` (default value is left control). For example `hammer_add goto 5000 keys=-cmd_mod1;goto keys=cmd_mod1`.
+
+Modifiers key also work for the `hammer_command` or `hoe_command` explained below.
+
 ## Command placement
 
 Some commands have coordinates as their parameters. These can be set with hammer/hoe by using commands `hammer_command` or `hoe_command`.
@@ -411,6 +421,11 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds visualization for edge targeted commands (instead of the usual center targeted).
 	- Adds new key bindings for picking the hovered object and picking the whole building.
 	- Adds a new key binding for resetting offset (unbound by default).
+	- Adds a new key binding for stacking (unbound by default).
+	- Adds new key bindings for modifier keys.
+	- Adds amount of selected objects to the multiselect.
+	- Adds settings for changing the modifier keys for tools.
+	- Changes Pipette and Area Pipette tools to support picking up objects.
 	- Fixes multiselect being always scalable. Now only scales if all child objects can be scaled.
 	- Fixes multiselect not copying the child scale.
 	- Improves multicommand support.

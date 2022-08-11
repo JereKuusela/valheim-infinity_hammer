@@ -64,15 +64,24 @@ public class RunBuildMenuCommands {
 }
 
 [HarmonyPatch(typeof(Terminal), nameof(Terminal.TryRunCommand))]
+public class ReplaceModifierKeys {
+
+  [HarmonyPriority(Priority.High)]
+  static void Prefix(ref string text) {
+    text = text.Replace(CommandParameters.CmdMod1, Configuration.ModifierKey1());
+    text = text.Replace(CommandParameters.CmdMod2, Configuration.ModifierKey2());
+  }
+}
+[HarmonyPatch(typeof(Terminal), nameof(Terminal.TryRunCommand))]
 public class RemoveCmdParameters {
 
   [HarmonyPriority(Priority.Low)]
-  static void Prefix(Terminal __instance, ref string text) {
+  static void Prefix(ref string text) {
     if (text.StartsWith("hammer_command", StringComparison.OrdinalIgnoreCase)) return;
     if (text.StartsWith("hoe_command", StringComparison.OrdinalIgnoreCase)) return;
     if (text.StartsWith("hammer_add", StringComparison.OrdinalIgnoreCase)) return;
     if (text.StartsWith("hoe_add", StringComparison.OrdinalIgnoreCase)) return;
-    text = CommandParameters.Join(text);
+    text = CommandParameters.RemoveCmdParameters(text);
     RunBuildMenuCommands.InstantCommand = true;
   }
 }
