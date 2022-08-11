@@ -51,7 +51,7 @@ For Structure Tweaks mod:
 - `growth=big/big_bad/small/small_bad`: Overrides the plant growth.
 - `interact=false`: Removes interaction.
 - `show=false`: Removes visibility.
-- `restricts=false`: Removes portal item restrictions.
+- `restrict=false`: Removes portal item restrictions.
 - `wear=broken/damaged/healthy`: Overrides the structure wear.
 
 For example `hammer Beech1 scale=2 health=1000` would select a beech tree with a double size and 1000 health.
@@ -232,8 +232,6 @@ Commands also exist for this:
 
 For example `hammer_add killall` would add a new item to the hammer menu that killed all nearby creatures when clicked.
 
-For example `hammer_add goto 5000 cmd_name=Up cmd_icon=Shelter` and `hammer_add goto cmd_name=Down cmd_icon=Shelter` would add buttons to quickly teleport up and down.
-
 ## Command style
 
 By default all added commands have name "Command" and have the command as the description.
@@ -248,7 +246,7 @@ Multiple commands can be executed by having ; between them. For example `hammer_
 
 `keys` parameter can be used to decide which commands get executed. For example `hammer_add goto 5000 keys=-leftalt;goto keys=leftalt` would teleport up or down depending on whether the left alt key was pressed.
 
-The config has keybindings for two modifier keys. These can be used in the commands with a value of `cmd_mod1` (default value is left alt) and `cmd_mod2` (default value is left control). For example `hammer_add goto 5000 keys=-cmd_mod1;goto keys=cmd_mod1`.
+The config has keybindings for two modifier keys. These can be used in the commands with a value of `cmd_mod1` (default value is left alt) and `cmd_mod2` (default value is left control). For example `hammer_add cmd_name=Teleport cmd_icon=Shelter goto 5000 keys=-cmd_mod1;goto keys=cmd_mod1`.
 
 Modifiers key also work for the `hammer_command` or `hoe_command` explained below.
 
@@ -343,6 +341,7 @@ Following powers are available with `hammer_config` command:
 - Select blacklist (key: `select_blacklist`): Allows disabling select for given objects (ids separated by ,).
 - Select range (default: `0`, key: `select_range`): Range for selecting (capped at about 50 meters).
 - Server Devcommands undo (default: `true`, key: `server_devcommands_undo`): If disabled, uses Infinity Hammer's own undo system even if Server Devcommands is installed.
+- Show command values (default: `false`, key: `show_command_values`): Always show the command on tool descriptions.
 - Unfreeze on select (default `false`, key: `unfreeze_on_select`): Removes the placement freeze when selecting a new object.
 - Unfreeze on unequip (defualt `true`, key: `unfreeze_on_unequip`): Removes the placement freeze when unequipping the hammer.
 
@@ -422,12 +421,14 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds new key bindings for picking the hovered object and picking the whole building.
 	- Adds a new key binding for resetting offset (unbound by default).
 	- Adds a new key binding for stacking (unbound by default).
+	- Adds a new setting `show_command_values` to always show the command on tool descriptions.
 	- Adds new key bindings for modifier keys.
 	- Adds amount of selected objects to the multiselect.
 	- Adds settings for changing the modifier keys for tools.
 	- Changes Pipette and Area Pipette tools to support picking up objects.
 	- Fixes multiselect being always scalable. Now only scales if all child objects can be scaled.
 	- Fixes multiselect not copying the child scale.
+	- Fixes remove effects not working for building.
 	- Improves multicommand support.
 	- Improves instant command support.
 

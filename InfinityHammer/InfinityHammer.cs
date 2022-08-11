@@ -13,8 +13,7 @@ namespace InfinityHammer;
 public class InfinityHammer : BaseUnityPlugin {
   public const string GUID = "infinity_hammer";
   public const string NAME = "Infinity Hammer";
-  const string LEGACY_GUID = "valheim.jerekuusela.infinity_hammer";
-  public const string VERSION = "1.19";
+  public const string VERSION = "1.20";
   ServerSync.ConfigSync ConfigSync = new(GUID) {
     DisplayName = NAME,
     CurrentVersion = VERSION,
@@ -23,14 +22,7 @@ public class InfinityHammer : BaseUnityPlugin {
   public static ManualLogSource Log;
 #nullable enable
   public void Awake() {
-    var legacyConfig = Path.Combine(Path.GetDirectoryName(Config.ConfigFilePath), $"{LEGACY_GUID}.cfg");
     var config = Path.Combine(Path.GetDirectoryName(Config.ConfigFilePath), $"{GUID}.cfg");
-    if (File.Exists(legacyConfig)) {
-      if (File.Exists(config))
-        File.Delete(legacyConfig);
-      else
-        File.Move(legacyConfig, config);
-    }
     Log = Logger;
     Harmony harmony = new(GUID);
     harmony.PatchAll();

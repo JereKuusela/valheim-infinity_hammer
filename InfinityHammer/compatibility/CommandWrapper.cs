@@ -10,23 +10,20 @@ public static class CommandWrapper {
   public static Assembly? StructureTweaks = null;
   public static void Init() {
     if (Chainloader.PluginInfos.TryGetValue("server_devcommands", out var info)) {
-      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 24)
+      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 25)
         InfinityHammer.Log.LogWarning($"Server Devcommands v{info.Metadata.Version.Major}.{info.Metadata.Version.Minor} is outdated. Please update!");
       else
         ServerDevcommands = info.Instance.GetType().Assembly;
 
     }
     if (Chainloader.PluginInfos.TryGetValue("world_edit_commands", out info)) {
-      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 7)
+      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 8)
         InfinityHammer.Log.LogWarning($"World Edit Commands v{info.Metadata.Version.Major}.{info.Metadata.Version.Minor} is outdated. Please update!");
       else
         WorldEditCommands = info.Instance.GetType().Assembly;
     }
     if (Chainloader.PluginInfos.TryGetValue("structure_tweaks", out info)) {
-      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 2)
-        InfinityHammer.Log.LogWarning($"StructureTweaks v{info.Metadata.Version.Major}.{info.Metadata.Version.Minor} is outdated. Please update!");
-      else
-        StructureTweaks = info.Instance.GetType().Assembly;
+      StructureTweaks = info.Instance.GetType().Assembly;
     }
   }
 #nullable disable

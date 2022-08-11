@@ -49,10 +49,8 @@ public class CommandParameters {
       Width = Mathf.Clamp(Width.Value, WidthCap.Min, WidthCap.Max);
     if (Depth.HasValue)
       Depth = Mathf.Clamp(Depth.Value, DepthCap.Min, DepthCap.Max);
-    if (showCommand || Description == "") {
-      if (Description != "") Description += "\n";
-      Description += RemoveCmdParameters(command);
-    }
+    if (showCommand || Description == "")
+      Description = RemoveCmdParameters(command);
   }
 
 
