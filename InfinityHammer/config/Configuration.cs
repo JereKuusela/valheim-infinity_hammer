@@ -83,7 +83,7 @@ public partial class Configuration {
   public static bool Enabled => configEnabled.Value;
   public static ConfigEntry<bool> configServerDevcommandsUndo;
   public static bool ServerDevcommandsUndo => configServerDevcommandsUndo.Value;
-  private static HashSet<string> ParseList(string value) => value.Split(',').Select(s => s.Trim().ToLower()).ToHashSet();
+  private static HashSet<string> ParseList(string value) => value.Split(',').Select(s => s.Trim().ToLower()).Where(s => s != "").ToHashSet();
   public static ConfigEntry<string> configRemoveBlacklist;
   public static HashSet<string> RemoveBlacklist = new();
   public static ConfigEntry<string> configSelectBlacklist;
@@ -92,11 +92,16 @@ public partial class Configuration {
   public static HashSet<string> HammerTools = new();
   public static ConfigEntry<string> configHoeTools;
   public static HashSet<string> HoeTools = new();
+  public static ConfigEntry<string> configMirrorFlip;
+  public static HashSet<string> MirrorFlip = new();
   public static ConfigWrapper Wrapper;
 #nullable enable
   private static void UpdateTools() {
     HammerTools = ParseList(configHammerTools.Value);
     HoeTools = ParseList(configHoeTools.Value);
+  }
+  private static void UpdateMirrorFlip() {
+    MirrorFlip = ParseList(configMirrorFlip.Value);
   }
   public static void Init(ConfigWrapper wrapper) {
     Wrapper = wrapper;
@@ -105,7 +110,11 @@ public partial class Configuration {
     configHammerTools = wrapper.BindList(section, "Hammer tools", "hammer", "List of hammers.");
     configHammerTools.SettingChanged += (s, e) => UpdateTools();
     configHoeTools = wrapper.Bind(section, "Hoe tools", "hoe", "List of hoes.");
-    configHoeTools.SettingChanged += (s, e) => UpdateTools(); UpdateTools();
+    configHoeTools.SettingChanged += (s, e) => UpdateTools();
+    UpdateTools();
+    configMirrorFlip = wrapper.Bind(section, "Mirror flip", "woodwall", "Object ids that get flipped instead of rotated when mirrored.");
+    configMirrorFlip.SettingChanged += (s, e) => UpdateMirrorFlip();
+    UpdateMirrorFlip();
     if (CommandWrapper.ServerDevcommands != null)
       configServerDevcommandsUndo = wrapper.Bind(section, "Server Devcommands undo", true, "If disabled, uses Infinity Hammer's own undo system even if Server Devcommands is installed.");
     configPlanBuildFolder = wrapper.Bind(section, "Plan Build folder", "BepInEx/config/PlanBuild", "Folder relative to the Valheim.exe.");

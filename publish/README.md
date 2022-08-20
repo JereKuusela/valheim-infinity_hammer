@@ -171,9 +171,12 @@ If [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Serv
 
 ## Multiplacement
 
-Objects can be placed multiple times in a row with the command:
+Objects can be placed multiple times in a row with the commands:
 
+- `hammer_zoop_[direction] [step=auto]`
 - `hammer_stack_[direction] [amount or min-max] [step=auto]`
+
+Zoop multiplies the selection while stack instantly places multiple objects.
 
 Possible directions are `backward`, `down`, `forward`,`left`, `right` and `up`.
 
@@ -413,6 +416,10 @@ If "Disable loot" is enabled, destroying creatures or structures won't drop loot
 Blacklist can be used to avoid destroying critical objects like locations. For example `hammer_config remove_blacklist LocationProxy`.
 
 # Changelog
+
+- v1.21
+	- Adds new commands `hammer_zoop_[direction]` to multiply the selection.
+	- Adds automatic snap points to multi selection.
 
 - v1.20
 	- Adds new parameters `fall` and `restrict` to the `hammer` command for Structure Tweaks mod.

@@ -55,9 +55,15 @@ public static class Selection {
   public static GameObject Set(RulerParameters ruler, string name, string description, string command, Sprite? icon) => GetOrAdd().Set(ruler, name, description, command, icon);
   public static GameObject Set(ZoneSystem.ZoneLocation location, int seed) => GetOrAdd().Set(location, seed);
   public static GameObject Set(Terminal terminal, Blueprint bp, Vector3 scale) => GetOrAdd().Set(terminal, bp, scale);
+  public static void ZoopUp(string offset) => GetOrAdd().ZoopUp(offset);
+  public static void ZoopDown(string offset) => GetOrAdd().ZoopDown(offset);
+  public static void ZoopForward(string offset) => GetOrAdd().ZoopForward(offset);
+  public static void ZoopBackward(string offset) => GetOrAdd().ZoopBackward(offset);
+  public static void ZoopLeft(string offset) => GetOrAdd().ZoopLeft(offset);
+  public static void ZoopRight(string offset) => GetOrAdd().ZoopRight(offset);
 }
 
-public class Selected {
+public partial class Selected {
 
 #nullable disable
   ///<summary>Copy of the selected entity. Only needed for the placement ghost because armor and item stands have a different model depending on their state.</summary>
@@ -72,8 +78,11 @@ public class Selected {
     return Objects[index].Data?.Clone();
   }
   public void Clear() {
-    if (Ghost) ZNetScene.instance.Destroy(Ghost);
+    if (Ghost) UnityEngine.Object.Destroy(Ghost);
     Ghost = null;
+    ZoopsX = 0;
+    ZoopsY = 0;
+    ZoopsZ = 0;
     Type = SelectedType.Default;
     RulerParameters = new();
     Ruler.Remove();
@@ -175,10 +184,28 @@ public class Selected {
     Clear();
     Type = SelectedType.Object;
     Ghost = Helper.SafeInstantiate(prefab);
+    // Reseted for bounds check.
+    Ghost.transform.rotation = Quaternion.identity;
     ResetColliders(Ghost, originalPrefab);
     Objects.Add(new(name, view.m_syncInitialScale, data));
     Rotating.UpdatePlacementRotation(view.gameObject);
     return Ghost;
+  }
+  private void CountObjects() {
+    if (Type != SelectedType.Multiple) return;
+    var count = ((IEnumerable<Transform>)Ghost.transform).Count(tr => tr.gameObject.activeSelf);
+    Ghost.name = $"Multiple ({count})";
+    var piece = Ghost.GetComponent<Piece>();
+    if (!piece) piece = Ghost.AddComponent<Piece>();
+    piece.m_name = Ghost.name;
+    Dictionary<string, int> counts = Objects.GroupBy(obj => obj.Prefab).ToDictionary(kvp => kvp.Key, kvp => kvp.Count());
+    var topKeys = counts.OrderBy(kvp => kvp.Value).Reverse().ToArray();
+    if (topKeys.Length <= 5)
+      piece.m_description = string.Join("\n", topKeys.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
+    else {
+      piece.m_description = string.Join("\n", topKeys.Take(4).Select(kvp => $"{kvp.Key}: {kvp.Value}"));
+      piece.m_description += $"\n{topKeys.Length - 4} other types: {topKeys.Skip(4).Sum(kvp => kvp.Value)}";
+    }
   }
   public GameObject Set(IEnumerable<ZNetView> views) {
     if (views.Count() == 1)
@@ -189,14 +216,9 @@ public class Selected {
     Ghost.SetActive(false);
     Ghost.name = $"Multiple ({views.Count()})";
     Ghost.transform.position = views.First().transform.position;
-    var piece = Ghost.AddComponent<Piece>();
-    piece.m_name = Ghost.name;
-    Dictionary<string, int> counts = new();
     ZNetView.m_forceDisableInit = true;
     foreach (var view in views) {
       var name = Utils.GetPrefabName(view.gameObject);
-      if (!counts.ContainsKey(name)) counts[name] = 0;
-      counts[name] += 1;
       var originalPrefab = ZNetScene.instance.GetPrefab(name);
       var prefab = Configuration.CopyState ? view.gameObject : originalPrefab;
       var data = Configuration.CopyState ? view.GetZDO() : null;
@@ -207,26 +229,26 @@ public class Selected {
       ResetColliders(obj, originalPrefab);
       var zdo = SetData(obj, "", data);
       Objects.Add(new SelectedObject(name, view.m_syncInitialScale, zdo));
+      AddSnapPoints(obj);
     }
     ZNetView.m_forceDisableInit = false;
-    var topKeys = counts.OrderBy(kvp => kvp.Value).Reverse().ToArray();
-    if (topKeys.Length <= 5)
-      piece.m_description = string.Join("\n", topKeys.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
-    else {
-      piece.m_description = string.Join("\n", topKeys.Take(4).Select(kvp => $"{kvp.Key}: {kvp.Value}"));
-      piece.m_description += $"\n{topKeys.Length - 4} other types: {topKeys.Skip(4).Sum(kvp => kvp.Value)}";
-    }
-
-
     Type = SelectedType.Multiple;
+    CountObjects();
     Rotating.UpdatePlacementRotation(Ghost);
     return Ghost;
   }
   public void Mirror() {
+    var i = 0;
     foreach (Transform item in Ghost.transform) {
-      item.localPosition = new(-item.localPosition.x, item.localPosition.y, item.localPosition.z);
+      var prefab = i < Objects.Count ? Objects[i].Prefab : "";
+      i += 1;
+      item.localPosition = new(item.localPosition.x, item.localPosition.y, -item.localPosition.z);
+
       var angles = item.localEulerAngles;
-      item.localRotation = Quaternion.Euler(angles.x, -angles.y, angles.z);
+      angles = new(angles.x, -angles.y, angles.z);
+      if (Configuration.MirrorFlip.Contains(prefab))
+        angles.y += 180;
+      item.localRotation = Quaternion.Euler(angles);
     }
     Helper.GetPlayer().SetupPlacementGhost();
   }
@@ -346,13 +368,8 @@ public class Selected {
       }
     }
     foreach (var position in bp.SnapPoints) {
-      GameObject obj = new() {
-        name = "_snappoint",
-        layer = LayerMask.NameToLayer("piece"),
-        tag = "snappoint"
-      };
-      obj.SetActive(false);
-      UnityEngine.Object.Instantiate(obj, position, Quaternion.identity, Ghost.transform);
+      SnapObj.SetActive(false);
+      UnityEngine.Object.Instantiate(SnapObj, position, Quaternion.identity, Ghost.transform);
     }
     ZNetView.m_forceDisableInit = false;
     Scaling.Get().SetScale(Ghost.transform.localScale);
@@ -360,6 +377,14 @@ public class Selected {
     Type = SelectedType.Multiple;
     return Ghost;
   }
+  private void AddSnapPoints(GameObject obj) {
+    foreach (Transform child in obj.transform) {
+      if (!child.gameObject.CompareTag("snappoint")) continue;
+      SnapObj.SetActive(false);
+      UnityEngine.Object.Instantiate(SnapObj, child.transform.position, Quaternion.identity, Ghost.transform);
+    }
+  }
+
 }
 ///<summary>Removes resource usage.</summary>
 [HarmonyPatch(typeof(VisEquipment), nameof(VisEquipment.SetItem))]

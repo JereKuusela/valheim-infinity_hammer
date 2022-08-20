@@ -7,23 +7,29 @@ using System.Reflection.Emit;
 using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer;
-[HarmonyPatch(typeof(ZNetView), nameof(ZNetView.Awake))]
+[HarmonyPatch(typeof(Player), nameof(Player.SetupPlacementGhost))]
 public static class Bounds {
   private static int[] IgnoredLayers = new[] { LayerMask.NameToLayer("character_trigger"), LayerMask.NameToLayer("viewblock"), LayerMask.NameToLayer("pathblocker") };
 
   public static Dictionary<string, Vector3> Get = new();
-  public static void Postfix(ZNetView __instance) {
-    var name = __instance.GetPrefabName();
+  public static void Postfix(Player __instance) {
+    var ghost = __instance.m_placementGhost;
+    if (ghost)
+      Check(ghost);
+  }
+  public static void Check(GameObject obj) {
+    if (obj.transform.rotation != Quaternion.identity) return;
+    var name = Utils.GetPrefabName(obj);
     if (Get.ContainsKey(name)) return;
-    if (__instance.transform.rotation != Quaternion.identity) return;
-    var colliders = __instance.GetComponentsInChildren<Collider>().Where(collider => !IgnoredLayers.Contains(collider.gameObject.layer)).ToArray();
-    if (colliders.Length == 0) {
+    if (!ZNetScene.instance.GetPrefab(name)) return;
+    var renderers = obj.GetComponentsInChildren<Renderer>().Where(collider => !IgnoredLayers.Contains(collider.gameObject.layer)).ToArray();
+    if (renderers.Length == 0) {
       Get[name] = Vector3.zero;
       return;
     }
-    var bounds = colliders[0].bounds;
-    foreach (var collider in colliders)
-      bounds.Encapsulate(collider.bounds);
+    var bounds = renderers[0].bounds;
+    foreach (var r in renderers)
+      bounds.Encapsulate(r.bounds);
     Get[name] = bounds.size;
   }
 }

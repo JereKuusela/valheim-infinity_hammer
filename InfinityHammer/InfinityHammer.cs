@@ -13,7 +13,7 @@ namespace InfinityHammer;
 public class InfinityHammer : BaseUnityPlugin {
   public const string GUID = "infinity_hammer";
   public const string NAME = "Infinity Hammer";
-  public const string VERSION = "1.20";
+  public const string VERSION = "1.21";
   ServerSync.ConfigSync ConfigSync = new(GUID) {
     DisplayName = NAME,
     CurrentVersion = VERSION,
@@ -22,7 +22,6 @@ public class InfinityHammer : BaseUnityPlugin {
   public static ManualLogSource Log;
 #nullable enable
   public void Awake() {
-    var config = Path.Combine(Path.GetDirectoryName(Config.ConfigFilePath), $"{GUID}.cfg");
     Log = Logger;
     Harmony harmony = new(GUID);
     harmony.PatchAll();
@@ -97,6 +96,7 @@ public class SetCommands {
     new HammerListCommand();
     new HoeListCommand();
     new HammerShapeCommand();
+    new HammerZoopCommand();
   }
 }
 
