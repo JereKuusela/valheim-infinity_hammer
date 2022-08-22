@@ -39,6 +39,7 @@ public partial class Selected {
     Ghost.transform.position = obj.transform.position;
     Ghost.transform.rotation = obj.transform.rotation;
     obj.transform.parent = Ghost.transform;
+    obj.transform.localScale = Vector3.one;
     obj.SetActive(true);
     AddSnapPoints(obj);
     if (obj.GetComponent<Piece>() is { } piece) {
@@ -113,17 +114,6 @@ public partial class Selected {
     layer = LayerMask.NameToLayer("piece"),
     tag = "snappoint",
   };
-  private Vector3 GetOffset(string offset) {
-    var baseObj = Ghost.transform.GetChild(0).gameObject;
-    var size = Helper.ParseSize(baseObj, offset);
-    size.x *= baseObj.transform.localScale.x;
-    size.x *= ZoopsX;
-    size.y *= baseObj.transform.localScale.y;
-    size.y *= ZoopsY;
-    size.z *= baseObj.transform.localScale.z;
-    size.z *= ZoopsZ;
-    return size;
-  }
   private Vector3 GetOffset(Vector3Int index) {
     var offset = ZoopOffset;
     offset.x *= index.x;
@@ -134,17 +124,23 @@ public partial class Selected {
   private void UpdateOffsetX(string offset) {
     var baseObj = Ghost.transform.GetChild(0).gameObject;
     var size = Helper.ParseSize(baseObj, offset);
-    ZoopOffset.x = size.x * baseObj.transform.localScale.x;
+    ZoopOffset.x = size.x * Ghost.transform.localScale.z;
   }
   private void UpdateOffsetY(string offset) {
     var baseObj = Ghost.transform.GetChild(0).gameObject;
     var size = Helper.ParseSize(baseObj, offset);
-    ZoopOffset.y = size.y * baseObj.transform.localScale.y;
+    ZoopOffset.y = size.y * Ghost.transform.localScale.y;
   }
   private void UpdateOffsetZ(string offset) {
     var baseObj = Ghost.transform.GetChild(0).gameObject;
     var size = Helper.ParseSize(baseObj, offset);
-    ZoopOffset.z = size.z * baseObj.transform.localScale.z;
+    ZoopOffset.z = size.z * Ghost.transform.localScale.z;
+  }
+  private void ZoopPostprocess() {
+    CountObjects();
+    var scale = Scaling.Build.Value;
+    Helper.GetPlayer().SetupPlacementGhost();
+    Scaling.Build.SetScale(scale);
   }
   public void ZoopRight(string offset) {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
@@ -160,8 +156,7 @@ public partial class Selected {
       ZoopsX += 1;
       AddChildX(offset);
     }
-    CountObjects();
-    Helper.GetPlayer().SetupPlacementGhost();
+    ZoopPostprocess();
   }
   public void ZoopLeft(string offset) {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
@@ -177,8 +172,7 @@ public partial class Selected {
       ZoopsX -= 1;
       AddChildX(offset);
     }
-    CountObjects();
-    Helper.GetPlayer().SetupPlacementGhost();
+    ZoopPostprocess();
   }
   public void ZoopUp(string offset) {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
@@ -194,8 +188,7 @@ public partial class Selected {
       ZoopsY += 1;
       AddChildY(offset);
     }
-    CountObjects();
-    Helper.GetPlayer().SetupPlacementGhost();
+    ZoopPostprocess();
   }
   public void ZoopDown(string offset) {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
@@ -211,8 +204,7 @@ public partial class Selected {
       ZoopsY -= 1;
       AddChildY(offset);
     }
-    CountObjects();
-    Helper.GetPlayer().SetupPlacementGhost();
+    ZoopPostprocess();
   }
   public void ZoopForward(string offset) {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
@@ -228,8 +220,7 @@ public partial class Selected {
       ZoopsZ += 1;
       AddChildZ(offset);
     }
-    CountObjects();
-    Helper.GetPlayer().SetupPlacementGhost();
+    ZoopPostprocess();
   }
   public void ZoopBackward(string offset) {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
@@ -245,7 +236,6 @@ public partial class Selected {
       ZoopsZ -= 1;
       AddChildZ(offset);
     }
-    CountObjects();
-    Helper.GetPlayer().SetupPlacementGhost();
+    ZoopPostprocess();
   }
 }

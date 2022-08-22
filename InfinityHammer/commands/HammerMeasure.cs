@@ -27,8 +27,10 @@ public class HammerMeasureCommand {
         if (prefab.name.StartsWith("_", StringComparison.Ordinal)) continue;
         if (prefab.name.StartsWith("fx_", StringComparison.Ordinal)) continue;
         if (prefab.name.StartsWith("sfx_", StringComparison.Ordinal)) continue;
+        if (prefab.GetComponentInChildren<Ragdoll>()) continue;
+        if (prefab.GetComponentInChildren<ItemDrop>()) continue;
         if (!prefab.GetComponentInChildren<Collider>()) continue;
-        var obj = UnityEngine.Object.Instantiate(prefab);
+        var obj = UnityEngine.Object.Instantiate(prefab, Vector3.zero, Quaternion.identity);
         CheckWithCollider(obj);
         UnityEngine.Object.Destroy(obj);
       }

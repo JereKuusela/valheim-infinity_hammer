@@ -10,6 +10,10 @@ public class BaseAIAwake {
 public class TreeBaseAwake {
   static bool Prefix() => !ZNetView.m_forceDisableInit;
 }
+[HarmonyPatch(typeof(TreeLog), nameof(TreeLog.Awake))]
+public class TreeLogAwake {
+  static bool Prefix() => !ZNetView.m_forceDisableInit;
+}
 [HarmonyPatch(typeof(MonsterAI), nameof(MonsterAI.Awake))]
 public class MonsterAIAwake {
   static bool Prefix() => !ZNetView.m_forceDisableInit;

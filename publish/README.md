@@ -213,11 +213,12 @@ Note: Infinity Hammer will also store the object data when creating blueprints. 
 
 Some special commands exist for advaced cases. Usually you want to bind these.
 
+- `hammer_add_piece_components`: Adds the Piece component to every object which allows copying them with PlanBuild mod.
 - `hammer_grid [precision] [center=current]`: Restricts possible placement coordinates. Using the same command removes the restriction.
+- `hammer_measure`: Measures most objects updating `dimensions` setting.
+- `hammer_mirror`: Mirrors the selection.
 - `hammer_place`: Allows placing with a key press.
 - `hammer_repair`: Selects the repair tool for quickly clearing the selection.
-- `hammer_mirror`: Mirrors the selection.
-- `hammer_add_piece_components`: Adds the Piece component to every object which allows copying them with PlanBuild mod.
 
 For example with [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) you could bind command `hammer_rotate_y random;hammer_place` to build objects with a random rotation.
 
@@ -420,7 +421,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 - v1.21
 	- Adds new commands `hammer_zoop_[direction]` to multiply the selection.
 	- Adds a new setting `dimensions` to define object dimensions.
-	- Adds a new command `hammer_measure` to measure every object.
+	- Adds a new command `hammer_measure` to measure most objects.
 	- Adds automatic snap points to multi selection.
 
 - v1.20

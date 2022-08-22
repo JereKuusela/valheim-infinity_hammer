@@ -10,9 +10,6 @@ public partial class Configuration {
   public static ConfigEntry<KeyboardShortcut> configCommandRadius;
   public static ConfigEntry<KeyboardShortcut> configCommandDepth;
   public static ConfigEntry<KeyboardShortcut> configCommandHeight;
-  public static ConfigEntry<KeyboardShortcut> configStackHorizontal;
-  public static ConfigEntry<KeyboardShortcut> configStackVertical;
-  public static ConfigEntry<KeyboardShortcut> configStackForward;
   public static ConfigEntry<KeyboardShortcut> configZoopHorizontal;
   public static ConfigEntry<KeyboardShortcut> configZoopVertical;
   public static ConfigEntry<KeyboardShortcut> configZoopForward;
@@ -66,9 +63,6 @@ public partial class Configuration {
     configCommandRadius = wrapper.BindWheelCommand("hammer_zoom_x_cmd 1", section, "Command radius (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift), "Changes the command radius.", "build");
     configCommandDepth = wrapper.BindWheelCommand("hammer_zoom_z_cmd 1", section, "Command depth (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift, KeyCode.LeftAlt), "Changes the command rectangle depth.", "build");
     configCommandHeight = wrapper.BindWheelCommand("hammer_zoom_y_cmd 0.5", section, "Command height (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift, KeyCode.LeftControl), "Changes the command height.", "build");
-    configStackForward = wrapper.BindWheelCommand("hammer_place;hammer_move_forward auto", section, "Stacking forward (mouse wheel)", new KeyboardShortcut(KeyCode.None), "Places next to each other.", "build");
-    configStackHorizontal = wrapper.BindWheelCommand("hammer_place;hammer_move_right auto", section, "Stacking horizontal (mouse wheel)", new KeyboardShortcut(KeyCode.None), "Places next to each other.", "build");
-    configStackVertical = wrapper.BindWheelCommand("hammer_place;hammer_move_up auto", section, "Stacking vertical (mouse wheel)", new KeyboardShortcut(KeyCode.None), "Places next to each other.", "build");
     configZoopForward = wrapper.BindWheelCommand("hammer_zoop_forward auto", section, "Zooping forward (mouse wheel)", new KeyboardShortcut(KeyCode.None), "Zoops next to each other.", "build");
     configZoopHorizontal = wrapper.BindWheelCommand("hammer_zoop_right auto", section, "Zooping horizontal (mouse wheel)", new KeyboardShortcut(KeyCode.None), "Zoops next to each other.", "build");
     configZoopVertical = wrapper.BindWheelCommand("hammer_zoop_up auto", section, "Zooping vertical (mouse wheel)", new KeyboardShortcut(KeyCode.None), "Zoops next to each other.", "build");

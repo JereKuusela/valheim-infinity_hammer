@@ -196,6 +196,7 @@ public partial class Selected {
     Ghost.name = $"Multiple ({Helper.CountActiveChildren(Ghost)})";
     var piece = Ghost.GetComponent<Piece>();
     if (!piece) piece = Ghost.AddComponent<Piece>();
+    piece.m_clipEverything = Helper.CountSnapPoints(Ghost) == 0;
     piece.m_name = Ghost.name;
     Dictionary<string, int> counts = Objects.GroupBy(obj => obj.Prefab).ToDictionary(kvp => kvp.Key, kvp => kvp.Count());
     var topKeys = counts.OrderBy(kvp => kvp.Value).Reverse().ToArray();
@@ -228,7 +229,8 @@ public partial class Selected {
       ResetColliders(obj, originalPrefab);
       var zdo = SetData(obj, "", data);
       Objects.Add(new SelectedObject(name, view.m_syncInitialScale, zdo));
-      AddSnapPoints(obj);
+      if (view == views.First())
+        AddSnapPoints(obj);
     }
     ZNetView.m_forceDisableInit = false;
     Type = SelectedType.Multiple;
