@@ -121,7 +121,7 @@ public static class Helper {
     var size = Vector3.one;
     if (value.Contains("auto")) {
       if (!ghost) throw new InvalidOperationException("No placement ghost.");
-      if (!Bounds.Get.TryGetValue(Utils.GetPrefabName(ghost), out size))
+      if (!Configuration.Dimensions.TryGetValue(Utils.GetPrefabName(ghost).ToLower(), out size))
         throw new InvalidOperationException("Missing object dimensions. Try placing the object to fix the issue.");
     }
     return multiplier * size;
@@ -142,19 +142,19 @@ public static class Helper {
   ///<summary>Returns whether the ghost is square on x-axis.</summary>
   public static bool IsSquareX(GameObject ghost) {
     if (!ghost) return false;
-    var size = Bounds.Get[Utils.GetPrefabName(ghost)];
+    var size = Configuration.Dimensions[Utils.GetPrefabName(ghost).ToLower()];
     return size.y - size.z < 0.01f;
   }
   ///<summary>Returns whether the ghost is square on y-axis.</summary>
   public static bool IsSquareY(GameObject ghost) {
     if (!ghost) return false;
-    var size = Bounds.Get[Utils.GetPrefabName(ghost)];
+    var size = Configuration.Dimensions[Utils.GetPrefabName(ghost).ToLower()];
     return size.x - size.z < 0.01f;
   }
   ///<summary>Returns whether the ghost is square on z-axis.</summary>
   public static bool IsSquareZ(GameObject ghost) {
     if (!ghost) return false;
-    var size = Bounds.Get[Utils.GetPrefabName(ghost)];
+    var size = Configuration.Dimensions[Utils.GetPrefabName(ghost).ToLower()];
     return size.x - size.y < 0.01f;
   }
 
@@ -293,6 +293,14 @@ public static class Helper {
         Helper.AddError(args.Context, e.Message);
       }
     };
+
+  public static int CountActiveChildren(GameObject obj) {
+    var count = 0;
+    foreach (Transform tr in obj.transform) {
+      if (tr.gameObject.activeSelf) count++;
+    }
+    return count;
+  }
 }
 [HarmonyPatch(typeof(Player), nameof(Player.Message))]
 public class ReplaceMessage {

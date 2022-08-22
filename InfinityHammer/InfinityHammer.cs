@@ -97,6 +97,7 @@ public class SetCommands {
     new HoeListCommand();
     new HammerShapeCommand();
     new HammerZoopCommand();
+    new HammerMeasureCommand();
   }
 }
 

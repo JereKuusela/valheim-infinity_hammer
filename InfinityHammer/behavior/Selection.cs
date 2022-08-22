@@ -193,8 +193,7 @@ public partial class Selected {
   }
   private void CountObjects() {
     if (Type != SelectedType.Multiple) return;
-    var count = ((IEnumerable<Transform>)Ghost.transform).Count(tr => tr.gameObject.activeSelf);
-    Ghost.name = $"Multiple ({count})";
+    Ghost.name = $"Multiple ({Helper.CountActiveChildren(Ghost)})";
     var piece = Ghost.GetComponent<Piece>();
     if (!piece) piece = Ghost.AddComponent<Piece>();
     piece.m_name = Ghost.name;
@@ -377,14 +376,24 @@ public partial class Selected {
     Type = SelectedType.Multiple;
     return Ghost;
   }
-  private void AddSnapPoints(GameObject obj) {
+  private void AddSnapPoints(GameObject obj, int index) {
+
     foreach (Transform child in obj.transform) {
       if (!child.gameObject.CompareTag("snappoint")) continue;
       SnapObj.SetActive(false);
       UnityEngine.Object.Instantiate(SnapObj, child.transform.position, Quaternion.identity, Ghost.transform);
     }
   }
-
+  private List<GameObject> AddSnapPoints(GameObject obj) {
+    List<GameObject> added = new();
+    foreach (Transform child in obj.transform) {
+      if (!child.gameObject.CompareTag("snappoint")) continue;
+      SnapObj.SetActive(false);
+      var snapObj = UnityEngine.Object.Instantiate(SnapObj, child.transform.position, Quaternion.identity, Ghost.transform);
+      added.Add(snapObj);
+    }
+    return added;
+  }
 }
 ///<summary>Removes resource usage.</summary>
 [HarmonyPatch(typeof(VisEquipment), nameof(VisEquipment.SetItem))]

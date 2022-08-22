@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -7,6 +8,8 @@ public partial class Selected {
   private int ZoopsX = 0;
   private int ZoopsY = 0;
   private int ZoopsZ = 0;
+  private Vector3 ZoopOffset = new();
+  private Dictionary<Vector3Int, GameObject> Zoops = new();
   private void ToSingle() {
     var obj = Ghost.transform.GetChild(0).gameObject;
     obj.SetActive(false);
@@ -19,8 +22,10 @@ public partial class Selected {
     ZoopsX = 0;
     ZoopsY = 0;
     ZoopsZ = 0;
+    Zoops.Clear();
   }
   private void ToMulti() {
+    if (Type == SelectedType.Multiple) return;
     if (Type == SelectedType.Default) {
       var ghost = Player.m_localPlayer.m_placementGhost;
       var name = Utils.GetPrefabName(ghost);
@@ -43,47 +48,71 @@ public partial class Selected {
       }
     }
   }
-  private void RemoveLast() {
+  private int Sign(int value) => value >= 0 ? 1 : -1;
+  private void RemoveChildSub(Vector3Int index) {
     if (Objects.Count > 0)
-      Objects = Objects.Take(Objects.Count - 1).ToList();
-    if (Ghost.transform.childCount > 0) {
-      var child = Ghost.transform.GetChild(Ghost.transform.childCount - 1);
-      child.gameObject.SetActive(false);
-      child.parent = null;
-      RemoveSnapPoints(child.gameObject);
-      UnityEngine.Object.Destroy(child.gameObject);
-    }
+      Objects.RemoveAt(0);
+    var obj = Zoops[index];
+    obj.SetActive(false);
+    obj.transform.parent = null;
+    UnityEngine.Object.Destroy(obj);
+    Zoops.Remove(index);
   }
-  private void AddChild(string offset) {
+  private void RemoveChildX() {
+    for (var y = 0; Math.Abs(y) <= Math.Abs(ZoopsY); y += Sign(ZoopsY))
+      for (var z = 0; Math.Abs(z) <= Math.Abs(ZoopsZ); z += Sign(ZoopsZ))
+        RemoveChildSub(new(ZoopsX, y, z));
+  }
+  private void RemoveChildY() {
+    for (var x = 0; Math.Abs(x) <= Math.Abs(ZoopsX); x += Sign(ZoopsX))
+      for (var z = 0; Math.Abs(z) <= Math.Abs(ZoopsZ); z += Sign(ZoopsZ))
+        RemoveChildSub(new(x, ZoopsY, z));
+  }
+  private void RemoveChildZ() {
+    for (var x = 0; Math.Abs(x) <= Math.Abs(ZoopsX); x += Sign(ZoopsX))
+      for (var y = 0; Math.Abs(y) <= Math.Abs(ZoopsY); y += Sign(ZoopsY))
+        RemoveChildSub(new(x, y, ZoopsZ));
+  }
+  private void AddChildSub(Vector3Int index) {
+    var pos = GetOffset(index);
     var baseObj = Ghost.transform.GetChild(0).gameObject;
-    var pos = GetOffset(offset);
-    ZNetView.m_forceDisableInit = true;
     var obj = Helper.SafeInstantiate(baseObj, Ghost);
     obj.SetActive(true);
     obj.transform.rotation = baseObj.transform.rotation;
     obj.transform.localPosition = pos;
     Objects.Add(new SelectedObject(Objects[0].Prefab, Objects[0].Scalable, Objects[0].Data));
+    Zoops[index] = obj;
+  }
+  private void AddChildX(string offset) {
+    UpdateOffsetX(offset);
+    ZNetView.m_forceDisableInit = true;
+    for (var y = 0; Math.Abs(y) <= Math.Abs(ZoopsY); y += Sign(ZoopsY))
+      for (var z = 0; Math.Abs(z) <= Math.Abs(ZoopsZ); z += Sign(ZoopsZ))
+        AddChildSub(new(ZoopsX, y, z));
     ZNetView.m_forceDisableInit = false;
-    AddSnapPoints(obj);
+  }
+  private void AddChildY(string offset) {
+    UpdateOffsetY(offset);
+    ZNetView.m_forceDisableInit = true;
+    for (var x = 0; Math.Abs(x) <= Math.Abs(ZoopsX); x += Sign(ZoopsX))
+      for (var z = 0; Math.Abs(z) <= Math.Abs(ZoopsZ); z += Sign(ZoopsZ))
+        AddChildSub(new(x, ZoopsY, z));
+    ZNetView.m_forceDisableInit = false;
+  }
+
+  private void AddChildZ(string offset) {
+    UpdateOffsetZ(offset);
+    ZNetView.m_forceDisableInit = true;
+    for (var x = 0; Math.Abs(x) <= Math.Abs(ZoopsX); x += Sign(ZoopsX))
+      for (var y = 0; Math.Abs(y) <= Math.Abs(ZoopsY); y += Sign(ZoopsY))
+        AddChildSub(new(x, y, ZoopsZ));
+    ZNetView.m_forceDisableInit = false;
   }
   private static GameObject SnapObj = new() {
     name = "_snappoint",
     layer = LayerMask.NameToLayer("piece"),
     tag = "snappoint",
   };
-  private void RemoveSnapPoints(GameObject obj) {
-    Stack<Transform> snaps = new();
-    foreach (Transform child in Ghost.transform) {
-      if (!child.gameObject.CompareTag("snappoint")) continue;
-      snaps.Push(child);
-    }
-    foreach (Transform child in obj.transform) {
-      if (!child.gameObject.CompareTag("snappoint")) continue;
-      var snap = snaps.Pop();
-      snap.parent = null;
-      UnityEngine.Object.Destroy(snap.gameObject);
-    }
-  }
   private Vector3 GetOffset(string offset) {
     var baseObj = Ghost.transform.GetChild(0).gameObject;
     var size = Helper.ParseSize(baseObj, offset);
@@ -95,22 +124,41 @@ public partial class Selected {
     size.z *= ZoopsZ;
     return size;
   }
+  private Vector3 GetOffset(Vector3Int index) {
+    var offset = ZoopOffset;
+    offset.x *= index.x;
+    offset.y *= index.y;
+    offset.z *= index.z;
+    return offset;
+  }
+  private void UpdateOffsetX(string offset) {
+    var baseObj = Ghost.transform.GetChild(0).gameObject;
+    var size = Helper.ParseSize(baseObj, offset);
+    ZoopOffset.x = size.x * baseObj.transform.localScale.x;
+  }
+  private void UpdateOffsetY(string offset) {
+    var baseObj = Ghost.transform.GetChild(0).gameObject;
+    var size = Helper.ParseSize(baseObj, offset);
+    ZoopOffset.y = size.y * baseObj.transform.localScale.y;
+  }
+  private void UpdateOffsetZ(string offset) {
+    var baseObj = Ghost.transform.GetChild(0).gameObject;
+    var size = Helper.ParseSize(baseObj, offset);
+    ZoopOffset.z = size.z * baseObj.transform.localScale.z;
+  }
   public void ZoopRight(string offset) {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
     if (Type == SelectedType.Command) return;
     if (Type == SelectedType.Location) return;
-    if (ZoopsY != 0 || ZoopsZ != 0)
-      ToSingle();
-    if (ZoopsX == -1) {
+    if (ZoopsX == -1 && ZoopsY == 0 && ZoopsZ == 0) {
       ToSingle();
     } else if (ZoopsX < 0) {
-      RemoveLast();
+      RemoveChildX();
       ZoopsX += 1;
     } else {
-      if (ZoopsX == 0)
-        ToMulti();
+      ToMulti();
       ZoopsX += 1;
-      AddChild(offset);
+      AddChildX(offset);
     }
     CountObjects();
     Helper.GetPlayer().SetupPlacementGhost();
@@ -119,18 +167,15 @@ public partial class Selected {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
     if (Type == SelectedType.Command) return;
     if (Type == SelectedType.Location) return;
-    if (ZoopsY != 0 || ZoopsZ != 0)
-      ToSingle();
-    if (ZoopsX == 1) {
+    if (ZoopsX == 1 && ZoopsY == 0 && ZoopsZ == 0) {
       ToSingle();
     } else if (ZoopsX > 0) {
-      RemoveLast();
+      RemoveChildX();
       ZoopsX -= 1;
     } else {
-      if (ZoopsX == 0)
-        ToMulti();
+      ToMulti();
       ZoopsX -= 1;
-      AddChild(offset);
+      AddChildX(offset);
     }
     CountObjects();
     Helper.GetPlayer().SetupPlacementGhost();
@@ -139,18 +184,15 @@ public partial class Selected {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
     if (Type == SelectedType.Command) return;
     if (Type == SelectedType.Location) return;
-    if (ZoopsX != 0 || ZoopsZ != 0)
-      ToSingle();
-    if (ZoopsY == -1) {
+    if (ZoopsX == 0 && ZoopsY == -1 && ZoopsZ == 0) {
       ToSingle();
     } else if (ZoopsY < 0) {
-      RemoveLast();
+      RemoveChildY();
       ZoopsY += 1;
     } else {
-      if (ZoopsY == 0)
-        ToMulti();
+      ToMulti();
       ZoopsY += 1;
-      AddChild(offset);
+      AddChildY(offset);
     }
     CountObjects();
     Helper.GetPlayer().SetupPlacementGhost();
@@ -159,18 +201,15 @@ public partial class Selected {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
     if (Type == SelectedType.Command) return;
     if (Type == SelectedType.Location) return;
-    if (ZoopsX != 0 || ZoopsZ != 0)
-      ToSingle();
-    if (ZoopsY == 1) {
+    if (ZoopsX == 0 && ZoopsY == 1 && ZoopsZ == 0) {
       ToSingle();
     } else if (ZoopsY > 0) {
-      RemoveLast();
+      RemoveChildY();
       ZoopsY -= 1;
     } else {
-      if (ZoopsY == 0)
-        ToMulti();
+      ToMulti();
       ZoopsY -= 1;
-      AddChild(offset);
+      AddChildY(offset);
     }
     CountObjects();
     Helper.GetPlayer().SetupPlacementGhost();
@@ -179,18 +218,15 @@ public partial class Selected {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
     if (Type == SelectedType.Command) return;
     if (Type == SelectedType.Location) return;
-    if (ZoopsX != 0 || ZoopsY != 0)
-      ToSingle();
-    if (ZoopsZ == -1) {
+    if (ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == -1) {
       ToSingle();
     } else if (ZoopsZ < 0) {
-      RemoveLast();
+      RemoveChildZ();
       ZoopsZ += 1;
     } else {
-      if (ZoopsZ == 0)
-        ToMulti();
+      ToMulti();
       ZoopsZ += 1;
-      AddChild(offset);
+      AddChildZ(offset);
     }
     CountObjects();
     Helper.GetPlayer().SetupPlacementGhost();
@@ -199,18 +235,15 @@ public partial class Selected {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
     if (Type == SelectedType.Command) return;
     if (Type == SelectedType.Location) return;
-    if (ZoopsX != 0 || ZoopsY != 0)
-      ToSingle();
-    if (ZoopsZ == 1) {
+    if (ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 1) {
       ToSingle();
     } else if (ZoopsZ > 0) {
-      RemoveLast();
+      RemoveChildZ();
       ZoopsZ -= 1;
     } else {
-      if (ZoopsZ == 0)
-        ToMulti();
+      ToMulti();
       ZoopsZ -= 1;
-      AddChild(offset);
+      AddChildZ(offset);
     }
     CountObjects();
     Helper.GetPlayer().SetupPlacementGhost();

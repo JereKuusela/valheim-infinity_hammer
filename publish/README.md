@@ -419,6 +419,8 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 
 - v1.21
 	- Adds new commands `hammer_zoop_[direction]` to multiply the selection.
+	- Adds a new setting `dimensions` to define object dimensions.
+	- Adds a new command `hammer_measure` to measure every object.
 	- Adds automatic snap points to multi selection.
 
 - v1.20
