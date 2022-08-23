@@ -171,22 +171,28 @@ If [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Serv
 
 ## Multiplacement
 
-Objects can be placed multiple times in a row with the commands:
-
+The selection can be multiplied with zooping:
 - `hammer_zoop_[direction] [step=auto]`
-- `hammer_stack_[direction] [amount or min-max] [step=auto]`
-
-Zoop multiplies the selection while stack instantly places multiple objects.
 
 Possible directions are `backward`, `down`, `forward`,`left`, `right` and `up`.
 
-The amount simply determines how many objects are placed. This can be fine-tuned by giving a range.
+The step sets the distance between cloned objects. By default this is the size of the object. 
 
-The step sets the distance between placed objects. By default this is the size of the object. 
+The recommended way is to set a keybinding in the config (with Server Devcommands mod). Custom bindings can also be used for special cases.
+
+Examples:
+-  `hammer_zoop_right auto`: Clones the selected object to next to it.
+-  `hammer_zoop_right 2*auto`: Clones the selected object while leaving a gap (equal to the object size).
+-  `hammer_zoop_up 5`: Clones the selected object to 5 meters above it.
+
+### Stacking
+
+Stacking is similar to zooping but instantly places the objects:
+- `hammer_stack_[direction] [amount or min-max] [step=auto]`
+
+The amount determines how many objects are placed. This can be fine-tuned by giving a range.
 
 Note: Choosing the correction direction can be difficult when rotating the selection. But you can easily try things by reverting the changes with `hammer_undo`.
-
-Note: Determining the size of the object is not fully reliable. Be prepared to give the distance manually.
 
 Examples:
 -  `hammer_stack_up 10`: Places 10 objects on top of each other.
@@ -320,6 +326,7 @@ Following powers are available with `hammer_config` command:
 - Copy rotation (default: `true`, key: `copy_rotation`): Copies rotation of the selected object.
 - Copy state (default: `true`, key: `copy_state`): Object state is copied (for example chest contents or item stand items).
 - Custom binds (default: ` `, key: `custom_binds`): Sets binds at the game start up. Any existing binds are cleared from those keys.
+- Dimensions (key: `dimensions`): Measurements for objects.
 - Disable loot (default: `false`, key: `disable_loot`): Creatures and structures won't drop loot when destroyed with the hammer.
 - Disable marker (default: `false`, key: `disable_marker`): Whether the placement ghost is visualized.
 - Enable undo (default: `true`, key: `enable_undo`): Whether the undo/redo feature is enabled.

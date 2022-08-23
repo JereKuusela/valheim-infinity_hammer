@@ -135,6 +135,10 @@ public partial class Selected {
     if (obj.GetComponent<WearNTear>() is not { } wearNTear) return;
     wearNTear.SetHealthVisual(Convert(wear, 1f), false);
   }
+  private static void SetText(GameObject obj, string text) {
+    if (obj.GetComponent<Sign>() is not { } sign) return;
+    sign.m_textWidget.text = text;
+  }
   private static void SetGrowth(GameObject obj, int growth) {
     if (growth == -1) return;
     if (obj.GetComponent<Plant>() is not { } plant) return;
@@ -158,6 +162,7 @@ public partial class Selected {
     SetLevel(obj, zdo.GetInt(Hash.Level, -1));
     SetGrowth(obj, zdo.GetInt(Hash.Growth, -1));
     SetWear(obj, zdo.GetInt(Hash.Wear, -1));
+    SetText(obj, zdo.GetString(Hash.Text, ""));
   }
   public void Postprocess(Vector3? scale) {
     if (Type == SelectedType.Object) {
@@ -167,8 +172,10 @@ public partial class Selected {
     }
     if (Type == SelectedType.Multiple) {
       var i = 0;
-      foreach (Transform tr in Ghost.transform)
+      foreach (Transform tr in Ghost.transform) {
+        if (Helper.IsSnapPoint(tr.gameObject)) continue;
         Postprocess(tr.gameObject, GetData(i++), scale);
+      }
     }
     Helper.GetPlayer().SetupPlacementGhost();
   }
@@ -176,7 +183,7 @@ public partial class Selected {
     var name = Utils.GetPrefabName(view.gameObject);
     var originalPrefab = ZNetScene.instance.GetPrefab(name);
     var prefab = Configuration.CopyState ? view.gameObject : originalPrefab;
-    var data = Configuration.CopyState ? view.GetZDO() : null;
+    var data = Configuration.CopyState ? view.GetZDO().Clone() : null;
 
     if (!prefab) throw new InvalidOperationException("Invalid prefab.");
     if (prefab.GetComponent<Player>()) throw new InvalidOperationException("Players are not valid objects.");
@@ -221,14 +228,14 @@ public partial class Selected {
       var name = Utils.GetPrefabName(view.gameObject);
       var originalPrefab = ZNetScene.instance.GetPrefab(name);
       var prefab = Configuration.CopyState ? view.gameObject : originalPrefab;
-      var data = Configuration.CopyState ? view.GetZDO() : null;
+      var data = Configuration.CopyState ? view.GetZDO().Clone() : null;
       var obj = Helper.SafeInstantiate(prefab, Ghost);
       obj.SetActive(true);
       obj.transform.position = view.transform.position;
       obj.transform.rotation = view.transform.rotation;
       ResetColliders(obj, originalPrefab);
       var zdo = SetData(obj, "", data);
-      Objects.Add(new SelectedObject(name, view.m_syncInitialScale, zdo));
+      Objects.Add(new(name, view.m_syncInitialScale, zdo));
       if (view == views.First())
         AddSnapPoints(obj);
     }
@@ -240,16 +247,20 @@ public partial class Selected {
   }
   public void Mirror() {
     var i = 0;
-    foreach (Transform item in Ghost.transform) {
+    foreach (Transform tr in Ghost.transform) {
       var prefab = i < Objects.Count ? Objects[i].Prefab : "";
       i += 1;
-      item.localPosition = new(item.localPosition.x, item.localPosition.y, -item.localPosition.z);
+      if (Helper.IsSnapPoint(tr.gameObject)) {
+        prefab = "";
+        i -= 1;
+      }
+      tr.localPosition = new(tr.localPosition.x, tr.localPosition.y, -tr.localPosition.z);
 
-      var angles = item.localEulerAngles;
+      var angles = tr.localEulerAngles;
       angles = new(angles.x, -angles.y, angles.z);
       if (Configuration.MirrorFlip.Contains(prefab))
         angles.y += 180;
-      item.localRotation = Quaternion.Euler(angles);
+      tr.localRotation = Quaternion.Euler(angles);
     }
     Helper.GetPlayer().SetupPlacementGhost();
   }
@@ -379,19 +390,18 @@ public partial class Selected {
     return Ghost;
   }
   private void AddSnapPoints(GameObject obj, int index) {
-
-    foreach (Transform child in obj.transform) {
-      if (!child.gameObject.CompareTag("snappoint")) continue;
+    foreach (Transform tr in obj.transform) {
+      if (!Helper.IsSnapPoint(tr.gameObject)) continue;
       SnapObj.SetActive(false);
-      UnityEngine.Object.Instantiate(SnapObj, child.transform.position, Quaternion.identity, Ghost.transform);
+      UnityEngine.Object.Instantiate(SnapObj, tr.transform.position, Quaternion.identity, Ghost.transform);
     }
   }
   private List<GameObject> AddSnapPoints(GameObject obj) {
     List<GameObject> added = new();
-    foreach (Transform child in obj.transform) {
-      if (!child.gameObject.CompareTag("snappoint")) continue;
+    foreach (Transform tr in obj.transform) {
+      if (!Helper.IsSnapPoint(tr.gameObject)) continue;
       SnapObj.SetActive(false);
-      var snapObj = UnityEngine.Object.Instantiate(SnapObj, child.transform.position, Quaternion.identity, Ghost.transform);
+      var snapObj = UnityEngine.Object.Instantiate(SnapObj, tr.transform.position, Quaternion.identity, Ghost.transform);
       added.Add(snapObj);
     }
     return added;

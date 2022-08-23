@@ -228,6 +228,7 @@ public static class Helper {
     }
     return SafeInstantiate(location.m_prefab);
   }
+  public static bool IsSnapPoint(GameObject obj) => obj.CompareTag("snappoint");
   ///<summary>Removes scripts that try to run (for example placement needs only the model and Piece component).</summary>
   public static void CleanObject(GameObject obj) {
     if (!obj || !Configuration.Enabled) return;
@@ -298,14 +299,14 @@ public static class Helper {
   public static int CountActiveChildren(GameObject obj) {
     var count = 0;
     foreach (Transform tr in obj.transform) {
-      if (tr.gameObject.activeSelf) count++;
+      if (tr.gameObject.activeSelf && !IsSnapPoint(tr.gameObject)) count++;
     }
     return count;
   }
   public static int CountSnapPoints(GameObject obj) {
     var count = 0;
     foreach (Transform tr in obj.transform) {
-      if (tr.gameObject.CompareTag("snappoint")) count++;
+      if (Helper.IsSnapPoint(tr.gameObject)) count++;
     }
     return count;
   }

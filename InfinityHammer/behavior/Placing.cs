@@ -106,8 +106,10 @@ public class PlacePiece {
     }
     if (Selection.Type == SelectedType.Multiple) {
       UndoHelper.StartTracking();
-      for (var i = 0; i < ghost.transform.childCount; i++) {
-        var ghostObj = ghost.transform.GetChild(i).gameObject;
+      var i = 0;
+      foreach (Transform tr in ghost.transform) {
+        var ghostObj = tr.gameObject;
+        if (Helper.IsSnapPoint(ghostObj)) continue;
         var name = Utils.GetPrefabName(ghostObj);
         var prefab = ZNetScene.instance.GetPrefab(name);
         if (prefab) {
@@ -117,6 +119,7 @@ public class PlacePiece {
           Hammer.PostProcessPlaced(childObj);
           Scaling.SetPieceScale(childView, ghostObj);
         }
+        i += 1;
       }
       UndoHelper.StopTracking();
       UnityEngine.Object.Destroy(obj);
