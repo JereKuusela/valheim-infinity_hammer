@@ -275,6 +275,7 @@ This command can be added to the menu with `hammer_add hammer_area`. It's recomm
 The full potential of commands can be unlocked by installing [World Edit Commands](https://valheim.thunderstore.io/package/JereKuusela/World_Edit_Commands/) mod. This automatically adds new commands to the hoe (mainly for terrain modifications).
 
 Full list of parameters:
+- `id`: Id of the hovered object.
 - `x`: X coordinate.
 - `y`: Y coordinate.
 - `z`: Z coordinate.
@@ -426,6 +427,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 # Changelog
 
 - v1.22
+	- Adds a new parameter `id` to commands for using the hovered object id.
 	- Improves support for picking up and freezing at the same time.
 
 - v1.21
