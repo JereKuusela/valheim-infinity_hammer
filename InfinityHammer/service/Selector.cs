@@ -26,9 +26,9 @@ public static class Selector {
 
 
   ///<summary>Returns the hovered object.</summary>
-  public static ZNetView GetHovered(float range, HashSet<string>? blacklist) {
+  public static ZNetView? GetHovered(float range, HashSet<string>? blacklist) {
     var hovered = GetHovered(Player.m_localPlayer, range, blacklist);
-    if (hovered == null) throw new InvalidOperationException("Nothing is being hovered.");
+    if (hovered == null) return null;
     return hovered.Obj;
   }
 

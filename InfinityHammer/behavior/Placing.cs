@@ -87,6 +87,14 @@ public class PlacePiece {
         }
         command = string.Join(" ", args);
       }
+      if (command.Contains("#id")) {
+        var hovered = Selector.GetHovered(Configuration.SelectRange, Configuration.SelectBlacklist);
+        if (hovered == null) {
+          Helper.AddError(Console.instance, "Nothing is being hovered.");
+          return;
+        }
+        command = command.Replace("#id", Utils.GetPrefabName(hovered.gameObject));
+      }
       command = command.Replace("#r", radius);
       command = command.Replace("#d", depth);
       command = command.Replace("#w", width);

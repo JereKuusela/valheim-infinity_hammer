@@ -13,6 +13,7 @@ public class ToolCommand {
     Hammer.Equip(tool);
     CommandParameters pars = new CommandParameters(string.Join(" ", args.Args.Skip(1)), false);
     Selection.Set(pars.ToRuler(), pars.Name, pars.Description, pars.Command, pars.Icon);
+    AddExtraInfo.ShowId = pars.IsId;
     GizmoWrapper.SetRotation(Quaternion.identity);
     Helper.AddMessage(args.Context, $"Selected command {pars.Name}.");
   }

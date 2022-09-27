@@ -114,6 +114,7 @@ public class HammerSelect {
         selected = Selection.Set(args[1]);
       else {
         var hovered = Selector.GetHovered(Configuration.SelectRange, Configuration.SelectBlacklist);
+        if (hovered == null) throw new InvalidOperationException("Nothing is being hovered.");
         if (pars.Connect)
           selected = Selection.Set(Selector.GetConnected(hovered));
         else

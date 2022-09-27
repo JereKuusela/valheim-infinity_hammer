@@ -86,6 +86,7 @@ public partial class Selected {
     Type = SelectedType.Default;
     RulerParameters = new();
     Ruler.Remove();
+    AddExtraInfo.ShowId = false;
     Command = "";
     Objects.Clear();
   }
@@ -196,6 +197,7 @@ public partial class Selected {
     ResetColliders(Ghost, originalPrefab);
     Objects.Add(new(name, view.m_syncInitialScale, data));
     Rotating.UpdatePlacementRotation(view.gameObject);
+    if (Position.Override.HasValue) Position.Override = view.transform.position;
     return Ghost;
   }
   private void CountObjects() {
@@ -243,6 +245,7 @@ public partial class Selected {
     Type = SelectedType.Multiple;
     CountObjects();
     Rotating.UpdatePlacementRotation(Ghost);
+    if (Position.Override.HasValue) Position.Override = Ghost.transform.position;
     return Ghost;
   }
   public void Mirror() {

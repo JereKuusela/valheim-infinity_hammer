@@ -94,9 +94,9 @@ public static class Position {
       Freeze();
   }
   public static void Freeze() {
-    var ghost = Helper.GetPlayer().m_placementGhost;
-    if (!ghost) return;
-    Override = ghost.transform.position;
+    var player = Helper.GetPlayer();
+    var ghost = player.m_placementGhost;
+    Override = ghost ? ghost.transform.position : player.transform.position;
   }
   public static void Unfreeze() {
     Override = null;

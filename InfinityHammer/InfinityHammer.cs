@@ -28,7 +28,11 @@ public class InfinityHammer : BaseUnityPlugin {
     CommandWrapper.Init();
     ConfigWrapper wrapper = new("hammer_config", Config, ConfigSync);
     Configuration.Init(wrapper);
-    SetupWatcher();
+    try {
+      SetupWatcher();
+    } catch {
+      //
+    }
   }
   private void OnDestroy() {
     Config.Save();

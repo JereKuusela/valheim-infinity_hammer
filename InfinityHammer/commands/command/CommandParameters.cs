@@ -24,6 +24,7 @@ public class CommandParameters {
   public float? Height = null;
   public bool Angle = false;
   public bool IsTargeted = false;
+  public bool IsId = false;
   public string Name = "Command";
   public string Description = "";
   public Sprite? Icon = null;
@@ -60,7 +61,7 @@ public class CommandParameters {
     Depth = Depth,
     RotateWithPlayer = !Angle,
     IsTargeted = IsTargeted,
-    Height = Height
+    Height = Height,
   };
 
   static bool IsParameter(string arg, string par) => arg == par || arg.EndsWith("=" + par, StringComparison.OrdinalIgnoreCase);
@@ -116,7 +117,7 @@ public class CommandParameters {
       if (name == CmdH) HeightCap = Parse.TryFloatRange(value);
     }
     var parameters = new[]{
-      "r", "d", "w", "h", "a", "w,d", "x", "y", "z", "tx", "ty", "tz",
+      "id", "r", "d", "w", "h", "a", "w,d", "x", "y", "z", "tx", "ty", "tz",
       "x,y", "x,z", "y,x", "y,z", "z,x", "z,y", "tx,ty", "tx,tz", "ty,tx", "ty,tz", "tz,tx", "tz,ty",
       "x,y,z", "x,z,y", "y,x,z", "y,z,x", "z,x,y", "z,y,x",
       "tx,ty,tz", "tx,tz,ty", "ty,tx,tz", "ty,tz,tx", "tz,tx,ty", "tz,ty,tx",
@@ -124,6 +125,8 @@ public class CommandParameters {
     for (var i = 0; i < args.Length; i++) {
       foreach (var par in parameters)
         args[i] = Replace(args[i], par);
+      if (args[i].Contains("#id"))
+        IsId = true;
       if (args[i].Contains("#a"))
         Angle = true;
       if (args[i].Contains("#r"))

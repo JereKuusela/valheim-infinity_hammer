@@ -425,6 +425,9 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 
 # Changelog
 
+- v1.22
+	- Improves support for picking up and freezing at the same time.
+
 - v1.21
 	- Adds new commands `hammer_zoop_[direction]` to multiply the selection.
 	- Adds a new setting `dimensions` to define object dimensions.

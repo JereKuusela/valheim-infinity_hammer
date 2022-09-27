@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using Service;
 using UnityEngine;
 namespace InfinityHammer;
 public static class CoverCheck {
@@ -78,10 +79,19 @@ public class AddCoverText {
 }*/
 
 [HarmonyPatch(typeof(Hud), nameof(Hud.SetupPieceInfo))]
-public class AddCommandText {
+public class AddExtraInfo {
+  private static string DescriptionHover() {
+    if (!ShowId) return "";
+    var hovered = Selector.GetHovered(Configuration.SelectRange, Configuration.SelectBlacklist);
+    var name = hovered == null ? "" : Utils.GetPrefabName(hovered.gameObject);
+    return $"id: {name}";
+  }
+  public static bool ShowId = false;
   public static void Postfix(Hud __instance, Piece piece) {
     if (!Selection.IsCommand()) return;
     if (!piece) return;
-    __instance.m_pieceDescription.text += "\n" + Ruler.Description();
+    var lines = new[] { Ruler.Description(), DescriptionHover() };
+    var text = string.Join("\n", lines.Where(s => s != ""));
+    __instance.m_pieceDescription.text += "\n" + text;
   }
 }
