@@ -37,10 +37,22 @@ public class HammerSelect {
     } else
       Helper.AddMessage(terminal, $"Selected {name}.");
   }
+  private ZDO InitZdo(int index) {
+    var hash = Selection.Objects[index].Prefab.GetStableHashCode();
+    ZDO zdo = new();
+    if (ZNetScene.instance.m_namedPrefabs.TryGetValue(hash, out var obj)) {
+      if (obj.GetComponent<ZNetView>() is { } view) {
+        zdo.m_type = view.m_type;
+        zdo.m_distant = view.m_distant;
+        zdo.m_prefab = hash;
+      }
+    }
+    return zdo;
+  }
   private void UpdateZDOs(Action<ZDO> action) {
     for (var i = 0; i < Selection.Objects.Count; i++) {
       var zdo = Selection.Objects[i].Data;
-      zdo ??= new ZDO();
+      zdo ??= InitZdo(i);
       action(zdo);
       Selection.Objects[i].Data = zdo;
     }

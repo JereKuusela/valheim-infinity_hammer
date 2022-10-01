@@ -67,7 +67,7 @@ public static class Scaling {
   public static ToolScaling Build = new(true);
   public static ToolScaling Command = new(false);
   public static ToolScaling Get() => Selection.IsCommand() ? Scaling.Command : Scaling.Build;
-  private static bool IsScalingSupported() {
+  public static bool IsScalingSupported() {
     var player = Helper.GetPlayer();
     var ghost = player.m_placementGhost;
     if (!ghost) return false;

@@ -129,23 +129,6 @@ public static class Hammer {
         mineRock.SaveHealth();
       }
     }
-    SetFall(obj.gameObject, zdo.GetInt(Hash.Fall, -1));
-    if (!zdo.GetBool(Hash.Render, true)) {
-      var renderers = view.GetComponentsInChildren<Renderer>();
-      foreach (var renderer in renderers)
-        renderer.enabled = false;
-    }
-    if (!zdo.GetBool(Hash.Collision, true)) {
-      var colliders = view.GetComponentsInChildren<Collider>();
-      if (zdo.GetPrefab() == Hash.Portal) {
-        foreach (var collider in colliders)
-          collider.enabled = false;
-
-      } else {
-        foreach (var collider in colliders)
-          collider.isTrigger = true;
-      }
-    }
     FixData(view);
   }
 

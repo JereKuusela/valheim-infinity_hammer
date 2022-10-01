@@ -43,8 +43,18 @@ public class PlacePiece {
     if (!ghost) return obj.gameObject;
     var name = Utils.GetPrefabName(ghost);
 
-    if (type == SelectedType.Object)
+    if (type == SelectedType.Object) {
+      var zdo = Selection.GetData(0);
+      if (zdo != null) {
+        ZNetView.m_initZDO = ZDOMan.instance.CreateNewZDO(ghost.transform.position);
+        Helper.CopyData(zdo, ZNetView.m_initZDO);
+        ZNetView.m_initZDO.m_rotation = ghost.transform.rotation;
+        if (Scaling.IsScalingSupported())
+          ZNetView.m_initZDO.Set("scale", ghost.transform.localScale);
+        ZNetView.m_initZDO.m_dataRevision = 1;
+      }
       return ZNetScene.instance.GetPrefab(name);
+    }
     if (type == SelectedType.Location)
       return ZoneSystem.instance.m_locationProxyPrefab;
     if (type == SelectedType.Multiple) {
@@ -141,9 +151,7 @@ public class PlacePiece {
       Hammer.SpawnLocation(view);
       UndoHelper.StopTracking();
     } else {
-      Hammer.CopyState(view);
       Hammer.PostProcessPlaced(piece.gameObject);
-      Scaling.SetPieceScale(view, ghost);
       UndoHelper.CreateObject(piece.gameObject);
     }
   }
