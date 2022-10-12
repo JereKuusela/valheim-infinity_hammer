@@ -9,9 +9,7 @@ namespace InfinityHammer;
 
 [HarmonyPatch(typeof(Player), nameof(Player.PieceRayTest))]
 public class FreezePlacementMarker {
-  static Vector3 CurrentNormal;
-  static Vector3 CurrentPoint;
-  static bool CurrentSuccess = false;
+  static Vector3 CurrentNormal = Vector3.up;
   static void Postfix(ref Vector3 point, ref Vector3 normal, ref Piece piece, ref Heightmap heightmap, ref Collider waterSurface, ref bool __result) {
     if (__result && Grid.Enabled) {
       point = Grid.Apply(point, heightmap ? Vector3.up : normal);
@@ -25,18 +23,16 @@ public class FreezePlacementMarker {
       }
     }
     if (Position.Override.HasValue) {
-      point = CurrentPoint;
+      point = Position.Override.Value;
       normal = CurrentNormal;
-      __result = CurrentSuccess;
+      __result = true;
 #nullable disable
       piece = null;
       heightmap = null;
       waterSurface = null;
 #nullable enable
     } else {
-      CurrentPoint = point;
       CurrentNormal = normal;
-      CurrentSuccess = __result;
     }
   }
 }
@@ -99,7 +95,7 @@ public static class Position {
   public static void Freeze() {
     var player = Helper.GetPlayer();
     var ghost = player.m_placementGhost;
-    Override = ghost ? ghost.transform.position : player.transform.position;
+    Override = ghost ? Deapply(ghost.transform.position) : player.transform.position;
   }
   public static void Unfreeze() {
     Override = null;
@@ -114,6 +110,17 @@ public static class Position {
     point += rotation * Vector3.right * Offset.x;
     point += rotation * Vector3.up * Offset.y;
     point += rotation * Vector3.forward * Offset.z;
+    return point;
+  }
+  public static Vector3 Deapply(Vector3 point) {
+    var ghost = Helper.GetPlayer().m_placementGhost;
+    if (!ghost) return point;
+    if (Override.HasValue)
+      point = Override.Value;
+    var rotation = ghost.transform.rotation;
+    point -= rotation * Vector3.right * Offset.x;
+    point -= rotation * Vector3.up * Offset.y;
+    point -= rotation * Vector3.forward * Offset.z;
     return point;
   }
   public static void SetX(float value) {
