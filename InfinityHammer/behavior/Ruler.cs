@@ -124,7 +124,7 @@ public class Ruler {
     return $"x: {Format(pos.x)}, z: {Format(pos.z)}, y: {Format(pos.y)}";
   }
   public static string Description() {
-    if (Projector == null) return "";
+    if (!Selection.IsCommand() || Projector == null) return "";
     if (Hud.instance.m_pieceSelectionWindow.activeSelf) return "";
     var lines = new[] { DescriptionScale(), DescriptionPosition() };
     return string.Join("\n", lines.Where(s => s != ""));

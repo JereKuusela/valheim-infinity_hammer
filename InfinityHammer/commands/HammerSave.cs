@@ -144,7 +144,7 @@ public class HammerSaveCommand {
     lines.Add($"#Name:{bp.Name}");
     lines.Add($"#Creator:{bp.Creator}");
     lines.Add($"#Description:{bp.Description}");
-    lines.Add($"#Category:");
+    lines.Add($"#Category: InfinityHammer");
     lines.Add($"#SnapPoints");
     lines.AddRange(bp.SnapPoints.Select(GetPlanBuildSnapPoint));
     lines.Add($"#Pieces");
@@ -195,7 +195,9 @@ public class HammerSaveCommand {
       var bp = BuildBluePrint(player, ghost);
       var lines = GetPlanBuildFile(bp);
       var name = Path.GetFileNameWithoutExtension(args[1]) + ".blueprint";
-      File.WriteAllLines(Path.Combine(Configuration.PlanBuildFolder, name), lines);
+      var path = Path.Combine(Configuration.PlanBuildFolder, name);
+      File.WriteAllLines(path, lines);
+      args.Context.AddString($"Blueprint saved to {path}");
     });
   }
 }

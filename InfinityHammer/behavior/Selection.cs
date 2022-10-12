@@ -48,6 +48,7 @@ public static class Selection {
   public static void Mirror() => Get()?.Mirror();
   public static void Postprocess(Vector3? scale) => Get()?.Postprocess(scale);
   public static ZDO? GetData(int index = 0) => Get()?.GetData(index);
+  public static string Description() => Get()?.ExtraDescription ?? "";
   public static void InitZDO(Transform tr, Vector3 scale, int index = 0) => Get()?.InitZDO(tr, scale, index);
   public static bool IsCommand() => Get()?.Type == SelectedType.Command;
   public static GameObject Set(string name) => GetOrAdd().Set(name);
@@ -73,6 +74,7 @@ public partial class Selected {
   public SelectedType Type = SelectedType.Default;
   public List<SelectedObject> Objects = new();
   public string Command = "";
+  public string ExtraDescription = "";
   public RulerParameters RulerParameters = new();
   public ZDO? GetData(int index = 0) {
     if (Objects.Count <= index) return null;
@@ -233,10 +235,10 @@ public partial class Selected {
     Dictionary<string, int> counts = Objects.GroupBy(obj => obj.Prefab).ToDictionary(kvp => kvp.Key, kvp => kvp.Count());
     var topKeys = counts.OrderBy(kvp => kvp.Value).Reverse().ToArray();
     if (topKeys.Length <= 5)
-      piece.m_description = string.Join("\n", topKeys.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
+      ExtraDescription = string.Join("\n", topKeys.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
     else {
-      piece.m_description = string.Join("\n", topKeys.Take(4).Select(kvp => $"{kvp.Key}: {kvp.Value}"));
-      piece.m_description += $"\n{topKeys.Length - 4} other types: {topKeys.Skip(4).Sum(kvp => kvp.Value)}";
+      ExtraDescription = string.Join("\n", topKeys.Take(4).Select(kvp => $"{kvp.Key}: {kvp.Value}"));
+      ExtraDescription += $"\n{topKeys.Length - 4} other types: {topKeys.Skip(4).Sum(kvp => kvp.Value)}";
     }
   }
   public GameObject Set(IEnumerable<ZNetView> views) {
