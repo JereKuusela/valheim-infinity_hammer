@@ -435,6 +435,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Fixes dimensions of hanging_hairstrands, wood_beam_26, wood_beam_45, wood_wall_roof_top and wood_wall_roof_top_45 (reset the setting to get the new values).
 	- Fixes the area select tool breaking up.
 	- Fixes object count being saved in blueprints.
+	- Fixes commands with modifier keys not working if a modifier key was unbound.
 
 - v1.21
 	- Adds new commands `hammer_zoop_[direction]` to multiply the selection.

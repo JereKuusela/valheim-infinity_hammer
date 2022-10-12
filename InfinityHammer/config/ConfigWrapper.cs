@@ -83,7 +83,8 @@ public class ConfigWrapper {
     SettingHandlers.Add(key, (Terminal terminal, string value) => Toggle(terminal, setting, name, value));
   }
   public static string GetKeys(KeyboardShortcut key) {
-    if (key.MainKey == KeyCode.None) return "";
+    // Empty value would mess up Server Devcommands logic.
+    if (key.MainKey == KeyCode.None) return "unbound";
     var keys = key.MainKey.ToString().ToLower();
     if (key.Modifiers.Count() > 0) keys += "," + string.Join(",", key.Modifiers);
     return keys;

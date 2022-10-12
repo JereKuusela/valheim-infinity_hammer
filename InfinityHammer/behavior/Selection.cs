@@ -417,19 +417,12 @@ public partial class Selected {
     Type = SelectedType.Multiple;
     return Ghost;
   }
-  private void AddSnapPoints(GameObject obj, int index) {
-    foreach (Transform tr in obj.transform) {
-      if (!Helper.IsSnapPoint(tr.gameObject)) continue;
-      SnapObj.SetActive(false);
-      UnityEngine.Object.Instantiate(SnapObj, tr.transform.position, Quaternion.identity, Ghost.transform);
-    }
-  }
   private List<GameObject> AddSnapPoints(GameObject obj) {
     List<GameObject> added = new();
     foreach (Transform tr in obj.transform) {
       if (!Helper.IsSnapPoint(tr.gameObject)) continue;
       SnapObj.SetActive(false);
-      var snapObj = UnityEngine.Object.Instantiate(SnapObj, tr.transform.position, Quaternion.identity, Ghost.transform);
+      var snapObj = UnityEngine.Object.Instantiate(SnapObj, tr.position, Quaternion.identity, Ghost.transform);
       added.Add(snapObj);
     }
     return added;
