@@ -1,4 +1,3 @@
-using System.Linq;
 using UnityEngine;
 namespace InfinityHammer;
 
@@ -11,7 +10,9 @@ public class ToolCommand {
   protected static void Execute(Terminal.ConsoleEventArgs args, Tool tool) {
     Helper.ArgsCheck(args, 2, "Missing the command.");
     Hammer.Equip(tool);
-    CommandParameters pars = new CommandParameters(string.Join(" ", args.Args.Skip(1)), false);
+    var command = string.Join(" ", args.Args);
+    command = command.Replace("hammer_command ", "").Replace("hoe_command ", "");
+    CommandParameters pars = new CommandParameters(command, false);
     Selection.Set(pars.ToRuler(), pars.Name, pars.Description, pars.Command, pars.Icon);
     AddExtraInfo.ShowId = pars.IsId;
     GizmoWrapper.SetRotation(Quaternion.identity);

@@ -26,12 +26,12 @@ public static class UpdateAvailable {
     int tab = 0;
     int index = 0;
     if (Hammer.HasTool(Helper.GetPlayer(), Tool.Hammer)) {
-      commands = Configuration.HammerCommands;
+      commands = CommandManager.HammerCommands;
       tab = Configuration.HammerMenuTab;
       index = Configuration.HammerMenuIndex;
     }
     if (Hammer.HasTool(Helper.GetPlayer(), Tool.Hoe)) {
-      commands = Configuration.HoeCommands;
+      commands = CommandManager.HoeCommands;
       tab = Configuration.HoeMenuTab;
       index = Configuration.HoeMenuIndex;
     }
@@ -68,6 +68,8 @@ public class ReplaceModifierKeys {
 
   [HarmonyPriority(Priority.High)]
   static void Prefix(ref string text) {
+    if (text.StartsWith("bind ", StringComparison.OrdinalIgnoreCase)) return;
+    if (text.StartsWith("alias ", StringComparison.OrdinalIgnoreCase)) return;
     text = text.Replace(CommandParameters.CmdMod1, Configuration.ModifierKey1());
     text = text.Replace(CommandParameters.CmdMod2, Configuration.ModifierKey2());
   }
@@ -77,10 +79,10 @@ public class RemoveCmdParameters {
 
   [HarmonyPriority(Priority.Low)]
   static void Prefix(ref string text) {
-    if (text.StartsWith("hammer_command", StringComparison.OrdinalIgnoreCase)) return;
-    if (text.StartsWith("hoe_command", StringComparison.OrdinalIgnoreCase)) return;
-    if (text.StartsWith("hammer_add", StringComparison.OrdinalIgnoreCase)) return;
-    if (text.StartsWith("hoe_add", StringComparison.OrdinalIgnoreCase)) return;
+    if (text.StartsWith("hammer_command ", StringComparison.OrdinalIgnoreCase)) return;
+    if (text.StartsWith("hoe_command ", StringComparison.OrdinalIgnoreCase)) return;
+    if (text.StartsWith("hammer_add ", StringComparison.OrdinalIgnoreCase)) return;
+    if (text.StartsWith("hoe_add ", StringComparison.OrdinalIgnoreCase)) return;
     text = CommandParameters.RemoveCmdParameters(text);
     RunBuildMenuCommands.InstantCommand = true;
   }

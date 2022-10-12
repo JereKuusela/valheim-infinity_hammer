@@ -11,11 +11,11 @@ public class ToolList {
     });
   }
   protected static void Execute(Terminal.ConsoleEventArgs args, Tool tool) {
-    var commands = Configuration.GetCommands(tool);
+    var commands = CommandManager.Get(tool);
     var index = -1;
     if (args.Length > 1) {
       index = Parse.TryInt(args.Args, 1, index);
-      GUIUtility.systemCopyBuffer = Configuration.GetCommand(tool, index);
+      GUIUtility.systemCopyBuffer = CommandManager.Get(tool, index);
     }
     for (var i = 0; i < commands.Count; i++) {
       var color = index == i ? "green" : "yellow";

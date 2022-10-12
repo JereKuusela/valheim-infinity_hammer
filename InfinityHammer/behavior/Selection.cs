@@ -294,7 +294,7 @@ public partial class Selected {
     Clear();
     var player = Helper.GetPlayer();
     RulerParameters = ruler;
-    Command = command.Replace("hammer_command ", "").Replace("hoe_command ", "");
+    Command = command;
     Ghost = new GameObject();
     Ghost.name = name;
     var piece = Ghost.AddComponent<Piece>();

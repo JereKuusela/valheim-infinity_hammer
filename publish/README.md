@@ -428,8 +428,11 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 
 - v1.22
 	- Adds a new parameter `id` to commands for using the hovered object id.
+	- Adds yaml file for commands.
 	- Improves support for picking up and freezing at the same time.
 	- Improves object copying to work better with modded objects.
+	- Fixes dimensions of hanging_hairstrands, wood_beam_26, wood_beam_45, wood_wall_roof_top and wood_wall_roof_top_45 (reset the setting to get the new values).
+	- Fixes the area select tool breaking up.
 
 - v1.21
 	- Adds new commands `hammer_zoop_[direction]` to multiply the selection.

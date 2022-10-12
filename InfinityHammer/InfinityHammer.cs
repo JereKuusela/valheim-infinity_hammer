@@ -17,6 +17,7 @@ public class InfinityHammer : BaseUnityPlugin {
   ServerSync.ConfigSync ConfigSync = new(GUID) {
     DisplayName = NAME,
     CurrentVersion = VERSION,
+    IsLocked = false
   };
 #nullable disable
   public static ManualLogSource Log;
@@ -30,6 +31,9 @@ public class InfinityHammer : BaseUnityPlugin {
     Configuration.Init(wrapper);
     try {
       SetupWatcher();
+      CommandManager.CreateFile();
+      CommandManager.SetupWatcher();
+      CommandManager.FromFile();
     } catch {
       //
     }

@@ -28,6 +28,7 @@ public class CommandParameters {
   public string Name = "Command";
   public string Description = "";
   public Sprite? Icon = null;
+  public string IconName = "";
   public string Command = "";
 
   public static string RemoveCmdParameters(string command) => string.Join(";", command.Split(';').Select(s => s.Trim()).Select(s => string.Join(" ", FilterCmd(s.Split(' ')))));
@@ -39,9 +40,9 @@ public class CommandParameters {
     .Where(s => !s.StartsWith($"{CmdW}=", StringComparison.OrdinalIgnoreCase))
     .Where(s => !s.StartsWith($"{CmdD}=", StringComparison.OrdinalIgnoreCase))
     .Where(s => !s.StartsWith($"{CmdH}=", StringComparison.OrdinalIgnoreCase));
-  public CommandParameters(string command, bool showCommand) {
+  public CommandParameters(string command, bool showCommand, bool replaceKeys = true) {
     var split = command.Split(';').Select(s => s.Trim()).ToArray();
-    Command = string.Join(";", split.Select(ParseArgs));
+    Command = string.Join(";", split.Select(s => ParseArgs(s, replaceKeys)));
     if (Radius.HasValue)
       Radius = Mathf.Clamp(Radius.Value, RadiusCap.Min, RadiusCap.Max);
     if (Height.HasValue)
@@ -76,6 +77,7 @@ public class CommandParameters {
   }
   private static Dictionary<string, int> PrefabNames = new();
   public static Sprite? FindSprite(string name) {
+    if (!ZNetScene.instance) return null;
     if (PrefabNames.Count == 0) {
       PrefabNames = ZNetScene.instance.m_namedPrefabs.GroupBy(kvp => kvp.Value.name.ToLower()).ToDictionary(kvp => kvp.Key, kvp => kvp.First().Key);
     }
@@ -97,10 +99,12 @@ public class CommandParameters {
     if (sprite) return sprite;
     return null;
   }
-  protected string ParseArgs(string command) {
+  protected string ParseArgs(string command, bool replaceKeys) {
     var scale = Scaling.Command;
-    command = command.Replace(CmdMod1, Configuration.ModifierKey1());
-    command = command.Replace(CmdMod2, Configuration.ModifierKey2());
+    if (replaceKeys) {
+      command = command.Replace(CmdMod1, Configuration.ModifierKey1());
+      command = command.Replace(CmdMod2, Configuration.ModifierKey2());
+    }
     var args = command.Split(' ').ToArray();
     foreach (var arg in args) {
       var split = arg.Split('=');
@@ -110,12 +114,13 @@ public class CommandParameters {
       var range = Parse.TryFloatRange(value);
       if (name == CmdName) Name = split[1].Replace("_", " ");
       if (name == CmdDesc) Description = split[1].Replace("_", " ");
-      if (name == CmdIcon) Icon = FindSprite(split[1]);
+      if (name == CmdIcon) IconName = split[1];
       if (name == CmdR) RadiusCap = Parse.TryFloatRange(value);
       if (name == CmdW) WidthCap = Parse.TryFloatRange(value);
       if (name == CmdD) DepthCap = Parse.TryFloatRange(value);
       if (name == CmdH) HeightCap = Parse.TryFloatRange(value);
     }
+    Icon = FindSprite(IconName);
     var parameters = new[]{
       "id", "r", "d", "w", "h", "a", "w,d", "x", "y", "z", "tx", "ty", "tz",
       "x,y", "x,z", "y,x", "y,z", "z,x", "z,y", "tx,ty", "tx,tz", "ty,tx", "ty,tz", "tz,tx", "tz,ty",

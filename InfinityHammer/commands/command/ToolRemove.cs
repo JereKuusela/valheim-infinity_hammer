@@ -13,12 +13,12 @@ public class ToolRemove {
     Helper.ArgsCheck(args, 2, "Missing the index or start of the command.");
     var index = Parse.TryInt(args.Args, 1, -1);
     if (index > -1) {
-      var cmd = Configuration.GetCommand(tool, index);
-      Configuration.RemoveCommand(tool, index);
+      var cmd = CommandManager.Get(tool, index);
+      CommandManager.Remove(tool, index);
       Helper.AddMessage(args.Context, $"Removed command {cmd} from {tool.ToString()}.");
     } else {
       var command = string.Join(" ", args.Args, 1, args.Length - 1);
-      var removed = Configuration.RemoveCommand(tool, command);
+      var removed = CommandManager.Remove(tool, command);
       Helper.AddMessage(args.Context, $"Removed {removed} commands from {tool.ToString()}.");
     }
   }
