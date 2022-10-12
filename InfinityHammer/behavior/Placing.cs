@@ -44,15 +44,7 @@ public class PlacePiece {
     var name = Utils.GetPrefabName(ghost);
 
     if (type == SelectedType.Object) {
-      var zdo = Selection.GetData(0);
-      if (zdo != null) {
-        ZNetView.m_initZDO = ZDOMan.instance.CreateNewZDO(ghost.transform.position);
-        Helper.CopyData(zdo, ZNetView.m_initZDO);
-        ZNetView.m_initZDO.m_rotation = ghost.transform.rotation;
-        if (Scaling.IsScalingSupported())
-          ZNetView.m_initZDO.Set("scale", ghost.transform.localScale);
-        ZNetView.m_initZDO.m_dataRevision = 1;
-      }
+      Selection.InitZDO(ghost.transform, ghost.transform.localScale);
       return ZNetScene.instance.GetPrefab(name);
     }
     if (type == SelectedType.Location)
@@ -64,6 +56,75 @@ public class PlacePiece {
     }
     return obj.gameObject;
   }
+
+  private static void HandleCommand(GameObject ghost) {
+    var scale = Scaling.Command;
+    var shape = Ruler.GetShape();
+    var x = ghost.transform.position.x.ToString(CultureInfo.InvariantCulture);
+    var y = ghost.transform.position.y.ToString(CultureInfo.InvariantCulture);
+    var z = ghost.transform.position.z.ToString(CultureInfo.InvariantCulture);
+    var radius = scale.X.ToString(CultureInfo.InvariantCulture);
+    var depth = scale.X.ToString(CultureInfo.InvariantCulture);
+    var width = scale.Z.ToString(CultureInfo.InvariantCulture);
+    if (shape != RulerShape.Rectangle)
+      width = depth;
+    var height = scale.Y.ToString(CultureInfo.InvariantCulture);
+    var angle = ghost.transform.rotation.eulerAngles.y.ToString(CultureInfo.InvariantCulture);
+
+    var command = Selection.Command;
+    var multiShape = command.Contains("#r") && (command.Contains("#w") || command.Contains("#d"));
+    if (multiShape) {
+      var circle = shape == RulerShape.Circle;
+      var args = command.Split(' ').ToList();
+      for (var i = args.Count - 1; i > -1; i--) {
+        if (circle && (args[i].Contains("#w") || args[i].Contains("#d")))
+          args.RemoveAt(i);
+        if (!circle && args[i].Contains("#r"))
+          args.RemoveAt(i);
+      }
+      command = string.Join(" ", args);
+    }
+    if (command.Contains("#id")) {
+      var hovered = Selector.GetHovered(Configuration.SelectRange, Configuration.SelectBlacklist);
+      if (hovered == null) {
+        Helper.AddError(Console.instance, "Nothing is being hovered.");
+        return;
+      }
+      command = command.Replace("#id", Utils.GetPrefabName(hovered.gameObject));
+    }
+    command = command.Replace("#r", radius);
+    command = command.Replace("#d", depth);
+    command = command.Replace("#w", width);
+    command = command.Replace("#a", angle);
+    command = command.Replace("#x", x);
+    command = command.Replace("#y", y);
+    command = command.Replace("#z", z);
+    command = command.Replace("#tx", x);
+    command = command.Replace("#ty", y);
+    command = command.Replace("#tz", z);
+    command = command.Replace("#h", height);
+    if (!Configuration.DisableMessages)
+      Console.instance.AddString($"Hammering command: {command}");
+    Console.instance.TryRunCommand(command);
+  }
+  private static void HandleMultiple(GameObject ghost) {
+    UndoHelper.StartTracking();
+    var i = 0;
+    foreach (Transform tr in ghost.transform) {
+      var ghostObj = tr.gameObject;
+      if (Helper.IsSnapPoint(ghostObj)) continue;
+      var name = Utils.GetPrefabName(ghostObj);
+      var prefab = ZNetScene.instance.GetPrefab(name);
+      if (prefab) {
+        Selection.InitZDO(tr, ghost.transform.localScale, i);
+        var childObj = UnityEngine.Object.Instantiate(prefab, ghostObj.transform.position, ghostObj.transform.rotation);
+        var childView = childObj.GetComponent<ZNetView>();
+        Hammer.PostProcessPlaced(childObj);
+      }
+      i += 1;
+    }
+    UndoHelper.StopTracking();
+  }
   static void Postprocess(GameObject obj) {
     var player = Helper.GetPlayer();
     Helper.EnsurePiece(obj);
@@ -71,75 +132,12 @@ public class PlacePiece {
     if (!ghost) return;
     var piece = obj.GetComponent<Piece>();
     if (Selection.Type == SelectedType.Command) {
-      var scale = Scaling.Command;
-      var shape = Ruler.GetShape();
-      var x = ghost.transform.position.x.ToString(CultureInfo.InvariantCulture);
-      var y = ghost.transform.position.y.ToString(CultureInfo.InvariantCulture);
-      var z = ghost.transform.position.z.ToString(CultureInfo.InvariantCulture);
-      var radius = scale.X.ToString(CultureInfo.InvariantCulture);
-      var depth = scale.X.ToString(CultureInfo.InvariantCulture);
-      var width = scale.Z.ToString(CultureInfo.InvariantCulture);
-      if (shape != RulerShape.Rectangle)
-        width = depth;
-      var height = scale.Y.ToString(CultureInfo.InvariantCulture);
-      var angle = ghost.transform.rotation.eulerAngles.y.ToString(CultureInfo.InvariantCulture);
-
-      var command = Selection.Command;
-      var multiShape = command.Contains("#r") && (command.Contains("#w") || command.Contains("#d"));
-      if (multiShape) {
-        var circle = shape == RulerShape.Circle;
-        var args = command.Split(' ').ToList();
-        for (var i = args.Count - 1; i > -1; i--) {
-          if (circle && (args[i].Contains("#w") || args[i].Contains("#d")))
-            args.RemoveAt(i);
-          if (!circle && args[i].Contains("#r"))
-            args.RemoveAt(i);
-        }
-        command = string.Join(" ", args);
-      }
-      if (command.Contains("#id")) {
-        var hovered = Selector.GetHovered(Configuration.SelectRange, Configuration.SelectBlacklist);
-        if (hovered == null) {
-          Helper.AddError(Console.instance, "Nothing is being hovered.");
-          return;
-        }
-        command = command.Replace("#id", Utils.GetPrefabName(hovered.gameObject));
-      }
-      command = command.Replace("#r", radius);
-      command = command.Replace("#d", depth);
-      command = command.Replace("#w", width);
-      command = command.Replace("#a", angle);
-      command = command.Replace("#x", x);
-      command = command.Replace("#y", y);
-      command = command.Replace("#z", z);
-      command = command.Replace("#tx", x);
-      command = command.Replace("#ty", y);
-      command = command.Replace("#tz", z);
-      command = command.Replace("#h", height);
-      if (!Configuration.DisableMessages)
-        Console.instance.AddString($"Hammering command: {command}");
-      Console.instance.TryRunCommand(command);
+      HandleCommand(ghost);
       UnityEngine.Object.Destroy(obj);
       return;
     }
     if (Selection.Type == SelectedType.Multiple) {
-      UndoHelper.StartTracking();
-      var i = 0;
-      foreach (Transform tr in ghost.transform) {
-        var ghostObj = tr.gameObject;
-        if (Helper.IsSnapPoint(ghostObj)) continue;
-        var name = Utils.GetPrefabName(ghostObj);
-        var prefab = ZNetScene.instance.GetPrefab(name);
-        if (prefab) {
-          var childObj = UnityEngine.Object.Instantiate(prefab, ghostObj.transform.position, ghostObj.transform.rotation);
-          var childView = childObj.GetComponent<ZNetView>();
-          Hammer.CopyState(childView, i);
-          Hammer.PostProcessPlaced(childObj);
-          Scaling.SetPieceScale(childView, ghostObj);
-        }
-        i += 1;
-      }
-      UndoHelper.StopTracking();
+      HandleMultiple(ghost);
       UnityEngine.Object.Destroy(obj);
       return;
     }

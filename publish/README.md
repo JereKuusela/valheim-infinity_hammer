@@ -429,6 +429,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 - v1.22
 	- Adds a new parameter `id` to commands for using the hovered object id.
 	- Improves support for picking up and freezing at the same time.
+	- Improves object copying to work better with modded objects.
 
 - v1.21
 	- Adds new commands `hammer_zoop_[direction]` to multiply the selection.

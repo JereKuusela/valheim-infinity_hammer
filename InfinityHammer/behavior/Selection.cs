@@ -48,6 +48,7 @@ public static class Selection {
   public static void Mirror() => Get()?.Mirror();
   public static void Postprocess(Vector3? scale) => Get()?.Postprocess(scale);
   public static ZDO? GetData(int index = 0) => Get()?.GetData(index);
+  public static void InitZDO(Transform tr, Vector3 scale, int index = 0) => Get()?.InitZDO(tr, scale, index);
   public static bool IsCommand() => Get()?.Type == SelectedType.Command;
   public static GameObject Set(string name) => GetOrAdd().Set(name);
   public static GameObject Set(ZNetView view) => GetOrAdd().Set(view);
@@ -76,6 +77,28 @@ public partial class Selected {
   public ZDO? GetData(int index = 0) {
     if (Objects.Count <= index) return null;
     return Objects[index].Data?.Clone();
+  }
+  public int GetPrefab(int index = 0) {
+    if (Objects.Count <= index) return 0;
+    return Objects[index].Prefab.GetStableHashCode();
+  }
+  public void InitZDO(Transform tr, Vector3 scale, int index = 0) {
+    var zdo = GetData(index);
+    if (zdo == null) return;
+    ZNetView.m_initZDO = ZDOMan.instance.CreateNewZDO(tr.position);
+    Helper.CopyData(zdo, ZNetView.m_initZDO);
+    ZNetView.m_initZDO.m_rotation = tr.rotation;
+    var hash = GetPrefab(index);
+    if (ZNetScene.instance.m_namedPrefabs.TryGetValue(hash, out var obj)) {
+      if (obj.GetComponent<ZNetView>() is { } view) {
+        ZNetView.m_initZDO.m_type = view.m_type;
+        ZNetView.m_initZDO.m_distant = view.m_distant;
+        ZNetView.m_initZDO.m_prefab = hash;
+      }
+    }
+    if (Scaling.IsScalingSupported())
+      ZNetView.m_initZDO.Set("scale", scale);
+    ZNetView.m_initZDO.m_dataRevision = 1;
   }
   public void Clear() {
     if (Ghost) UnityEngine.Object.Destroy(Ghost);
