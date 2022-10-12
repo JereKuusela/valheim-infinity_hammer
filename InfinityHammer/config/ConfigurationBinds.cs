@@ -27,9 +27,13 @@ public partial class Configuration {
   public static ConfigEntry<KeyboardShortcut> configMoveBackwardLarge;
   public static ConfigEntry<KeyboardShortcut> configFreeze;
   public static ConfigEntry<KeyboardShortcut> configSelect;
+  public static ConfigEntry<KeyboardShortcut> configSelectFrozen;
   public static ConfigEntry<KeyboardShortcut> configPick;
+  public static ConfigEntry<KeyboardShortcut> configPickFrozen;
   public static ConfigEntry<KeyboardShortcut> configSelectAll;
+  public static ConfigEntry<KeyboardShortcut> configSelectAllFrozen;
   public static ConfigEntry<KeyboardShortcut> configPickAll;
+  public static ConfigEntry<KeyboardShortcut> configPickAllFrozen;
   public static ConfigEntry<KeyboardShortcut> configResetOffset;
   public static ConfigEntry<KeyboardShortcut> configUndo;
   public static ConfigEntry<KeyboardShortcut> configRedo;
@@ -81,9 +85,13 @@ public partial class Configuration {
     configFreeze = wrapper.BindCommand("hammer_freeze", section, "Freeze selection", new KeyboardShortcut(KeyCode.Keypad0), "Freezes placement position for precise placement.", "build");
     configResetOffset = wrapper.BindCommand("hammer_offset", section, "Reset offset", new KeyboardShortcut(KeyCode.None), "Resets the offset.", "build");
     configSelect = wrapper.BindCommand("hammer", section, "Select", new KeyboardShortcut(KeyCode.Keypad5), "Select the hovered object.");
-    configPick = wrapper.BindCommand("hammer;object remove", section, "Pick", new KeyboardShortcut(KeyCode.Keypad5, KeyCode.LeftControl), "Pick the hovered object.");
-    configSelectAll = wrapper.BindCommand("hammer connect", section, "Select building", new KeyboardShortcut(KeyCode.Keypad5, KeyCode.LeftAlt), "Select the whole building.");
-    configPickAll = wrapper.BindCommand("hammer connect;object remove connect id=*", section, "Pick building", new KeyboardShortcut(KeyCode.Keypad5, KeyCode.LeftAlt, KeyCode.LeftControl), "Pick the whole building.");
+    configSelectFrozen = wrapper.BindCommand("hammer freeze", section, "Select frozen", new KeyboardShortcut(KeyCode.Keypad5, KeyCode.LeftControl), "Select the hovered object.");
+    configPick = wrapper.BindCommand("hammer pick", section, "Pick", new KeyboardShortcut(KeyCode.Keypad5, KeyCode.LeftAlt), "Pick the hovered object.");
+    configPickFrozen = wrapper.BindCommand("hammer pick freeze", section, "Pick frozen", new KeyboardShortcut(KeyCode.Keypad5, KeyCode.LeftAlt, KeyCode.LeftControl), "Select the hovered object.");
+    configSelectAll = wrapper.BindCommand("hammer connect", section, "Select building", new KeyboardShortcut(KeyCode.None), "Select the whole building.");
+    configPickAll = wrapper.BindCommand("hammer connect pick", section, "Pick building", new KeyboardShortcut(KeyCode.None), "Pick the whole building.");
+    configSelectAllFrozen = wrapper.BindCommand("hammer connect freeze", section, "Select building frozen", new KeyboardShortcut(KeyCode.None), "Select the whole building.");
+    configPickAllFrozen = wrapper.BindCommand("hammer connect pick freeze", section, "Pick building frozen", new KeyboardShortcut(KeyCode.None), "Pick the whole building.");
     configUndo = wrapper.BindCommand("hammer_undo", section, "Undo", new KeyboardShortcut(KeyCode.Keypad7), "Undo actions.");
     configRedo = wrapper.BindCommand("hammer_redo", section, "Redo", new KeyboardShortcut(KeyCode.Keypad9), "Redo actions.");
   }

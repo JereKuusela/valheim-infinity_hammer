@@ -13,7 +13,7 @@ namespace InfinityHammer;
 public class InfinityHammer : BaseUnityPlugin {
   public const string GUID = "infinity_hammer";
   public const string NAME = "Infinity Hammer";
-  public const string VERSION = "1.21";
+  public const string VERSION = "1.22";
   ServerSync.ConfigSync ConfigSync = new(GUID) {
     DisplayName = NAME,
     CurrentVersion = VERSION,

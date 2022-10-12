@@ -29,7 +29,7 @@ public partial class Selected {
     if (Type == SelectedType.Default) {
       var ghost = Player.m_localPlayer.m_placementGhost;
       var name = Utils.GetPrefabName(ghost);
-      Set(name);
+      Set(name, Selection.IsSingleUse());
     }
     var obj = Ghost;
     Type = SelectedType.Multiple;

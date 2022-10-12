@@ -19,6 +19,7 @@ public class HammerZoomCommand {
       return null;
     });
     Helper.Command(name, $"[amount or percentage] - Zooms the {axis} axis (if the object supports it).", (args) => {
+      Helper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
       if (Selection.IsCommand() != isCommand) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;
@@ -35,6 +36,7 @@ public class HammerZoomCommand {
       return null;
     });
     Helper.Command(name, "[amount/percentage or x,z,y] - Zooms the selection (if the object supports it).", (args) => {
+      Helper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
       if (Selection.IsCommand() != isCommand) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;

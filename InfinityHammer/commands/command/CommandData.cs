@@ -19,17 +19,16 @@ public class CommandData {
 }
 
 public class InitialData {
-  private const string LEGACY_AREA_SELECT = "hammer_area cmd_icon=hammer cmd_name=Area_pipette cmd_desc=Select_multiple_objects.";
   private const string SELECT = "hammer_command cmd_icon=hammer cmd_name=Pipette cmd_desc=Select_object. hammer";
-  private const string SELECT_FROZEN = "hammer_command cmd_icon=hammer cmd_name=freezegland cmd_desc=Press_cmd_mod1_to_select_entire_buildings.\nPress_cmd_mod2_to_pick_up. hammer keys=-cmd_mod1;hammer keys=cmd_mod1 connect;object remove keys=-cmd_mod1,cmd_mod2;object remove connect id=* keys=cmd_mod1,cmd_mod2";
-  private const string LEGACY_SELECT = "hammer_command cmd_icon=hammer cmd_name=Pipette cmd_desc=Press_alt_to_select_entire_buildings. hammer keys=-leftalt;hammer keys=leftalt connect";
-  private const string SELECT_DEVCOMMANDS = "hammer_command cmd_icon=hammer cmd_name=Pipette cmd_desc=Press_cmd_mod1_to_select_entire_buildings.\nPress_cmd_mod2_to_pick_up. hammer keys=-cmd_mod1;hammer keys=cmd_mod1 connect;object remove keys=-cmd_mod1,cmd_mod2;object remove connect id=* keys=cmd_mod1,cmd_mod2";
+  private const string PICK = "hammer_command cmd_icon=hammer cmd_name=Pick cmd_desc=Pick_object. hammer pick";
+  private const string SELECT_DEVCOMMANDS = "hammer_command cmd_icon=hammer cmd_name=Pipette cmd_desc=Press_cmd_mod1_to_pick_up.\nPress_cmd_mod2_to_freeze. hammer pick=cmd_mod1 freeze=cmd_mod2";
+  private const string CONNECT_DEVCOMMANDS = "hammer_command cmd_icon=hammer cmd_name=Building_pipette cmd_desc=Select_entire_buildings.\nPress_cmd_mod1_to_pick_up.\nPress_cmd_mod2_to_freeze. hammer connect pick=cmd_mod1 freeze=cmd_mod2";
   private const string AREA_SELECT = "hammer_area cmd_icon=hammer cmd_name=Area_pipette cmd_desc=Select_multiple_objects.";
-  private const string AREA_SELECT_DEVCOMMANDS = "hammer_area cmd_icon=hammer cmd_name=Area_pipette cmd_desc=Select_multiple_objects.\nPress_cmd_mod2_to_pick_up.;hammer_object remove id=* keys=cmd_mod2";
+  private const string AREA_SELECT_DEVCOMMANDS = "hammer_area cmd_icon=hammer cmd_name=Area_pipette cmd_desc=Select_multiple_objects.\nPress_cmd_mod1_to_pick_up.\nPress_cmd_mod2_to_freeze. pick=cmd_mod1 freeze=cmd_mod2";
   public static string[] Hammer() {
-    if (CommandWrapper.WorldEditCommands == null)
-      return new[] { SELECT, AREA_SELECT };
-    return new[] { SELECT_DEVCOMMANDS, AREA_SELECT_DEVCOMMANDS };
+    if (CommandWrapper.ServerDevcommands == null)
+      return new[] { SELECT, PICK, AREA_SELECT };
+    return new[] { SELECT_DEVCOMMANDS, CONNECT_DEVCOMMANDS, AREA_SELECT_DEVCOMMANDS };
   }
   public static string[] Hoe() {
     if (CommandWrapper.WorldEditCommands == null)

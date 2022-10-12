@@ -14,6 +14,7 @@ public class HammerScaleCommand {
       return null;
     });
     Helper.Command(name, $"[amount] - Sets the scale of {axis} axis (if the object supports it).", (args) => {
+      Helper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
       if (Selection.IsCommand() != isCommand) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;
@@ -30,6 +31,7 @@ public class HammerScaleCommand {
       return null;
     });
     Helper.Command(name, "[amount or x,z,y] - Sets the scale (if the object supports it).", (args) => {
+      Helper.CheatCheck();
       if (Selection.IsCommand() != isCommand) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;
       var scaling = Scaling.Get();

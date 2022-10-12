@@ -30,11 +30,17 @@ public class SetSelectedPiece {
 
 [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
 public class PlacePiece {
+  private static bool Clear = false;
   static void Prefix() {
     DisableEffects.Active = true;
+    Clear = Selection.IsSingleUse();
   }
-  static void Finalizer() {
+  static void Finalizer(bool __result) {
     DisableEffects.Active = false;
+    if (__result && Clear) {
+      Selection.Clear();
+      Hammer.Clear();
+    }
   }
   static GameObject GetPrefab(Piece obj) {
     var type = Selection.Type;

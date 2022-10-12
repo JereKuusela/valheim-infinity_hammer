@@ -93,6 +93,9 @@ public static class Position {
     else
       Freeze();
   }
+  public static void Freeze(Vector3 position) {
+    Override = position;
+  }
   public static void Freeze() {
     var player = Helper.GetPlayer();
     var ghost = player.m_placementGhost;

@@ -428,8 +428,12 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 
 - v1.22
 	- Adds a new parameter `id` to commands for using the hovered object id.
+	- Adds a new parameter `pick` to the `hammer` command.
+	- Adds a new parameter `freeze` to the `hammer` command.
+	- Adds new bind settings.
 	- Adds yaml file for commands.
 	- Adds "InfinityHammer" category to saved blueprints.
+	- Adds cheat checks to scaling and zoom commands.
 	- Improves support for picking up and freezing at the same time.
 	- Improves object copying to work better with modded objects.
 	- Fixes dimensions of hanging_hairstrands, wood_beam_26, wood_beam_45, wood_wall_roof_top and wood_wall_roof_top_45 (reset the setting to get the new values).

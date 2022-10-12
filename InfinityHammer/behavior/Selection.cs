@@ -45,15 +45,16 @@ public static class Selection {
   public static List<SelectedObject> Objects => Get()?.Objects ?? new();
 
   public static void Clear() => Get()?.Clear();
+  public static bool IsSingleUse() => Get()?.SingleUse ?? false;
   public static void Mirror() => Get()?.Mirror();
   public static void Postprocess(Vector3? scale) => Get()?.Postprocess(scale);
   public static ZDO? GetData(int index = 0) => Get()?.GetData(index);
   public static string Description() => Get()?.ExtraDescription ?? "";
   public static void InitZDO(Transform tr, Vector3 scale, int index = 0) => Get()?.InitZDO(tr, scale, index);
   public static bool IsCommand() => Get()?.Type == SelectedType.Command;
-  public static GameObject Set(string name) => GetOrAdd().Set(name);
-  public static GameObject Set(ZNetView view) => GetOrAdd().Set(view);
-  public static GameObject Set(IEnumerable<ZNetView> views) => GetOrAdd().Set(views);
+  public static GameObject Set(string name, bool singleUse) => GetOrAdd().Set(name, singleUse);
+  public static GameObject Set(ZNetView view, bool singleUse) => GetOrAdd().Set(view, singleUse);
+  public static GameObject Set(IEnumerable<ZNetView> views, bool singleUse) => GetOrAdd().Set(views, singleUse);
   public static GameObject Set(RulerParameters ruler, string name, string description, string command, Sprite? icon) => GetOrAdd().Set(ruler, name, description, command, icon);
   public static GameObject Set(ZoneSystem.ZoneLocation location, int seed) => GetOrAdd().Set(location, seed);
   public static GameObject Set(Terminal terminal, Blueprint bp, Vector3 scale) => GetOrAdd().Set(terminal, bp, scale);
@@ -75,6 +76,7 @@ public partial class Selected {
   public List<SelectedObject> Objects = new();
   public string Command = "";
   public string ExtraDescription = "";
+  public bool SingleUse = false;
   public RulerParameters RulerParameters = new();
   public ZDO? GetData(int index = 0) {
     if (Objects.Count <= index) return null;
@@ -104,6 +106,8 @@ public partial class Selected {
   }
   public void Clear() {
     if (Ghost) UnityEngine.Object.Destroy(Ghost);
+    SingleUse = false;
+    ExtraDescription = "";
     Ghost = null;
     ZoopsX = 0;
     ZoopsY = 0;
@@ -115,12 +119,13 @@ public partial class Selected {
     Command = "";
     Objects.Clear();
   }
-  public GameObject Set(string name) {
+  public GameObject Set(string name, bool singleUse) {
     var prefab = ZNetScene.instance.GetPrefab(name);
     if (!prefab) throw new InvalidOperationException("Invalid prefab.");
     if (prefab.GetComponent<Player>()) throw new InvalidOperationException("Players are not valid objects.");
     if (!Configuration.AllObjects && !Helper.IsBuildPiece(prefab)) throw new InvalidOperationException("Only build pieces are allowed.");
     Clear();
+    SingleUse = singleUse;
     Type = SelectedType.Object;
     Ghost = Helper.SafeInstantiate(prefab);
     Objects.Add(new(name, prefab.GetComponent<ZNetView>().m_syncInitialScale, null));
@@ -205,7 +210,7 @@ public partial class Selected {
     }
     Helper.GetPlayer().SetupPlacementGhost();
   }
-  public GameObject Set(ZNetView view) {
+  public GameObject Set(ZNetView view, bool singleUse) {
     var name = Utils.GetPrefabName(view.gameObject);
     var originalPrefab = ZNetScene.instance.GetPrefab(name);
     var prefab = Configuration.CopyState ? view.gameObject : originalPrefab;
@@ -215,6 +220,7 @@ public partial class Selected {
     if (prefab.GetComponent<Player>()) throw new InvalidOperationException("Players are not valid objects.");
     if (!Configuration.AllObjects && !Helper.IsBuildPiece(prefab)) throw new InvalidOperationException("Only build pieces are allowed.");
     Clear();
+    SingleUse = singleUse;
     Type = SelectedType.Object;
     Ghost = Helper.SafeInstantiate(prefab);
     // Reseted for bounds check.
@@ -222,7 +228,6 @@ public partial class Selected {
     ResetColliders(Ghost, originalPrefab);
     Objects.Add(new(name, view.m_syncInitialScale, data));
     Rotating.UpdatePlacementRotation(view.gameObject);
-    if (Position.Override.HasValue) Position.Override = view.transform.position;
     return Ghost;
   }
   private void CountObjects() {
@@ -241,10 +246,11 @@ public partial class Selected {
       ExtraDescription += $"\n{topKeys.Length - 4} other types: {topKeys.Skip(4).Sum(kvp => kvp.Value)}";
     }
   }
-  public GameObject Set(IEnumerable<ZNetView> views) {
+  public GameObject Set(IEnumerable<ZNetView> views, bool singleUse) {
     if (views.Count() == 1)
-      return Set(views.First());
+      return Set(views.First(), singleUse);
     Clear();
+    SingleUse = singleUse;
     Ghost = new GameObject();
     // Prevents children from disappearing.
     Ghost.SetActive(false);
@@ -270,7 +276,6 @@ public partial class Selected {
     Type = SelectedType.Multiple;
     CountObjects();
     Rotating.UpdatePlacementRotation(Ghost);
-    if (Position.Override.HasValue) Position.Override = Ghost.transform.position;
     return Ghost;
   }
   public void Mirror() {
@@ -419,8 +424,10 @@ public partial class Selected {
   }
   private List<GameObject> AddSnapPoints(GameObject obj) {
     List<GameObject> added = new();
+    // Null reference exception is sometimes thrown, no idea why but added some checks.
+    if (!Ghost || !obj || !SnapObj) return added;
     foreach (Transform tr in obj.transform) {
-      if (!Helper.IsSnapPoint(tr.gameObject)) continue;
+      if (!tr || !Helper.IsSnapPoint(tr.gameObject)) continue;
       SnapObj.SetActive(false);
       var snapObj = UnityEngine.Object.Instantiate(SnapObj, tr.position, Quaternion.identity, Ghost.transform);
       added.Add(snapObj);

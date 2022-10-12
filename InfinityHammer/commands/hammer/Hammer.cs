@@ -47,7 +47,7 @@ public class HammerSelect {
   }
   public HammerSelect() {
     List<string> named = new() {
-      "scale", "radius", "level", "stars", "connected", "from", "health", "type",
+      "freeze", "pick", "scale", "level", "stars", "connect", "health", "type",
     };
     if (CommandWrapper.StructureTweaks != null) {
       List<string> namedStructure = new() {
@@ -88,9 +88,10 @@ public class HammerSelect {
       { "scale", (int index) => CommandWrapper.Scale("scale", "Size of the object (if the object can be scaled).", index) },
       { "level", (int index) => CommandWrapper.Info("Level.") },
       { "stars", (int index) => CommandWrapper.Info("Stars.") },
-      { "from", (int index) => CommandWrapper.Info("Position.") },
       { "text", (int index) => CommandWrapper.Info("Text.") },
       { "health", (int index) => CommandWrapper.Info("Health.") },
+      { "freeze", (int index) => CommandWrapper.Info("Freezes in the place.") },
+      { "pick", (int index) => CommandWrapper.Info("Picks up the selection.") },
       { "connect", (int index) => CommandWrapper.Info("Selects whole building.") },
       { "type", (int index) => ObjectTypes },
       { "wear", (int index) => Wears },
@@ -101,25 +102,38 @@ public class HammerSelect {
       { "interact", (int index) => False },
       { "restrict", (int index) => False },
     });
-    Helper.Command("hammer", "[object id or radius] - Selects the object to be placed (the hovered object by default).", (args) => {
+    Helper.Command("hammer", "[object id] - Selects the object to be placed (the hovered object by default).", (args) => {
       Helper.EnabledCheck();
       Hammer.Equip(Tool.Hammer);
       HammerParameters pars = new(args);
-      GameObject selected;
+      GameObject? selected = null;
+      ZNetView[] views = new ZNetView[0];
       if (pars.Radius.HasValue)
-        selected = Selection.Set(Selector.GetNearby("", pars.ObjectType, pars.Position, pars.Radius.Value, pars.Height));
+        views = Selector.GetNearby("", pars.ObjectType, pars.Position, pars.Radius.Value, pars.Height);
       else if (pars.Width.HasValue && pars.Depth.HasValue)
-        selected = Selection.Set(Selector.GetNearby("", pars.ObjectType, pars.Position, pars.Angle, pars.Width.Value, pars.Depth.Value, pars.Height));
-      else if (args.Length > 1 && !args[1].Contains("=") && args[1] != "connect")
-        selected = Selection.Set(args[1]);
+        views = Selector.GetNearby("", pars.ObjectType, pars.Position, pars.Angle, pars.Width.Value, pars.Depth.Value, pars.Height);
+      else if (args.Length > 1 && !args[1].Contains("=") && !pars.Connect && !pars.Pick && !pars.Freeze)
+        selected = Selection.Set(args[1], pars.Pick);
       else {
         var hovered = Selector.GetHovered(Configuration.SelectRange, Configuration.SelectBlacklist);
         if (hovered == null) throw new InvalidOperationException("Nothing is being hovered.");
         if (pars.Connect)
-          selected = Selection.Set(Selector.GetConnected(hovered));
+          views = Selector.GetConnected(hovered);
         else
-          selected = Selection.Set(hovered);
+          views = new ZNetView[] { hovered };
       }
+      if (selected == null && views.Length > 0) {
+        selected = Selection.Set(views, pars.Pick);
+        if (pars.Pick) {
+          foreach (var view in views) {
+            RemovePiece.AddRemovedObject(view);
+            Helper.RemoveZDO(view.GetZDO());
+          }
+          UndoWrapper.Remove(RemovePiece.RemovedObjects);
+          RemovePiece.RemovedObjects.Clear();
+        }
+      }
+      if (selected == null) return;
       if (pars.Health.HasValue)
         UpdateZDOs(zdo => zdo.Set(Hash.Health, pars.Health.Value));
       if (pars.Level.HasValue)
@@ -143,6 +157,7 @@ public class HammerSelect {
       if (pars.Text != null)
         UpdateZDOs(zdo => zdo.Set(Hash.Text, pars.Text));
       Selection.Postprocess(pars.Scale);
+      if (pars.Freeze) Position.Freeze(selected.transform.position);
       PrintSelected(args.Context, selected);
     }, CommandWrapper.ObjectIds);
   }
