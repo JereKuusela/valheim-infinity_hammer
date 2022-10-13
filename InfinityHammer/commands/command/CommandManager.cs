@@ -16,9 +16,6 @@ public class CommandManager {
 
   public static string FromData(CommandData data, Tool tool) {
     var command = data.command;
-    var toolStr = tool == Tool.Hammer ? "hammer_" : "hoe_";
-    if (data.prepend_tool_name)
-      command = String.Join(";", command.Split(';').Select(cmd => toolStr + cmd));
     if (data.name != "")
       command += $" cmd_name={data.name.Replace(" ", "_")}";
     if (data.description != "")
@@ -31,16 +28,6 @@ public class CommandManager {
     CommandParameters pars = new(command, false, false);
     CommandData data = new();
     data.command = pars.Command;
-    data.prepend_tool_name = false;
-    var cmds = data.command.Split(';');
-    if (cmds.All(cmd => cmd.StartsWith("hammer_", StringComparison.OrdinalIgnoreCase))) {
-      data.prepend_tool_name = true;
-      data.command = String.Join(";", cmds.Select(cmd => cmd.Substring(7)));
-    }
-    if (cmds.All(cmd => cmd.StartsWith("hoe_", StringComparison.OrdinalIgnoreCase))) {
-      data.prepend_tool_name = true;
-      data.command = String.Join(";", cmds.Select(cmd => cmd.Substring(4)));
-    }
     data.description = pars.Description;
     data.name = pars.Name;
     data.icon = pars.IconName;

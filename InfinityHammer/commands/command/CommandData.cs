@@ -14,8 +14,6 @@ public class CommandData {
   [DefaultValue("")]
   public string icon = "";
   public string command = "";
-  [DefaultValue(true)]
-  public bool prepend_tool_name = true;
 }
 
 public class InitialData {
@@ -34,9 +32,8 @@ public class InitialData {
     if (CommandWrapper.WorldEditCommands == null)
       return new string[0];
     return new[] {
-      "hoe_terrain cmd_icon=mud_road cmd_name=Level cmd_desc=Flattens_terrain. level",
-      "hoe_terrain cmd_icon=mud_road cmd_name=Smooth_level cmd_desc=Smoothly_flattens_terrain. level smooth=.5",
-      "hoe_terrain cmd_icon=raise cmd_name=Raise cmd_desc=Raises_terrain. raise=h",
+      "hoe_terrain cmd_icon=mud_road cmd_name=Level cmd_desc=Flattens_terrain.\nHold_cmd_mod1_to_smooth. level key=-cmd_mod1;level smooth=.5 key=cmd_mod1",
+      "hoe_terrain cmd_icon=raise cmd_name=Raise cmd_desc=Raises_terrain.\nHold_cmd_mod1_to_smooth. raise=h key=-cmd_mod1;raise=h smooth=.5 key=cmd_mod1",
       "hoe_terrain cmd_icon=paved_road cmd_name=Pave cmd_desc=Paves_terrain. paint=paved",
       "hoe_terrain cmd_icon=replant cmd_name=Grass cmd_desc=Grass. paint=grass",
       "hoe_terrain cmd_icon=Hoe cmd_name=Dirt cmd_desc=Dirt. paint=dirt",
@@ -46,9 +43,9 @@ public class InitialData {
       "hoe_terrain cmd_icon=trophygreydwarfshaman cmd_name=MossyPaving cmd_desc=Paving_with_moss. paint=paved_moss",
       "hoe_terrain cmd_icon=tar cmd_name=DarkPaving cmd_desc=Dark_Paving. paint=paved_dark",
       "hoe_terrain cmd_icon=Hoe cmd_name=Reset cmd_desc=Resets_terrain. reset",
-      "hoe_slope cmd_icon=wood_wall_roof_45 cmd_name=Slope cmd_desc=Smooth_slope_between_you_and_aim_point.",
-      "hoe_object cmd_icon=softdeath cmd_name=Remove cmd_desc=Removes_objects.\nPress_cmd_mod1_to_also_reset_the_terrain. remove id=*;hoe_terrain keys=cmd_mod1 reset",
-      "hoe_object cmd_icon=Carrot cmd_name=Tame cmd_desc=Tames_creatures. tame",
+      "hoe_slope cmd_icon=wood_wall_roof_45 cmd_name=Slope cmd_desc=Slope_between_you_and_aim_point.\nHold_cmd_mod1_to_smooth. key=-cmd_mod1;hoe_slope smooth=.5 key=cmd_mod1",
+      "hoe_object cmd_icon=softdeath cmd_name=Remove cmd_desc=Removes_objects.\nHold_cmd_mod1_to_also_reset_the_terrain. remove id=*;hoe_terrain keys=cmd_mod1 reset",
+      "hoe_object cmd_icon=Carrot cmd_name=Tame cmd_desc=Tames_creatures.\nHold_cmd_mod1_to_untame tame key=-cmd_mod1;wild key=cmd_mod1",
     };
   }
 }

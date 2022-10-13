@@ -15,12 +15,12 @@ public enum SelectedType {
 
 public class SelectedObject {
   public string Prefab = "";
-  public ZDO? Data;
+  public ZDO Data;
   public bool Scalable;
-  public SelectedObject(string name, bool scalable, ZDO? data) {
+  public SelectedObject(string name, bool scalable, ZDO data) {
     Prefab = name;
     Scalable = scalable;
-    Data = data == null ? data : data.Clone();
+    Data = data.Clone();
   }
 }
 
@@ -129,7 +129,7 @@ public partial class Selected {
     SingleUse = singleUse;
     Type = SelectedType.Object;
     Ghost = Helper.SafeInstantiate(prefab);
-    Objects.Add(new(name, prefab.GetComponent<ZNetView>().m_syncInitialScale, null));
+    Objects.Add(new(name, prefab.GetComponent<ZNetView>().m_syncInitialScale, new()));
     return Ghost;
   }
   private static void ResetColliders(GameObject obj, GameObject original) {
@@ -215,7 +215,7 @@ public partial class Selected {
     var name = Utils.GetPrefabName(view.gameObject);
     var originalPrefab = ZNetScene.instance.GetPrefab(name);
     var prefab = Configuration.CopyState ? view.gameObject : originalPrefab;
-    var data = Configuration.CopyState ? view.GetZDO().Clone() : null;
+    var data = Configuration.CopyState ? view.GetZDO().Clone() : new();
 
     if (!prefab) throw new InvalidOperationException("Invalid prefab.");
     if (prefab.GetComponent<Player>()) throw new InvalidOperationException("Players are not valid objects.");
@@ -262,7 +262,7 @@ public partial class Selected {
       var name = Utils.GetPrefabName(view.gameObject);
       var originalPrefab = ZNetScene.instance.GetPrefab(name);
       var prefab = Configuration.CopyState ? view.gameObject : originalPrefab;
-      var data = Configuration.CopyState ? view.GetZDO().Clone() : null;
+      var data = Configuration.CopyState ? view.GetZDO().Clone() : new();
       var obj = Helper.SafeInstantiate(prefab, Ghost);
       obj.SetActive(true);
       obj.transform.position = view.transform.position;
@@ -329,7 +329,7 @@ public partial class Selected {
     Type = SelectedType.Location;
     return Ghost;
   }
-  private static ZDO? SetData(GameObject obj, string data, ZDO? zdo) {
+  private static ZDO SetData(GameObject obj, string data, ZDO zdo) {
     if (obj.GetComponent<Sign>() is { } sign) {
       zdo ??= new();
       if (data == "")

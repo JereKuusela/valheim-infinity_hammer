@@ -102,12 +102,12 @@ public class HammerSaveCommand {
     return info;
   }
   private static void AddSingleObject(Blueprint bp, GameObject obj) {
-    var zdo = Selection.GetData();
+    var zdo = Selection.GetData() ?? new();
     var info = GetExtraInfo(obj, zdo);
     bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), Vector3.zero, Quaternion.identity, obj.transform.localScale, info, zdo));
   }
   private static void AddObject(Blueprint bp, GameObject obj, int index = 0) {
-    var zdo = Selection.GetData(index);
+    var zdo = Selection.GetData(index) ?? new();
     var info = GetExtraInfo(obj, zdo);
     bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), obj.transform.localPosition, obj.transform.localRotation, obj.transform.localScale, info, zdo));
   }
