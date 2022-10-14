@@ -76,13 +76,13 @@ public class HammerSaveCommand {
       }
     }
   }
-  private static string GetExtraInfo(GameObject obj, ZDO? zdo) {
+  private static string GetExtraInfo(GameObject obj, ZDO zdo) {
     var info = "";
-    if (obj.GetComponent<Sign>() && zdo != null)
+    if (obj.GetComponent<Sign>())
       info = zdo.GetString(Hash.Text, "");
-    if (obj.GetComponent<TeleportWorld>() && zdo != null)
+    if (obj.GetComponent<TeleportWorld>())
       info = zdo.GetString(Hash.Tag, "");
-    if (obj.GetComponent<Tameable>() && zdo != null)
+    if (obj.GetComponent<Tameable>())
       info = zdo.GetString(Hash.TamedName, "");
 
     if (obj.GetComponent<ItemStand>() is { } itemStand && zdo?.GetString(Hash.Item) != "") {
@@ -128,12 +128,14 @@ public class HammerSaveCommand {
       }
     }
     if (Selection.Type == SelectedType.Multiple || Selection.Type == SelectedType.Location) {
-      for (var i = 0; i < obj.transform.childCount; i++) {
-        var child = obj.transform.GetChild(i);
-        if (Helper.IsSnapPoint(child.gameObject))
-          bp.SnapPoints.Add(child.localPosition);
-        else
-          AddObject(bp, child.gameObject, i);
+      var i = 0;
+      foreach (Transform tr in obj.transform) {
+        if (Helper.IsSnapPoint(tr.gameObject))
+          bp.SnapPoints.Add(tr.localPosition);
+        else {
+          AddObject(bp, tr.gameObject, i);
+          i += 1;
+        }
       }
     }
     return bp;
@@ -178,6 +180,7 @@ public class HammerSaveCommand {
       ZPackage pkg = new();
       Serialize(obj.Data, pkg);
       data = pkg.GetBase64();
+      if (data == "AAAAAA==") data = "";
     }
     return $"{name};;{posX};{posY};{posZ};{rotX};{rotY};{rotZ};{rotW};{info};{scaleX};{scaleY};{scaleZ};{data}";
   }

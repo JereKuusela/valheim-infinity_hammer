@@ -14,15 +14,30 @@ public class CommandData {
   [DefaultValue("")]
   public string icon = "";
   public string command = "";
+  [DefaultValue("")]
+  public string continuous = "";
 }
 
 public class InitialData {
-  private const string SELECT = "hammer_command cmd_icon=hammer cmd_name=Pipette cmd_desc=Select_object. hammer";
-  private const string PICK = "hammer_command cmd_icon=hammer cmd_name=Pick cmd_desc=Pick_object. hammer pick";
-  private const string SELECT_DEVCOMMANDS = "hammer_command cmd_icon=hammer cmd_name=Pipette cmd_desc=Press_cmd_mod1_to_pick_up.\nPress_cmd_mod2_to_freeze. hammer pick=cmd_mod1 freeze=cmd_mod2";
-  private const string CONNECT_DEVCOMMANDS = "hammer_command cmd_icon=hammer cmd_name=Building_pipette cmd_desc=Select_entire_buildings.\nPress_cmd_mod1_to_pick_up.\nPress_cmd_mod2_to_freeze. hammer connect pick=cmd_mod1 freeze=cmd_mod2";
-  private const string AREA_SELECT = "hammer_area cmd_icon=hammer cmd_name=Area_pipette cmd_desc=Select_multiple_objects.";
-  private const string AREA_SELECT_DEVCOMMANDS = "hammer_area cmd_icon=hammer cmd_name=Area_pipette cmd_desc=Select_multiple_objects.\nPress_cmd_mod1_to_pick_up.\nPress_cmd_mod2_to_freeze. pick=cmd_mod1 freeze=cmd_mod2";
+  private const string N = CommandParameters.CmdName;
+  private const string D = CommandParameters.CmdDesc;
+  private const string I = CommandParameters.CmdIcon;
+  private const string CONT = CommandParameters.CmdContinuous + "=" + M1;
+  private const string M1 = CommandParameters.CmdMod1;
+  private const string M2 = CommandParameters.CmdMod2;
+  private const string K = "keys";
+  private const string P = "paint";
+  private const string HC = "hammer_command";
+  private const string HT = "hoe_terrain";
+  private const string HO = "hoe_object";
+  private const string HS = "hoe_slope";
+  private const string SMOOTH = $"smooth={M1}?.5:0";
+  private const string SELECT = $"{HC} {I}=hammer {N}=Pipette {D}=Select_object. hammer";
+  private const string PICK = $"{HC} {I}=hammer {N}=Pick {D}=Pick_object. hammer pick";
+  private const string SELECT_DEVCOMMANDS = $"{HC} {I}=hammer {N}=Pipette {D}=Press_{M1}_to_pick_up.\nPress_{M2}_to_freeze. hammer pick={M1} freeze={M2}";
+  private const string CONNECT_DEVCOMMANDS = $"{HC} {I}=hammer {N}=Building_pipette {D}=Select_entire_buildings.\nPress_{M1}_to_pick_up.\nPress_{M2}_to_freeze. hammer connect pick={M1} freeze={M2}";
+  private const string AREA_SELECT = $"hammer_area {I}=hammer {N}=Area_pipette {D}=Select_multiple_objects.";
+  private const string AREA_SELECT_DEVCOMMANDS = $"hammer_area {I}=hammer {N}=Area_pipette {D}=Select_multiple_objects.\nPress_{M1}_to_pick_up.\nPress_{M2}_to_freeze. pick={M1} freeze={M2}";
   public static string[] Hammer() {
     if (CommandWrapper.ServerDevcommands == null)
       return new[] { SELECT, PICK, AREA_SELECT };
@@ -32,20 +47,20 @@ public class InitialData {
     if (CommandWrapper.WorldEditCommands == null)
       return new string[0];
     return new[] {
-      "hoe_terrain cmd_icon=mud_road cmd_name=Level cmd_desc=Flattens_terrain.\nHold_cmd_mod1_to_smooth. level key=-cmd_mod1;level smooth=.5 key=cmd_mod1",
-      "hoe_terrain cmd_icon=raise cmd_name=Raise cmd_desc=Raises_terrain.\nHold_cmd_mod1_to_smooth. raise=h key=-cmd_mod1;raise=h smooth=.5 key=cmd_mod1",
-      "hoe_terrain cmd_icon=paved_road cmd_name=Pave cmd_desc=Paves_terrain. paint=paved",
-      "hoe_terrain cmd_icon=replant cmd_name=Grass cmd_desc=Grass. paint=grass",
-      "hoe_terrain cmd_icon=Hoe cmd_name=Dirt cmd_desc=Dirt. paint=dirt",
-      "hoe_terrain cmd_icon=cultivate cmd_name=Cultivate Area cmd_desc=Cultivates_terrain. paint=cultivated",
-      "hoe_terrain cmd_icon=trophyabomination cmd_name=DarkGrass cmd_desc=Dark_Grass. paint=grass_dark",
-      "hoe_terrain cmd_icon=iron_wall_2x2 cmd_name=PatchyGrass cmd_desc=Patchy_Grass. paint=patches",
-      "hoe_terrain cmd_icon=trophygreydwarfshaman cmd_name=MossyPaving cmd_desc=Paving_with_moss. paint=paved_moss",
-      "hoe_terrain cmd_icon=tar cmd_name=DarkPaving cmd_desc=Dark_Paving. paint=paved_dark",
-      "hoe_terrain cmd_icon=Hoe cmd_name=Reset cmd_desc=Resets_terrain. reset",
-      "hoe_slope cmd_icon=wood_wall_roof_45 cmd_name=Slope cmd_desc=Slope_between_you_and_aim_point.\nHold_cmd_mod1_to_smooth. key=-cmd_mod1;hoe_slope smooth=.5 key=cmd_mod1",
-      "hoe_object cmd_icon=softdeath cmd_name=Remove cmd_desc=Removes_objects.\nHold_cmd_mod1_to_also_reset_the_terrain. remove id=*;hoe_terrain keys=cmd_mod1 reset",
-      "hoe_object cmd_icon=Carrot cmd_name=Tame cmd_desc=Tames_creatures.\nHold_cmd_mod1_to_untame tame key=-cmd_mod1;wild key=cmd_mod1",
+      $"{HT} {I}=mud_road {N}=Level {D}=Flattens_terrain.\nHold_{M1}_to_smooth. level {SMOOTH}",
+      $"{HT} {I}=raise {N}=Raise {D}=Raises_terrain.\nHold_{M1}_to_smooth. raise=h {SMOOTH}",
+      $"{HT} {I}=paved_road {N}=Pave {D}=Paves_terrain.\nHold_{M1}_to_repeat. {P}=paved {CONT}",
+      $"{HT} {I}=replant {N}=Grass {D}=Grass.\nHold_{M1}_to_repeat. {P}=grass {CONT}",
+      $"{HT} {I}=Hoe {N}=Dirt {D}=Dirt.\nHold_{M1}_to_repeat. {P}=dirt {CONT}",
+      $"{HT} {I}=cultivate {N}=Cultivate Area {D}=Cultivates_terrain.\nHold_{M1}_to_repeat. {P}=cultivated {CONT}",
+      $"{HT} {I}=trophyabomination {N}=DarkGrass {D}=Dark_Grass.\nHold_{M1}_to_repeat. {P}=grass_dark {CONT}",
+      $"{HT} {I}=iron_wall_2x2 {N}=PatchyGrass {D}=Patchy_Grass.\nHold_{M1}_to_repeat. {P}=patches {CONT}",
+      $"{HT} {I}=trophygreydwarfshaman {N}=MossyPaving {D}=Paving_with_moss.\nHold_{M1}_to_repeat. {P}=paved_moss {CONT}",
+      $"{HT} {I}=tar {N}=DarkPaving {D}=Dark_Paving.\nHold_{M1}_to_repeat. {P}=paved_dark {CONT}",
+      $"{HT} {I}=Hoe {N}=Reset {D}=Resets_terrain.\nHold_{M1}_to_repeat. reset {CONT}",
+      $"{HS} {I}=wood_wall_roof_45 {N}=Slope {D}=Slope_between_you_and_aim_point.",
+      $"{HO} {I}=softdeath {N}=Remove {D}=Removes_objects.\nHold_{M1}_to_also_reset_the_terrain. remove id=*;{HT} keys={M1} reset",
+      $"{HO} {I}=Carrot {N}=Tame {D}=Tames_creatures.\nHold_{M1}_to_untame tame {K}=-{M1};{HO} wild {K}={M1}",
     };
   }
 }

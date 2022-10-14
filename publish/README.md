@@ -431,7 +431,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Adds a new parameter `pick` to the `hammer` command.
 	- Adds a new parameter `freeze` to the `hammer` command.
 	- Adds new bind settings.
-	- Adds yaml file for commands.
+	- Adds yaml file for commands.a
 	- Adds "InfinityHammer" category to saved blueprints.
 	- Adds cheat checks to scaling and zoom commands.
 	- Improves support for picking up and freezing at the same time.
@@ -441,6 +441,7 @@ Blacklist can be used to avoid destroying critical objects like locations. For e
 	- Fixes object count being saved in blueprints.
 	- Fixes freezing sometimes making the selection disappear.
 	- Fixes commands with modifier keys not working if a modifier key was unbound.
+	- Fixes snappoints messing up blueprint data saving.
 
 - v1.21
 	- Adds new commands `hammer_zoop_[direction]` to multiply the selection.

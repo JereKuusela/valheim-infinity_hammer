@@ -17,11 +17,17 @@ public class CommandManager {
   public static string FromData(CommandData data, Tool tool) {
     var command = data.command;
     if (data.name != "")
-      command += $" cmd_name={data.name.Replace(" ", "_")}";
+      command += $" {CommandParameters.CmdName}={data.name.Replace(" ", "_")}";
     if (data.description != "")
-      command += $" cmd_desc={data.description.Replace(" ", "_")}";
+      command += $" {CommandParameters.CmdDesc}={data.description.Replace(" ", "_")}";
     if (data.icon != "")
-      command += $" cmd_icon={data.icon}";
+      command += $" {CommandParameters.CmdIcon}={data.icon}";
+    if (data.continuous != "") {
+      if (data.continuous == "true")
+        command += $" {CommandParameters.CmdContinuous}";
+      else
+        command += $" {CommandParameters.CmdContinuous}={data.continuous}";
+    }
     return command;
   }
   public static CommandData ToData(string command) {
@@ -30,7 +36,8 @@ public class CommandManager {
     data.command = pars.Command;
     data.description = pars.Description;
     data.name = pars.Name;
-    data.icon = pars.IconName;
+    data.icon = pars.IconValue;
+    data.continuous = pars.Continuous;
     return data;
   }
   public static void CreateFile() {
@@ -71,18 +78,23 @@ public class CommandManager {
   public static List<string> HammerCommands = new();
   public static List<string> HoeCommands = new();
   public static void FromFile() {
-    var yaml = Data.Read(Pattern);
-    if (yaml == "") return;
+    var data = Data.Read(Pattern, Data.Deserialize<CommandsData>);
+    if (data.Length == 0) {
+      CreateFile();
+      return;
+    }
     try {
-      var data = Data.Deserialize<CommandsData>(yaml, FileName);
-      var count = data.hammer.Length + data.hoe.Length;
+      var hammer = data.SelectMany(value => value.hammer).ToArray();
+      var hoe = data.SelectMany(value => value.hoe).ToArray();
+      var count = hammer.Length + hoe.Length;
       if (count == 0) {
         InfinityHammer.Log.LogWarning($"Failed to load any command data.");
         return;
       }
-      HammerCommands = data.hammer.Select(cmd => FromData(cmd, Tool.Hammer)).ToList();
-      HoeCommands = data.hoe.Select(cmd => FromData(cmd, Tool.Hoe)).ToList();
+      HammerCommands = hammer.Select(cmd => FromData(cmd, Tool.Hammer)).ToList();
+      HoeCommands = hoe.Select(cmd => FromData(cmd, Tool.Hoe)).ToList();
       InfinityHammer.Log.LogInfo($"Reloading {count} command data.");
+      Player.m_localPlayer?.UpdateAvailablePiecesList();
     } catch (Exception e) {
       InfinityHammer.Log.LogError(e.StackTrace);
     }

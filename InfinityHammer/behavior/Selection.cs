@@ -45,7 +45,8 @@ public static class Selection {
   public static List<SelectedObject> Objects => Get()?.Objects ?? new();
 
   public static void Clear() => Get()?.Clear();
-  public static bool IsSingleUse() => Get()?.SingleUse ?? false;
+  public static bool IsSingleUse() => GetOrAdd().SingleUse;
+  public static bool IsContinuous() => GetOrAdd().Continuous == "true" || Helper.IsDown(GetOrAdd().Continuous);
   public static void Mirror() => Get()?.Mirror();
   public static void Postprocess(Vector3? scale) => Get()?.Postprocess(scale);
   public static ZDO? GetData(int index = 0) => Get()?.GetData(index);
@@ -55,7 +56,7 @@ public static class Selection {
   public static GameObject Set(string name, bool singleUse) => GetOrAdd().Set(name, singleUse);
   public static GameObject Set(ZNetView view, bool singleUse) => GetOrAdd().Set(view, singleUse);
   public static GameObject Set(IEnumerable<ZNetView> views, bool singleUse) => GetOrAdd().Set(views, singleUse);
-  public static GameObject Set(RulerParameters ruler, string name, string description, string command, Sprite? icon) => GetOrAdd().Set(ruler, name, description, command, icon);
+  public static GameObject Set(RulerParameters ruler, string name, string description, string command, string continuous, Sprite? icon) => GetOrAdd().Set(ruler, name, description, command, continuous, icon);
   public static GameObject Set(ZoneSystem.ZoneLocation location, int seed) => GetOrAdd().Set(location, seed);
   public static GameObject Set(Terminal terminal, Blueprint bp, Vector3 scale) => GetOrAdd().Set(terminal, bp, scale);
   public static void ZoopUp(string offset) => GetOrAdd().ZoopUp(offset);
@@ -77,10 +78,11 @@ public partial class Selected {
   public string Command = "";
   public string ExtraDescription = "";
   public bool SingleUse = false;
+  public string Continuous = "";
   public RulerParameters RulerParameters = new();
   public ZDO? GetData(int index = 0) {
     if (Objects.Count <= index) return null;
-    return Objects[index].Data?.Clone();
+    return Objects[index].Data.Clone();
   }
   public int GetPrefab(int index = 0) {
     if (Objects.Count <= index) return 0;
@@ -108,6 +110,7 @@ public partial class Selected {
   public void Clear() {
     if (Ghost) UnityEngine.Object.Destroy(Ghost);
     SingleUse = false;
+    Continuous = "";
     ExtraDescription = "";
     Ghost = null;
     ZoopsX = 0;
@@ -268,8 +271,8 @@ public partial class Selected {
       obj.transform.position = view.transform.position;
       obj.transform.rotation = view.transform.rotation;
       ResetColliders(obj, originalPrefab);
-      var zdo = SetData(obj, "", data);
-      Objects.Add(new(name, view.m_syncInitialScale, zdo));
+      SetData(obj, "", data);
+      Objects.Add(new(name, view.m_syncInitialScale, data));
       if (view == views.First())
         AddSnapPoints(obj);
     }
@@ -298,10 +301,11 @@ public partial class Selected {
     }
     Helper.GetPlayer().SetupPlacementGhost();
   }
-  public GameObject Set(RulerParameters ruler, string name, string description, string command, Sprite? icon) {
+  public GameObject Set(RulerParameters ruler, string name, string description, string command, string continuous, Sprite? icon) {
     Clear();
     var player = Helper.GetPlayer();
     RulerParameters = ruler;
+    Continuous = continuous;
     Command = command;
     Ghost = new GameObject();
     Ghost.name = name;
@@ -331,7 +335,6 @@ public partial class Selected {
   }
   private static ZDO SetData(GameObject obj, string data, ZDO zdo) {
     if (obj.GetComponent<Sign>() is { } sign) {
-      zdo ??= new();
       if (data == "")
         data = zdo.GetString(Hash.Text, data);
       else
@@ -339,15 +342,12 @@ public partial class Selected {
       sign.m_textWidget.text = data;
     }
     if (obj.GetComponent<TeleportWorld>() && data != "") {
-      zdo ??= new();
       zdo.Set(Hash.Tag, data);
     }
     if (obj.GetComponent<Tameable>() && data != "") {
-      zdo ??= new();
       zdo.Set(Hash.TamedName, data);
     }
     if (obj.GetComponent<ItemStand>() is { } itemStand) {
-      zdo ??= new();
       var split = data.Split(':');
       var name = split[0];
       var variant = Parse.TryInt(split, 1, 0);
@@ -361,7 +361,6 @@ public partial class Selected {
       itemStand.SetVisualItem(name, variant);
     }
     if (obj.GetComponent<ArmorStand>() is { } armorStand) {
-      zdo ??= new();
       var split = data.Split(':');
       var pose = Parse.TryInt(split, 0, 0);
       if (data == "")

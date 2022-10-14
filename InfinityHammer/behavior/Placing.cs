@@ -178,9 +178,31 @@ public class PlacePiece {
   }
 }
 
+[HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacement))]
+public class HoldUse {
+  static void CheckHold() {
+    if (!Selection.IsContinuous()) return;
+    var player = Player.m_localPlayer;
+    if (ZInput.GetButton("Attack") || ZInput.GetButton("JoyPlace"))
+      player.m_placePressedTime = Time.time;
+    if (Time.time - player.m_lastToolUseTime > player.m_placeDelay / 4f)
+      player.m_lastToolUseTime = 0f;
+  }
+  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+    return new CodeMatcher(instructions)
+          .MatchForward(
+              useEnd: false,
+              new CodeMatch(
+                  OpCodes.Ldstr,
+                  "Attack"))
+          .Insert(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate(CheckHold).operand))
+          .InstructionEnumeration();
+  }
+}
+
 [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
 public class PostProcessToolOnPlace {
-  public static void Postfix(Player __instance, ref bool __result) {
+  static void Postfix(Player __instance, ref bool __result) {
     if (__result) Hammer.PostProcessTool(__instance);
   }
 }

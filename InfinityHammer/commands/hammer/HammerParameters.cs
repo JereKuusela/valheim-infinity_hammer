@@ -49,7 +49,6 @@ public class HammerParameters {
       Position = Player.m_localPlayer.transform.position;
     ParseArgs(args.Args);
   }
-  private bool IsDown(string key) => Enum.TryParse<KeyCode>(key, true, out var code) && Input.GetKey(code);
   protected void ParseArgs(string[] args) {
     foreach (var arg in args) {
       var split = arg.Split('=');
@@ -64,11 +63,11 @@ public class HammerParameters {
       var value = split[1].ToLower();
       var values = Parse.Split(value);
       if (name == "connect")
-        Connect = IsDown(value);
+        Connect = Helper.IsDown(value);
       if (name == "freeze")
-        Freeze = IsDown(value);
+        Freeze = Helper.IsDown(value);
       if (name == "pick")
-        Pick = IsDown(value);
+        Pick = Helper.IsDown(value);
       if (name == "level")
         Level = Parse.TryInt(value, 1);
       if (name == "stars")

@@ -48,9 +48,8 @@ public class Data : MonoBehaviour {
     }
   }
 
-  public static string Read(string pattern) {
-    var data = Directory.GetFiles(Paths.ConfigPath, pattern).Select(name => File.ReadAllText(name));
-    return string.Join("\n", data);
+  public static T[] Read<T>(string pattern, Func<string, string, T> action) {
+    return Directory.GetFiles(Paths.ConfigPath, pattern).Select(name => action(File.ReadAllText(name), name)).ToArray();
   }
 }
 #nullable disable

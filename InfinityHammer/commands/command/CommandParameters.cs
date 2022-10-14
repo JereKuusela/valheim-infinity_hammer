@@ -5,15 +5,16 @@ using Service;
 using UnityEngine;
 namespace InfinityHammer;
 public class CommandParameters {
-  public static string CmdName = "cmd_name";
-  public static string CmdDesc = "cmd_desc";
-  public static string CmdIcon = "cmd_icon";
-  public static string CmdR = "cmd_r";
-  public static string CmdW = "cmd_w";
-  public static string CmdD = "cmd_d";
-  public static string CmdH = "cmd_h";
-  public static string CmdMod1 = "cmd_mod1";
-  public static string CmdMod2 = "cmd_mod2";
+  public const string CmdName = "cmd_name";
+  public const string CmdDesc = "cmd_desc";
+  public const string CmdIcon = "cmd_icon";
+  public const string CmdR = "cmd_r";
+  public const string CmdW = "cmd_w";
+  public const string CmdD = "cmd_d";
+  public const string CmdH = "cmd_h";
+  public const string CmdContinuous = "cmd_cont";
+  public const string CmdMod1 = "cmd_mod1";
+  public const string CmdMod2 = "cmd_mod2";
   public Range<float> RadiusCap = new(float.MinValue, float.MaxValue);
   public Range<float> WidthCap = new(float.MinValue, float.MaxValue);
   public Range<float> DepthCap = new(float.MinValue, float.MaxValue);
@@ -25,10 +26,11 @@ public class CommandParameters {
   public bool Angle = false;
   public bool IsTargeted = false;
   public bool IsId = false;
+  public string Continuous = "";
   public string Name = "Command";
   public string Description = "";
   public Sprite? Icon = null;
-  public string IconName = "";
+  public string IconValue = "";
   public string Command = "";
 
   public static string RemoveCmdParameters(string command) => string.Join(";", command.Split(';').Select(s => s.Trim()).Select(s => string.Join(" ", FilterCmd(s.Split(' ')))));
@@ -36,6 +38,7 @@ public class CommandParameters {
     .Where(s => !s.StartsWith($"{CmdName}=", StringComparison.OrdinalIgnoreCase))
     .Where(s => !s.StartsWith($"{CmdDesc}=", StringComparison.OrdinalIgnoreCase))
     .Where(s => !s.StartsWith($"{CmdIcon}=", StringComparison.OrdinalIgnoreCase))
+    .Where(s => !s.StartsWith($"{CmdContinuous}=", StringComparison.OrdinalIgnoreCase))
     .Where(s => !s.StartsWith($"{CmdR}=", StringComparison.OrdinalIgnoreCase))
     .Where(s => !s.StartsWith($"{CmdW}=", StringComparison.OrdinalIgnoreCase))
     .Where(s => !s.StartsWith($"{CmdD}=", StringComparison.OrdinalIgnoreCase))
@@ -109,18 +112,20 @@ public class CommandParameters {
     foreach (var arg in args) {
       var split = arg.Split('=');
       var name = split[0].ToLower();
+      if (name == CmdContinuous) Continuous = "true";
       if (split.Length < 2) continue;
       var value = split[1].ToLower();
       var range = Parse.TryFloatRange(value);
       if (name == CmdName) Name = split[1].Replace("_", " ");
       if (name == CmdDesc) Description = split[1].Replace("_", " ");
-      if (name == CmdIcon) IconName = split[1];
+      if (name == CmdIcon) IconValue = split[1];
+      if (name == CmdContinuous) Continuous = value;
       if (name == CmdR) RadiusCap = Parse.TryFloatRange(value);
       if (name == CmdW) WidthCap = Parse.TryFloatRange(value);
       if (name == CmdD) DepthCap = Parse.TryFloatRange(value);
       if (name == CmdH) HeightCap = Parse.TryFloatRange(value);
     }
-    Icon = FindSprite(IconName);
+    Icon = FindSprite(IconValue);
     var parameters = new[]{
       "id", "r", "d", "w", "h", "a", "w,d", "x", "y", "z", "tx", "ty", "tz",
       "x,y", "x,z", "y,x", "y,z", "z,x", "z,y", "tx,ty", "tx,tz", "ty,tx", "ty,tz", "tz,tx", "tz,ty",

@@ -4,8 +4,17 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <nullable>enable</nullable>
+    <DoILRepack>false</DoILRepack>
   </PropertyGroup>
-  <Target Name="CopyDLL" AfterTargets="Build">
+  <Target Name="ILRepacker" AfterTargets="Build" >
+      <ItemGroup>
+          <InputAssemblies Include="$(TargetPath)" />
+          <InputAssemblies Include="$(TargetDir)YamlDotNet.dll" />
+          <InputAssemblies Include="$(ProjectDir)..\..\Libs\ServerSync.dll" />
+      </ItemGroup>
+      <ILRepack Parallel="true" Internalize="true" InputAssemblies="@(InputAssemblies)" TargetKind="Dll" OutputFile="$(TargetPath)" />
+  </Target>
+  <Target Name="CopyDLL" AfterTargets="ILRepacker">
     <Copy
       SourceFiles="$(TargetDir)$(ProjectName).dll"
       DestinationFolder="$(ProjectDir)\..\..\Libs" />
@@ -51,13 +60,12 @@
     <Reference Include="assembly_guiutils_publicized.dll">
       <HintPath>..\..\Libs\assembly_guiutils_publicized.dll</HintPath>
     </Reference>
+    <Reference Include="ServerSync.dll">
+      <HintPath>..\..\Libs\ServerSync.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Fody" Version="6.6.3">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="ILMerge.Fody" Version="1.23.0" PrivateAssets="All" />
+    <PackageReference Include="ILRepack.Lib.MSBuild" Version="2.1.18" />
     <PackageReference Include="YamlDotNet" Version="11.2.1" />
   </ItemGroup>
 </Project>

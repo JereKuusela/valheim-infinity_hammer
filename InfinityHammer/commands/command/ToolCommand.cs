@@ -13,7 +13,7 @@ public class ToolCommand {
     var command = string.Join(" ", args.Args);
     command = command.Replace("hammer_command ", "").Replace("hoe_command ", "");
     CommandParameters pars = new CommandParameters(command, false);
-    Selection.Set(pars.ToRuler(), pars.Name, pars.Description, pars.Command, pars.Icon);
+    Selection.Set(pars.ToRuler(), pars.Name, pars.Description, pars.Command, pars.Continuous, pars.Icon);
     AddExtraInfo.ShowId = pars.IsId;
     GizmoWrapper.SetRotation(Quaternion.identity);
     Helper.AddMessage(args.Context, $"Selected command {pars.Name}.");
