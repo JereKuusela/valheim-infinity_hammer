@@ -10,13 +10,14 @@ Install also [World Edit Commands](https://valheim.thunderstore.io/package/JereK
 
 # Usage
 
-See [documentation](https://github.com/JereKuusela/valheim-expand_world/blob/main/README.md).
+See [documentation](https://github.com/JereKuusela/valheim-infinity_hammer/blob/main/README.md).
 
 # Credits
 
 Thanks for Azumatt for creating the mod icon!
 
 Sources: [GitHub](https://github.com/JereKuusela/valheim-infinity_hammer)
+
 Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 
 # Changelog
@@ -77,7 +78,7 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 	- Fixes starred creatures having wrong color/size on the placement ghost.
 
 - v1.18
-  - Adds new settings `move_amount` and `move_amount_large` to configure default bindings.
+	- Adds new settings `move_amount` and `move_amount_large` to configure default bindings.
 	- Adds new command aliases `hammer_area`, `hammer_object` and `hammer_terrain`.
 	- Adds rectangle shape to `hammer_area`.
 	- Changes most default bindings only work when the hammer or hoe is equipped.
