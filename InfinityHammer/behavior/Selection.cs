@@ -108,6 +108,7 @@ public partial class Selected {
     ZNetView.m_initZDO.m_dataRevision = 1;
   }
   public void Clear() {
+    if (Configuration.UnfreezeOnSelect) Position.Unfreeze();
     if (Ghost) UnityEngine.Object.Destroy(Ghost);
     SingleUse = false;
     Continuous = "";
@@ -314,8 +315,8 @@ public partial class Selected {
     piece.m_description = description.Replace("\\n", "\n");
     piece.m_icon = icon;
     piece.m_clipEverything = true;
-    Helper.GetPlayer().SetupPlacementGhost();
     Type = SelectedType.Command;
+    Helper.GetPlayer().SetupPlacementGhost();
     Ruler.Create(ruler);
     return Ghost;
   }
@@ -329,8 +330,8 @@ public partial class Selected {
     data.Set(Hash.Location, location.m_prefab.name.GetStableHashCode());
     data.Set(Hash.Seed, seed);
     Objects.Add(new(location.m_prefab.name, false, data));
-    Helper.GetPlayer().SetupPlacementGhost();
     Type = SelectedType.Location;
+    Helper.GetPlayer().SetupPlacementGhost();
     return Ghost;
   }
   private static ZDO SetData(GameObject obj, string data, ZDO zdo) {
@@ -394,6 +395,7 @@ public partial class Selected {
     Ghost.SetActive(false);
     Ghost.name = bp.Name;
     Ghost.transform.localScale = scale;
+    Ghost.transform.position = Helper.GetPlayer().transform.position;
     var piece = Ghost.AddComponent<Piece>();
     piece.m_name = bp.Name;
     piece.m_description = bp.Description;
@@ -414,12 +416,14 @@ public partial class Selected {
     }
     foreach (var position in bp.SnapPoints) {
       SnapObj.SetActive(false);
-      UnityEngine.Object.Instantiate(SnapObj, position, Quaternion.identity, Ghost.transform);
+      var snapObj = UnityEngine.Object.Instantiate(SnapObj, Ghost.transform);
+      snapObj.transform.localPosition = position;
     }
+    piece.m_clipEverything = Helper.CountSnapPoints(Ghost) == 0;
     ZNetView.m_forceDisableInit = false;
     Scaling.Get().SetScale(Ghost.transform.localScale);
-    Helper.GetPlayer().SetupPlacementGhost();
     Type = SelectedType.Multiple;
+    Helper.GetPlayer().SetupPlacementGhost();
     return Ghost;
   }
   private List<GameObject> AddSnapPoints(GameObject obj) {
@@ -429,7 +433,8 @@ public partial class Selected {
     foreach (Transform tr in obj.transform) {
       if (!tr || !Helper.IsSnapPoint(tr.gameObject)) continue;
       SnapObj.SetActive(false);
-      var snapObj = UnityEngine.Object.Instantiate(SnapObj, tr.position, Quaternion.identity, Ghost.transform);
+      var snapObj = UnityEngine.Object.Instantiate(SnapObj, Ghost.transform);
+      snapObj.transform.localPosition = tr.position;
       added.Add(snapObj);
     }
     return added;

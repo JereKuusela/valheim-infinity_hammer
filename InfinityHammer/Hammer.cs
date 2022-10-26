@@ -14,7 +14,6 @@ public static class Hammer {
 
   public static void RemoveSelection() {
     Selection.Clear();
-    if (Configuration.UnfreezeOnSelect) Position.Unfreeze();
   }
   public static bool IsTool(string name, Tool tool) => tool == Tool.Hammer ? Configuration.HammerTools.Contains(name.ToLower()) : Configuration.HoeTools.Contains(name.ToLower());
   public static bool IsTool(GameObject obj, Tool tool) => obj && IsTool(Utils.GetPrefabName(obj), tool);

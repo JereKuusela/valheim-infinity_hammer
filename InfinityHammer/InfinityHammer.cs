@@ -22,10 +22,11 @@ public class InfinityHammer : BaseUnityPlugin {
 #nullable disable
   public static ManualLogSource Log;
 #nullable enable
+  public static bool ConfigExists = false;
   public void Awake() {
+    ConfigExists = File.Exists(Config.ConfigFilePath);
     Log = Logger;
-    Harmony harmony = new(GUID);
-    harmony.PatchAll();
+    new Harmony(GUID).PatchAll();
     CommandWrapper.Init();
     ConfigWrapper wrapper = new("hammer_config", Config, ConfigSync);
     Configuration.Init(wrapper);

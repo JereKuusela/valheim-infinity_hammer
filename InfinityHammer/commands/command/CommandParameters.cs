@@ -15,10 +15,10 @@ public class CommandParameters {
   public const string CmdContinuous = "cmd_cont";
   public const string CmdMod1 = "cmd_mod1";
   public const string CmdMod2 = "cmd_mod2";
-  public Range<float> RadiusCap = new(float.MinValue, float.MaxValue);
-  public Range<float> WidthCap = new(float.MinValue, float.MaxValue);
-  public Range<float> DepthCap = new(float.MinValue, float.MaxValue);
-  public Range<float> HeightCap = new(float.MinValue, float.MaxValue);
+  public Range<float?> RadiusCap = new(null);
+  public Range<float?> WidthCap = new(null);
+  public Range<float?> DepthCap = new(null);
+  public Range<float?> HeightCap = new(null);
   public float? Radius = null;
   public float? Width = null;
   public float? Depth = null;
@@ -47,13 +47,13 @@ public class CommandParameters {
     var split = command.Split(';').Select(s => s.Trim()).ToArray();
     Command = string.Join(";", split.Select(s => ParseArgs(s, replaceKeys)));
     if (Radius.HasValue)
-      Radius = Mathf.Clamp(Radius.Value, RadiusCap.Min, RadiusCap.Max);
+      Radius = Mathf.Clamp(Radius.Value, RadiusCap.Min ?? float.MinValue, RadiusCap.Max ?? float.MaxValue);
     if (Height.HasValue)
-      Height = Mathf.Clamp(Height.Value, HeightCap.Min, HeightCap.Max);
+      Height = Mathf.Clamp(Height.Value, HeightCap.Min ?? float.MinValue, HeightCap.Max ?? float.MaxValue);
     if (Width.HasValue)
-      Width = Mathf.Clamp(Width.Value, WidthCap.Min, WidthCap.Max);
+      Width = Mathf.Clamp(Width.Value, WidthCap.Min ?? float.MinValue, WidthCap.Max ?? float.MaxValue);
     if (Depth.HasValue)
-      Depth = Mathf.Clamp(Depth.Value, DepthCap.Min, DepthCap.Max);
+      Depth = Mathf.Clamp(Depth.Value, DepthCap.Min ?? float.MinValue, DepthCap.Max ?? float.MaxValue);
     if (showCommand || Description == "")
       Description = RemoveCmdParameters(command);
   }
@@ -120,10 +120,10 @@ public class CommandParameters {
       if (name == CmdDesc) Description = split[1].Replace("_", " ");
       if (name == CmdIcon) IconValue = split[1];
       if (name == CmdContinuous) Continuous = value;
-      if (name == CmdR) RadiusCap = Parse.TryFloatRange(value);
-      if (name == CmdW) WidthCap = Parse.TryFloatRange(value);
-      if (name == CmdD) DepthCap = Parse.TryFloatRange(value);
-      if (name == CmdH) HeightCap = Parse.TryFloatRange(value);
+      if (name == CmdR) RadiusCap = Parse.TryFloatNullRange(value);
+      if (name == CmdW) WidthCap = Parse.TryFloatNullRange(value);
+      if (name == CmdD) DepthCap = Parse.TryFloatNullRange(value);
+      if (name == CmdH) HeightCap = Parse.TryFloatNullRange(value);
     }
     Icon = FindSprite(IconValue);
     var parameters = new[]{

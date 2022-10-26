@@ -22,6 +22,14 @@ public class CommandManager {
       command += $" {CommandParameters.CmdDesc}={data.description.Replace(" ", "_")}";
     if (data.icon != "")
       command += $" {CommandParameters.CmdIcon}={data.icon}";
+    if (data.initialDepth != "")
+      command += $" {CommandParameters.CmdD}={data.initialDepth}";
+    if (data.initialHeight != "")
+      command += $" {CommandParameters.CmdH}={data.initialHeight}";
+    if (data.initialRadius != "")
+      command += $" {CommandParameters.CmdR}={data.initialRadius}";
+    if (data.initialWidth != "")
+      command += $" {CommandParameters.CmdW}={data.initialWidth}";
     if (data.continuous != "") {
       if (data.continuous == "true")
         command += $" {CommandParameters.CmdContinuous}";
@@ -38,6 +46,10 @@ public class CommandManager {
     data.name = pars.Name;
     data.icon = pars.IconValue;
     data.continuous = pars.Continuous;
+    data.initialDepth = pars.DepthCap.ToString();
+    data.initialHeight = pars.HeightCap.ToString();
+    data.initialRadius = pars.RadiusCap.ToString();
+    data.initialWidth = pars.WidthCap.ToString();
     return data;
   }
   public static void CreateFile() {
@@ -60,15 +72,15 @@ public class CommandManager {
 
   public static void Add(Tool tool, string command) {
     Get(tool).Add(command);
-    CommandManager.ToFile();
+    ToFile();
   }
   public static void Remove(Tool tool, int index) {
     Get(tool).RemoveAt(index);
-    CommandManager.ToFile();
+    ToFile();
   }
   public static int Remove(Tool tool, string command) {
     var removed = Get(tool).RemoveAll(cmd => cmd.StartsWith(command, StringComparison.OrdinalIgnoreCase));
-    CommandManager.ToFile();
+    ToFile();
     return removed;
   }
   public static string Get(Tool tool, int index) {

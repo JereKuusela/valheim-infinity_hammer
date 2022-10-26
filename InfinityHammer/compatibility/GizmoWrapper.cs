@@ -22,40 +22,33 @@ public static class GizmoWrapper {
     SetField("_xRot", ComfySnap(euler.x));
     SetField("_yRot", ComfySnap(euler.y));
     SetField("_zRot", ComfySnap(euler.z));
-    Player.m_localPlayer.UpdatePlacement(true, 0f);
   }
   private static void ComfyRotationX(float rotation, int previous = 0) {
     if (Comfy == null) return;
     SetField("_xRot", previous + ComfySnap(rotation));
-    Player.m_localPlayer.UpdatePlacement(true, 0f);
   }
   private static void ComfyRotationY(float rotation, int previous = 0) {
     if (Comfy == null) return;
     SetField("_yRot", previous + ComfySnap(rotation));
-    Player.m_localPlayer.UpdatePlacement(true, 0f);
   }
   private static void ComfyRotationZ(float rotation, int previous = 0) {
     if (Comfy == null) return;
     ComfyType().GetField("_zRot", PrivateBinding).SetValue(null, previous + ComfySnap(rotation));
-    Player.m_localPlayer.UpdatePlacement(true, 0f);
   }
   private static void ComfyRotateX(float rotation) {
     if (Comfy == null) return;
     var previous = (int)Get("_xRot");
     ComfyRotationX(rotation, previous);
-    Player.m_localPlayer.UpdatePlacement(true, 0f);
   }
   private static void ComfyRotateY(float rotation) {
     if (Comfy == null) return;
     var previous = (int)Get("_yRot");
     ComfyRotationY(rotation, previous);
-    Player.m_localPlayer.UpdatePlacement(true, 0f);
   }
   private static void ComfyRotateZ(float rotation) {
     if (Comfy == null) return;
     var previous = (int)Get("_zRot");
     ComfyRotationZ(rotation, previous);
-    Player.m_localPlayer.UpdatePlacement(true, 0f);
   }
   private static int ComfySnap(float rotation) {
     if (Comfy == null) return 0;

@@ -159,6 +159,9 @@ public class HammerSelect {
       Selection.Postprocess(pars.Scale);
       if (pars.Freeze) Position.Freeze(selected.transform.position);
       PrintSelected(args.Context, selected);
+
+      // Free fly prevents input so it won't update the rotation.
+      if (GameCamera.InFreeFly()) Helper.GetPlayer().UpdatePlacement(true, 0f);
     }, CommandWrapper.ObjectIds);
   }
 }

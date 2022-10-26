@@ -14,6 +14,11 @@ public class Range<T> {
     Min = min;
     Max = max;
   }
+  public override string ToString() {
+    if (Min != null && Min.Equals(Max)) return Min.ToString();
+    if (Min == null || Max == null) return "";
+    return $"{Min.ToString()}-{Max.ToString()}";
+  }
 }
 
 ///<summary>Contains functions for parsing arguments, etc.</summary>
@@ -88,6 +93,11 @@ public static class Parse {
       return defaultValue;
     return result;
   }
+  public static float? TryFloatNull(string arg) {
+    if (!float.TryParse(arg, NumberStyles.Float, CultureInfo.InvariantCulture, out var result))
+      return null;
+    return result;
+  }
   public static float TryFloat(string[] args, int index, float defaultValue = 1f) {
     if (args.Length <= index) return defaultValue;
     return TryFloat(args[index], defaultValue);
@@ -95,6 +105,10 @@ public static class Parse {
   public static Range<float> TryFloatRange(string arg, float defaultValue = 1) {
     var range = TryRange(arg);
     return new(TryFloat(range.Min, defaultValue), TryFloat(range.Max, defaultValue));
+  }
+  public static Range<float?> TryFloatNullRange(string arg) {
+    var range = TryRange(arg);
+    return new(TryFloatNull(range.Min), TryFloatNull(range.Max));
   }
   public static Range<float> TryFloatRange(string[] args, int index, float defaultValue = 1) {
     if (args.Length <= index) return new(defaultValue);

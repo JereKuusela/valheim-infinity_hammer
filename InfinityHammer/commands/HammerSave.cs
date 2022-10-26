@@ -120,7 +120,7 @@ public class HammerSaveCommand {
       bp.Name = Localization.instance.Localize(piece.m_name);
       bp.Description = piece.m_description;
     }
-    if (Selection.Type == SelectedType.Object) {
+    if (Selection.Type == SelectedType.Object || Selection.Type == SelectedType.Default) {
       AddSingleObject(bp, obj);
       foreach (Transform child in obj.transform) {
         if (Helper.IsSnapPoint(child.gameObject))
@@ -199,6 +199,7 @@ public class HammerSaveCommand {
       var lines = GetPlanBuildFile(bp);
       var name = Path.GetFileNameWithoutExtension(args[1]) + ".blueprint";
       var path = Path.Combine(Configuration.PlanBuildFolder, name);
+      Directory.CreateDirectory(Path.GetDirectoryName(path));
       File.WriteAllLines(path, lines);
       args.Context.AddString($"Blueprint saved to {path}");
     });

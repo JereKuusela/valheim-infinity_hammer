@@ -311,7 +311,12 @@ public static class Helper {
     return count;
   }
 
-  public static bool IsDown(string key) => Enum.TryParse<KeyCode>(key, true, out var code) && Input.GetKey(code);
+  public static bool IsDown(string key) {
+    if (key.StartsWith("-", StringComparison.OrdinalIgnoreCase))
+      return Enum.TryParse<KeyCode>(key.Substring(1), true, out var code) && !Input.GetKey(code);
+    else
+      return Enum.TryParse<KeyCode>(key, true, out var code) && Input.GetKey(code);
+  }
 }
 [HarmonyPatch(typeof(Player), nameof(Player.Message))]
 public class ReplaceMessage {
