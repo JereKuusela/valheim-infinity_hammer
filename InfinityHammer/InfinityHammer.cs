@@ -13,7 +13,8 @@ namespace InfinityHammer;
 public class InfinityHammer : BaseUnityPlugin {
   public const string GUID = "infinity_hammer";
   public const string NAME = "Infinity Hammer";
-  public const string VERSION = "1.22";
+  public const string VERSION = "1.23";
+  public static bool StructureTweaks = false;
   ServerSync.ConfigSync ConfigSync = new(GUID) {
     DisplayName = NAME,
     CurrentVersion = VERSION,
@@ -69,6 +70,7 @@ public class InfinityHammer : BaseUnityPlugin {
       GizmoWrapper.InitComfy(info.Instance.GetType().Assembly);
     if (Chainloader.PluginInfos.TryGetValue("m3to.mods.GizmoReloaded", out info))
       GizmoWrapper.InitReloaded(info.Instance.GetType().Assembly);
+    StructureTweaks = Chainloader.PluginInfos.ContainsKey("structure_tweaks");
   }
 
   public void LateUpdate() {

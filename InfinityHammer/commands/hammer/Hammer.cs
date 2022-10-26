@@ -49,7 +49,7 @@ public class HammerSelect {
     List<string> named = new() {
       "freeze", "pick", "scale", "level", "stars", "connect", "health", "type",
     };
-    if (CommandWrapper.StructureTweaks != null) {
+    if (InfinityHammer.StructureTweaks) {
       List<string> namedStructure = new() {
         "growth", "wear", "show", "collision", "interact", "fall", "restrict"
       };

@@ -22,6 +22,9 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 
 # Changelog
 
+- v1.23
+	- Fixes the `hammer` auto complete not showing Structure Tweaks mod specific parameters.
+
 - v1.22
 	- Adds a new parameter `id` to commands for using the hovered object id.
 	- Adds a new parameter `pick` to the `hammer` command.
