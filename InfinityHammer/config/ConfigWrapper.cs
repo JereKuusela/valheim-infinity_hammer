@@ -3,17 +3,14 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using BepInEx.Configuration;
-using ServerSync;
 using UnityEngine;
 
 namespace Service;
 public class ConfigWrapper {
 
   private ConfigFile ConfigFile;
-  private ConfigSync ConfigSync;
-  public ConfigWrapper(string command, ConfigFile configFile, ConfigSync configSync) {
+  public ConfigWrapper(string command, ConfigFile configFile) {
     ConfigFile = configFile;
-    ConfigSync = configSync;
 
     new Terminal.ConsoleCommand(command, "[key] [value] - Toggles or sets a config value.", (Terminal.ConsoleEventArgs args) => {
       if (args.Length < 2) return;
@@ -24,18 +21,8 @@ public class ConfigWrapper {
         handler(args.Context, string.Join(" ", args.Args, 2, args.Length - 2));
     }, optionsFetcher: () => SettingHandlers.Keys.ToList());
   }
-  public ConfigEntry<bool> BindLocking(string group, string name, bool value, ConfigDescription description) {
-    var configEntry = ConfigFile.Bind(group, name, value, description);
-    Register(configEntry);
-    var syncedConfigEntry = ConfigSync.AddLockingConfigEntry(configEntry);
-    syncedConfigEntry.SynchronizedConfig = true;
-    return configEntry;
-  }
-  public ConfigEntry<bool> BindLocking(string group, string name, bool value, string description) => BindLocking(group, name, value, new ConfigDescription(description));
   private ConfigEntry<T> Create<T>(string group, string name, T value, ConfigDescription description, bool synchronizedSetting = true) {
     var configEntry = ConfigFile.Bind(group, name, value, description);
-    var syncedConfigEntry = ConfigSync.AddConfigEntry(configEntry);
-    syncedConfigEntry.SynchronizedConfig = synchronizedSetting;
     return configEntry;
   }
   private ConfigEntry<T> Create<T>(string group, string name, T value, string description, bool synchronizedSetting = true) => Create(group, name, value, new ConfigDescription(description), synchronizedSetting);

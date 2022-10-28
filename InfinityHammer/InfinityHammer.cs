@@ -15,11 +15,6 @@ public class InfinityHammer : BaseUnityPlugin {
   public const string NAME = "Infinity Hammer";
   public const string VERSION = "1.23";
   public static bool StructureTweaks = false;
-  ServerSync.ConfigSync ConfigSync = new(GUID) {
-    DisplayName = NAME,
-    CurrentVersion = VERSION,
-    IsLocked = false
-  };
 #nullable disable
   public static ManualLogSource Log;
 #nullable enable
@@ -29,7 +24,7 @@ public class InfinityHammer : BaseUnityPlugin {
     Log = Logger;
     new Harmony(GUID).PatchAll();
     CommandWrapper.Init();
-    ConfigWrapper wrapper = new("hammer_config", Config, ConfigSync);
+    ConfigWrapper wrapper = new("hammer_config", Config);
     Configuration.Init(wrapper);
     try {
       SetupWatcher();

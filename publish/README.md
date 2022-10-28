@@ -24,6 +24,7 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 
 - v1.23
 	- Fixes the `hammer` auto complete not showing Structure Tweaks mod specific parameters.
+	- Fixes the black screen.
 
 - v1.22
 	- Adds a new parameter `id` to commands for using the hovered object id.
