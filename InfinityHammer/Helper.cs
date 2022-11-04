@@ -26,17 +26,6 @@ public static class Helper {
       ZDOMan.instance.DestroyZDO(zdo);
   }
 
-  public static void CopyData(ZDO from, ZDO to) {
-    to.m_floats = from.m_floats;
-    to.m_vec3 = from.m_vec3;
-    to.m_quats = from.m_quats;
-    to.m_ints = from.m_ints;
-    to.m_longs = from.m_longs;
-    to.m_strings = from.m_strings;
-    to.m_byteArrays = from.m_byteArrays;
-    to.IncreseDataRevision();
-  }
-
   public static float ParseFloat(string value, float defaultValue = 0) {
     if (float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var result)) return result;
     return defaultValue;

@@ -50,8 +50,8 @@ public class UndoHelper {
     if (!netView) throw new InvalidOperationException("No view");
     var added = netView.GetZDO();
     netView.SetLocalScale(zdo.GetVec3("scale", obj.transform.localScale));
-    Helper.CopyData(zdo.Clone(), added);
-    Hammer.FixData(netView);
+    DataHelper.Copy(zdo.Clone(), added);
+    DataHelper.Fix(netView);
     return added;
   }
   public static ZDO[] Place(ZDO[] data) => data.Select(Place).Where(obj => obj != null).ToArray();

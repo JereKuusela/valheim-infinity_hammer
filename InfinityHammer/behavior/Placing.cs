@@ -44,13 +44,15 @@ public class PlacePiece {
   }
   static GameObject GetPrefab(Piece obj) {
     var type = Selection.Type;
-    if (type == SelectedType.Default) return obj.gameObject;
     var ghost = Helper.GetPlayer().m_placementGhost;
     if (!ghost) return obj.gameObject;
     var name = Utils.GetPrefabName(ghost);
-
+    if (type == SelectedType.Default) {
+      DataHelper.Init(name, ghost.transform);
+      return obj.gameObject;
+    }
     if (type == SelectedType.Object) {
-      Selection.InitZDO(ghost.transform, ghost.transform.localScale);
+      DataHelper.Init(name, ghost.transform, Selection.GetData(0));
       return ZNetScene.instance.GetPrefab(name);
     }
     if (type == SelectedType.Location)
@@ -122,7 +124,7 @@ public class PlacePiece {
       var name = Utils.GetPrefabName(ghostObj);
       var prefab = ZNetScene.instance.GetPrefab(name);
       if (prefab) {
-        Selection.InitZDO(tr, ghost.transform.localScale, i);
+        DataHelper.Init(name, ghost.transform, Selection.GetData(i));
         var childObj = UnityEngine.Object.Instantiate(prefab, ghostObj.transform.position, ghostObj.transform.rotation);
         var childView = childObj.GetComponent<ZNetView>();
         Hammer.PostProcessPlaced(childObj);

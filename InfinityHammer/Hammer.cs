@@ -41,28 +41,6 @@ public static class Hammer {
     player.m_lastToolUseTime = 0f;
     player.UpdatePlacement(true, 0f);
   }
-
-  ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
-  public static void FixData(ZNetView obj) {
-    var zdo = obj.GetZDO();
-    var character = obj.GetComponent<Character>();
-    if (character) {
-      // SetLevel would also overwrite the health (when copying a creature with a custom health).
-      var level = zdo.GetInt(Hash.Level, 1);
-      character.m_level = level;
-      zdo.Set(Hash.Level, level);
-      if (character.m_onLevelSet != null) character.m_onLevelSet(character.m_level);
-      character.SetTamed(zdo.GetBool(Hash.Tamed, false));
-    }
-    obj.GetComponentInChildren<ItemDrop>()?.Load();
-    obj.GetComponentInChildren<ArmorStand>()?.UpdateVisual();
-    obj.GetComponentInChildren<VisEquipment>()?.UpdateVisuals();
-    obj.GetComponentInChildren<ItemStand>()?.UpdateVisual();
-    obj.GetComponentInChildren<CookingStation>()?.UpdateCooking();
-    obj.GetComponentInChildren<LocationProxy>()?.SpawnLocation();
-    obj.GetComponentInChildren<Sign>()?.UpdateText();
-    obj.GetComponentInChildren<Door>()?.UpdateState();
-  }
   ///<summary>Replaces LocationProxy with the actual location.</summary>
   public static void SpawnLocation(ZNetView view) {
     Helper.RemoveZDO(view.GetZDO());
@@ -113,7 +91,7 @@ public static class Hammer {
         mineRock.SaveHealth();
       }
     }
-    FixData(view);
+    DataHelper.Fix(view);
   }
 
   ///<summary>Restores durability and stamina to counter the usage.</summary>

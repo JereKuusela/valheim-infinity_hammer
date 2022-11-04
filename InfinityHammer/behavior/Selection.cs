@@ -51,7 +51,6 @@ public static class Selection {
   public static void Postprocess(Vector3? scale) => Get()?.Postprocess(scale);
   public static ZDO? GetData(int index = 0) => Get()?.GetData(index);
   public static string Description() => Get()?.ExtraDescription ?? "";
-  public static void InitZDO(Transform tr, Vector3 scale, int index = 0) => Get()?.InitZDO(tr, scale, index);
   public static bool IsCommand() => Get()?.Type == SelectedType.Command;
   public static GameObject Set(string name, bool singleUse) => GetOrAdd().Set(name, singleUse);
   public static GameObject Set(ZNetView view, bool singleUse) => GetOrAdd().Set(view, singleUse);
@@ -88,25 +87,7 @@ public partial class Selected {
     if (Objects.Count <= index) return 0;
     return Objects[index].Prefab.GetStableHashCode();
   }
-  public void InitZDO(Transform tr, Vector3 scale, int index = 0) {
-    var zdo = GetData(index);
-    if (zdo == null) return;
-    ZNetView.m_initZDO = ZDOMan.instance.CreateNewZDO(tr.position);
-    Helper.CopyData(zdo, ZNetView.m_initZDO);
-    ZNetView.m_initZDO.m_rotation = tr.rotation;
-    var hash = GetPrefab(index);
-    if (ZNetScene.instance.m_namedPrefabs.TryGetValue(hash, out var obj)) {
-      if (obj.GetComponent<ZNetView>() is { } view) {
-        ZNetView.m_initZDO.m_type = view.m_type;
-        ZNetView.m_initZDO.m_distant = view.m_distant;
-        ZNetView.m_initZDO.m_persistent = view.m_persistent;
-        ZNetView.m_initZDO.m_prefab = hash;
-      }
-    } else InfinityHammer.Log.LogWarning("Failed to find prefab for the zdo.");
-    if (Scaling.IsScalingSupported())
-      ZNetView.m_initZDO.Set("scale", scale);
-    ZNetView.m_initZDO.m_dataRevision = 1;
-  }
+
   public void Clear() {
     if (Configuration.UnfreezeOnSelect) Position.Unfreeze();
     if (Ghost) UnityEngine.Object.Destroy(Ghost);

@@ -24,6 +24,7 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 
 - v1.24
 	- Fixes compatibility issue with Comfy Gizmo.
+	- Fixes scaling not working when selecting default pieces from the build menu.
 
 - v1.23
 	- Fixes the `hammer` auto complete not showing Structure Tweaks mod specific parameters.
