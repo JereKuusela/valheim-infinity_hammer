@@ -1,14 +1,17 @@
 using System;
 using System.Reflection;
+using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer;
 public static class GizmoWrapper {
   private static Assembly? Comfy = null;
   private static Assembly? Reloaded = null;
-  private static BindingFlags PrivateBinding = BindingFlags.Static | BindingFlags.NonPublic;
   private static Type ComfyType() => Comfy!.GetType("Gizmo.ComfyGizmo");
-  private static object Get(string field) => ComfyType().GetField(field, PrivateBinding).GetValue(null);
-  private static void SetField(string field, int value) => ComfyType().GetField(field, PrivateBinding).SetValue(null, value);
+  private static Vector3 ComfyGet() => (Vector3)AccessTools.Field(ComfyType(), "_eulerAngles").GetValue(null);
+  private static void ComfySet(Vector3 angles) {
+    AccessTools.Field(ComfyType(), "_eulerAngles").SetValue(null, angles);
+    AccessTools.Method(ComfyType(), "Rotate").Invoke(null, new object[0]);
+  }
   public static void InitComfy(Assembly assembly) {
     Comfy = assembly;
   }
@@ -16,45 +19,38 @@ public static class GizmoWrapper {
     Reloaded = assembly;
   }
   static bool Prefix() => !Selection.IsCommand();
-  private static void SetComfyRotation(Quaternion rotation) {
+  private static void ComfyRotation(Quaternion rotation) {
     if (Comfy == null) return;
     var euler = rotation.eulerAngles;
-    SetField("_xRot", ComfySnap(euler.x));
-    SetField("_yRot", ComfySnap(euler.y));
-    SetField("_zRot", ComfySnap(euler.z));
+    ComfySet(euler);
   }
-  private static void ComfyRotationX(float rotation, int previous = 0) {
+  private static void ComfyRotationX(float rotation) {
     if (Comfy == null) return;
-    SetField("_xRot", previous + ComfySnap(rotation));
+    var angles = ComfyGet();
+    angles.x = rotation;
+    ComfySet(angles);
   }
-  private static void ComfyRotationY(float rotation, int previous = 0) {
+  private static void ComfyRotationY(float rotation) {
     if (Comfy == null) return;
-    SetField("_yRot", previous + ComfySnap(rotation));
+    var angles = ComfyGet();
+    angles.y = rotation;
+    ComfySet(angles);
   }
-  private static void ComfyRotationZ(float rotation, int previous = 0) {
+  private static void ComfyRotationZ(float rotation) {
     if (Comfy == null) return;
-    ComfyType().GetField("_zRot", PrivateBinding).SetValue(null, previous + ComfySnap(rotation));
+    var angles = ComfyGet();
+    angles.z = rotation;
+    ComfySet(angles);
   }
-  private static void ComfyRotateX(float rotation) {
+  private static void ComfyRotate(Vector3 rotation) {
     if (Comfy == null) return;
-    var previous = (int)Get("_xRot");
-    ComfyRotationX(rotation, previous);
+    var angles = ComfyGet();
+    angles += rotation;
+    ComfySet(angles);
   }
-  private static void ComfyRotateY(float rotation) {
-    if (Comfy == null) return;
-    var previous = (int)Get("_yRot");
-    ComfyRotationY(rotation, previous);
-  }
-  private static void ComfyRotateZ(float rotation) {
-    if (Comfy == null) return;
-    var previous = (int)Get("_zRot");
-    ComfyRotationZ(rotation, previous);
-  }
-  private static int ComfySnap(float rotation) {
-    if (Comfy == null) return 0;
-    var snapAngle = (float)ComfyType().GetField("_snapAngle", PrivateBinding).GetValue(null);
-    return (int)Math.Round(rotation / snapAngle);
-  }
+  private static void ComfyRotateX(float rotation) => ComfyRotate(new(rotation, 0f, 0f));
+  private static void ComfyRotateY(float rotation) => ComfyRotate(new(0f, rotation, 0f));
+  private static void ComfyRotateZ(float rotation) => ComfyRotate(new(0f, 0f, rotation));
   private static void ReloadedRotateX(float rotation) {
     var gizmo = GetReloaded();
     if (!gizmo) return;
@@ -95,7 +91,7 @@ public static class GizmoWrapper {
     if (gizmo) gizmo.transform.rotation = rotation;
   }
   public static void SetRotation(Quaternion rotation) {
-    SetComfyRotation(rotation);
+    ComfyRotation(rotation);
     SetReloadedRotation(rotation);
   }
   public static void RotateX(float rotation) {

@@ -22,6 +22,9 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 
 # Changelog
 
+- v1.24
+	- Fixes compatibility issue with Comfy Gizmo.
+
 - v1.23
 	- Fixes the `hammer` auto complete not showing Structure Tweaks mod specific parameters.
 	- Fixes the black screen.
