@@ -80,14 +80,25 @@ public class PlacePiece
   private static void HandleCommand(GameObject ghost)
   {
     var scale = Scaling.Command;
-    var shape = Ruler.GetShape();
     var x = ghost.transform.position.x.ToString(CultureInfo.InvariantCulture);
     var y = ghost.transform.position.y.ToString(CultureInfo.InvariantCulture);
     var z = ghost.transform.position.z.ToString(CultureInfo.InvariantCulture);
     var radius = scale.X.ToString(CultureInfo.InvariantCulture);
+    var innerSize = Mathf.Min(scale.X, scale.Z).ToString(CultureInfo.InvariantCulture);
+    var outerSize = Mathf.Max(scale.X, scale.Z).ToString(CultureInfo.InvariantCulture);
     var depth = scale.X.ToString(CultureInfo.InvariantCulture);
     var width = scale.Z.ToString(CultureInfo.InvariantCulture);
-    if (shape != RulerShape.Rectangle)
+    if (Ruler.Shape == RulerShape.Circle)
+    {
+      innerSize = radius;
+      outerSize = radius;
+    }
+    if (Ruler.Shape == RulerShape.Square)
+    {
+      innerSize = radius;
+      outerSize = radius;
+    }
+    if (Ruler.Shape != RulerShape.Rectangle)
       width = depth;
     var height = scale.Y.ToString(CultureInfo.InvariantCulture);
     var angle = ghost.transform.rotation.eulerAngles.y.ToString(CultureInfo.InvariantCulture);
@@ -96,7 +107,7 @@ public class PlacePiece
     var multiShape = command.Contains("#r") && (command.Contains("#w") || command.Contains("#d"));
     if (multiShape)
     {
-      var circle = shape == RulerShape.Circle;
+      var circle = Ruler.Shape == RulerShape.Circle || Ruler.Shape == RulerShape.Ring;
       var args = command.Split(' ').ToList();
       for (var i = args.Count - 1; i > -1; i--)
       {
@@ -117,8 +128,14 @@ public class PlacePiece
       }
       command = command.Replace("#id", Utils.GetPrefabName(hovered.gameObject));
     }
+    command = command.Replace("#r1-r2", $"{innerSize}-{outerSize}");
+    command = command.Replace("#w1-w2", $"{innerSize}-{outerSize}");
+
+    if (Ruler.Shape == RulerShape.Grid)
+      command = command.Replace("#d", $"{innerSize}-{outerSize}");
+    else
+      command = command.Replace("#d", depth);
     command = command.Replace("#r", radius);
-    command = command.Replace("#d", depth);
     command = command.Replace("#w", width);
     command = command.Replace("#a", angle);
     command = command.Replace("#x", x);

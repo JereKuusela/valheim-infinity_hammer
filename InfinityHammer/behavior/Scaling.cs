@@ -18,6 +18,9 @@ public class ToolScaling
     if (SanityY)
       Value.y = Mathf.Max(0f, Value.y);
     Value.z = Mathf.Max(0f, Value.z);
+    // Little hack to keep scalings more consistent.
+    if (Mathf.Approximately(Value.x, Value.z))
+      Value.x = Value.z;
   }
   public void Zoom(float amount, float percentage)
   {

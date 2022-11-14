@@ -127,13 +127,16 @@ public class FejdStartupStart
 {
   static void Create(string tool)
   {
-    var pars = "from=x,z,y circle=r angle=a rect=w,d";
-    var parsTo = "terrain to=tx,tz,ty circle=r rect=w,d";
+    var pars = "from=x,z,y circle=r1-r2 angle=a rect=w1-w2,d";
+    var parsSpawn = "from=x,z,y radius=r1-r2";
+    var parsTo = "terrain to=tx,tz,ty circle=r1-r2 rect=w1-w2,d";
+    var sub = CommandWrapper.Substitution();
     Console.instance.TryRunCommand($"alias {tool}_terrain {tool}_command terrain {pars}");
     Console.instance.TryRunCommand($"alias {tool}_object {tool}_command object {pars} height=h");
+    Console.instance.TryRunCommand($"alias {tool}_spawn {tool}_command spawn_object {sub} {parsSpawn}");
 
     Console.instance.TryRunCommand($"alias {tool}_terrain_to hammer_shape rectangle;{tool}_command {parsTo}");
-    Console.instance.TryRunCommand($"alias {tool}_slope {tool}_terrain_to slope cmd_w=$");
+    Console.instance.TryRunCommand($"alias {tool}_slope {tool}_terrain_to slope cmd_w={sub}");
 
   }
   static void Postfix()

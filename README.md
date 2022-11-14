@@ -283,7 +283,9 @@ Full list of parameters:
 - `z`: Z coordinate.
 - `a`: Angle. Mostly matters for rectangles.
 - `r`: Radius. Enables circle shape.
+- `r1-r2`: Radius range. Enables circle and ring shapes.
 - `w`: Rectangle width. Enables square shape.
+- `w1-w2`: Square range. Enables square and grid shapes.
 - `d`: Rectangle depth. Enables rectangle shape.
 - `h`: Height.
 

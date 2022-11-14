@@ -8,7 +8,9 @@ namespace InfinityHammer;
 public class RulerParameters
 {
   public float? Radius;
+  public float? Ring;
   public float? Width;
+  public float? Grid;
   public float? Depth;
   public float? Height;
   public bool RotateWithPlayer;
@@ -17,6 +19,8 @@ public class RulerParameters
 public enum RulerShape
 {
   Circle,
+  Ring,
+  Grid,
   Square,
   Rectangle,
 }
@@ -24,10 +28,19 @@ public class Ruler
 {
   public static GameObject? Projector = null;
   public static GameObject? Circle = null;
+  public static GameObject? Ring = null;
   public static GameObject? Rectangle = null;
   public static GameObject? Square = null;
+  public static GameObject? Grid = null;
   private static CircleProjector? BaseProjector = null;
-
+  public static void SanityCheckShape()
+  {
+    if (Ruler.Shape == RulerShape.Circle && !Circle) Ruler.Shape = RulerShape.Ring;
+    if (Ruler.Shape == RulerShape.Ring && !Ring) Ruler.Shape = RulerShape.Square;
+    if (Ruler.Shape == RulerShape.Square && !Square) Ruler.Shape = RulerShape.Grid;
+    if (Ruler.Shape == RulerShape.Grid && !Grid) Ruler.Shape = RulerShape.Rectangle;
+    if (Ruler.Shape == RulerShape.Rectangle && !Rectangle) Ruler.Shape = RulerShape.Circle;
+  }
   private static CircleProjector GetBaseProjector()
   {
     var workbench = ZNetScene.instance.GetPrefab("piece_workbench");
@@ -39,14 +52,6 @@ public class Ruler
   private static bool UseHeight = false;
   private static bool IsTargeted = false;
   public static RulerShape Shape = RulerShape.Circle;
-  public static RulerShape? GetShape()
-  {
-    if (Projector == null) return null;
-    if (Circle?.activeSelf == true) return RulerShape.Circle;
-    if (Square?.activeSelf == true) return RulerShape.Square;
-    if (Rectangle?.activeSelf == true) return RulerShape.Rectangle;
-    return null;
-  }
   public static void Update()
   {
     var player = Player.m_localPlayer;
@@ -70,9 +75,10 @@ public class Ruler
       var distance = Utils.DistanceXZ(ptr.position, gtr.position) / 2f;
       scale.SetScaleX(distance);
     }
+    Ruler.SanityCheckShape();
     if (Circle != null)
     {
-      Circle.SetActive((!Rectangle && !Square) || Shape == RulerShape.Circle);
+      Circle.SetActive(Shape == RulerShape.Circle || Shape == RulerShape.Ring);
       var proj = Circle.GetComponent<CircleProjector>();
       if (Circle.activeSelf)
       {
@@ -85,10 +91,24 @@ public class Ruler
         proj.CreateSegments();
       }
     }
+    if (Circle != null && Ring != null)
+    {
+      Ring.SetActive(Shape == RulerShape.Ring);
+      var proj = Ring.GetComponent<CircleProjector>();
+      if (Ring.activeSelf)
+      {
+        proj.m_radius = scale.Z;
+        proj.m_nrOfSegments = Math.Max(3, (int)(proj.m_radius * 4));
+      }
+      else if (proj.m_nrOfSegments > 0)
+      {
+        proj.m_nrOfSegments = 0;
+        proj.CreateSegments();
+      }
+    }
     if (Square != null)
     {
-      var disabled = (Circle?.activeSelf == true) || (Rectangle && Shape == RulerShape.Rectangle);
-      Square.SetActive(!disabled);
+      Square.SetActive(Shape == RulerShape.Square || Shape == RulerShape.Grid);
       var proj = Square.GetComponent<RectangleProjector>();
       if (Square.activeSelf)
       {
@@ -102,15 +122,30 @@ public class Ruler
         proj.CreateSegments();
       }
     }
+    if (Square != null && Grid != null)
+    {
+      Grid.SetActive(Shape == RulerShape.Grid);
+      var proj = Grid.GetComponent<RectangleProjector>();
+      if (Grid.activeSelf)
+      {
+        proj.m_width = scale.Z;
+        proj.m_depth = scale.Z;
+        proj.m_nrOfSegments = Math.Max(3, (int)((proj.m_depth + proj.m_width) * 2));
+      }
+      else if (proj.m_nrOfSegments > 0)
+      {
+        proj.m_nrOfSegments = 0;
+        proj.CreateSegments();
+      }
+    }
     if (Rectangle != null)
     {
-      var disabled = Circle?.activeSelf == true || Square?.activeSelf == true;
-      Rectangle.SetActive(!disabled);
+      Rectangle.SetActive(Shape == RulerShape.Rectangle);
       var proj = Rectangle.GetComponent<RectangleProjector>();
       if (Rectangle.activeSelf)
       {
-        proj.m_width = scale.Z;
-        proj.m_depth = scale.X;
+        proj.m_width = scale.X;
+        proj.m_depth = scale.Z;
         proj.m_nrOfSegments = Math.Max(3, (int)((proj.m_depth + proj.m_width) * 2));
       }
       else if (proj.m_nrOfSegments > 0)
@@ -126,16 +161,26 @@ public class Ruler
   {
     var scale = Scaling.Command;
     var height = UseHeight ? $", h: {Format(scale.Y)}" : "";
-    var shape = GetShape();
-    if (shape == RulerShape.Rectangle)
+    if (Shape == RulerShape.Rectangle)
       return $"w: {Format(scale.X)}, d: {Format(scale.Z)}" + height;
 
-    if (shape == RulerShape.Square)
+    if (Shape == RulerShape.Square)
       return $"w: {Format(scale.X)}" + height;
 
-    if (shape == RulerShape.Circle)
+    if (Shape == RulerShape.Circle)
       return $"r: {Format(scale.X)}" + height;
-
+    if (Shape == RulerShape.Ring)
+    {
+      var min = Mathf.Min(scale.X, scale.Z);
+      var max = Mathf.Max(scale.X, scale.Z);
+      return $"r: {Format(min)}-{Format(max)}" + height;
+    }
+    if (Shape == RulerShape.Grid)
+    {
+      var min = Mathf.Min(scale.X, scale.Z);
+      var max = Mathf.Max(scale.X, scale.Z);
+      return $"w: {Format(min)}-{Format(max)}" + height;
+    }
     return "";
   }
   private static string DescriptionPosition()
@@ -183,6 +228,15 @@ public class Ruler
       proj.m_nrOfSegments = 3;
       scale.SetScaleX(pars.Width.Value);
     }
+    if (pars.Grid.HasValue)
+    {
+      Grid = CreateChild(obj);
+      var proj = Grid.AddComponent<RectangleProjector>();
+      proj.m_prefab = BaseProjector.m_prefab;
+      proj.m_mask = BaseProjector.m_mask;
+      proj.m_nrOfSegments = 3;
+      scale.SetScaleZ(pars.Grid.Value);
+    }
     if (pars.Width.HasValue && pars.Depth.HasValue)
     {
       Rectangle = CreateChild(obj);
@@ -190,8 +244,8 @@ public class Ruler
       proj.m_prefab = BaseProjector.m_prefab;
       proj.m_mask = BaseProjector.m_mask;
       proj.m_nrOfSegments = 3;
-      scale.SetScaleX(pars.Depth.Value);
-      scale.SetScaleZ(pars.Width.Value);
+      scale.SetScaleX(pars.Width.Value);
+      scale.SetScaleZ(pars.Depth.Value);
     }
     if (pars.Radius.HasValue)
     {
@@ -201,6 +255,15 @@ public class Ruler
       proj.m_mask = BaseProjector.m_mask;
       proj.m_nrOfSegments = 3;
       scale.SetScaleX(pars.Radius.Value);
+    }
+    if (pars.Ring.HasValue)
+    {
+      Ring = CreateChild(obj);
+      var proj = Ring.AddComponent<CircleProjector>();
+      proj.m_prefab = BaseProjector.m_prefab;
+      proj.m_mask = BaseProjector.m_mask;
+      proj.m_nrOfSegments = 3;
+      scale.SetScaleZ(pars.Ring.Value);
     }
     UseHeight = pars.Height.HasValue;
     if (pars.Height.HasValue)
@@ -221,6 +284,8 @@ public class Ruler
       UnityEngine.Object.Destroy(Projector);
     Projector = null;
     Circle = null;
+    Ring = null;
+    Grid = null;
     Rectangle = null;
     Square = null;
   }

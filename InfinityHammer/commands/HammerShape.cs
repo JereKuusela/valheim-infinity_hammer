@@ -20,7 +20,9 @@ public class HammerShapeCommand
       {
         var arg = args[1].ToLower();
         if (arg == RulerShape.Circle.ToString().ToLower()) Ruler.Shape = RulerShape.Circle;
+        else if (arg == RulerShape.Ring.ToString().ToLower()) Ruler.Shape = RulerShape.Ring;
         else if (arg == RulerShape.Rectangle.ToString().ToLower()) Ruler.Shape = RulerShape.Rectangle;
+        else if (arg == RulerShape.Grid.ToString().ToLower()) Ruler.Shape = RulerShape.Grid;
         else if (arg == RulerShape.Square.ToString().ToLower()) Ruler.Shape = RulerShape.Square;
         else return;
       }
@@ -28,16 +30,13 @@ public class HammerShapeCommand
       {
         var projector = Ruler.Projector;
         if (projector == null) return;
-        var circle = Ruler.Circle;
-        var square = Ruler.Square;
-        var rect = Ruler.Rectangle;
-        if (Ruler.Shape == RulerShape.Circle && square) Ruler.Shape = RulerShape.Square;
-        else if (Ruler.Shape == RulerShape.Circle && rect) Ruler.Shape = RulerShape.Rectangle;
-        else if (Ruler.Shape == RulerShape.Square && rect) Ruler.Shape = RulerShape.Rectangle;
-        else if (Ruler.Shape == RulerShape.Square && circle) Ruler.Shape = RulerShape.Circle;
-        else if (Ruler.Shape == RulerShape.Rectangle && circle) Ruler.Shape = RulerShape.Circle;
-        else if (Ruler.Shape == RulerShape.Rectangle && square) Ruler.Shape = RulerShape.Square;
-        else return;
+        if (Ruler.Shape == RulerShape.Circle) Ruler.Shape = RulerShape.Ring;
+        else if (Ruler.Shape == RulerShape.Ring) Ruler.Shape = RulerShape.Square;
+        else if (Ruler.Shape == RulerShape.Square) Ruler.Shape = RulerShape.Grid;
+        else if (Ruler.Shape == RulerShape.Grid) Ruler.Shape = RulerShape.Rectangle;
+        else if (Ruler.Shape == RulerShape.Rectangle) Ruler.Shape = RulerShape.Circle;
+
+        Ruler.SanityCheckShape();
       }
       Helper.AddMessage(args.Context, $"Selection shape set to {Ruler.Shape}.");
     });

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using BepInEx.Bootstrap;
+using HarmonyLib;
+
 namespace InfinityHammer;
 public static class CommandWrapper
 {
@@ -40,6 +42,11 @@ public static class CommandWrapper
   {
     if (ServerDevcommands == null) return;
     GetMethod(Type(), "Register", new[] { typeof(string), typeof(Func<int, List<string>>) }).Invoke(null, new object[] { command, action });
+  }
+  public static string Substitution()
+  {
+    if (ServerDevcommands == null) return "$$";
+    return AccessTools.PropertyGetter(ServerDevcommands.GetType("ServerDevcommands.Settings"), "Substitution").Invoke(null, new object[0]).ToString();
   }
   public static void Register(string command, Func<int, int, List<string>> action, Dictionary<string, Func<int, List<string>>> named)
   {

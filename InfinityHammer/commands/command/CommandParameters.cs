@@ -20,17 +20,19 @@ public class CommandParameters
   public Range<float?> WidthCap = new(null);
   public Range<float?> DepthCap = new(null);
   public Range<float?> HeightCap = new(null);
-  public float? Radius = null;
-  public float? Width = null;
-  public float? Depth = null;
-  public float? Height = null;
+  public float? Radius;
+  public float? Ring;
+  public float? Width;
+  public float? Grid;
+  public float? Depth;
+  public float? Height;
   public bool Angle = false;
   public bool IsTargeted = false;
   public bool IsId = false;
   public string Continuous = "";
   public string Name = "Command";
   public string Description = "";
-  public Sprite? Icon = null;
+  public Sprite? Icon;
   public string IconValue = "";
   public string Command = "";
 
@@ -50,10 +52,14 @@ public class CommandParameters
     Command = string.Join(";", split.Select(s => ParseArgs(s, replaceKeys)));
     if (Radius.HasValue)
       Radius = Mathf.Clamp(Radius.Value, RadiusCap.Min ?? float.MinValue, RadiusCap.Max ?? float.MaxValue);
+    if (Ring.HasValue)
+      Ring = Mathf.Clamp(Ring.Value, RadiusCap.Min ?? float.MinValue, RadiusCap.Max ?? float.MaxValue);
     if (Height.HasValue)
       Height = Mathf.Clamp(Height.Value, HeightCap.Min ?? float.MinValue, HeightCap.Max ?? float.MaxValue);
     if (Width.HasValue)
       Width = Mathf.Clamp(Width.Value, WidthCap.Min ?? float.MinValue, WidthCap.Max ?? float.MaxValue);
+    if (Grid.HasValue)
+      Grid = Mathf.Clamp(Grid.Value, WidthCap.Min ?? float.MinValue, WidthCap.Max ?? float.MaxValue);
     if (Depth.HasValue)
       Depth = Mathf.Clamp(Depth.Value, DepthCap.Min ?? float.MinValue, DepthCap.Max ?? float.MaxValue);
     if (showCommand || Description == "")
@@ -64,7 +70,9 @@ public class CommandParameters
   public RulerParameters ToRuler() => new()
   {
     Radius = Radius,
+    Ring = Ring,
     Width = Width,
+    Grid = Grid,
     Depth = Depth,
     RotateWithPlayer = !Angle,
     IsTargeted = IsTargeted,
@@ -138,7 +146,7 @@ public class CommandParameters
     }
     Icon = FindSprite(IconValue);
     var parameters = new[]{
-      "id", "r", "d", "w", "h", "a", "w,d", "x", "y", "z", "tx", "ty", "tz",
+      "id", "r", "r1-r2", "d", "w", "w1-w2", "h", "a", "w,d", "w1-w2,d", "x", "y", "z", "tx", "ty", "tz",
       "x,y", "x,z", "y,x", "y,z", "z,x", "z,y", "tx,ty", "tx,tz", "ty,tx", "ty,tz", "tz,tx", "tz,ty",
       "x,y,z", "x,z,y", "y,x,z", "y,z,x", "z,x,y", "z,y,x",
       "tx,ty,tz", "tx,tz,ty", "ty,tx,tz", "ty,tz,tx", "tz,tx,ty", "tz,ty,tx",
@@ -153,10 +161,20 @@ public class CommandParameters
         Angle = true;
       if (args[i].Contains("#r"))
         Radius = scale.Value.x;
+      if (args[i].Contains("#r1-r2"))
+      {
+        Radius = scale.Value.x;
+        Ring = scale.Value.z;
+      }
       if (args[i].Contains("#w"))
-        Width = scale.Value.z;
+        Width = scale.Value.x;
+      if (args[i].Contains("#w1-w2"))
+      {
+        Width = scale.Value.x;
+        Grid = scale.Value.z;
+      }
       if (args[i].Contains("#d"))
-        Depth = scale.Value.x;
+        Depth = scale.Value.z;
       if (args[i].Contains("#h"))
         Height = scale.Value.y;
       if (args[i].Contains("#tx"))
