@@ -24,6 +24,7 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 
 - v1.25
 	- Fixes blueprints being placed incorrectly.
+	- Fixes continous commands (like terrain paint) being instantly used on select.
 
 - v1.24
 	- Fixes compatibility issue with Comfy Gizmo.

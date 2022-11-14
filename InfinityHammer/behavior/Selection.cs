@@ -323,6 +323,7 @@ public partial class Selected
     Clear();
     var player = Helper.GetPlayer();
     RulerParameters = ruler;
+    HoldUse.Disabled = true;
     Continuous = continuous;
     Command = command;
     Ghost = new GameObject();

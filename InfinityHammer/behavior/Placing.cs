@@ -210,9 +210,13 @@ public class PlacePiece
 [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacement))]
 public class HoldUse
 {
+  // Needed to prevent instant usage when selecting continuous command.
+  public static bool Disabled = true;
   static void CheckHold()
   {
-    if (!Selection.IsContinuous()) return;
+    if (!ZInput.GetButton("Attack") && !ZInput.GetButton("JoyPlace"))
+      Disabled = false;
+    if (Disabled || !Selection.IsContinuous()) return;
     var player = Player.m_localPlayer;
     if (ZInput.GetButton("Attack") || ZInput.GetButton("JoyPlace"))
       player.m_placePressedTime = Time.time;
