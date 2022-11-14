@@ -1,24 +1,31 @@
 using System.Collections.Generic;
 namespace InfinityHammer;
-public class HammerShapeCommand {
-  public HammerShapeCommand() {
+public class HammerShapeCommand
+{
+  public HammerShapeCommand()
+  {
     List<string> shapes = new() {
       RulerShape.Circle.ToString(),
       RulerShape.Rectangle.ToString(),
       RulerShape.Square.ToString(),
     };
-    CommandWrapper.Register("hammer_shape", (int index, int subIndex) => {
+    CommandWrapper.Register("hammer_shape", (int index, int subIndex) =>
+    {
       if (index == 0) return shapes;
       return null;
     });
-    Helper.Command("hammer_shape", "[shape] - Toggles or sets the selection shape.", (args) => {
-      if (args.Length > 1) {
+    Helper.Command("hammer_shape", "[shape] - Toggles or sets the selection shape.", (args) =>
+    {
+      if (args.Length > 1)
+      {
         var arg = args[1].ToLower();
         if (arg == RulerShape.Circle.ToString().ToLower()) Ruler.Shape = RulerShape.Circle;
         else if (arg == RulerShape.Rectangle.ToString().ToLower()) Ruler.Shape = RulerShape.Rectangle;
         else if (arg == RulerShape.Square.ToString().ToLower()) Ruler.Shape = RulerShape.Square;
         else return;
-      } else {
+      }
+      else
+      {
         var projector = Ruler.Projector;
         if (projector == null) return;
         var circle = Ruler.Circle;

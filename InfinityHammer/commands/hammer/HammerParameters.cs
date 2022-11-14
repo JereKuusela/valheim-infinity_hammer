@@ -2,26 +2,30 @@ using System;
 using Service;
 using UnityEngine;
 namespace InfinityHammer;
-public enum Growth {
+public enum Growth
+{
   Default,
   HealthyGrown,
   UnhealthyGrown,
   Healthy,
   Unhealthy
 }
-public enum Wear {
+public enum Wear
+{
   Default,
   Broken,
   Damaged,
   Healthy
 }
-public enum Fall {
+public enum Fall
+{
   Default,
   Off,
   Terrain,
   Solid
 }
-public class HammerParameters {
+public class HammerParameters
+{
   public Vector3 Position = Vector3.zero;
   public Vector3? Scale;
   public string? Text;
@@ -44,13 +48,16 @@ public class HammerParameters {
   public Growth Growth = Growth.Default;
   public Fall Fall = Fall.Default;
 
-  public HammerParameters(Terminal.ConsoleEventArgs args) {
+  public HammerParameters(Terminal.ConsoleEventArgs args)
+  {
     if (Player.m_localPlayer)
       Position = Player.m_localPlayer.transform.position;
     ParseArgs(args.Args);
   }
-  protected void ParseArgs(string[] args) {
-    foreach (var arg in args) {
+  protected void ParseArgs(string[] args)
+  {
+    foreach (var arg in args)
+    {
       var split = arg.Split('=');
       var name = split[0].ToLower();
       if (name == "connect")
@@ -82,7 +89,8 @@ public class HammerParameters {
         Scale = Parse.TryScale(values);
       if (name == "circle")
         Radius = Parse.TryFloat(value, 0f);
-      if (name == "rect") {
+      if (name == "rect")
+      {
         var size = Parse.TryScale(values);
         Width = size.x;
         Depth = size.z;

@@ -8,21 +8,27 @@ using UnityEngine;
 namespace InfinityHammer;
 
 [HarmonyPatch(typeof(Player), nameof(Player.PieceRayTest))]
-public class FreezePlacementMarker {
+public class FreezePlacementMarker
+{
   static Vector3 CurrentNormal = Vector3.up;
-  static void Postfix(ref Vector3 point, ref Vector3 normal, ref Piece piece, ref Heightmap heightmap, ref Collider waterSurface, ref bool __result) {
-    if (__result && Grid.Enabled) {
+  static void Postfix(ref Vector3 point, ref Vector3 normal, ref Piece piece, ref Heightmap heightmap, ref Collider waterSurface, ref bool __result)
+  {
+    if (__result && Grid.Enabled)
+    {
       point = Grid.Apply(point, heightmap ? Vector3.up : normal);
-      if (heightmap) {
+      if (heightmap)
+      {
         // +2 meters so that floors and small objects will be hit by the collision check.
         point.y = ZoneSystem.instance.GetGroundHeight(point) + 2f;
-        if (Physics.Raycast(point, Vector3.down, out var raycastHit, 50f, Player.m_localPlayer.m_placeRayMask)) {
+        if (Physics.Raycast(point, Vector3.down, out var raycastHit, 50f, Player.m_localPlayer.m_placeRayMask))
+        {
           point = raycastHit.point;
           normal = raycastHit.normal;
         }
       }
     }
-    if (Position.Override.HasValue) {
+    if (Position.Override.HasValue)
+    {
       point = Position.Override.Value;
       normal = CurrentNormal;
       __result = true;
@@ -31,16 +37,20 @@ public class FreezePlacementMarker {
       heightmap = null;
       waterSurface = null;
 #nullable enable
-    } else {
+    }
+    else
+    {
       CurrentNormal = normal;
     }
   }
 }
 
 [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
-public class OverridePlacementGhost {
+public class OverridePlacementGhost
+{
   ///<summary>Then override snapping and other modifications for the final result (and some rules are checked too).</summary>
-  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+  {
     return new CodeMatcher(instructions)
           .MatchForward(
               useEnd: false,
@@ -58,11 +68,13 @@ public class OverridePlacementGhost {
   }
 }
 
-public static class Grid {
+public static class Grid
+{
   public static bool Enabled => Precision != 0f;
   private static float Precision;
   private static Vector3 Center;
-  public static Vector3 Apply(Vector3 point, Vector3 normal) {
+  public static Vector3 Apply(Vector3 point, Vector3 normal)
+  {
     if (!Enabled) return point;
     var rotation = Quaternion.FromToRotation(Vector3.up, normal);
     point = rotation * point;
@@ -71,37 +83,47 @@ public static class Grid {
     point.z = center.z + Mathf.Round((point.z - center.z) / Precision) * Precision;
     return Quaternion.Inverse(rotation) * point;
   }
-  public static void Set(float precision, Vector3 center) {
-    if (Precision == precision) {
+  public static void Set(float precision, Vector3 center)
+  {
+    if (Precision == precision)
+    {
       Precision = 0f;
-    } else {
+    }
+    else
+    {
       Center = center;
       Precision = precision;
     }
   }
 }
-public static class Position {
+public static class Position
+{
   public static Vector3? Override = null;
   public static Vector3 Offset = Vector3.zero;
-  public static void ToggleFreeze() {
+  public static void ToggleFreeze()
+  {
     if (Override.HasValue)
       Unfreeze();
     else
       Freeze();
   }
-  public static void Freeze(Vector3 position) {
+  public static void Freeze(Vector3 position)
+  {
     Override = position;
   }
-  public static void Freeze() {
+  public static void Freeze()
+  {
     var player = Helper.GetPlayer();
     var ghost = player.m_placementGhost;
     Override = ghost ? Deapply(ghost.transform.position) : player.transform.position;
   }
-  public static void Unfreeze() {
+  public static void Unfreeze()
+  {
     Override = null;
     if (Configuration.ResetOffsetOnUnfreeze) Offset = Vector3.zero;
   }
-  public static Vector3 Apply(Vector3 point) {
+  public static Vector3 Apply(Vector3 point)
+  {
     var ghost = Helper.GetPlayer().m_placementGhost;
     if (!ghost) return point;
     if (Override.HasValue)
@@ -112,7 +134,8 @@ public static class Position {
     point += rotation * Vector3.forward * Offset.z;
     return point;
   }
-  public static Vector3 Deapply(Vector3 point) {
+  public static Vector3 Deapply(Vector3 point)
+  {
     var ghost = Helper.GetPlayer().m_placementGhost;
     if (!ghost) return point;
     if (Override.HasValue)
@@ -123,63 +146,80 @@ public static class Position {
     point -= rotation * Vector3.forward * Offset.z;
     return point;
   }
-  public static void SetX(float value) {
+  public static void SetX(float value)
+  {
     Offset.x = value;
   }
-  public static void SetY(float value) {
+  public static void SetY(float value)
+  {
     Offset.y = value;
   }
-  public static void SetZ(float value) {
+  public static void SetZ(float value)
+  {
     Offset.z = value;
   }
-  public static void MoveLeft(float value) {
+  public static void MoveLeft(float value)
+  {
     Offset.x -= value;
   }
-  public static void MoveRight(float value) {
+  public static void MoveRight(float value)
+  {
     Offset.x += value;
   }
-  public static void MoveDown(float value) {
+  public static void MoveDown(float value)
+  {
     Offset.y -= value;
   }
-  public static void MoveUp(float value) {
+  public static void MoveUp(float value)
+  {
     Offset.y += value;
   }
-  public static void MoveBackward(float value) {
+  public static void MoveBackward(float value)
+  {
     Offset.z -= value;
   }
-  public static void MoveForward(float value) {
+  public static void MoveForward(float value)
+  {
     Offset.z += value;
   }
-  public static void Set(Vector3 value) {
+  public static void Set(Vector3 value)
+  {
     Offset = value;
   }
-  public static void Move(Vector3 value) {
+  public static void Move(Vector3 value)
+  {
     Offset += value;
   }
 
-  public static void Print(Terminal terminal) {
+  public static void Print(Terminal terminal)
+  {
     if (Configuration.DisableOffsetMessages) return;
     Helper.AddMessage(terminal, $"Offset set to forward: {Offset.z.ToString("F1", CultureInfo.InvariantCulture)}, up: {Offset.y.ToString("F1", CultureInfo.InvariantCulture)}, right: {Offset.x.ToString("F1", CultureInfo.InvariantCulture)}.");
   }
 }
-public static class Rotating {
-  public static void UpdatePlacementRotation(GameObject obj) {
+public static class Rotating
+{
+  public static void UpdatePlacementRotation(GameObject obj)
+  {
     if (!Configuration.CopyRotation) return;
     var player = Helper.GetPlayer();
     var rotation = obj.transform.rotation;
     player.m_placeRotation = Mathf.RoundToInt(rotation.eulerAngles.y / 22.5f);
     GizmoWrapper.SetRotation(rotation);
   }
-  public static void RotateX(float value) {
+  public static void RotateX(float value)
+  {
     Helper.GetPlayer();
     GizmoWrapper.RotateX(value);
   }
-  public static void RotateY(float value) {
+  public static void RotateY(float value)
+  {
     var player = Helper.GetPlayer();
     player.m_placeRotation = Mathf.RoundToInt(((player.m_placeRotation * 22.5f) + value) / 22.5f);
     GizmoWrapper.RotateY(value);
   }
-  public static void RotateZ(float value) {
+  public static void RotateZ(float value)
+  {
     Helper.GetPlayer();
     GizmoWrapper.RotateZ(value);
   }

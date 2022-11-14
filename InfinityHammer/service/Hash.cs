@@ -1,6 +1,7 @@
 namespace Service;
 
-public static class Hash {
+public static class Hash
+{
   public static int PlantTime = "plantTime".GetStableHashCode();
   public static int Wear = "override_wear".GetStableHashCode();
   public static int Fall = "override_fall".GetStableHashCode();

@@ -5,7 +5,8 @@ using HarmonyLib;
 using Service;
 using UnityEngine;
 namespace InfinityHammer;
-public static class CoverCheck {
+public static class CoverCheck
+{
   public static Vector3 GetCoverPoint(CraftingStation obj) => obj.m_roofCheckPoint.position;
   public static Vector3 GetCoverPoint(Fermenter obj) => obj.m_roofCheckPoint.position;
   public static Vector3 GetCoverPoint(Beehive obj) => obj.m_coverPoint.position;
@@ -25,7 +26,8 @@ public static class CoverCheck {
   public static string JoinLines(IEnumerable<string> lines) => string.Join(". ", lines.Where(line => line != ""));
   public static string CurrentCover = "";
 
-  public static void CheckCover(GameObject obj) {
+  public static void CheckCover(GameObject obj)
+  {
     CurrentCover = "";
     GetCover(obj.GetComponent<Beehive>());
     GetCover(obj.GetComponent<Fermenter>());
@@ -35,29 +37,37 @@ public static class CoverCheck {
     GetCover(obj.GetComponent<Windmill>());
   }
 
-  public static void GetCover(Beehive obj) {
+  public static void GetCover(Beehive obj)
+  {
     if (obj) GetCover(GetCoverPoint(obj), obj.m_maxCover, false, false);
   }
-  public static void GetCover(Fermenter obj) {
+  public static void GetCover(Fermenter obj)
+  {
     if (obj) GetCover(GetCoverPoint(obj), CoverFermenterLimit);
   }
-  public static void GetCover(Fireplace obj) {
+  public static void GetCover(Fireplace obj)
+  {
     if (obj) GetCover(GetCoverPoint(obj), CoverFireplaceLimit, false);
   }
-  public static void GetCover(Bed obj) {
+  public static void GetCover(Bed obj)
+  {
     if (obj) GetCover(GetCoverPoint(obj), CoverBedLimit);
   }
-  public static void GetCover(CraftingStation obj) {
+  public static void GetCover(CraftingStation obj)
+  {
     if (obj) GetCover(GetCoverPoint(obj), CoverCraftingStationLimit);
   }
-  public static void GetCover(Windmill obj) {
+  public static void GetCover(Windmill obj)
+  {
     if (obj) GetCover(GetCoverPoint(obj), 0, false);
   }
-  public static void GetCover(Vector3 position, float limit, bool checkRoof = true, bool minLimit = true) {
+  public static void GetCover(Vector3 position, float limit, bool checkRoof = true, bool minLimit = true)
+  {
     List<string> lines = new();
     Cover.GetCoverForPoint(position, out var percent, out var roof);
     var text = $"{Percent(percent)} cover";
-    if (limit > 0) {
+    if (limit > 0)
+    {
       var pastLimit = minLimit ? percent < limit : percent > limit;
       text += " (" + Percent(limit, pastLimit ? "yellow" : "white") + ")";
     }
@@ -79,8 +89,10 @@ public class AddCoverText {
 }*/
 
 [HarmonyPatch(typeof(Hud), nameof(Hud.SetupPieceInfo))]
-public class AddExtraInfo {
-  private static string DescriptionHover() {
+public class AddExtraInfo
+{
+  private static string DescriptionHover()
+  {
     if (!Selection.IsCommand()) return "";
     if (!ShowId) return "";
     var hovered = Selector.GetHovered(Configuration.SelectRange, Configuration.SelectBlacklist);
@@ -88,7 +100,8 @@ public class AddExtraInfo {
     return $"id: {name}";
   }
   public static bool ShowId = false;
-  public static void Postfix(Hud __instance, Piece piece) {
+  public static void Postfix(Hud __instance, Piece piece)
+  {
     if (!piece) return;
     var lines = new[] { Selection.Description(), Ruler.Description(), DescriptionHover() };
     var text = string.Join("\n", lines.Where(s => s != ""));

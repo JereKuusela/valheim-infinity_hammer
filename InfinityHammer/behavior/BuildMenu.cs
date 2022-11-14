@@ -5,12 +5,15 @@ using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer;
 
-public class BuildMenuCommand : Piece {
+public class BuildMenuCommand : Piece
+{
   public string Command = "";
 }
 [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpdateAvailable))]
-public static class UpdateAvailable {
-  private static Piece Build(string command) {
+public static class UpdateAvailable
+{
+  private static Piece Build(string command)
+  {
     CommandParameters pars = new(command, Configuration.AlwaysShowCommand);
     GameObject obj = new();
     var piece = obj.AddComponent<BuildMenuCommand>();
@@ -20,17 +23,20 @@ public static class UpdateAvailable {
     piece.m_icon = pars.Icon;
     return piece;
   }
-  static void Postfix(PieceTable __instance) {
+  static void Postfix(PieceTable __instance)
+  {
     if (!Configuration.IsCheats) return;
     List<string>? commands = null;
     int tab = 0;
     int index = 0;
-    if (Hammer.HasTool(Helper.GetPlayer(), Tool.Hammer)) {
+    if (Hammer.HasTool(Helper.GetPlayer(), Tool.Hammer))
+    {
       commands = CommandManager.HammerCommands;
       tab = Configuration.HammerMenuTab;
       index = Configuration.HammerMenuIndex;
     }
-    if (Hammer.HasTool(Helper.GetPlayer(), Tool.Hoe)) {
+    if (Hammer.HasTool(Helper.GetPlayer(), Tool.Hoe))
+    {
       commands = CommandManager.HoeCommands;
       tab = Configuration.HoeMenuTab;
       index = Configuration.HoeMenuIndex;
@@ -45,16 +51,20 @@ public static class UpdateAvailable {
 }
 
 [HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece))]
-public class RunBuildMenuCommands {
+public class RunBuildMenuCommands
+{
   public static bool InstantCommand = false;
 
   [HarmonyPriority(Priority.Low)]
-  public static bool Prefix(Player __instance, Vector2Int p) {
+  public static bool Prefix(Player __instance, Vector2Int p)
+  {
     var piece = __instance.GetPiece(p);
-    if (piece && piece.GetComponent<BuildMenuCommand>() is { } cmd) {
+    if (piece && piece.GetComponent<BuildMenuCommand>() is { } cmd)
+    {
       InstantCommand = false;
       Console.instance.TryRunCommand(cmd.Command);
-      if (!InstantCommand) {
+      if (!InstantCommand)
+      {
         __instance.m_buildPieces.SetSelected(p);
       }
       return false;
@@ -64,10 +74,12 @@ public class RunBuildMenuCommands {
 }
 
 [HarmonyPatch(typeof(Terminal), nameof(Terminal.TryRunCommand))]
-public class ReplaceModifierKeys {
+public class ReplaceModifierKeys
+{
 
   [HarmonyPriority(Priority.High)]
-  static void Prefix(ref string text) {
+  static void Prefix(ref string text)
+  {
     if (text.StartsWith("bind ", StringComparison.OrdinalIgnoreCase)) return;
     if (text.StartsWith("alias ", StringComparison.OrdinalIgnoreCase)) return;
     text = text.Replace(CommandParameters.CmdMod1, Configuration.ModifierKey1());
@@ -75,10 +87,12 @@ public class ReplaceModifierKeys {
   }
 }
 [HarmonyPatch(typeof(Terminal), nameof(Terminal.TryRunCommand))]
-public class RemoveCmdParameters {
+public class RemoveCmdParameters
+{
 
   [HarmonyPriority(Priority.Low)]
-  static void Prefix(ref string text) {
+  static void Prefix(ref string text)
+  {
     if (text.StartsWith("hammer_command ", StringComparison.OrdinalIgnoreCase)) return;
     if (text.StartsWith("hoe_command ", StringComparison.OrdinalIgnoreCase)) return;
     if (text.StartsWith("hammer_add ", StringComparison.OrdinalIgnoreCase)) return;

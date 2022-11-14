@@ -2,11 +2,13 @@ using System.ComponentModel;
 
 namespace InfinityHammer;
 
-public class CommandsData {
+public class CommandsData
+{
   public CommandData[] hammer = new CommandData[0];
   public CommandData[] hoe = new CommandData[0];
 }
-public class CommandData {
+public class CommandData
+{
   [DefaultValue("")]
   public string name = "";
   [DefaultValue("")]
@@ -26,7 +28,8 @@ public class CommandData {
   public string initialRadius = "";
 }
 
-public class InitialData {
+public class InitialData
+{
   private const string N = CommandParameters.CmdName;
   private const string D = CommandParameters.CmdDesc;
   private const string I = CommandParameters.CmdIcon;
@@ -47,12 +50,14 @@ public class InitialData {
   private const string CONNECT_DEVCOMMANDS = $"{HC} {I}=hammer {N}=Building_pipette {D}=Select_entire_buildings.\nPress_{M1}_to_pick_up.\nPress_{M2}_to_freeze. hammer connect pick={M1} freeze={M2}";
   private const string AREA_SELECT = $"hammer_area {I}=hammer {N}=Area_pipette {INIITIAL_H} {D}=Select_multiple_objects.";
   private const string AREA_SELECT_DEVCOMMANDS = $"hammer_area {I}=hammer {N}=Area_pipette {INIITIAL_H} {D}=Select_multiple_objects.\nPress_{M1}_to_pick_up.\nPress_{M2}_to_freeze. pick={M1} freeze={M2}";
-  public static string[] Hammer() {
+  public static string[] Hammer()
+  {
     if (CommandWrapper.ServerDevcommands == null)
       return new[] { SELECT, PICK, AREA_SELECT };
     return new[] { SELECT_DEVCOMMANDS, CONNECT_DEVCOMMANDS, AREA_SELECT_DEVCOMMANDS };
   }
-  public static string[] Hoe() {
+  public static string[] Hoe()
+  {
     if (CommandWrapper.WorldEditCommands == null)
       return new string[0];
     return new[] {

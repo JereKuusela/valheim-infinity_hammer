@@ -2,9 +2,12 @@ using HarmonyLib;
 namespace InfinityHammer;
 ///<summary>Disables the resource check.</summary>
 [HarmonyPatch(typeof(Player), nameof(Player.HaveRequirements), new[] { typeof(Piece), typeof(Player.RequirementMode) })]
-public class HaveRequirements {
-  public static bool Prefix(ref bool __result) {
-    if (Configuration.NoBuildCost) {
+public class HaveRequirements
+{
+  public static bool Prefix(ref bool __result)
+  {
+    if (Configuration.NoBuildCost)
+    {
       __result = true;
       return false;
     }
@@ -13,17 +16,21 @@ public class HaveRequirements {
 }
 ///<summary>Removes resource usage.</summary>
 [HarmonyPatch(typeof(Player), nameof(Player.ConsumeResources))]
-public class ConsumeResources {
+public class ConsumeResources
+{
   static bool Prefix() => !Configuration.NoBuildCost;
 }
 [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
-public class UnlockPlacement {
-  public static void Prefix(Player __instance) {
+public class UnlockPlacement
+{
+  public static void Prefix(Player __instance)
+  {
     if (!__instance.m_placementGhost) return;
     var piece = __instance.m_placementGhost.GetComponent<Piece>();
     if (Configuration.AllowInDungeons) piece.m_allowedInDungeons = true;
   }
-  public static void Postfix(Player __instance) {
+  public static void Postfix(Player __instance)
+  {
     if (!__instance.m_placementGhost) return;
     if (!__instance.m_placementGhost.activeSelf) return;
     // These three are handled by other settings in other places.
@@ -37,9 +44,12 @@ public class UnlockPlacement {
   }
 }
 [HarmonyPatch(typeof(Location), nameof(Location.IsInsideNoBuildLocation))]
-public class IsInsideNoBuildLocation {
-  public static bool Prefix(ref bool __result) {
-    if (Configuration.IgnoreNoBuild) {
+public class IsInsideNoBuildLocation
+{
+  public static bool Prefix(ref bool __result)
+  {
+    if (Configuration.IgnoreNoBuild)
+    {
       __result = false;
       return false;
     }
@@ -47,9 +57,12 @@ public class IsInsideNoBuildLocation {
   }
 }
 [HarmonyPatch(typeof(PrivateArea), nameof(PrivateArea.CheckAccess))]
-public class CheckAccess {
-  public static bool Prefix(ref bool __result) {
-    if (Configuration.IgnoreWards) {
+public class CheckAccess
+{
+  public static bool Prefix(ref bool __result)
+  {
+    if (Configuration.IgnoreWards)
+    {
       __result = true;
       return false;
     }
@@ -57,9 +70,12 @@ public class CheckAccess {
   }
 }
 [HarmonyPatch(typeof(Player), nameof(Player.CheckCanRemovePiece))]
-public class CheckCanRemovePiece {
-  public static bool Prefix(ref bool __result) {
-    if (Configuration.NoBuildCost) {
+public class CheckCanRemovePiece
+{
+  public static bool Prefix(ref bool __result)
+  {
+    if (Configuration.NoBuildCost)
+    {
       __result = true;
       return false;
     }

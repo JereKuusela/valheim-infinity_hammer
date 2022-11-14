@@ -2,7 +2,8 @@ using BepInEx.Configuration;
 using Service;
 namespace InfinityHammer;
 
-public partial class Configuration {
+public partial class Configuration
+{
 #nullable disable
   public static ConfigEntry<string> configCustomBinds;
   public static string CustomBinds => configCustomBinds.Value;
@@ -18,11 +19,13 @@ public partial class Configuration {
   public static float CommandDefaultSize => ConfigWrapper.TryParseFloat(configCommandDefaultSize);
 #nullable enable
 
-  private static void InitCommands(ConfigWrapper wrapper) {
+  private static void InitCommands(ConfigWrapper wrapper)
+  {
     var section = "6. Commands";
     configCustomBinds = wrapper.BindList(section, "Custom binds", "", "Binds separated by ; that are set on the game start.");
     configCommandDefaultSize = wrapper.Bind(section, "Command default size", "10", "Default size for commands.");
-    configCommandDefaultSize.SettingChanged += (s, e) => {
+    configCommandDefaultSize.SettingChanged += (s, e) =>
+    {
       Scaling.Command.SetScaleX(CommandDefaultSize);
       Scaling.Command.SetScaleZ(CommandDefaultSize);
     };

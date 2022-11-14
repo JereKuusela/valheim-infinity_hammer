@@ -1,15 +1,19 @@
 using Service;
 using UnityEngine;
 namespace InfinityHammer;
-public class HammerBlueprintParameters {
+public class HammerBlueprintParameters
+{
   public Vector3? Scale;
 
-  public HammerBlueprintParameters(Terminal.ConsoleEventArgs args) {
+  public HammerBlueprintParameters(Terminal.ConsoleEventArgs args)
+  {
     ParseArgs(args.Args);
   }
 
-  protected void ParseArgs(string[] args) {
-    foreach (var arg in args) {
+  protected void ParseArgs(string[] args)
+  {
+    foreach (var arg in args)
+    {
       var split = arg.Split('=');
       var name = split[0].ToLower();
       if (split.Length < 2) continue;

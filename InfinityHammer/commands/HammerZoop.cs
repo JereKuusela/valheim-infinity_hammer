@@ -2,13 +2,17 @@ using System;
 using Service;
 
 namespace InfinityHammer;
-public class HammerZoopCommand {
-  private static void Command(string direction, Action<string> action, Action<string> reverse) {
-    CommandWrapper.Register($"hammer_zoop_{direction}", (int index) => {
+public class HammerZoopCommand
+{
+  private static void Command(string direction, Action<string> action, Action<string> reverse)
+  {
+    CommandWrapper.Register($"hammer_zoop_{direction}", (int index) =>
+    {
       if (index == 0) return CommandWrapper.Info($"Meters towards the {direction} direction (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
       return null;
     });
-    Helper.Command($"hammer_zoop_{direction}", $"[value=auto] - Zoops towards the {direction} direction.", (args) => {
+    Helper.Command($"hammer_zoop_{direction}", $"[value=auto] - Zoops towards the {direction} direction.", (args) =>
+    {
       Helper.CheatCheck();
       var ghost = Helper.GetPlacementGhost();
       var value = "auto";
@@ -20,7 +24,8 @@ public class HammerZoopCommand {
         action(value);
     });
   }
-  public HammerZoopCommand() {
+  public HammerZoopCommand()
+  {
     Command("left", Selection.ZoopLeft, Selection.ZoopRight);
     Command("right", Selection.ZoopRight, Selection.ZoopLeft);
     Command("down", Selection.ZoopDown, Selection.ZoopUp);

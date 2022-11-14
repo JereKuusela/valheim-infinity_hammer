@@ -10,8 +10,10 @@ using UnityEngine;
 namespace InfinityHammer;
 ///<summary>Overrides the piece selection.</summary>
 [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.GetSelectedPiece))]
-public class GetSelectedPiece {
-  public static bool Prefix(ref Piece __result) {
+public class GetSelectedPiece
+{
+  public static bool Prefix(ref Piece __result)
+  {
     if (Selection.Ghost)
       __result = Selection.Ghost.GetComponent<Piece>();
     if (__result) return false;
@@ -21,43 +23,53 @@ public class GetSelectedPiece {
 
 ///<summary>Selecting a piece normally removes the override.</summary>
 [HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece))]
-public class SetSelectedPiece {
-  public static void Prefix(Player __instance) {
+public class SetSelectedPiece
+{
+  public static void Prefix(Player __instance)
+  {
     Hammer.RemoveSelection();
     __instance.SetupPlacementGhost();
   }
 }
 
 [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
-public class PlacePiece {
+public class PlacePiece
+{
   private static bool Clear = false;
-  static void Prefix() {
+  static void Prefix()
+  {
     DisableEffects.Active = true;
     Clear = Selection.IsSingleUse();
   }
-  static void Finalizer(bool __result) {
+  static void Finalizer(bool __result)
+  {
     DisableEffects.Active = false;
-    if (__result && Clear) {
+    if (__result && Clear)
+    {
       Selection.Clear();
       Hammer.Clear();
     }
   }
-  static GameObject GetPrefab(Piece obj) {
+  static GameObject GetPrefab(Piece obj)
+  {
     var type = Selection.Type;
     var ghost = Helper.GetPlayer().m_placementGhost;
     if (!ghost) return obj.gameObject;
     var name = Utils.GetPrefabName(ghost);
-    if (type == SelectedType.Default) {
+    if (type == SelectedType.Default)
+    {
       DataHelper.Init(name, ghost.transform);
       return obj.gameObject;
     }
-    if (type == SelectedType.Object) {
+    if (type == SelectedType.Object)
+    {
       DataHelper.Init(name, ghost.transform, Selection.GetData(0));
       return ZNetScene.instance.GetPrefab(name);
     }
     if (type == SelectedType.Location)
       return ZoneSystem.instance.m_locationProxyPrefab;
-    if (type == SelectedType.Multiple) {
+    if (type == SelectedType.Multiple)
+    {
       var dummy = new GameObject();
       dummy.name = "Blueprint";
       return dummy;
@@ -65,7 +77,8 @@ public class PlacePiece {
     return obj.gameObject;
   }
 
-  private static void HandleCommand(GameObject ghost) {
+  private static void HandleCommand(GameObject ghost)
+  {
     var scale = Scaling.Command;
     var shape = Ruler.GetShape();
     var x = ghost.transform.position.x.ToString(CultureInfo.InvariantCulture);
@@ -81,10 +94,12 @@ public class PlacePiece {
 
     var command = Selection.Command;
     var multiShape = command.Contains("#r") && (command.Contains("#w") || command.Contains("#d"));
-    if (multiShape) {
+    if (multiShape)
+    {
       var circle = shape == RulerShape.Circle;
       var args = command.Split(' ').ToList();
-      for (var i = args.Count - 1; i > -1; i--) {
+      for (var i = args.Count - 1; i > -1; i--)
+      {
         if (circle && (args[i].Contains("#w") || args[i].Contains("#d")))
           args.RemoveAt(i);
         if (!circle && args[i].Contains("#r"))
@@ -92,9 +107,11 @@ public class PlacePiece {
       }
       command = string.Join(" ", args);
     }
-    if (command.Contains("#id")) {
+    if (command.Contains("#id"))
+    {
       var hovered = Selector.GetHovered(Configuration.SelectRange, Configuration.SelectBlacklist);
-      if (hovered == null) {
+      if (hovered == null)
+      {
         Helper.AddError(Console.instance, "Nothing is being hovered.");
         return;
       }
@@ -115,16 +132,19 @@ public class PlacePiece {
       Console.instance.AddString($"Hammering command: {command}");
     Console.instance.TryRunCommand(command);
   }
-  private static void HandleMultiple(GameObject ghost) {
+  private static void HandleMultiple(GameObject ghost)
+  {
     UndoHelper.StartTracking();
     var i = 0;
-    foreach (Transform tr in ghost.transform) {
+    foreach (Transform tr in ghost.transform)
+    {
       var ghostObj = tr.gameObject;
       if (Helper.IsSnapPoint(ghostObj)) continue;
       var name = Utils.GetPrefabName(ghostObj);
       var prefab = ZNetScene.instance.GetPrefab(name);
-      if (prefab) {
-        DataHelper.Init(name, ghost.transform, Selection.GetData(i));
+      if (prefab)
+      {
+        DataHelper.Init(name, ghostObj.transform, Selection.GetData(i));
         var childObj = UnityEngine.Object.Instantiate(prefab, ghostObj.transform.position, ghostObj.transform.rotation);
         var childView = childObj.GetComponent<ZNetView>();
         Hammer.PostProcessPlaced(childObj);
@@ -133,18 +153,21 @@ public class PlacePiece {
     }
     UndoHelper.StopTracking();
   }
-  static void Postprocess(GameObject obj) {
+  static void Postprocess(GameObject obj)
+  {
     var player = Helper.GetPlayer();
     Helper.EnsurePiece(obj);
     var ghost = Helper.GetPlayer().m_placementGhost;
     if (!ghost) return;
     var piece = obj.GetComponent<Piece>();
-    if (Selection.Type == SelectedType.Command) {
+    if (Selection.Type == SelectedType.Command)
+    {
       HandleCommand(ghost);
       UnityEngine.Object.Destroy(obj);
       return;
     }
-    if (Selection.Type == SelectedType.Multiple) {
+    if (Selection.Type == SelectedType.Multiple)
+    {
       HandleMultiple(ghost);
       UnityEngine.Object.Destroy(obj);
       return;
@@ -152,16 +175,20 @@ public class PlacePiece {
     var view = obj.GetComponent<ZNetView>();
     // Hoe adds pieces too.
     if (!view) return;
-    if (Selection.Type == SelectedType.Location && obj.GetComponent<LocationProxy>()) {
+    if (Selection.Type == SelectedType.Location && obj.GetComponent<LocationProxy>())
+    {
       UndoHelper.StartTracking();
       Hammer.SpawnLocation(view);
       UndoHelper.StopTracking();
-    } else {
+    }
+    else
+    {
       Hammer.PostProcessPlaced(piece.gameObject);
       UndoHelper.CreateObject(piece.gameObject);
     }
   }
-  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+  {
     return new CodeMatcher(instructions)
           .MatchForward(
               useEnd: false,
@@ -181,8 +208,10 @@ public class PlacePiece {
 }
 
 [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacement))]
-public class HoldUse {
-  static void CheckHold() {
+public class HoldUse
+{
+  static void CheckHold()
+  {
     if (!Selection.IsContinuous()) return;
     var player = Player.m_localPlayer;
     if (ZInput.GetButton("Attack") || ZInput.GetButton("JoyPlace"))
@@ -190,7 +219,8 @@ public class HoldUse {
     if (Time.time - player.m_lastToolUseTime > player.m_placeDelay / 4f)
       player.m_lastToolUseTime = 0f;
   }
-  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+  {
     return new CodeMatcher(instructions)
           .MatchForward(
               useEnd: false,
@@ -203,35 +233,43 @@ public class HoldUse {
 }
 
 [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
-public class PostProcessToolOnPlace {
-  static void Postfix(Player __instance, ref bool __result) {
+public class PostProcessToolOnPlace
+{
+  static void Postfix(Player __instance, ref bool __result)
+  {
     if (__result) Hammer.PostProcessTool(__instance);
   }
 }
 
 [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
-public class UnlockBuildDistance {
-  public static void Prefix(Player __instance, ref float __state) {
+public class UnlockBuildDistance
+{
+  public static void Prefix(Player __instance, ref float __state)
+  {
     __state = __instance.m_maxPlaceDistance;
     if (Configuration.BuildRange > 0f)
       __instance.m_maxPlaceDistance = Configuration.BuildRange;
     if (Selection.Type == SelectedType.Command)
       __instance.m_maxPlaceDistance = 1000f;
   }
-  public static void Postfix(Player __instance, float __state) {
+  public static void Postfix(Player __instance, float __state)
+  {
     __instance.m_maxPlaceDistance = __state;
   }
 }
 
 [HarmonyPatch(typeof(Player), nameof(Player.SetupPlacementGhost))]
-public class SetupPlacementGhost {
-  public static void Postfix(Player __instance) {
+public class SetupPlacementGhost
+{
+  public static void Postfix(Player __instance)
+  {
     if (!__instance.m_placementGhost) return;
     // Ensures that the scale is reseted when selecting objects from the build menu.
     Scaling.Build.SetScale(__instance.m_placementGhost.transform.localScale);
     // When copying an existing object, the copy is inactive.
     // So the ghost must be manually activated while disabling ZNet stuff.
-    if (__instance.m_placementGhost && !__instance.m_placementGhost.activeSelf) {
+    if (__instance.m_placementGhost && !__instance.m_placementGhost.activeSelf)
+    {
       ZNetView.m_forceDisableInit = true;
       __instance.m_placementGhost.SetActive(true);
       ZNetView.m_forceDisableInit = false;
@@ -239,11 +277,14 @@ public class SetupPlacementGhost {
   }
 }
 [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
-public class UpdatePlacementGhost {
-  static void Postfix(Player __instance) {
+public class UpdatePlacementGhost
+{
+  static void Postfix(Player __instance)
+  {
     Scaling.Set(__instance.m_placementGhost);
     var marker = __instance.m_placementMarkerInstance;
-    if (marker) {
+    if (marker)
+    {
       // Max 2 to only affect default game markers.
       for (var i = 0; i < marker.transform.childCount && i < 2; i++)
         marker.transform.GetChild(i).gameObject.SetActive(!Configuration.HidePlacementMarker);
@@ -251,18 +292,24 @@ public class UpdatePlacementGhost {
   }
 }
 [HarmonyPatch(typeof(ZoneSystem), nameof(ZoneSystem.SpawnLocation))]
-public class CustomizeSpawnLocation {
+public class CustomizeSpawnLocation
+{
   public static bool? RandomDamage = null;
   public static bool AllViews = false;
-  static void Customize() {
-    if (RandomDamage.HasValue) {
+  static void Customize()
+  {
+    if (RandomDamage.HasValue)
+    {
       WearNTear.m_randomInitialDamage = RandomDamage.Value;
     }
-    if (AllViews) {
+    if (AllViews)
+    {
       var data = Selection.GetData();
-      if (data != null) {
+      if (data != null)
+      {
         var location = ZoneSystem.instance.GetLocation(data.GetInt(Hash.Location, 0));
-        if (location != null) {
+        if (location != null)
+        {
           foreach (var view in location.m_netViews)
             view.gameObject.SetActive(true);
         }
@@ -270,7 +317,8 @@ public class CustomizeSpawnLocation {
       }
     }
   }
-  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
+  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+  {
     return new CodeMatcher(instructions)
           .MatchForward(
               useEnd: false,

@@ -22,6 +22,9 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 
 # Changelog
 
+- v1.25
+	- Fixes blueprints being placed incorrectly.
+
 - v1.24
 	- Fixes compatibility issue with Comfy Gizmo.
 	- Fixes scaling not working when selecting default pieces from the build menu.

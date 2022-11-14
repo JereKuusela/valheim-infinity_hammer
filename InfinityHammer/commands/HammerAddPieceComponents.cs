@@ -1,11 +1,15 @@
 using System;
 namespace InfinityHammer;
-public class HammerAddPieceComponentsCommand {
-  public HammerAddPieceComponentsCommand() {
+public class HammerAddPieceComponentsCommand
+{
+  public HammerAddPieceComponentsCommand()
+  {
     CommandWrapper.RegisterEmpty("hammer_add_piece_components");
-    Helper.Command("hammer_add_piece_components", "Adds the Piece component to every prefab to allow copying them with PlanBuild.", (args) => {
+    Helper.Command("hammer_add_piece_components", "Adds the Piece component to every prefab to allow copying them with PlanBuild.", (args) =>
+    {
       Helper.CheatCheck();
-      foreach (var prefab in ZNetScene.instance.m_prefabs) {
+      foreach (var prefab in ZNetScene.instance.m_prefabs)
+      {
         if (prefab.name == "Player") continue;
         if (prefab.name.StartsWith("_", StringComparison.Ordinal)) continue;
         if (prefab.name.StartsWith("fx_", StringComparison.Ordinal)) continue;
@@ -15,7 +19,8 @@ public class HammerAddPieceComponentsCommand {
         piece.m_name = Utils.GetPrefabName(piece.gameObject);
         piece.m_clipEverything = true;
       }
-      foreach (var instance in ZNetScene.instance.m_instances.Values) {
+      foreach (var instance in ZNetScene.instance.m_instances.Values)
+      {
         if (instance.gameObject.name == "Player(Clone)") continue;
         if (instance.gameObject.name.StartsWith("_", StringComparison.Ordinal)) continue;
         if (instance.gameObject.name.StartsWith("fx_", StringComparison.Ordinal)) continue;

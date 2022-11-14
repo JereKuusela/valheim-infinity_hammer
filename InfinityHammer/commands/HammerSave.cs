@@ -7,8 +7,10 @@ using UnityEngine;
 namespace InfinityHammer;
 
 
-public class HammerSaveCommand {
-  private static void Serialize(ZDO zdo, ZPackage pkg) {
+public class HammerSaveCommand
+{
+  private static void Serialize(ZDO zdo, ZPackage pkg)
+  {
     var num = 0;
     if (zdo.m_floats != null && zdo.m_floats.Count > 0)
       num |= 1;
@@ -26,57 +28,72 @@ public class HammerSaveCommand {
       num |= 128;
 
     pkg.Write(num);
-    if (zdo.m_floats != null && zdo.m_floats.Count > 0) {
+    if (zdo.m_floats != null && zdo.m_floats.Count > 0)
+    {
       pkg.Write((byte)zdo.m_floats.Count);
-      foreach (KeyValuePair<int, float> keyValuePair in zdo.m_floats) {
+      foreach (KeyValuePair<int, float> keyValuePair in zdo.m_floats)
+      {
         pkg.Write(keyValuePair.Key);
         pkg.Write(keyValuePair.Value);
       }
     }
-    if (zdo.m_vec3 != null && zdo.m_vec3.Count > 0) {
+    if (zdo.m_vec3 != null && zdo.m_vec3.Count > 0)
+    {
       pkg.Write((byte)zdo.m_vec3.Count);
-      foreach (KeyValuePair<int, Vector3> keyValuePair2 in zdo.m_vec3) {
+      foreach (KeyValuePair<int, Vector3> keyValuePair2 in zdo.m_vec3)
+      {
         pkg.Write(keyValuePair2.Key);
         pkg.Write(keyValuePair2.Value);
       }
     }
-    if (zdo.m_quats != null && zdo.m_quats.Count > 0) {
+    if (zdo.m_quats != null && zdo.m_quats.Count > 0)
+    {
       pkg.Write((byte)zdo.m_quats.Count);
-      foreach (KeyValuePair<int, Quaternion> keyValuePair3 in zdo.m_quats) {
+      foreach (KeyValuePair<int, Quaternion> keyValuePair3 in zdo.m_quats)
+      {
         pkg.Write(keyValuePair3.Key);
         pkg.Write(keyValuePair3.Value);
       }
     }
-    if (zdo.m_ints != null && zdo.m_ints.Count > 0) {
+    if (zdo.m_ints != null && zdo.m_ints.Count > 0)
+    {
       pkg.Write((byte)zdo.m_ints.Count);
-      foreach (KeyValuePair<int, int> keyValuePair4 in zdo.m_ints) {
+      foreach (KeyValuePair<int, int> keyValuePair4 in zdo.m_ints)
+      {
         pkg.Write(keyValuePair4.Key);
         pkg.Write(keyValuePair4.Value);
       }
     }
-    if (zdo.m_longs != null && zdo.m_longs.Count > 0) {
+    if (zdo.m_longs != null && zdo.m_longs.Count > 0)
+    {
       pkg.Write((byte)zdo.m_longs.Count);
-      foreach (KeyValuePair<int, long> keyValuePair5 in zdo.m_longs) {
+      foreach (KeyValuePair<int, long> keyValuePair5 in zdo.m_longs)
+      {
         pkg.Write(keyValuePair5.Key);
         pkg.Write(keyValuePair5.Value);
       }
     }
-    if (zdo.m_strings != null && zdo.m_strings.Count > 0) {
+    if (zdo.m_strings != null && zdo.m_strings.Count > 0)
+    {
       pkg.Write((byte)zdo.m_strings.Count);
-      foreach (KeyValuePair<int, string> keyValuePair6 in zdo.m_strings) {
+      foreach (KeyValuePair<int, string> keyValuePair6 in zdo.m_strings)
+      {
         pkg.Write(keyValuePair6.Key);
         pkg.Write(keyValuePair6.Value);
       }
     }
-    if (zdo.m_byteArrays != null && zdo.m_byteArrays.Count > 0) {
+    if (zdo.m_byteArrays != null && zdo.m_byteArrays.Count > 0)
+    {
       pkg.Write((byte)zdo.m_byteArrays.Count);
-      foreach (KeyValuePair<int, byte[]> keyValuePair7 in zdo.m_byteArrays) {
+      foreach (KeyValuePair<int, byte[]> keyValuePair7 in zdo.m_byteArrays)
+      {
         pkg.Write(keyValuePair7.Key);
         pkg.Write(keyValuePair7.Value);
       }
     }
   }
-  private static string GetExtraInfo(GameObject obj, ZDO zdo) {
+  private static string GetExtraInfo(GameObject obj, ZDO zdo)
+  {
     var info = "";
     if (obj.GetComponent<Sign>())
       info = zdo.GetString(Hash.Text, "");
@@ -85,7 +102,8 @@ public class HammerSaveCommand {
     if (obj.GetComponent<Tameable>())
       info = zdo.GetString(Hash.TamedName, "");
 
-    if (obj.GetComponent<ItemStand>() is { } itemStand && zdo?.GetString(Hash.Item) != "") {
+    if (obj.GetComponent<ItemStand>() is { } itemStand && zdo?.GetString(Hash.Item) != "")
+    {
       var item = zdo?.GetString(Hash.Item) ?? "";
       var variant = zdo?.GetInt(Hash.Variant) ?? 0;
       if (variant != 0)
@@ -93,7 +111,8 @@ public class HammerSaveCommand {
       else
         info = $"{item}";
     }
-    if (obj.GetComponent<ArmorStand>() is { } armorStand) {
+    if (obj.GetComponent<ArmorStand>() is { } armorStand)
+    {
       info = $"{armorStand.m_pose}:";
       info += $"{armorStand.m_slots.Count}:";
       var slots = armorStand.m_slots.Select(slot => $"{slot.m_visualName}:{slot.m_visualVariant}");
@@ -101,38 +120,47 @@ public class HammerSaveCommand {
     }
     return info;
   }
-  private static void AddSingleObject(Blueprint bp, GameObject obj) {
+  private static void AddSingleObject(Blueprint bp, GameObject obj)
+  {
     var zdo = Selection.GetData() ?? new();
     var info = GetExtraInfo(obj, zdo);
     bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), Vector3.zero, Quaternion.identity, obj.transform.localScale, info, zdo));
   }
-  private static void AddObject(Blueprint bp, GameObject obj, int index = 0) {
+  private static void AddObject(Blueprint bp, GameObject obj, int index = 0)
+  {
     var zdo = Selection.GetData(index) ?? new();
     var info = GetExtraInfo(obj, zdo);
     bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), obj.transform.localPosition, obj.transform.localRotation, obj.transform.localScale, info, zdo));
   }
-  private static Blueprint BuildBluePrint(Player player, GameObject obj) {
+  private static Blueprint BuildBluePrint(Player player, GameObject obj)
+  {
     Blueprint bp = new();
     bp.Name = Utils.GetPrefabName(obj);
     bp.Creator = player.GetPlayerName();
     var piece = obj.GetComponent<Piece>();
-    if (piece) {
+    if (piece)
+    {
       bp.Name = Localization.instance.Localize(piece.m_name);
       bp.Description = piece.m_description;
     }
-    if (Selection.Type == SelectedType.Object || Selection.Type == SelectedType.Default) {
+    if (Selection.Type == SelectedType.Object || Selection.Type == SelectedType.Default)
+    {
       AddSingleObject(bp, obj);
-      foreach (Transform child in obj.transform) {
+      foreach (Transform child in obj.transform)
+      {
         if (Helper.IsSnapPoint(child.gameObject))
           bp.SnapPoints.Add(child.localPosition);
       }
     }
-    if (Selection.Type == SelectedType.Multiple || Selection.Type == SelectedType.Location) {
+    if (Selection.Type == SelectedType.Multiple || Selection.Type == SelectedType.Location)
+    {
       var i = 0;
-      foreach (Transform tr in obj.transform) {
+      foreach (Transform tr in obj.transform)
+      {
         if (Helper.IsSnapPoint(tr.gameObject))
           bp.SnapPoints.Add(tr.localPosition);
-        else {
+        else
+        {
           AddObject(bp, tr.gameObject, i);
           i += 1;
         }
@@ -141,7 +169,8 @@ public class HammerSaveCommand {
     return bp;
   }
 
-  private static string[] GetPlanBuildFile(Blueprint bp) {
+  private static string[] GetPlanBuildFile(Blueprint bp)
+  {
     List<string> lines = new();
     lines.Add($"#Name:{bp.Name}");
     lines.Add($"#Creator:{bp.Creator}");
@@ -153,16 +182,19 @@ public class HammerSaveCommand {
     lines.AddRange(bp.Objects.Select(GetPlanBuildObject));
     return lines.ToArray();
   }
-  private static string InvariantString(float f) {
+  private static string InvariantString(float f)
+  {
     return f.ToString(NumberFormatInfo.InvariantInfo);
   }
-  private static string GetPlanBuildSnapPoint(Vector3 pos) {
+  private static string GetPlanBuildSnapPoint(Vector3 pos)
+  {
     var x = InvariantString(pos.x);
     var y = InvariantString(pos.y);
     var z = InvariantString(pos.z);
     return $"{x};{y};{z}";
   }
-  private static string GetPlanBuildObject(BlueprintObject obj) {
+  private static string GetPlanBuildObject(BlueprintObject obj)
+  {
     var name = obj.Prefab;
     var posX = InvariantString(obj.Pos.x);
     var posY = InvariantString(obj.Pos.y);
@@ -176,7 +208,8 @@ public class HammerSaveCommand {
     var scaleZ = InvariantString(obj.Scale.z);
     var info = obj.ExtraInfo;
     var data = "";
-    if (obj.Data != null) {
+    if (obj.Data != null)
+    {
       ZPackage pkg = new();
       Serialize(obj.Data, pkg);
       data = pkg.GetBase64();
@@ -185,12 +218,15 @@ public class HammerSaveCommand {
     return $"{name};;{posX};{posY};{posZ};{rotX};{rotY};{rotZ};{rotW};{info};{scaleX};{scaleY};{scaleZ};{data}";
   }
 
-  public HammerSaveCommand() {
-    CommandWrapper.Register("hammer_save", (int index) => {
+  public HammerSaveCommand()
+  {
+    CommandWrapper.Register("hammer_save", (int index) =>
+    {
       if (index == 0) return CommandWrapper.Info("File name.");
       return null;
     });
-    Helper.Command("hammer_save", "[file name] - Saves the selection to a blueprint.", (args) => {
+    Helper.Command("hammer_save", "[file name] - Saves the selection to a blueprint.", (args) =>
+    {
       Helper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
       var player = Helper.GetPlayer();

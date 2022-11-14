@@ -1,17 +1,20 @@
 using System.Reflection;
 using BepInEx.Bootstrap;
 namespace InfinityHammer;
-public static class JotunnWrapper {
+public static class JotunnWrapper
+{
   public const string GUID = "com.jotunn.jotunn";
   private static Assembly? Jotunn;
-  public static void Run() {
+  public static void Run()
+  {
     if (!Chainloader.PluginInfos.TryGetValue(GUID, out var info)) return;
     Jotunn = info.Instance.GetType().Assembly;
     if (Jotunn == null) return;
   }
 #nullable disable
   private static BindingFlags PublicBinding = BindingFlags.Static | BindingFlags.Public;
-  public static void IsCustomlocation(string name) {
+  public static void IsCustomlocation(string name)
+  {
     if (Jotunn == null) return;
     var type = Jotunn.GetType("Jotunn.Managers.KeyHintManager");
     if (type == null) return;

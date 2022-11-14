@@ -1,18 +1,21 @@
 using System.Collections.Generic;
 using System.Linq;
 namespace InfinityHammer;
-public interface UndoAction {
+public interface UndoAction
+{
   void Undo();
   void Redo();
   string UndoMessage();
   string RedoMessage();
 }
-public class UndoManager {
+public class UndoManager
+{
   private static List<UndoAction> History = new();
   private static int Index = -1;
   private static bool Executing = false;
   public static int MaxSteps = 50;
-  public static void Add(UndoAction action) {
+  public static void Add(UndoAction action)
+  {
     // During undo/redo more steps won't be added.
     if (Executing) return;
     if (History.Count > MaxSteps - 1)
@@ -23,28 +26,36 @@ public class UndoManager {
     Index = History.Count - 1;
   }
 
-  public static bool Undo(Terminal terminal) {
-    if (Index < 0) {
+  public static bool Undo(Terminal terminal)
+  {
+    if (Index < 0)
+    {
       Helper.AddMessage(terminal, "Nothing to undo.");
       return false;
     }
     Executing = true;
-    try {
+    try
+    {
       History[Index].Undo();
       Helper.AddMessage(terminal, History[Index].UndoMessage());
-    } catch { }
+    }
+    catch { }
     Index--;
     Executing = false;
     return true;
   }
-  public static bool Redo(Terminal terminal) {
-    if (Index < History.Count - 1) {
+  public static bool Redo(Terminal terminal)
+  {
+    if (Index < History.Count - 1)
+    {
       Executing = true;
       Index++;
-      try {
+      try
+      {
         History[Index].Redo();
         Helper.AddMessage(terminal, History[Index].RedoMessage());
-      } catch { }
+      }
+      catch { }
       Executing = false;
       return true;
     }

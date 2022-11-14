@@ -1,19 +1,24 @@
 using System;
 using Service;
 namespace InfinityHammer;
-public class HammerScaleCommand {
-  private static void Scale(string amountStr, string direction, Action<float> action) {
+public class HammerScaleCommand
+{
+  private static void Scale(string amountStr, string direction, Action<float> action)
+  {
     var amount = Parse.Direction(direction) * Parse.TryFloat(amountStr, 1f);
     action(amount);
   }
-  private static void CommandAxis(string name, string axis, Func<ToolScaling, Action<float>> action, bool isCommand) {
+  private static void CommandAxis(string name, string axis, Func<ToolScaling, Action<float>> action, bool isCommand)
+  {
     name = $"{name}_{axis}";
     if (isCommand) name += "_cmd";
-    CommandWrapper.Register(name, (int index) => {
+    CommandWrapper.Register(name, (int index) =>
+    {
       if (index == 0) return CommandWrapper.Info("Amount.");
       return null;
     });
-    Helper.Command(name, $"[amount] - Sets the scale of {axis} axis (if the object supports it).", (args) => {
+    Helper.Command(name, $"[amount] - Sets the scale of {axis} axis (if the object supports it).", (args) =>
+    {
       Helper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
       if (Selection.IsCommand() != isCommand) return;
@@ -24,13 +29,16 @@ public class HammerScaleCommand {
         Scaling.PrintScale(args.Context);
     });
   }
-  private static void Command(string name, bool isCommand) {
+  private static void Command(string name, bool isCommand)
+  {
     if (isCommand) name += "_cmd";
-    CommandWrapper.Register(name, (int index, int subIndex) => {
+    CommandWrapper.Register(name, (int index, int subIndex) =>
+    {
       if (index == 0) return CommandWrapper.XZY("Amount of scale.", subIndex);
       return null;
     });
-    Helper.Command(name, "[amount or x,z,y] - Sets the scale (if the object supports it).", (args) => {
+    Helper.Command(name, "[amount or x,z,y] - Sets the scale (if the object supports it).", (args) =>
+    {
       Helper.CheatCheck();
       if (Selection.IsCommand() != isCommand) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;
@@ -41,7 +49,8 @@ public class HammerScaleCommand {
         Scaling.PrintScale(args.Context);
     });
   }
-  public HammerScaleCommand() {
+  public HammerScaleCommand()
+  {
     var name = "hammer_scale";
     CommandAxis(name, "x", (scale) => scale.SetScaleX, false);
     CommandAxis(name, "y", (scale) => scale.SetScaleY, false);

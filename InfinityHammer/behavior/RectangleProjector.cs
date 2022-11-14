@@ -2,10 +2,12 @@ using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer;
 
-public class RectangleProjector : CircleProjector {
+public class RectangleProjector : CircleProjector
+{
   public float m_width = 5f;
   public float m_depth = 5f;
-  private Vector3 Cast(Vector3 pos) {
+  private Vector3 Cast(Vector3 pos)
+  {
     RaycastHit raycastHit;
     if (Physics.Raycast(pos + Vector3.up * 500f, Vector3.down, out raycastHit, 1000f, this.m_mask.value))
       pos.y = raycastHit.point.y;
@@ -13,20 +15,24 @@ public class RectangleProjector : CircleProjector {
   }
   private Transform Get(int index) => m_segments[index].transform;
   private void Set(int index, Vector3 pos) => Get(index).localPosition = pos;
-  private void Cast(int index) {
+  private void Cast(int index)
+  {
     var segment = Get(index);
     segment.position = Cast(segment.position);
   }
   private void SetRot(int index, Vector3 rot) => Get(index).localRotation = Quaternion.LookRotation(rot, Vector3.up);
-  private void EdgeFix(int index, float percent, float max, float start, float end, Vector3 direction) {
+  private void EdgeFix(int index, float percent, float max, float start, float end, Vector3 direction)
+  {
     var pos = percent * max;
     var transform = Get(index);
     var scale = m_prefab.transform.localScale;
-    if (pos - start < 0.5f) {
+    if (pos - start < 0.5f)
+    {
       scale.z *= pos - start + 0.5f;
       transform.localPosition += direction * (0.5f - scale.z / 2f);
     }
-    if (end - pos < 0.5f) {
+    if (end - pos < 0.5f)
+    {
       scale.z *= Mathf.Max(0f, end - pos + 0.5f);
       transform.localPosition -= direction * (0.5f - scale.z / 2f);
     }
@@ -34,7 +40,8 @@ public class RectangleProjector : CircleProjector {
     else transform.gameObject.SetActive(true);
     transform.localScale = scale;
   }
-  new private void Update() {
+  new private void Update()
+  {
     var totalLength = 2 * m_width + 2 * m_depth;
     var forward = (int)Mathf.Max(2, Mathf.Ceil(m_nrOfSegments * m_depth / totalLength));
     var right = (int)Mathf.Max(2, Mathf.Ceil(m_nrOfSegments * m_width / totalLength));
@@ -59,7 +66,8 @@ public class RectangleProjector : CircleProjector {
     var end = start + 2f * m_depth;
     var size = 2f * m_depth * forward / (forward - 1);
     var time = baseTime / (forward);
-    for (int i = 0; i < forward; i++, index++) {
+    for (int i = 0; i < forward; i++, index++)
+    {
       var percent = ((float)i / forward + time) % 1f;
       var pos = basePos + percent * size * Vector3.forward;
       Set(index, pos);
@@ -70,7 +78,8 @@ public class RectangleProjector : CircleProjector {
     end = start + 2f * m_width;
     size = 2f * m_width * right / (right - 1);
     time = baseTime / (right);
-    for (int i = 0; i < right; i++, index++) {
+    for (int i = 0; i < right; i++, index++)
+    {
       var percent = ((float)i / right + time) % 1f;
       var pos = basePos + percent * size * Vector3.right;
       Set(index, pos);
@@ -81,7 +90,8 @@ public class RectangleProjector : CircleProjector {
     end = start + 2f * m_depth;
     size = 2f * m_depth * back / (back - 1);
     time = baseTime / (back);
-    for (int i = 0; i < back; i++, index++) {
+    for (int i = 0; i < back; i++, index++)
+    {
       var percent = ((float)i / back + time) % 1f;
       var pos = basePos + percent * size * Vector3.back;
       Set(index, pos);
@@ -92,7 +102,8 @@ public class RectangleProjector : CircleProjector {
     end = start + 2f * m_width;
     size = 2f * m_width * left / (left - 1);
     time = baseTime / (left);
-    for (int i = 0; i < left; i++, index++) {
+    for (int i = 0; i < left; i++, index++)
+    {
       var percent = ((float)i / left + time) % 1f;
       var pos = basePos + percent * size * Vector3.left;
       Set(index, pos);
@@ -101,7 +112,8 @@ public class RectangleProjector : CircleProjector {
     }
     Vector3 offset = new(0f, Ruler.Height, 0f);
     if (offset == Vector3.zero) return;
-    foreach (var segment in m_segments) {
+    foreach (var segment in m_segments)
+    {
       segment.transform.localPosition += offset;
     }
   }
@@ -110,13 +122,16 @@ public class RectangleProjector : CircleProjector {
 
 
 [HarmonyPatch(typeof(CircleProjector), nameof(CircleProjector.Update))]
-public class OffsetProjector {
+public class OffsetProjector
+{
   static bool Prefix(CircleProjector __instance) => __instance.m_radius > 0f;
-  static void Postfix(CircleProjector __instance) {
+  static void Postfix(CircleProjector __instance)
+  {
     if (__instance.m_radius == 0f) return;
     Vector3 offset = new(0f, Ruler.Height, 0f);
     if (offset == Vector3.zero) return;
-    foreach (var segment in __instance.m_segments) {
+    foreach (var segment in __instance.m_segments)
+    {
       segment.transform.localPosition += offset;
     }
   }

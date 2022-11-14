@@ -4,7 +4,8 @@ using System.Linq;
 using Service;
 using UnityEngine;
 namespace InfinityHammer;
-public class CommandParameters {
+public class CommandParameters
+{
   public const string CmdName = "cmd_name";
   public const string CmdDesc = "cmd_desc";
   public const string CmdIcon = "cmd_icon";
@@ -43,7 +44,8 @@ public class CommandParameters {
     .Where(s => !s.StartsWith($"{CmdW}=", StringComparison.OrdinalIgnoreCase))
     .Where(s => !s.StartsWith($"{CmdD}=", StringComparison.OrdinalIgnoreCase))
     .Where(s => !s.StartsWith($"{CmdH}=", StringComparison.OrdinalIgnoreCase));
-  public CommandParameters(string command, bool showCommand, bool replaceKeys = true) {
+  public CommandParameters(string command, bool showCommand, bool replaceKeys = true)
+  {
     var split = command.Split(';').Select(s => s.Trim()).ToArray();
     Command = string.Join(";", split.Select(s => ParseArgs(s, replaceKeys)));
     if (Radius.HasValue)
@@ -59,7 +61,8 @@ public class CommandParameters {
   }
 
 
-  public RulerParameters ToRuler() => new() {
+  public RulerParameters ToRuler() => new()
+  {
     Radius = Radius,
     Width = Width,
     Depth = Depth,
@@ -71,23 +74,28 @@ public class CommandParameters {
   static bool IsParameter(string arg, string par) => arg == par || arg.EndsWith("=" + par, StringComparison.OrdinalIgnoreCase);
   static string ReplaceEnd(string arg, string par, int amount) => arg.Substring(0, arg.Length - amount) + par;
 
-  private string Replace(string arg, string par) {
-    while (IsParameter(arg, par)) {
+  private string Replace(string arg, string par)
+  {
+    while (IsParameter(arg, par))
+    {
       var str = string.Join(",", par.Split(',').Select(s => $"#{s}"));
       return ReplaceEnd(arg, str, par.Length);
     }
     return arg;
   }
   private static Dictionary<string, int> PrefabNames = new();
-  public static Sprite? FindSprite(string name) {
+  public static Sprite? FindSprite(string name)
+  {
     if (!ZNetScene.instance) return null;
-    if (PrefabNames.Count == 0) {
+    if (PrefabNames.Count == 0)
+    {
       PrefabNames = ZNetScene.instance.m_namedPrefabs.GroupBy(kvp => kvp.Value.name.ToLower()).ToDictionary(kvp => kvp.Key, kvp => kvp.First().Key);
     }
 
     name = name.ToLower();
     Sprite? sprite;
-    if (PrefabNames.TryGetValue(name, out var hash)) {
+    if (PrefabNames.TryGetValue(name, out var hash))
+    {
       var prefab = ZNetScene.instance.GetPrefab(hash);
       sprite = prefab?.GetComponent<Piece>()?.m_icon;
       if (sprite) return sprite;
@@ -102,14 +110,17 @@ public class CommandParameters {
     if (sprite) return sprite;
     return null;
   }
-  protected string ParseArgs(string command, bool replaceKeys) {
+  protected string ParseArgs(string command, bool replaceKeys)
+  {
     var scale = Scaling.Command;
-    if (replaceKeys) {
+    if (replaceKeys)
+    {
       command = command.Replace(CmdMod1, Configuration.ModifierKey1());
       command = command.Replace(CmdMod2, Configuration.ModifierKey2());
     }
     var args = command.Split(' ').ToArray();
-    foreach (var arg in args) {
+    foreach (var arg in args)
+    {
       var split = arg.Split('=');
       var name = split[0].ToLower();
       if (name == CmdContinuous) Continuous = "true";
@@ -132,7 +143,8 @@ public class CommandParameters {
       "x,y,z", "x,z,y", "y,x,z", "y,z,x", "z,x,y", "z,y,x",
       "tx,ty,tz", "tx,tz,ty", "ty,tx,tz", "ty,tz,tx", "tz,tx,ty", "tz,ty,tx",
     };
-    for (var i = 0; i < args.Length; i++) {
+    for (var i = 0; i < args.Length; i++)
+    {
       foreach (var par in parameters)
         args[i] = Replace(args[i], par);
       if (args[i].Contains("#id"))

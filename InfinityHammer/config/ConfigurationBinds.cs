@@ -3,7 +3,8 @@ using Service;
 using UnityEngine;
 namespace InfinityHammer;
 
-public partial class Configuration {
+public partial class Configuration
+{
 #nullable disable
   public static ConfigEntry<KeyboardShortcut> configShapeKey;
   public static ConfigEntry<KeyboardShortcut> configBuildScale;
@@ -42,15 +43,18 @@ public partial class Configuration {
   public static ConfigEntry<string> configMoveAmount;
   public static ConfigEntry<string> configMoveAmountLarge;
 #nullable enable
-  public static string ModifierKey1() {
+  public static string ModifierKey1()
+  {
     if (configCommandModifier1 == null) return "leftalt";
     return ConfigWrapper.GetKeys(configCommandModifier1.Value);
   }
-  public static string ModifierKey2() {
+  public static string ModifierKey2()
+  {
     if (configCommandModifier2 == null) return "leftcontrol";
     return ConfigWrapper.GetKeys(configCommandModifier2.Value);
   }
-  private static void InitBinds(ConfigWrapper wrapper) {
+  private static void InitBinds(ConfigWrapper wrapper)
+  {
     var section = "2. Binds";
     configCommandModifier1 = wrapper.Bind(section, "Command modifier 1", new KeyboardShortcut(KeyCode.LeftAlt), "");
     configCommandModifier2 = wrapper.Bind(section, "Command modifier 2", new KeyboardShortcut(KeyCode.LeftControl), "");
