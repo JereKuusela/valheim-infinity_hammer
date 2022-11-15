@@ -45,6 +45,7 @@ public class HammerScaleCommand
       var scaling = Scaling.Get();
       var scale = Parse.TryScale(Parse.Split(args[1])) * Parse.Direction(args.Args, 2);
       scaling.SetScale(scale);
+      Scaling.UpdateGhost();
       if (!isCommand)
         Scaling.PrintScale(args.Context);
     });

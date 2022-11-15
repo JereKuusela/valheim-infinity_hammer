@@ -25,6 +25,7 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 - v1.25
 	- Adds new shapes grid and ring.
 	- Fixes blueprints being placed incorrectly.
+	- Fixes scaling issues.
 	- Fixes continous commands (like terrain paint) being instantly used on select.
 
 - v1.24

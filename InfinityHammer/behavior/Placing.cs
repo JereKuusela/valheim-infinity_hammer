@@ -302,7 +302,6 @@ public class UpdatePlacementGhost
 {
   static void Postfix(Player __instance)
   {
-    Scaling.Set(__instance.m_placementGhost);
     var marker = __instance.m_placementMarkerInstance;
     if (marker)
     {

@@ -83,28 +83,33 @@ public static class Scaling
   public static ToolScaling Build = new(true);
   public static ToolScaling Command = new(false);
   public static ToolScaling Get() => Selection.IsCommand() ? Scaling.Command : Scaling.Build;
-  public static bool IsScalingSupported()
+
+  public static void UpdateGhost()
   {
-    var player = Helper.GetPlayer();
-    var ghost = player.m_placementGhost;
-    if (!ghost) return false;
+    if (Selection.Type == SelectedType.Command) return;
+    var ghost = Helper.GetPlacementGhost();
+    if (!IsScalingSupported(ghost)) return;
+    ghost.transform.localScale = Build.Value;
+    Selection.SetScale(Build.Value);
+  }
+  public static bool IsScalingSupported(GameObject obj)
+  {
+    if (!Configuration.Enabled) return false;
+    if (!obj) return false;
     if (Selection.Type == SelectedType.Command) return true;
     if (Selection.Type == SelectedType.Multiple) return Selection.Objects.All(obj => obj.Scalable);
+    if (Selection.Objects.Count > 0) return Selection.Objects[0].Scalable;
     // Ghost won't have netview so the selected piece must be used.
     // This technically also works for the build window if other mods add scalable objects there.
-    var view = player.GetSelectedPiece()?.GetComponent<ZNetView>();
-    return view && view != null && view.m_syncInitialScale;
-  }
-  public static void Set(GameObject ghost)
-  {
-    if (Configuration.Enabled && ghost && IsScalingSupported() && Selection.Type != SelectedType.Command)
-      ghost.transform.localScale = Build.Value;
+    var scene = ZNetScene.instance.GetPrefab(Utils.GetPrefabName(obj));
+    if (scene.TryGetComponent<ZNetView>(out var view)) return view.m_syncInitialScale;
+    return false;
   }
   public static void PrintScale(Terminal terminal)
   {
     if (Configuration.DisableScaleMessages) return;
     var scaling = Get();
-    if (IsScalingSupported())
+    if (IsScalingSupported(Helper.GetPlacementGhost()))
     {
       if (scaling.X != scaling.Y || scaling.X != scaling.Z)
         Helper.AddMessage(terminal, $"Scale set to X: {scaling.X.ToString("P0")}, Z: {scaling.Z.ToString("P0")}, Y: {scaling.Y.ToString("P0")}.");

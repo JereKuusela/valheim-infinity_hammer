@@ -64,6 +64,7 @@ public class HammerZoomCommand
       }
       else
         throw new InvalidOperationException("Must either have 1 or 3 values.");
+      Scaling.UpdateGhost();
       if (!isCommand)
         Scaling.PrintScale(args.Context);
     });

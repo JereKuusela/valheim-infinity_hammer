@@ -54,6 +54,7 @@ public static class Selection
   public static bool IsContinuous() => GetOrAdd().Continuous == "true" || Helper.IsDown(GetOrAdd().Continuous);
   public static void Mirror() => Get()?.Mirror();
   public static void Postprocess(Vector3? scale) => Get()?.Postprocess(scale);
+  public static void SetScale(Vector3 scale) => Get()?.SetScale(scale);
   public static ZDO? GetData(int index = 0) => Get()?.GetData(index);
   public static string Description() => Get()?.ExtraDescription ?? "";
   public static bool IsCommand() => Get()?.Type == SelectedType.Command;
@@ -142,12 +143,6 @@ public partial class Selected
       colliders[i].isTrigger = originalColliders[i].isTrigger;
     }
   }
-  private static void SetScale(GameObject obj, Vector3? scale)
-  {
-    if (obj.GetComponent<ZNetView>() is not { } view) return;
-    if (view.m_syncInitialScale)
-      obj.transform.localScale = scale ?? view.gameObject.transform.localScale;
-  }
   private static void SetLevel(GameObject obj, int level)
   {
     if (level == -1) return;
@@ -195,21 +190,23 @@ public partial class Selected
       plant.m_unhealthy.SetActive(unhealthy || unhealthyGrown);
     }
   }
-  private void Postprocess(GameObject obj, ZDO? zdo, Vector3? scale)
+  private void Postprocess(GameObject obj, ZDO? zdo)
   {
-    SetScale(obj, scale);
     if (zdo == null) return;
     SetLevel(obj, zdo.GetInt(Hash.Level, -1));
     SetGrowth(obj, zdo.GetInt(Hash.Growth, -1));
     SetWear(obj, zdo.GetInt(Hash.Wear, -1));
     SetText(obj, zdo.GetString(Hash.Text, ""));
   }
+  public void SetScale(Vector3 scale)
+  {
+    Ghost.transform.localScale = scale;
+  }
   public void Postprocess(Vector3? scale)
   {
     if (Type == SelectedType.Object)
     {
-      Postprocess(Ghost, GetData(), scale);
-      Scaling.Get().SetScale(Ghost.transform.localScale);
+      Postprocess(Ghost, GetData());
       Helper.EnsurePiece(Ghost);
     }
     if (Type == SelectedType.Multiple)
@@ -218,9 +215,12 @@ public partial class Selected
       foreach (Transform tr in Ghost.transform)
       {
         if (Helper.IsSnapPoint(tr.gameObject)) continue;
-        Postprocess(tr.gameObject, GetData(i++), scale);
+        Postprocess(tr.gameObject, GetData(i++));
       }
     }
+    if (scale.HasValue && Scaling.IsScalingSupported(Ghost))
+      SetScale(scale.Value);
+    Scaling.Get().SetScale(Ghost.transform.localScale);
     Helper.GetPlayer().SetupPlacementGhost();
   }
   public GameObject Set(ZNetView view, bool singleUse)

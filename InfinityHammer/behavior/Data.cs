@@ -13,17 +13,17 @@ public class DataHelper
     ZNetView.m_initZDO.m_rotation = tr.rotation;
     if (ZNetScene.instance.m_namedPrefabs.TryGetValue(hash, out var obj))
     {
-      if (obj.GetComponent<ZNetView>() is { } view)
+      if (obj.TryGetComponent<ZNetView>(out var view))
       {
         ZNetView.m_initZDO.m_type = view.m_type;
         ZNetView.m_initZDO.m_distant = view.m_distant;
         ZNetView.m_initZDO.m_persistent = view.m_persistent;
         ZNetView.m_initZDO.m_prefab = hash;
+        if (view.m_syncInitialScale)
+          ZNetView.m_initZDO.Set("scale", tr.lossyScale);
       }
     }
     else InfinityHammer.Log.LogWarning("Failed to find prefab for the zdo.");
-    if (Scaling.IsScalingSupported())
-      ZNetView.m_initZDO.Set("scale", tr.localScale);
     ZNetView.m_initZDO.m_dataRevision = 1;
   }
 
