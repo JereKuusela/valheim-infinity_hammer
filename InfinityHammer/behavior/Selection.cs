@@ -200,7 +200,8 @@ public partial class Selected
   }
   public void SetScale(Vector3 scale)
   {
-    Ghost.transform.localScale = scale;
+    if (Ghost)
+      Ghost.transform.localScale = scale;
   }
   public void Postprocess(Vector3? scale)
   {

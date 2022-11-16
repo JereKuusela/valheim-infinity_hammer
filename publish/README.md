@@ -22,6 +22,9 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 
 # Changelog
 
+- v1.26
+	- Fixes incompatiblity issue with Odin Ship mod.
+
 - v1.25
 	- Adds new shapes: grid and ring.
 	- Fixes blueprints being placed incorrectly.

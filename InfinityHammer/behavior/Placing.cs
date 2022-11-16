@@ -52,6 +52,7 @@ public class PlacePiece
   }
   static GameObject GetPrefab(Piece obj)
   {
+    if (!Configuration.Enabled) return obj.gameObject;
     var type = Selection.Type;
     var ghost = Helper.GetPlayer().m_placementGhost;
     if (!ghost) return obj.gameObject;
@@ -172,6 +173,7 @@ public class PlacePiece
   }
   static void Postprocess(GameObject obj)
   {
+    if (!Configuration.Enabled) return;
     var player = Helper.GetPlayer();
     Helper.EnsurePiece(obj);
     var ghost = Helper.GetPlayer().m_placementGhost;
@@ -192,6 +194,7 @@ public class PlacePiece
     var view = obj.GetComponent<ZNetView>();
     // Hoe adds pieces too.
     if (!view) return;
+    view.m_body?.WakeUp();
     if (Selection.Type == SelectedType.Location && obj.GetComponent<LocationProxy>())
     {
       UndoHelper.StartTracking();
