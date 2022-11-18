@@ -8,22 +8,17 @@ public class DataHelper
   public static void Init(string name, Transform tr, ZDO? zdo = null) => Init(name.GetStableHashCode(), tr, zdo);
   public static void Init(int hash, Transform tr, ZDO? zdo = null)
   {
+    if (!ZNetScene.instance.m_namedPrefabs.TryGetValue(hash, out var obj)) return;
+    if (!obj.TryGetComponent<ZNetView>(out var view)) return;
     ZNetView.m_initZDO = ZDOMan.instance.CreateNewZDO(tr.position);
     if (zdo != null) Copy(zdo, ZNetView.m_initZDO);
     ZNetView.m_initZDO.m_rotation = tr.rotation;
-    if (ZNetScene.instance.m_namedPrefabs.TryGetValue(hash, out var obj))
-    {
-      if (obj.TryGetComponent<ZNetView>(out var view))
-      {
-        ZNetView.m_initZDO.m_type = view.m_type;
-        ZNetView.m_initZDO.m_distant = view.m_distant;
-        ZNetView.m_initZDO.m_persistent = view.m_persistent;
-        ZNetView.m_initZDO.m_prefab = hash;
-        if (view.m_syncInitialScale)
-          ZNetView.m_initZDO.Set("scale", tr.lossyScale);
-      }
-    }
-    else InfinityHammer.Log.LogWarning("Failed to find prefab for the zdo.");
+    ZNetView.m_initZDO.m_type = view.m_type;
+    ZNetView.m_initZDO.m_distant = view.m_distant;
+    ZNetView.m_initZDO.m_persistent = view.m_persistent;
+    ZNetView.m_initZDO.m_prefab = hash;
+    if (view.m_syncInitialScale)
+      ZNetView.m_initZDO.Set("scale", tr.lossyScale);
     ZNetView.m_initZDO.m_dataRevision = 1;
   }
 

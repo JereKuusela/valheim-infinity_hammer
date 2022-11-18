@@ -22,6 +22,9 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 
 # Changelog
 
+- v1.27
+	- Fixes terrain reseting when using default hoe objects.
+
 - v1.26
 	- Fixes incompatiblity issue with Odin Ship mod.
 

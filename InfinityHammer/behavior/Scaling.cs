@@ -101,8 +101,8 @@ public static class Scaling
     if (Selection.Objects.Count > 0) return Selection.Objects[0].Scalable;
     // Ghost won't have netview so the selected piece must be used.
     // This technically also works for the build window if other mods add scalable objects there.
-    var scene = ZNetScene.instance.GetPrefab(Utils.GetPrefabName(obj));
-    if (scene.TryGetComponent<ZNetView>(out var view)) return view.m_syncInitialScale;
+    var prefab = ZNetScene.instance.GetPrefab(Utils.GetPrefabName(obj));
+    if (prefab && prefab.TryGetComponent<ZNetView>(out var view)) return view.m_syncInitialScale;
     return false;
   }
   public static void PrintScale(Terminal terminal)
