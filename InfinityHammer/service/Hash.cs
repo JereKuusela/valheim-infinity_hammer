@@ -18,6 +18,7 @@ public static class Hash
   public static int Pose = "pose".GetStableHashCode();
   public static int Item = "item".GetStableHashCode();
   public static int Variant = "variant".GetStableHashCode();
+  public static int Quality = "quality".GetStableHashCode();
   public static int TamedName = "TamedName".GetStableHashCode();
   public static int Tamed = "Tamed".GetStableHashCode();
   public static int Tag = "tag".GetStableHashCode();

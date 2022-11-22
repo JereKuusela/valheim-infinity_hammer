@@ -377,17 +377,20 @@ public partial class Selected
       var split = data.Split(':');
       var name = split[0];
       var variant = Parse.TryInt(split, 1, 0);
+      var quality = Parse.TryInt(split, 2, 1);
       if (data == "")
       {
         name = zdo.GetString(Hash.Item, name);
         variant = zdo.GetInt(Hash.Variant, variant);
+        quality = zdo.GetInt(Hash.Quality, quality);
       }
       else
       {
         zdo.Set(Hash.Item, name);
         zdo.Set(Hash.Variant, variant);
+        zdo.Set(Hash.Quality, quality);
       }
-      itemStand.SetVisualItem(name, variant);
+      itemStand.SetVisualItem(name, variant, quality);
     }
     if (obj.GetComponent<ArmorStand>() is { } armorStand)
     {

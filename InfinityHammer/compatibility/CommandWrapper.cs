@@ -14,7 +14,7 @@ public static class CommandWrapper
   {
     if (Chainloader.PluginInfos.TryGetValue("server_devcommands", out var info))
     {
-      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 33)
+      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 35)
         InfinityHammer.Log.LogWarning($"Server Devcommands v{info.Metadata.Version.Major}.{info.Metadata.Version.Minor} is outdated. Please update!");
       else
         ServerDevcommands = info.Instance.GetType().Assembly;
