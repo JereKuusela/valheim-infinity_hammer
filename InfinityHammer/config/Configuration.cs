@@ -53,6 +53,8 @@ public partial class Configuration
   public static bool ResetOffsetOnUnfreeze => configResetOffsetOnUnfreeze.Value;
   public static ConfigEntry<bool> configUnfreezeOnUnequip;
   public static bool UnfreezeOnUnequip => configUnfreezeOnUnequip.Value;
+  public static ConfigEntry<bool> configAllSnapPoints;
+  public static bool AllSnapPoints => configAllSnapPoints.Value;
   public static ConfigEntry<bool> configUnfreezeOnSelect;
   public static bool UnfreezeOnSelect => configUnfreezeOnSelect.Value;
   public static ConfigEntry<string> configOverwriteHealth;
@@ -198,6 +200,7 @@ public partial class Configuration
     configUnfreezeOnSelect = wrapper.Bind(section, "Unfreeze on select", true, "Removes the placement freeze when selecting a new object.");
     configResetOffsetOnUnfreeze = wrapper.Bind(section, "Reset offset on unfreeze", true, "Removes the placement offset when unfreezing the placement.");
     configUnfreezeOnUnequip = wrapper.Bind(section, "Unfreeze on unequip", true, "Removes the placement freeze when unequipping the hammer.");
+    configAllSnapPoints = wrapper.Bind(section, "Snap points for all objects", false, "If enabled, multi selection creates snap points for every object.");
     configHidePlacementMarker = wrapper.Bind(section, "No placement marker", false, "Hides the yellow placement marker (also affects Gizmo mod).");
     configIgnoreOtherRestrictions = wrapper.Bind(section, "Ignore other restrictions", true, "Ignores any other restrictions (material, biome, etc.)");
     section = "4. Items";

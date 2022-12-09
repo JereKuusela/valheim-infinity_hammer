@@ -358,6 +358,7 @@ Following powers are available with `hammer_config` command:
 - Select range (default: `0`, key: `select_range`): Range for selecting (capped at about 50 meters).
 - Server Devcommands undo (default: `true`, key: `server_devcommands_undo`): If disabled, uses Infinity Hammer's own undo system even if Server Devcommands is installed.
 - Show command values (default: `false`, key: `show_command_values`): Always show the command on tool descriptions.
+- Snap points for all objects (default: `false`, key: `snap_points_for_all_objects`):If enabled, multi selection creates snap points for every object.
 - Unfreeze on select (default `true`, key: `unfreeze_on_select`): Removes the placement freeze when selecting a new object.
 - Unfreeze on unequip (defualt `true`, key: `unfreeze_on_unequip`): Removes the placement freeze when unequipping the hammer.
 

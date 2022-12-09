@@ -216,6 +216,8 @@ public static class Helper
     var ret = UnityEngine.Object.Instantiate(obj);
     Helper.CleanObject(ret);
     obj.SetActive(true);
+    if (ret.TryGetComponent<Character>(out var character))
+      Character.m_characters.Remove(character);
     if (highlight)
       wear.Highlight();
     return ret;
@@ -261,7 +263,7 @@ public static class Helper
   {
     if (!obj || !Configuration.Enabled) return;
     // Creature behavior.
-    if (obj.GetComponent<Character>() is { } character) character.enabled = false;
+    if (obj.TryGetComponent<Character>(out var character)) character.enabled = false;
     UnityEngine.Object.Destroy(obj.GetComponent<CharacterDrop>());
     UnityEngine.Object.Destroy(obj.GetComponent<MonsterAI>());
     UnityEngine.Object.Destroy(obj.GetComponent<AnimalAI>());

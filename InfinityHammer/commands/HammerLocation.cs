@@ -33,7 +33,7 @@ public class HammerLocationCommand
         if (seed == 0) seed = rng.Next();
         var location = ZoneSystem.instance.GetLocation(args[1].GetStableHashCode());
         var selected = Selection.Set(location, seed);
-
+        selected.name = args[1];
         PrintSelected(args.Context, selected);
       }
       catch (InvalidOperationException e)

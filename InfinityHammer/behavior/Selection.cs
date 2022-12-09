@@ -288,7 +288,7 @@ public partial class Selected
       ResetColliders(obj, originalPrefab);
       SetData(obj, "", data);
       Objects.Add(new(name, view.m_syncInitialScale, data));
-      if (view == views.First())
+      if (view == views.First() || Configuration.AllSnapPoints)
         AddSnapPoints(obj);
     }
     ZNetView.m_forceDisableInit = false;
@@ -347,9 +347,9 @@ public partial class Selected
     Ghost = Helper.SafeInstantiateLocation(location, Hammer.AllLocationsObjects ? null : seed);
     Helper.EnsurePiece(Ghost);
     ZDO data = new();
-    data.Set(Hash.Location, location.m_prefab.name.GetStableHashCode());
+    data.Set(Hash.Location, location.m_prefabName.GetStableHashCode());
     data.Set(Hash.Seed, seed);
-    Objects.Add(new(location.m_prefab.name, false, data));
+    Objects.Add(new(location.m_prefabName, false, data));
     Type = SelectedType.Location;
     Helper.GetPlayer().SetupPlacementGhost();
     return Ghost;
@@ -478,7 +478,7 @@ public partial class Selected
       if (!tr || !Helper.IsSnapPoint(tr.gameObject)) continue;
       SnapObj.SetActive(false);
       var snapObj = UnityEngine.Object.Instantiate(SnapObj, Ghost.transform);
-      snapObj.transform.localPosition = tr.position;
+      snapObj.transform.position = tr.position;
       added.Add(snapObj);
     }
     return added;

@@ -32,3 +32,12 @@ public class LocationProxyAwake
 {
   static bool Prefix() => !ZNetView.m_forceDisableInit;
 }
+[HarmonyPatch(typeof(Character), nameof(Character.Awake))]
+public class CharacterAwake
+{
+  static void Postfix(Character __instance)
+  {
+    if (ZNetView.m_forceDisableInit) Character.m_characters.Remove(__instance);
+  }
+}
+

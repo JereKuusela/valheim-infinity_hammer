@@ -92,6 +92,7 @@ public partial class Selected
     obj.SetActive(true);
     obj.transform.rotation = baseObj.transform.rotation;
     obj.transform.localPosition = pos;
+    if (Configuration.AllSnapPoints) AddSnapPoints(obj);
     Objects.Add(new SelectedObject(Objects[0].Prefab, Objects[0].Scalable, Objects[0].Data));
     Zoops[index] = obj;
   }

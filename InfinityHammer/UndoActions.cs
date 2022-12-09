@@ -23,7 +23,10 @@ public class UndoHelper
   {
     if (!obj) return;
     foreach (var view in obj.GetComponentsInChildren<ZNetView>())
-      Objects.Add(view.GetZDO());
+    {
+      if (view.GetZDO() != null)
+        Objects.Add(view.GetZDO());
+    }
     if (!GroupCreating && !Track) Finish();
   }
   public static void StartTracking()
