@@ -28,15 +28,6 @@ public class Repair
       DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, character.GetTopPoint(), Mathf.Abs(heal));
       return true;
     }
-    if (Configuration.RepairTaming)
-    {
-      Taming.SetTame(character, !character.IsTamed());
-      if (character.IsTamed())
-        ReplaceMessage.Message = "Tamed " + Localization.instance.Localize(character.m_name);
-      else
-        ReplaceMessage.Message = "Untamed " + Localization.instance.Localize(character.m_name);
-      return true;
-    }
     return false;
   }
   private static bool RepairPlayer(ZNetView obj)

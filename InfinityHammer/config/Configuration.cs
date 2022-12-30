@@ -79,8 +79,6 @@ public partial class Configuration
   public static float BuildRange => IsCheats ? Helper.ParseFloat(configBuildRange.Value, 0f) : 0f;
   public static ConfigEntry<bool> configRemoveEffects;
   public static bool RemoveEffects => configRemoveEffects.Value && Enabled;
-  public static ConfigEntry<bool> configRepairTaming;
-  public static bool RepairTaming => configRepairTaming.Value && IsCheats;
   public static ConfigEntry<bool> configShowCommandValues;
   public static bool AlwaysShowCommand => configShowCommandValues.Value;
   public static ConfigEntry<bool> configHidePlacementMarker;
@@ -178,7 +176,6 @@ public partial class Configuration
     configRemoveRange = wrapper.Bind(section, "Remove range", "0", "Range for removing objects (0 = default).");
     configRepairRange = wrapper.Bind(section, "Repair range", "0", "Range for repairing objects (0 = default).");
     configBuildRange = wrapper.Bind(section, "Build range", "0", "Range for placing objects (0 = default)");
-    configRepairTaming = wrapper.Bind(section, "Repair taming", false, "Repairing full health creatures tames/untames them.");
     configShowCommandValues = wrapper.Bind(section, "Show command values", false, "Always shows the command in the tool descriptions.");
     configRemoveEffects = wrapper.Bind(section, "Remove effects", false, "Removes visual effects of building, etc.");
     configEnableUndo = wrapper.Bind(section, "Enable undo", true, "Enabled undo and redo for placing/removing.");

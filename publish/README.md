@@ -22,6 +22,9 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 
 # Changelog
 
+- v1.30
+  - Removes the setting `repair_taming` as obsolete (better do it with World Edit Commands).
+
 - v1.29
   - Adds a new setting `Snap points for all objects` (default false).
 	- Improves compatibility with custom locations from Expand World mod.

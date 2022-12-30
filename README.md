@@ -16,7 +16,6 @@ Install also [World Edit Commands](https://valheim.thunderstore.io/package/JereK
 - Remove anything. Something unremovable messing up your grand design? No more!
 - Build without restrictions. Dungeons and even the start temple become valid for building.
 - QoL improvements: Extended range, no resouce costs, no item drops, no visual effects and more!
-- Tame anything. Powerful creatures, or even bosses can become your protectors. Or just pit them against each other!
 
 # Selecting objects
 
@@ -352,7 +351,6 @@ Following powers are available with `hammer_config` command:
 - Remove range (default: `0`, key: `remove_range`): Range for removing (capped at about 50 meters).
 - Repair anything (default: `false`, key: `repair_anything`): Allows healing or repairing any object.
 - Repair range (default: `0`, key: `repair_range`): Range for repairing (capped at about 50 meters).
-- Repair taming (default: `false`, key: `repair_taming`): Repairing full health creatures will tame/untame them (works for all creatures).
 - Reset offset on unfreeze (default `true`, key: `reset_offset_on_unfreeze`): Removes the placement offset when unfreezing the placement.
 - Select blacklist (key: `select_blacklist`): Allows disabling select for given objects (ids separated by ,).
 - Select range (default: `0`, key: `select_range`): Range for selecting (capped at about 50 meters).
