@@ -71,6 +71,7 @@ public static class Hammer
     CustomizeSpawnLocation.RandomDamage = null;
     CustomizeSpawnLocation.AllViews = false;
   }
+
   ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
   public static void PostProcessPlaced(GameObject obj)
   {

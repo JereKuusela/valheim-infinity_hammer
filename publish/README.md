@@ -23,6 +23,7 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 # Changelog
 
 - v1.30
+	- Adds compatibility for Valheim Raft mod.
   - Removes the setting `repair_taming` as obsolete (better do it with World Edit Commands).
 
 - v1.29

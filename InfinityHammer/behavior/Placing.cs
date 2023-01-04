@@ -150,24 +150,50 @@ public class PlacePiece
       Console.instance.AddString($"Hammering command: {command}");
     Console.instance.TryRunCommand(command);
   }
+  private static ZDOID SpawnRaft(List<GameObject> children)
+  {
+    for (var i = 0; i < children.Count; i++)
+    {
+      var child = children[i];
+      var name = Utils.GetPrefabName(child);
+      if (name != "MBRaft") continue;
+      var prefab = ZNetScene.instance.GetPrefab(name);
+      DataHelper.Init(name, child.transform, Selection.GetData(i));
+      var childObj = UnityEngine.Object.Instantiate(prefab, child.transform.position, child.transform.rotation);
+      Hammer.PostProcessPlaced(childObj);
+      return childObj.GetComponent<ZNetView>()?.GetZDO()?.m_uid ?? ZDOID.None;
+    }
+    return ZDOID.None;
+  }
+  public static KeyValuePair<int, int> RaftParent = ZDO.GetHashZDOID("MBParent");
+  private static void HandleRaft(List<GameObject> children)
+  {
+    var raft = SpawnRaft(children);
+    if (raft == ZDOID.None) return;
+    for (var i = 0; i < children.Count; i++)
+    {
+      var zdo = Selection.Objects[i].Data;
+      if (zdo.GetZDOID(RaftParent) != ZDOID.None)
+        zdo.Set(RaftParent, raft);
+    }
+  }
   private static void HandleMultiple(GameObject ghost)
   {
     UndoHelper.StartTracking();
-    var i = 0;
-    foreach (Transform tr in ghost.transform)
+    var children = Helper.GetChildren(ghost);
+    HandleRaft(children);
+    for (var i = 0; i < children.Count; i++)
     {
-      var ghostObj = tr.gameObject;
-      if (Helper.IsSnapPoint(ghostObj)) continue;
-      var name = Utils.GetPrefabName(ghostObj);
+      var ghostChild = children[i];
+      var name = Utils.GetPrefabName(ghostChild);
+      if (name == "MBRaft") continue;
       var prefab = ZNetScene.instance.GetPrefab(name);
       if (prefab)
       {
-        DataHelper.Init(name, ghostObj.transform, Selection.GetData(i));
-        var childObj = UnityEngine.Object.Instantiate(prefab, ghostObj.transform.position, ghostObj.transform.rotation);
-        var childView = childObj.GetComponent<ZNetView>();
+        DataHelper.Init(name, ghostChild.transform, Selection.GetData(i));
+        var childObj = UnityEngine.Object.Instantiate(prefab, ghostChild.transform.position, ghostChild.transform.rotation);
         Hammer.PostProcessPlaced(childObj);
       }
-      i += 1;
     }
     UndoHelper.StopTracking();
   }

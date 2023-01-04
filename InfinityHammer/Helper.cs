@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using HarmonyLib;
@@ -258,6 +259,16 @@ public static class Helper
     return SafeInstantiate(location.m_prefab);
   }
   public static bool IsSnapPoint(GameObject obj) => obj.CompareTag("snappoint");
+  public static List<GameObject> GetChildren(GameObject obj)
+  {
+    List<GameObject> children = new();
+    foreach (Transform tr in obj.transform)
+    {
+      if (Helper.IsSnapPoint(tr.gameObject)) continue;
+      children.Add(tr.gameObject);
+    }
+    return children;
+  }
   ///<summary>Removes scripts that try to run (for example placement needs only the model and Piece component).</summary>
   public static void CleanObject(GameObject obj)
   {

@@ -139,10 +139,18 @@ public static class Selector
     if (objs.Length == 0) throw new InvalidOperationException("Nothing is nearby.");
     return objs;
   }
+  private static KeyValuePair<int, int> RaftParent = ZDO.GetHashZDOID("MBParent");
 
+  public static ZNetView[] GetConnectedRaft(ZNetView baseView)
+  {
+    var id = baseView.GetZDO().GetZDOID(RaftParent);
+    var instances = ZNetScene.instance.m_instances.Values;
+    return instances.Where(view => view.GetZDO().m_uid == id || view.GetZDO().GetZDOID(RaftParent) == id).ToArray();
+  }
   ///<summary>Returns connected WearNTear objects.</summary>
   public static ZNetView[] GetConnected(ZNetView baseView)
   {
+    if (baseView.GetZDO().GetZDOID(RaftParent) != ZDOID.None) return GetConnectedRaft(baseView);
     var baseWear = baseView.GetComponent<WearNTear>();
     if (baseWear == null) throw new InvalidOperationException("Connected doesn't work for this object.");
     HashSet<ZNetView> views = new() { baseView };
