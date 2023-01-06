@@ -46,13 +46,12 @@ public partial class Selected
     obj.transform.localScale = Vector3.one;
     obj.SetActive(true);
     AddSnapPoints(obj);
-    if (obj.GetComponent<Piece>() is { } piece)
+    if (obj.TryGetComponent<Piece>(out var piece))
     {
       var name2 = Utils.GetPrefabName(obj);
-      if (ZNetScene.instance.GetPrefab(name2) is { } prefab)
-      {
-        if (!prefab.GetComponent<Piece>()) UnityEngine.Object.Destroy(piece);
-      }
+      var prefab = ZNetScene.instance.GetPrefab(name2);
+      if (prefab && !prefab.GetComponent<Piece>())
+        UnityEngine.Object.Destroy(piece);
     }
   }
   private int Sign(int value) => value >= 0 ? 1 : -1;

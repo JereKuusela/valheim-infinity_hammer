@@ -356,7 +356,7 @@ public partial class Selected
   }
   private static ZDO SetData(GameObject obj, string data, ZDO zdo)
   {
-    if (obj.GetComponent<Sign>() is { } sign)
+    if (obj.TryGetComponent<Sign>(out var sign))
     {
       if (data == "")
         data = zdo.GetString(Hash.Text, data);
@@ -372,7 +372,7 @@ public partial class Selected
     {
       zdo.Set(Hash.TamedName, data);
     }
-    if (obj.GetComponent<ItemStand>() is { } itemStand)
+    if (obj.TryGetComponent<ItemStand>(out var itemStand))
     {
       var split = data.Split(':');
       var name = split[0];
@@ -392,7 +392,7 @@ public partial class Selected
       }
       itemStand.SetVisualItem(name, variant, quality);
     }
-    if (obj.GetComponent<ArmorStand>() is { } armorStand)
+    if (obj.TryGetComponent<ArmorStand>(out var armorStand))
     {
       var split = data.Split(':');
       var pose = Parse.TryInt(split, 0, 0);

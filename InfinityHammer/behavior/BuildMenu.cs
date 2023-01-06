@@ -59,7 +59,7 @@ public class RunBuildMenuCommands
   public static bool Prefix(Player __instance, Vector2Int p)
   {
     var piece = __instance.GetPiece(p);
-    if (piece && piece.GetComponent<BuildMenuCommand>() is { } cmd)
+    if (piece && piece.TryGetComponent<BuildMenuCommand>(out var cmd))
     {
       InstantCommand = false;
       Console.instance.TryRunCommand(cmd.Command);

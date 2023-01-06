@@ -102,7 +102,7 @@ public class HammerSaveCommand
     if (obj.GetComponent<Tameable>())
       info = zdo.GetString(Hash.TamedName, "");
 
-    if (obj.GetComponent<ItemStand>() is { } itemStand && zdo?.GetString(Hash.Item) != "")
+    if (obj.GetComponent<ItemStand>() && zdo?.GetString(Hash.Item) != "")
     {
       var item = zdo?.GetString(Hash.Item) ?? "";
       var variant = zdo?.GetInt(Hash.Variant) ?? 0;
@@ -111,7 +111,7 @@ public class HammerSaveCommand
       else
         info = $"{item}";
     }
-    if (obj.GetComponent<ArmorStand>() is { } armorStand)
+    if (obj.TryGetComponent<ArmorStand>(out var armorStand))
     {
       info = $"{armorStand.m_pose}:";
       info += $"{armorStand.m_slots.Count}:";
