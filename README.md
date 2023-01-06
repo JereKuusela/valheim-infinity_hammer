@@ -162,13 +162,11 @@ For example `3*random` would randomly rotate 0, 120 or 240 degrees.
 
 ## Undo / redo
 
+Requires installing [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/).
+
 Building and removing objects can be quickly reversed by pressing NumPad7. Reversed actions can be redone with NumPad9.
 
 Note: Any other removal like buildings collapsing due to lack of support or destroyed by enemies is not tracked. Only your direct actions can be undone.
-
-Internally this is done by using commands `hammer_undo` and `hammer_redo`.
-
-If [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) mod is installed, this integrates with its undo system (unless overridden in the config). So commmands `undo` and `redo` would also work.
 
 ## Multiplacement
 
@@ -193,7 +191,7 @@ Stacking is similar to zooping but instantly places the objects:
 
 The amount determines how many objects are placed. This can be fine-tuned by giving a range.
 
-Note: Choosing the correction direction can be difficult when rotating the selection. But you can easily try things by reverting the changes with `hammer_undo`.
+Note: Choosing the correction direction can be difficult when rotating the selection. But you can easily try things by reverting the changes with `undo`.
 
 Examples:
 -  `hammer_stack_up 10`: Places 10 objects on top of each other.
@@ -333,15 +331,12 @@ Following powers are available with `hammer_config` command:
 - Dimensions (key: `dimensions`): Measurements for objects.
 - Disable loot (default: `false`, key: `disable_loot`): Creatures and structures won't drop loot when destroyed with the hammer.
 - Disable marker (default: `false`, key: `disable_marker`): Whether the placement ghost is visualized.
-- Enable undo (default: `true`, key: `enable_undo`): Whether the undo/redo feature is enabled.
 - Ignore no build (default: `true`, key: `ignore_no_build`): "Mystical power" no longer prevents building.
 - Ignore other restrictions (default: `true`, key: `ignore_other_restrictions`): Removes any other restrictions (for example campfires can be built on wood floors).
 - Ignore wards (default: `true`, key: `ignore_wards`): Wards no longer prevent building.
 - Infinite health (default: `false`, key: `infinite_health`): Sets the Overwrite health setting to 1E30.
-- No build cost (default: `true`, key: `no_build_cost`): Removes resource cost and crafting station requirement.
+- No cost (default: `false`, key: `no_cost`): Removes durability, resource and stamina costs.
 - No creator (default: `false`, key: `no_creator`): Builds without setting the creator information.
-- No durability loss (default: `true`, key: `no_durability_loss`): Hammer auto-repairs used durability.
-- No stamina cost (default: `true`, key: `no_stamina_cost`): Hammer auto-regens used stamina.
 - Overwrite health (default: `0`, key: `overwrite_health`): Sets the health of built or repaired objects (0 reverts to the default max health, except for creatures).
 - Plan Build folder (default: `BepInEx/config/PlanBuild`, key: `plan_build_folder`): Folder relative to the Valheim.exe.
 - Remove anything (default: `false`, key: `remove_anything`): Allows removing any object.
@@ -354,7 +349,6 @@ Following powers are available with `hammer_config` command:
 - Reset offset on unfreeze (default `true`, key: `reset_offset_on_unfreeze`): Removes the placement offset when unfreezing the placement.
 - Select blacklist (key: `select_blacklist`): Allows disabling select for given objects (ids separated by ,).
 - Select range (default: `0`, key: `select_range`): Range for selecting (capped at about 50 meters).
-- Server Devcommands undo (default: `true`, key: `server_devcommands_undo`): If disabled, uses Infinity Hammer's own undo system even if Server Devcommands is installed.
 - Show command values (default: `false`, key: `show_command_values`): Always show the command on tool descriptions.
 - Snap points for all objects (default: `false`, key: `snap_points_for_all_objects`):If enabled, multi selection creates snap points for every object.
 - Unfreeze on select (default `true`, key: `unfreeze_on_select`): Removes the placement freeze when selecting a new object.
@@ -377,10 +371,6 @@ Some commonly used features have pre-made key binds in the configuration. Intern
 This means that [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) mod is needed for multi-key binds or for using the mouse wheel.
 
 If you don't wish to use this system you can set all binds to none and make your own bindings with the `bind` command.
-
-Binds can also be shared with others with the `custom_binds` setting but this isn't really recommended.
-
-The format is `keycode1 command1;keycode2 command2`. For example `keypad0 hammer;keypad7 hammer_undo;keypad9 hammer_redo`.
 
 
 # Building

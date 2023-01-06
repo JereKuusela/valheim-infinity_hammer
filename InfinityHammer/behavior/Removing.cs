@@ -93,7 +93,7 @@ public class RemovePiece
     if (RemovedObjects.Count > 0)
     {
       RemoveInArea(RemovedObjects[0], Configuration.RemoveArea);
-      UndoWrapper.Remove(RemovedObjects);
+      Undo.Remove(RemovedObjects);
     }
     RemovedObjects.Clear();
     DisableEffects.Active = false;

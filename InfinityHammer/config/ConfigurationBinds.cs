@@ -96,7 +96,7 @@ public partial class Configuration
     configPickAll = wrapper.BindCommand("hammer connect pick", section, "Pick building", new KeyboardShortcut(KeyCode.None), "Pick the whole building.");
     configSelectAllFrozen = wrapper.BindCommand("hammer connect freeze", section, "Select building frozen", new KeyboardShortcut(KeyCode.None), "Select the whole building.");
     configPickAllFrozen = wrapper.BindCommand("hammer connect pick freeze", section, "Pick building frozen", new KeyboardShortcut(KeyCode.None), "Pick the whole building.");
-    configUndo = wrapper.BindCommand("hammer_undo", section, "Undo", new KeyboardShortcut(KeyCode.Keypad7), "Undo actions.");
-    configRedo = wrapper.BindCommand("hammer_redo", section, "Redo", new KeyboardShortcut(KeyCode.Keypad9), "Redo actions.");
+    configUndo = wrapper.BindCommand("undo", section, "Undo", new KeyboardShortcut(KeyCode.Keypad7), "Undo actions.");
+    configRedo = wrapper.BindCommand("redo", section, "Redo", new KeyboardShortcut(KeyCode.Keypad9), "Redo actions.");
   }
 }

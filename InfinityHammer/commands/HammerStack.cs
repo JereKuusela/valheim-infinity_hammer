@@ -8,7 +8,7 @@ public class HammerStackCommand
 {
   private static void Execute(Vector3 delta, Vector3Int min, Vector3Int max)
   {
-    UndoHelper.StartCreating();
+    Undo.StartCreating();
     var ghostPosition = Player.m_localPlayer.m_placementGhost.transform.position;
     var ghostRotation = Player.m_localPlayer.m_placementGhost.transform.rotation;
     for (var x = min.x; x <= max.x; x++)
@@ -29,7 +29,7 @@ public class HammerStackCommand
     }
     OverridePlacement.OverridePosition = null;
     OverridePlacement.OverrideRotation = null;
-    UndoHelper.FinishCreating();
+    Undo.FinishCreating();
   }
   private static List<string>? AutoComplete(int index)
   {

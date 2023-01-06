@@ -179,7 +179,7 @@ public class PlacePiece
   }
   private static void HandleMultiple(GameObject ghost)
   {
-    UndoHelper.StartTracking();
+    Undo.StartTracking();
     var children = Helper.GetChildren(ghost);
     HandleRaft(children);
     for (var i = 0; i < children.Count; i++)
@@ -195,7 +195,7 @@ public class PlacePiece
         Hammer.PostProcessPlaced(childObj);
       }
     }
-    UndoHelper.StopTracking();
+    Undo.StopTracking();
   }
   static void Postprocess(GameObject obj)
   {
@@ -223,14 +223,14 @@ public class PlacePiece
     view.m_body?.WakeUp();
     if (Selection.Type == SelectedType.Location && obj.GetComponent<LocationProxy>())
     {
-      UndoHelper.StartTracking();
+      Undo.StartTracking();
       Hammer.SpawnLocation(view);
-      UndoHelper.StopTracking();
+      Undo.StopTracking();
     }
     else
     {
       Hammer.PostProcessPlaced(piece.gameObject);
-      UndoHelper.CreateObject(piece.gameObject);
+      Undo.CreateObject(piece.gameObject);
     }
   }
   static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)

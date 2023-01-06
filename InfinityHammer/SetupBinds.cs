@@ -10,14 +10,6 @@ public class SetupBinds
     var oldBinds = oldBindsStr.Split('|').Select(s => s.Trim()).Where(s => s != "").ToArray();
     var newBinds = newBindsStr.Split('|').Select(s => s.Trim()).Where(s => s != "").ToArray();
   }
-  private static void Setup()
-  {
-    if (Configuration.CustomBinds == "") return;
-    var binds = Configuration.CustomBinds.Split('|').Select(s => s.Trim()).ToArray();
-    var keys = binds.Select(bind => bind.Split(' ').First().Split(',').First()).ToHashSet();
-    foreach (var key in keys) Console.instance.TryRunCommand($"unbind {key}");
-    foreach (var bind in binds) Console.instance.TryRunCommand($"bind {bind}");
-  }
   private static string MigrateHammerScale(string bind)
   {
     if (!bind.Contains("hammer_scale build ")) return bind;
@@ -41,7 +33,6 @@ public class SetupBinds
   static void Postfix()
   {
     MigrateBinds();
-    Setup();
     Configuration.Wrapper.SetupBinds();
   }
 }

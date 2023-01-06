@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer;
@@ -10,12 +11,27 @@ public static class UndoTracker
 {
   public static void Postfix(ZNetView __instance)
   {
-    if (UndoHelper.Track)
-      UndoHelper.CreateObject(__instance.gameObject);
+    if (Undo.Track)
+      Undo.CreateObject(__instance.gameObject);
   }
 }
-public class UndoHelper
+public class Undo
 {
+  private static BindingFlags PrivateBinding = BindingFlags.Static | BindingFlags.NonPublic;
+  private static Type? Type() => CommandWrapper.ServerDevcommands?.GetType("ServerDevcommands.UndoManager");
+
+  public static void Place(IEnumerable<ZDO> objs)
+  {
+    if (objs.Count() == 0) return;
+    UndoPlace action = new(objs);
+    Type()?.GetMethod("Add", PrivateBinding).Invoke(null, new[] { action });
+  }
+  public static void Remove(IEnumerable<ZDO> objs)
+  {
+    if (objs.Count() == 0) return;
+    UndoRemove action = new(objs);
+    Type()?.GetMethod("Add", PrivateBinding).Invoke(null, new[] { action });
+  }
   private static bool GroupCreating = false;
   public static List<ZDO> Objects = new();
   public static bool Track = false;
@@ -49,7 +65,7 @@ public class UndoHelper
   }
   private static void Finish()
   {
-    UndoWrapper.Place(Objects);
+    Place(Objects);
     Objects.Clear();
     GroupCreating = false;
     Track = false;
@@ -79,7 +95,7 @@ public class UndoHelper
   }
   public static ZDO[] Remove(ZDO[] toRemove)
   {
-    var data = UndoHelper.Clone(toRemove);
+    var data = Undo.Clone(toRemove);
     foreach (var zdo in toRemove) Helper.RemoveZDO(zdo);
     return data;
   }
@@ -92,21 +108,29 @@ public class UndoRemove : MonoBehaviour, UndoAction
   private ZDO[] Data;
   public UndoRemove(IEnumerable<ZDO> data)
   {
-    Data = UndoHelper.Clone(data);
+    Data = global::InfinityHammer.Undo.Clone(data);
   }
   public void Undo()
   {
-    Data = UndoHelper.Place(Data);
+    Data = global::InfinityHammer.Undo.Place(Data);
   }
 
   public void Redo()
   {
-    Data = UndoHelper.Remove(Data);
+    Data = global::InfinityHammer.Undo.Remove(Data);
   }
 
-  public string UndoMessage() => $"Undo: Restored {UndoHelper.Print(Data)}";
+  public string UndoMessage() => $"Undo: Restored {(global::InfinityHammer.Undo.Print(Data))}";
 
-  public string RedoMessage() => $"Redo: Removed {UndoHelper.Print(Data)}";
+  public string RedoMessage() => $"Redo: Removed {(global::InfinityHammer.Undo.Print(Data))}";
+}
+
+public interface UndoAction
+{
+  void Undo();
+  void Redo();
+  string UndoMessage();
+  string RedoMessage();
 }
 
 public class UndoPlace : MonoBehaviour, UndoAction
@@ -115,18 +139,18 @@ public class UndoPlace : MonoBehaviour, UndoAction
   private ZDO[] Data;
   public UndoPlace(IEnumerable<ZDO> data)
   {
-    Data = UndoHelper.Clone(data);
+    Data = global::InfinityHammer.Undo.Clone(data);
   }
   public void Undo()
   {
-    Data = UndoHelper.Remove(Data);
+    Data = global::InfinityHammer.Undo.Remove(Data);
   }
 
-  public string UndoMessage() => $"Undo: Removed {UndoHelper.Print(Data)}";
+  public string UndoMessage() => $"Undo: Removed {(global::InfinityHammer.Undo.Print(Data))}";
 
   public void Redo()
   {
-    Data = UndoHelper.Place(Data);
+    Data = global::InfinityHammer.Undo.Place(Data);
   }
-  public string RedoMessage() => $"Redo: Restored {UndoHelper.Print(Data)}";
+  public string RedoMessage() => $"Redo: Restored {(global::InfinityHammer.Undo.Print(Data))}";
 }

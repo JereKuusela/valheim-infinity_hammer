@@ -146,7 +146,7 @@ public class HammerSelect
             RemovePiece.AddRemovedObject(view);
             Helper.RemoveZDO(view.GetZDO());
           }
-          UndoWrapper.Remove(RemovePiece.RemovedObjects);
+          Undo.Remove(RemovePiece.RemovedObjects);
           RemovePiece.RemovedObjects.Clear();
         }
       }

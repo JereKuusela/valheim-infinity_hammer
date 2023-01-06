@@ -25,6 +25,10 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 - v1.30
 	- Adds compatibility for Valheim Raft mod.
   - Removes the setting `repair_taming` as obsolete (better do it with World Edit Commands).
+	- Removes the setting `custom_binds` as obsolete (better to use the binds.yaml of Server Devcommands).
+	- Removes the setting `enable_undo` as obsolete (now always uses Server Devcommands undo if installed).
+	- Removes the setting `server_devcommands_undo` as obsolete (now always uses Server Devcommands undo if installed).
+	- Removes the settings `no_build_cost`, `no_durability_loss` and `no_stamina_cost` as obsolete (merged to `no_cost`).
 
 - v1.29
   - Adds a new setting `Snap points for all objects` (default false).

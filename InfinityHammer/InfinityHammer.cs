@@ -103,7 +103,6 @@ public class SetCommands
     new HammerScaleCommand();
     new HammerZoomCommand();
     new HammerStackCommand();
-    new HammerUndoCommand();
     new HammerFreezeCommand();
     new HammerGridCommand();
     new HammerSaveCommand();

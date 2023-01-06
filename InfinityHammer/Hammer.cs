@@ -63,7 +63,7 @@ public static class Hammer
     CustomizeSpawnLocation.AllViews = AllLocationsObjects;
     CustomizeSpawnLocation.RandomDamage = RandomLocationDamage;
     ZoneSystem.instance.SpawnLocation(location, seed, position, rotation, ZoneSystem.SpawnMode.Full, new());
-    foreach (var zdo in UndoHelper.Objects)
+    foreach (var zdo in Undo.Objects)
     {
       if (ZNetScene.instance.m_instances.TryGetValue(zdo, out var obj))
         PostProcessPlaced(obj.gameObject);
@@ -116,9 +116,9 @@ public static class Hammer
   {
     var item = obj.GetRightItem();
     if (item == null) return;
-    if (Configuration.NoStaminaCost)
+    if (Configuration.NoCost)
       obj.UseStamina(-item.m_shared.m_attack.m_attackStamina);
-    if (Configuration.NoDurabilityLoss && item.m_shared.m_useDurability)
+    if (Configuration.NoCost && item.m_shared.m_useDurability)
       item.m_durability += item.m_shared.m_useDurabilityDrain;
   }
 }

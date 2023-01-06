@@ -5,8 +5,6 @@ namespace InfinityHammer;
 public partial class Configuration
 {
 #nullable disable
-  public static ConfigEntry<string> configCustomBinds;
-  public static string CustomBinds => configCustomBinds.Value;
   public static ConfigEntry<int> configHammerMenuTab;
   public static int HammerMenuTab => configHammerMenuTab.Value;
   public static ConfigEntry<int> configHammerMenuIndex;
@@ -22,7 +20,6 @@ public partial class Configuration
   private static void InitCommands(ConfigWrapper wrapper)
   {
     var section = "6. Commands";
-    configCustomBinds = wrapper.BindList(section, "Custom binds", "", "Binds separated by ; that are set on the game start.");
     configCommandDefaultSize = wrapper.Bind(section, "Command default size", "10", "Default size for commands.");
     configCommandDefaultSize.SettingChanged += (s, e) =>
     {

@@ -11,16 +11,12 @@ public partial class Configuration
 #nullable disable
   public static bool IsCheats => Enabled && ((ZNet.instance && ZNet.instance.IsServer()) || Console.instance.IsCheatsEnabled());
   public static ConfigEntry<string> configVersion;
-  public static ConfigEntry<bool> configNoBuildCost;
-  public static bool NoBuildCost => configNoBuildCost.Value && IsCheats;
+  public static ConfigEntry<bool> configNoCost;
+  public static bool NoCost => configNoCost.Value && IsCheats;
   public static ConfigEntry<bool> configIgnoreWards;
   public static bool IgnoreWards => configIgnoreWards.Value && IsCheats;
   public static ConfigEntry<bool> configIgnoreNoBuild;
   public static bool IgnoreNoBuild => configIgnoreNoBuild.Value && IsCheats;
-  public static ConfigEntry<bool> configNoStaminaCost;
-  public static bool NoStaminaCost => configNoStaminaCost.Value && IsCheats;
-  public static ConfigEntry<bool> configNoDurabilityLoss;
-  public static bool NoDurabilityLoss => configNoDurabilityLoss.Value && IsCheats;
   public static ConfigEntry<bool> configAllObjects;
   public static bool AllObjects => configAllObjects.Value && IsCheats;
   public static ConfigEntry<bool> configCopyState;
@@ -45,8 +41,6 @@ public partial class Configuration
   public static bool DisableLoot => configDisableLoot.Value && IsCheats;
   public static ConfigEntry<bool> configRepairAnything;
   public static bool RepairAnything => configRepairAnything.Value && IsCheats;
-  public static ConfigEntry<bool> configEnableUndo;
-  public static bool EnableUndo => configEnableUndo.Value && IsCheats;
   public static ConfigEntry<bool> configNoCreator;
   public static bool NoCreator => configNoCreator.Value && IsCheats;
   public static ConfigEntry<bool> configResetOffsetOnUnfreeze;
@@ -85,8 +79,6 @@ public partial class Configuration
   public static bool HidePlacementMarker => configHidePlacementMarker.Value && Enabled;
   public static ConfigEntry<bool> configEnabled;
   public static bool Enabled => configEnabled.Value;
-  public static ConfigEntry<bool> configServerDevcommandsUndo;
-  public static bool ServerDevcommandsUndo => configServerDevcommandsUndo.Value;
   public static ConfigEntry<string> configRemoveBlacklist;
   public static HashSet<string> RemoveBlacklist = new();
   public static ConfigEntry<string> configSelectBlacklist;
@@ -164,8 +156,6 @@ public partial class Configuration
     configDimensions = wrapper.Bind(section, "Dimensions", "", "Object dimensions.");
     configDimensions.SettingChanged += (s, e) => UpdateDimensions();
     UpdateDimensions();
-    if (CommandWrapper.ServerDevcommands != null)
-      configServerDevcommandsUndo = wrapper.Bind(section, "Server Devcommands undo", true, "If disabled, uses Infinity Hammer's own undo system even if Server Devcommands is installed.");
     configPlanBuildFolder = wrapper.Bind(section, "Plan Build folder", "BepInEx/config/PlanBuild", "Folder relative to the Valheim.exe.");
     configBuildShareFolder = wrapper.Bind(section, "Build Share folder", "BuildShare/Builds", "Folder relative to the Valheim.exe.");
     if (CommandWrapper.ServerDevcommands != null)
@@ -178,13 +168,10 @@ public partial class Configuration
     configBuildRange = wrapper.Bind(section, "Build range", "0", "Range for placing objects (0 = default)");
     configShowCommandValues = wrapper.Bind(section, "Show command values", false, "Always shows the command in the tool descriptions.");
     configRemoveEffects = wrapper.Bind(section, "Remove effects", false, "Removes visual effects of building, etc.");
-    configEnableUndo = wrapper.Bind(section, "Enable undo", true, "Enabled undo and redo for placing/removing.");
     configCopyRotation = wrapper.Bind(section, "Copy rotation", true, "Copies rotation of the selected object.");
-    configNoBuildCost = wrapper.Bind(section, "No build cost", false, "Removes build costs and requirements.");
+    configNoCost = wrapper.Bind(section, "No cost", false, "Removes durability, resource and stamina costs.");
     configIgnoreWards = wrapper.Bind(section, "Ignore wards", true, "Ignores ward restrictions.");
     configIgnoreNoBuild = wrapper.Bind(section, "Ignore no build", true, "Ignores no build areas.");
-    configNoStaminaCost = wrapper.Bind(section, "No stamina cost", true, "Removes hammer stamina usage.");
-    configNoDurabilityLoss = wrapper.Bind(section, "No durability loss", true, "Removes hammer durability usage.");
     configAllObjects = wrapper.Bind(section, "All objects", true, "Allows placement of non-default objects.");
     configCopyState = wrapper.Bind(section, "Copy state", true, "Copies object's internal state.");
     configAllowInDungeons = wrapper.Bind(section, "Allow in dungeons", true, "Allows building in dungeons.");
