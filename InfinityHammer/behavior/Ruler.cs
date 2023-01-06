@@ -73,7 +73,7 @@ public class Ruler
     if (IsTargeted)
     {
       var distance = Utils.DistanceXZ(ptr.position, gtr.position) / 2f;
-      scale.SetScaleX(distance);
+      scale.SetScaleZ(distance);
     }
     Ruler.SanityCheckShape();
     if (Circle != null)

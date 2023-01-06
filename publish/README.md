@@ -29,6 +29,7 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 	- Removes the setting `enable_undo` as obsolete (now always uses Server Devcommands undo if installed).
 	- Removes the setting `server_devcommands_undo` as obsolete (now always uses Server Devcommands undo if installed).
 	- Removes the settings `no_build_cost`, `no_durability_loss` and `no_stamina_cost` as obsolete (merged to `no_cost`).
+	- Fixes the rectangle shape having the dimensions reversed.
 
 - v1.29
   - Adds a new setting `Snap points for all objects` (default false).

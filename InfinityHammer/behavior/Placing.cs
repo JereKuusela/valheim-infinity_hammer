@@ -87,20 +87,25 @@ public class PlacePiece
     var radius = scale.X.ToString(CultureInfo.InvariantCulture);
     var innerSize = Mathf.Min(scale.X, scale.Z).ToString(CultureInfo.InvariantCulture);
     var outerSize = Mathf.Max(scale.X, scale.Z).ToString(CultureInfo.InvariantCulture);
-    var depth = scale.X.ToString(CultureInfo.InvariantCulture);
-    var width = scale.Z.ToString(CultureInfo.InvariantCulture);
+    var depth = scale.Z.ToString(CultureInfo.InvariantCulture);
+    var width = scale.X.ToString(CultureInfo.InvariantCulture);
     if (Ruler.Shape == RulerShape.Circle)
-    {
-      innerSize = radius;
-      outerSize = radius;
-    }
-    if (Ruler.Shape == RulerShape.Square)
     {
       innerSize = radius;
       outerSize = radius;
     }
     if (Ruler.Shape != RulerShape.Rectangle)
       width = depth;
+    if (Ruler.Shape == RulerShape.Square)
+    {
+      innerSize = radius;
+      outerSize = radius;
+    }
+    if (Ruler.Shape == RulerShape.Rectangle)
+    {
+      innerSize = width;
+      outerSize = width;
+    }
     var height = scale.Y.ToString(CultureInfo.InvariantCulture);
     var angle = ghost.transform.rotation.eulerAngles.y.ToString(CultureInfo.InvariantCulture);
 
