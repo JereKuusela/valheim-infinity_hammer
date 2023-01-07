@@ -4,9 +4,7 @@ Bend the rules of building! Copy any object, make structures indestructible, rem
 
 Install on the admin client (modding [guide](https://youtu.be/L9ljm2eKLrk)).
 
-Install also [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) to enable key binds and use this on a server (as an admin).
-
-Install also [World Edit Commands](https://valheim.thunderstore.io/package/JereKuusela/World_Edit_Commands/) for terrain tools.
+Install also [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) and [World Edit Commands](https://valheim.thunderstore.io/package/JereKuusela/World_Edit_Commands/).
 
 # Features
 
@@ -15,7 +13,18 @@ Install also [World Edit Commands](https://valheim.thunderstore.io/package/JereK
 - Make structures indestructible, even the gravity can't bring them down.
 - Remove anything. Something unremovable messing up your grand design? No more!
 - Build without restrictions. Dungeons and even the start temple become valid for building.
-- QoL improvements: Extended range, no resouce costs, no item drops, no visual effects and more!
+- QoL improvements: Extended range, no resource costs, no item drops, no visual effects and more!
+
+Recommended mods:
+
+- [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/): Enables key binds, undo and better command support.
+- [World Edit Commands](https://valheim.thunderstore.io/package/JereKuusela/World_Edit_Commands/): Enables terrain tools and additional commands.
+- [Gizmo](https://valheim.thunderstore.io/package/ComfyMods/Gizmo/): Enables free rotation.
+
+Similar mods:
+
+- [Better Creative](https://valheim.thunderstore.io/package/Heinermann/BetterCreative/): Adds most objects to the build menu and some enhancements.
+- [OCDheim](https://valheim.thunderstore.io/package/javadevils/OCDheim/): Lots of enhancements, especially for precise building.
 
 # Selecting objects
 
@@ -419,4 +428,3 @@ If "Destroy anything" is enabled, all objects can be removed.
 
 If "Disable loot" is enabled, destroying creatures or structures won't drop loot. This can be useful to get rid of very high starred creatures that crash the game when killed.
 
-Blacklist can be used to avoid destroying critical objects like locations. For example `hammer_config remove_blacklist LocationProxy`.
