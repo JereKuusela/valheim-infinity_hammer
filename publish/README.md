@@ -24,13 +24,17 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 
 - v1.30
 	- Adds compatibility for Valheim Raft mod.
-	- Renames the setting `select_blacklist` to `ignored_ids`. These now affect most operations.
-	- Renames the setting `remove_blacklist` to `ignored_remove_ids`.
-	- Removes the setting `repair_taming` as obsolete (better do it with World Edit Commands).
-	- Removes the setting `custom_binds` as obsolete (better to use the binds.yaml of Server Devcommands).
-	- Removes the setting `enable_undo` as obsolete (now always uses Server Devcommands undo if installed).
-	- Removes the setting `server_devcommands_undo` as obsolete (now always uses Server Devcommands undo if installed).
-	- Removes the settings `no_build_cost`, `no_durability_loss` and `no_stamina_cost` as obsolete (merged to `no_cost`).
+	- Adds a new setting "No health indicator".
+	- Adds a new setting "No support indicator".
+	- Renames the setting "Remove effects" to "No effects".
+	- Renames the setting "Select blacklist" to "Ignored ids". These now affect most operations.
+	- Renames the setting "Remove blacklist" to "Ignored remove ids".
+	- Renames the settings "No build cost", "No durability loss" and "No stamina cost" to "No cost".
+	- Removes the setting "Repair taming" as obsolete (better do it with World Edit Commands).
+	- Removes the setting "Custom binds" as obsolete (better to use the binds.yaml of Server Devcommands).
+	- Removes the setting "Enable undo" as obsolete (now always uses Server Devcommands undo if installed).
+	- Removes the setting "Server devcommands undo" as obsolete (now always uses Server Devcommands undo if installed).
+	- Removes the setting "Copy rotation" as obsolete.
 	- Fixes the rectangle shape having the dimensions reversed.
 
 - v1.29

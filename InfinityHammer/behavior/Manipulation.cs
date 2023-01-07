@@ -201,7 +201,6 @@ public static class Rotating
 {
   public static void UpdatePlacementRotation(GameObject obj)
   {
-    if (!Configuration.CopyRotation) return;
     var player = Helper.GetPlayer();
     var rotation = obj.transform.rotation;
     player.m_placeRotation = Mathf.RoundToInt(rotation.eulerAngles.y / 22.5f);

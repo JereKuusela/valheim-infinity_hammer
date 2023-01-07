@@ -324,9 +324,7 @@ Following powers are available with `hammer_config` command:
 - All objects (default: `true`, key: `all_objects`): Hammer can select and place any object. Any placed object can be removed with the hammer until the area is reloaded.
 - Allow in dungeons (default: `true`, key: `allow_in_dungeons`): Building is allowed in dungeons.
 - Build Share folder (default: `BuildShare/Builds`, key: `build_share_folder`): Folder relative to the Valheim.exe.
-- Copy rotation (default: `true`, key: `copy_rotation`): Copies rotation of the selected object.
 - Copy state (default: `true`, key: `copy_state`): Object state is copied (for example chest contents or item stand items).
-- Custom binds (default: ` `, key: `custom_binds`): Sets binds at the game start up. Any existing binds are cleared from those keys.
 - Dimensions (key: `dimensions`): Measurements for objects.
 - Disable loot (default: `false`, key: `disable_loot`): Creatures and structures won't drop loot when destroyed with the hammer.
 - Ignore no build (default: `true`, key: `ignore_no_build`): "Mystical power" no longer prevents building.
@@ -351,12 +349,14 @@ Following powers are available with `hammer_config` command:
 
 On servers, above features are disabled without cheat access (except visual changes and offsetting).
 
-## Visuals
+## Visual
 
-Visual settings work even without cheat access.
+Visual settings work even without cheat access. These all are disabled by default.
 
-- Disable marker (default: `false`, key: `disable_marker`): Whether the placement ghost is visualized.
-- Remove effects (default: `false`, key: `remove_effects`): Removes visual effects of building, repairing and destroying.
+- No effects: Hides visual effects of building, repairing and destroying.
+- No health indicator: Hides the piece health bar.
+- No placement marker: Hides the yellow placement marker (also affects Gizmo mod).
+- No support indicator: Hides the color that shows support.
 
 ## Output
 
@@ -381,7 +381,7 @@ If you don't wish to use this system you can set all binds to none and make your
 
 Hammer configuration applies to all building, including the standard structures selected from the build menu.
 
-When selecting an existing object, its size and rotation is copied to the placement tool. If "Copy rotation" is disabled then the selection tool keeps the last rotation. The last rotation is always used when using the build window.
+When selecting an existing object, its size and rotation is copied to the placement tool. The last rotation is always used when using the build window.
 
 Object scaling only works for some objects (mostly trees and rocks). This is restricted by the base game (scaling is not stored in the save file).
 

@@ -59,8 +59,6 @@ public partial class Configuration
   public static string BuildShareFolder => configBuildShareFolder.Value;
   public static ConfigEntry<bool> configInfiniteHealth;
   public static bool InfiniteHealth => configInfiniteHealth.Value && IsCheats;
-  public static ConfigEntry<bool> configCopyRotation;
-  public static bool CopyRotation => configCopyRotation.Value && Enabled;
   public static ConfigEntry<string> configRemoveArea;
   public static float RemoveArea => Enabled ? Helper.ParseFloat(configRemoveArea.Value, 0f) : 0f;
   public static ConfigEntry<string> configRange;
@@ -118,10 +116,10 @@ public partial class Configuration
     if (configVersion.Value == InfinityHammer.VERSION) return;
     InfinityHammer.Log.LogInfo($"Migrating from version {configVersion.Value} to {InfinityHammer.VERSION}");
     InfinityHammer.Log.LogInfo("Automatically disabling new key binds (frozen selection and pick).");
-    configSelectFrozen.Value = new(KeyCode.None);
-    configPickFrozen.Value = new(KeyCode.None);
-    configSelectAllFrozen.Value = new(KeyCode.None);
-    configPickAllFrozen.Value = new(KeyCode.None);
+    selectFrozen.Value = new(KeyCode.None);
+    pickFrozen.Value = new(KeyCode.None);
+    selectAllFrozen.Value = new(KeyCode.None);
+    pickAllFrozen.Value = new(KeyCode.None);
     InfinityHammer.Log.LogInfo("Enabling Unfreeze on select.");
     configUnfreezeOnSelect.Value = true;
 
@@ -157,7 +155,6 @@ public partial class Configuration
     configRemoveArea = wrapper.Bind(section, "Remove area", "0", "Removes same objects within the radius.");
     configRange = wrapper.Bind(section, "Hammer range", "50", "Range for actions.");
     configShowCommandValues = wrapper.Bind(section, "Show command values", false, "Always shows the command in the tool descriptions.");
-    configCopyRotation = wrapper.Bind(section, "Copy rotation", true, "Copies rotation of the selected object.");
     configNoCost = wrapper.Bind(section, "No cost", false, "Removes durability, resource and stamina costs.");
     configIgnoreWards = wrapper.Bind(section, "Ignore wards", true, "Ignores ward restrictions.");
     configIgnoreNoBuild = wrapper.Bind(section, "Ignore no build", true, "Ignores no build areas.");

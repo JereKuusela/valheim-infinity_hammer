@@ -171,7 +171,7 @@ public class Repair
   }
   public static void Prefix(Player __instance)
   {
-    RemoveEffects.Active = true;
+    HideEffects.Active = true;
     IsRepairing = true;
     Repaired = false;
   }
@@ -185,7 +185,7 @@ public class Repair
   public static void Finalizer()
   {
     IsRepairing = false;
-    RemoveEffects.Active = false;
+    HideEffects.Active = false;
   }
 }
 

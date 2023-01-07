@@ -77,7 +77,7 @@ public class RemovePiece
   }
   public static bool Prefix(Player __instance, ref bool __result)
   {
-    RemoveEffects.Active = true;
+    HideEffects.Active = true;
     Removing = true;
     PreventPieceDrops.Active = Configuration.DisableLoot;
     PreventCreaturerops.Active = Configuration.DisableLoot;
@@ -96,7 +96,7 @@ public class RemovePiece
       Undo.Remove(RemovedObjects);
     }
     RemovedObjects.Clear();
-    RemoveEffects.Active = false;
+    HideEffects.Active = false;
     PreventPieceDrops.Active = false;
     PreventCreaturerops.Active = false;
     Removing = false;

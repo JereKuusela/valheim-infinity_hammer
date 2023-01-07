@@ -8,28 +8,31 @@ public partial class Configuration
 
 #nullable disable
   // Visuals.
-  public static ConfigEntry<bool> configRemoveEffects;
-  public static bool RemoveEffects => configRemoveEffects.Value && Enabled;
-  public static ConfigEntry<bool> configHidePlacementMarker;
-  public static bool HidePlacementMarker => configHidePlacementMarker.Value && Enabled;
-  public static ConfigEntry<bool> configHideSupportColor;
-  public static bool HideSupportColor => configHideSupportColor.Value && Enabled;
+  public static ConfigEntry<bool> hideEffects;
+  public static bool HideEffects => hideEffects.Value && Enabled;
+  public static ConfigEntry<bool> hidePlacementMarker;
+  public static bool HidePlacementMarker => hidePlacementMarker.Value && Enabled;
+  public static ConfigEntry<bool> hideSupportColor;
+  public static bool HideSupportColor => hideSupportColor.Value && Enabled;
+  public static ConfigEntry<bool> hidePieceHealth;
+  public static bool HidePieceHealth => hidePieceHealth.Value && Enabled;
 #nullable enable
   public static void InitVisuals(ConfigWrapper wrapper)
   {
     Wrapper = wrapper;
     var section = "3. Visual";
-    configRemoveEffects = wrapper.Bind(section, "Remove effects", false, "Removes visual effects of building, etc.");
-    configHidePlacementMarker = wrapper.Bind(section, "No placement marker", false, "Hides the yellow placement marker (also affects Gizmo mod).");
-    configHideSupportColor = wrapper.Bind(section, "No support color", false, "Hides the color that shows support.");
+    hideEffects = wrapper.Bind(section, "No effects", false, "Hides visual effects of building, repairing and destroying.");
+    hidePlacementMarker = wrapper.Bind(section, "No placement marker", false, "Hides the yellow placement marker (also affects Gizmo mod).");
+    hideSupportColor = wrapper.Bind(section, "No support indicator", false, "Hides the color that shows support.");
+    hidePieceHealth = wrapper.Bind(section, "No health indicator", false, "Hides the piece health bar.");
   }
 }
 
 [HarmonyPatch(typeof(EffectList), nameof(EffectList.Create))]
-public class RemoveEffects
+public class HideEffects
 {
   public static bool Active = false;
-  static bool Prefix() => !Active || !Configuration.RemoveEffects;
+  static bool Prefix() => !Active || !Configuration.HideEffects;
 }
 
 [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
@@ -51,4 +54,13 @@ public class HidePlacementMarker
 public class HideSupportColor
 {
   static bool Prefix() => !Configuration.HideSupportColor;
+}
+[HarmonyPatch(typeof(Hud), nameof(Hud.UpdateCrosshair))]
+public class HidePieceHealth
+{
+  static void Postfix(Hud __instance)
+  {
+    if (Configuration.HidePieceHealth)
+      __instance.m_pieceHealthRoot.gameObject.SetActive(false);
+  }
 }

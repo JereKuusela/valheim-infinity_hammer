@@ -38,12 +38,12 @@ public class PlacePiece
   private static bool Clear = false;
   static void Prefix()
   {
-    RemoveEffects.Active = true;
+    HideEffects.Active = true;
     Clear = Selection.IsSingleUse();
   }
   static void Finalizer(bool __result)
   {
-    RemoveEffects.Active = false;
+    HideEffects.Active = false;
     if (__result && Clear)
     {
       Selection.Clear();
