@@ -323,38 +323,42 @@ Following powers are available with `hammer_config` command:
 - Enabled (default: `true`, key: `enabled`): If disabled, removes most features.
 - All objects (default: `true`, key: `all_objects`): Hammer can select and place any object. Any placed object can be removed with the hammer until the area is reloaded.
 - Allow in dungeons (default: `true`, key: `allow_in_dungeons`): Building is allowed in dungeons.
-- Build range (default: `0`, key: `build_range`): Range for building (capped at about 50 meters).
 - Build Share folder (default: `BuildShare/Builds`, key: `build_share_folder`): Folder relative to the Valheim.exe.
 - Copy rotation (default: `true`, key: `copy_rotation`): Copies rotation of the selected object.
 - Copy state (default: `true`, key: `copy_state`): Object state is copied (for example chest contents or item stand items).
 - Custom binds (default: ` `, key: `custom_binds`): Sets binds at the game start up. Any existing binds are cleared from those keys.
 - Dimensions (key: `dimensions`): Measurements for objects.
 - Disable loot (default: `false`, key: `disable_loot`): Creatures and structures won't drop loot when destroyed with the hammer.
-- Disable marker (default: `false`, key: `disable_marker`): Whether the placement ghost is visualized.
 - Ignore no build (default: `true`, key: `ignore_no_build`): "Mystical power" no longer prevents building.
 - Ignore other restrictions (default: `true`, key: `ignore_other_restrictions`): Removes any other restrictions (for example campfires can be built on wood floors).
 - Ignore wards (default: `true`, key: `ignore_wards`): Wards no longer prevent building.
+- Ignored ids (key: `ignored_ids`): Objects ignored by this mod (ids separated by ,).
+- Ignored remove ids (key: `ignored_remove_ids`): Additional ids that are ignored when removing anything.
 - Infinite health (default: `false`, key: `infinite_health`): Sets the Overwrite health setting to 1E30.
 - No cost (default: `false`, key: `no_cost`): Removes durability, resource and stamina costs.
 - No creator (default: `false`, key: `no_creator`): Builds without setting the creator information.
 - Overwrite health (default: `0`, key: `overwrite_health`): Sets the health of built or repaired objects (0 reverts to the default max health, except for creatures).
 - Plan Build folder (default: `BepInEx/config/PlanBuild`, key: `plan_build_folder`): Folder relative to the Valheim.exe.
+- Range (default: `0`, key: `range`): Range for the hammer (capped at about 50 meters).
 - Remove anything (default: `false`, key: `remove_anything`): Allows removing any object.
 - Remove area (default: `0`, key: `remove_area`): Removes same objects within the radius.
-- Remove blacklist (key: `remove_blacklist`): Allows disabling remove for given objects (ids separated by ,). Only works if remove anything is enabled.
-- Remove effects (default: `false`, key: `remove_effects`): Removes visual effects of building, repairing and destroying.
-- Remove range (default: `0`, key: `remove_range`): Range for removing (capped at about 50 meters).
 - Repair anything (default: `false`, key: `repair_anything`): Allows healing or repairing any object.
-- Repair range (default: `0`, key: `repair_range`): Range for repairing (capped at about 50 meters).
 - Reset offset on unfreeze (default `true`, key: `reset_offset_on_unfreeze`): Removes the placement offset when unfreezing the placement.
-- Select blacklist (key: `select_blacklist`): Allows disabling select for given objects (ids separated by ,).
-- Select range (default: `0`, key: `select_range`): Range for selecting (capped at about 50 meters).
 - Show command values (default: `false`, key: `show_command_values`): Always show the command on tool descriptions.
 - Snap points for all objects (default: `false`, key: `snap_points_for_all_objects`):If enabled, multi selection creates snap points for every object.
 - Unfreeze on select (default `true`, key: `unfreeze_on_select`): Removes the placement freeze when selecting a new object.
 - Unfreeze on unequip (defualt `true`, key: `unfreeze_on_unequip`): Removes the placement freeze when unequipping the hammer.
 
-On servers, above features are disabled without cheat access (except Copy rotate, No placement marker, Remove effects, Select range and offsetting).
+On servers, above features are disabled without cheat access (except visual changes and offsetting).
+
+## Visuals
+
+Visual settings work even without cheat access.
+
+- Disable marker (default: `false`, key: `disable_marker`): Whether the placement ghost is visualized.
+- Remove effects (default: `false`, key: `remove_effects`): Removes visual effects of building, repairing and destroying.
+
+## Output
 
 Messages from the mod can be configured with following settings:
 

@@ -147,8 +147,8 @@ public class Repair
 
   private static bool RepairAnything(Player player)
   {
-    var range = Configuration.RepairRange > 0f ? Configuration.RepairRange : player.m_maxPlaceDistance;
-    var hovered = Selector.GetHovered(player, range, null, true);
+    var range = Configuration.Range > 0f ? Configuration.Range : player.m_maxPlaceDistance;
+    var hovered = Selector.GetHovered(player, range, new(), true);
     if (hovered == null) return false;
     var obj = hovered.Obj;
     var repaired = RepairObject(obj, hovered.Index);
@@ -171,7 +171,7 @@ public class Repair
   }
   public static void Prefix(Player __instance)
   {
-    DisableEffects.Active = true;
+    RemoveEffects.Active = true;
     IsRepairing = true;
     Repaired = false;
   }
@@ -185,7 +185,7 @@ public class Repair
   public static void Finalizer()
   {
     IsRepairing = false;
-    DisableEffects.Active = false;
+    RemoveEffects.Active = false;
   }
 }
 
@@ -195,8 +195,8 @@ public class UnlockRepairDistance
   public static void Prefix(Player __instance, ref float __state)
   {
     __state = __instance.m_maxPlaceDistance;
-    if (Configuration.RepairRange > 0f)
-      __instance.m_maxPlaceDistance = Configuration.RepairRange;
+    if (Configuration.Range > 0f)
+      __instance.m_maxPlaceDistance = Configuration.Range;
   }
   public static void Postfix(Player __instance, float __state)
   {

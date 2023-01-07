@@ -124,12 +124,6 @@ public static class Hammer
 }
 
 
-[HarmonyPatch(typeof(EffectList), nameof(EffectList.Create))]
-public class DisableEffects
-{
-  public static bool Active = false;
-  static bool Prefix() => !Active || !Configuration.RemoveEffects;
-}
 
 [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.UnequipItem))]
 public class UnfreezeOnUnequip

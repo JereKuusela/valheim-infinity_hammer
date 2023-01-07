@@ -122,17 +122,17 @@ public class HammerSelect
       GameObject? selected = null;
       ZNetView[] views = new ZNetView[0];
       if (pars.Radius.HasValue)
-        views = Selector.GetNearby("", pars.ObjectType, pars.Position, pars.Radius.Value, pars.Height);
+        views = Selector.GetNearby("", pars.ObjectType, Configuration.IgnoredIds, pars.Position, pars.Radius.Value, pars.Height);
       else if (pars.Width.HasValue && pars.Depth.HasValue)
-        views = Selector.GetNearby("", pars.ObjectType, pars.Position, pars.Angle, pars.Width.Value, pars.Depth.Value, pars.Height);
+        views = Selector.GetNearby("", pars.ObjectType, Configuration.IgnoredIds, pars.Position, pars.Angle, pars.Width.Value, pars.Depth.Value, pars.Height);
       else if (args.Length > 1 && !args[1].Contains("=") && !pars.Connect && !pars.Pick && !pars.Freeze)
         selected = Selection.Set(args[1], pars.Pick);
       else
       {
-        var hovered = Selector.GetHovered(Configuration.SelectRange, Configuration.SelectBlacklist);
+        var hovered = Selector.GetHovered(Configuration.Range, Configuration.IgnoredIds);
         if (hovered == null) throw new InvalidOperationException("Nothing is being hovered.");
         if (pars.Connect)
-          views = Selector.GetConnected(hovered);
+          views = Selector.GetConnected(hovered, Configuration.IgnoredIds);
         else
           views = new ZNetView[] { hovered };
       }

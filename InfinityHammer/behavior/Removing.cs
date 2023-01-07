@@ -12,8 +12,8 @@ public class UnlockRemoveDistance
   public static void Prefix(Player __instance, ref float __state)
   {
     __state = __instance.m_maxPlaceDistance;
-    if (Configuration.RemoveRange > 0f)
-      __instance.m_maxPlaceDistance = Configuration.RemoveRange;
+    if (Configuration.Range > 0f)
+      __instance.m_maxPlaceDistance = Configuration.Range;
   }
   public static void Postfix(Player __instance, float __state)
   {
@@ -38,7 +38,7 @@ public class RemovePiece
 
   private static bool RemoveAnything(Player obj)
   {
-    var hovered = Selector.GetHovered(obj, obj.m_maxPlaceDistance, Configuration.RemoveBlacklist);
+    var hovered = Selector.GetHovered(obj, obj.m_maxPlaceDistance, Configuration.RemoveIds);
     if (hovered == null) return false;
     obj.m_removeEffects.Create(hovered.Obj.transform.position, Quaternion.identity, null, 1f, -1);
     SetRemovedObject(hovered.Obj);
@@ -77,7 +77,7 @@ public class RemovePiece
   }
   public static bool Prefix(Player __instance, ref bool __result)
   {
-    DisableEffects.Active = true;
+    RemoveEffects.Active = true;
     Removing = true;
     PreventPieceDrops.Active = Configuration.DisableLoot;
     PreventCreaturerops.Active = Configuration.DisableLoot;
@@ -96,7 +96,7 @@ public class RemovePiece
       Undo.Remove(RemovedObjects);
     }
     RemovedObjects.Clear();
-    DisableEffects.Active = false;
+    RemoveEffects.Active = false;
     PreventPieceDrops.Active = false;
     PreventCreaturerops.Active = false;
     Removing = false;

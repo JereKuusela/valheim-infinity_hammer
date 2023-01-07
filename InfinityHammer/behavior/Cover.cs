@@ -95,7 +95,7 @@ public class AddExtraInfo
   {
     if (!Selection.IsCommand()) return "";
     if (!ShowId) return "";
-    var hovered = Selector.GetHovered(Configuration.SelectRange, Configuration.SelectBlacklist);
+    var hovered = Selector.GetHovered(Configuration.Range, Configuration.IgnoredIds);
     var name = hovered == null ? "" : Utils.GetPrefabName(hovered.gameObject);
     return $"id: {name}";
   }

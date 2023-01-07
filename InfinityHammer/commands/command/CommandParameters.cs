@@ -150,6 +150,7 @@ public class CommandParameters
       "x,y", "x,z", "y,x", "y,z", "z,x", "z,y", "tx,ty", "tx,tz", "ty,tx", "ty,tz", "tz,tx", "tz,ty",
       "x,y,z", "x,z,y", "y,x,z", "y,z,x", "z,x,y", "z,y,x",
       "tx,ty,tz", "tx,tz,ty", "ty,tx,tz", "ty,tz,tx", "tz,tx,ty", "tz,ty,tx",
+      "ignore"
     };
     for (var i = 0; i < args.Length; i++)
     {

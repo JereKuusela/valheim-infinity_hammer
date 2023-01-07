@@ -63,26 +63,16 @@ public partial class Configuration
   public static bool CopyRotation => configCopyRotation.Value && Enabled;
   public static ConfigEntry<string> configRemoveArea;
   public static float RemoveArea => Enabled ? Helper.ParseFloat(configRemoveArea.Value, 0f) : 0f;
-  public static ConfigEntry<string> configSelectRange;
-  public static float SelectRange => Enabled ? Helper.ParseFloat(configSelectRange.Value, 0f) : 0f;
-  public static ConfigEntry<string> configRemoveRange;
-  public static float RemoveRange => IsCheats ? Helper.ParseFloat(configRemoveRange.Value, 0f) : 0f;
-  public static ConfigEntry<string> configRepairRange;
-  public static float RepairRange => IsCheats ? Helper.ParseFloat(configRepairRange.Value, 0f) : 0f;
-  public static ConfigEntry<string> configBuildRange;
-  public static float BuildRange => IsCheats ? Helper.ParseFloat(configBuildRange.Value, 0f) : 0f;
-  public static ConfigEntry<bool> configRemoveEffects;
-  public static bool RemoveEffects => configRemoveEffects.Value && Enabled;
+  public static ConfigEntry<string> configRange;
+  public static float Range => IsCheats ? Helper.ParseFloat(configRange.Value, 0f) : 0f;
   public static ConfigEntry<bool> configShowCommandValues;
   public static bool AlwaysShowCommand => configShowCommandValues.Value;
-  public static ConfigEntry<bool> configHidePlacementMarker;
-  public static bool HidePlacementMarker => configHidePlacementMarker.Value && Enabled;
   public static ConfigEntry<bool> configEnabled;
   public static bool Enabled => configEnabled.Value;
-  public static ConfigEntry<string> configRemoveBlacklist;
-  public static HashSet<string> RemoveBlacklist = new();
-  public static ConfigEntry<string> configSelectBlacklist;
-  public static HashSet<string> SelectBlacklist = new();
+  public static ConfigEntry<string> configIgnoredRemoveIds;
+  public static List<string> RemoveIds = new();
+  public static ConfigEntry<string> configIgnoredIds;
+  public static List<string> IgnoredIds = new();
   public static ConfigEntry<string> configHammerTools;
   public static HashSet<string> HammerTools = new();
   public static ConfigEntry<string> configHoeTools;
@@ -92,20 +82,22 @@ public partial class Configuration
   public static ConfigEntry<string> configDimensions;
   public static Dictionary<string, Vector3> Dimensions = new();
   public static ConfigWrapper Wrapper;
+
 #nullable enable
-  private static HashSet<string> ParseList(string value) => value.Split(',').Select(s => s.Trim().ToLower()).Where(s => s != "").ToHashSet();
+  private static List<string> ParseList(string value) => value.Split(',').Select(s => s.Trim().ToLower()).Where(s => s != "").ToList();
+  private static HashSet<string> ParseHashList(string value) => value.Split(',').Select(s => s.Trim().ToLower()).Where(s => s != "").ToHashSet();
 
   private static Dictionary<string, Vector3> ParseSize(string value) => value.Split('|').Select(s => s.Trim().ToLower()).Where(s => s != "")
     .Select(s => s.Split(',')).Where(split => split.Length == 4).ToDictionary(split => split[0], split => Parse.TryVectorXZY(split, 1));
 
   private static void UpdateTools()
   {
-    HammerTools = ParseList(configHammerTools.Value);
-    HoeTools = ParseList(configHoeTools.Value);
+    HammerTools = ParseHashList(configHammerTools.Value);
+    HoeTools = ParseHashList(configHoeTools.Value);
   }
   private static void UpdateMirrorFlip()
   {
-    MirrorFlip = ParseList(configMirrorFlip.Value);
+    MirrorFlip = ParseHashList(configMirrorFlip.Value);
   }
   private static void UpdateDimensions()
   {
@@ -158,16 +150,13 @@ public partial class Configuration
     UpdateDimensions();
     configPlanBuildFolder = wrapper.Bind(section, "Plan Build folder", "BepInEx/config/PlanBuild", "Folder relative to the Valheim.exe.");
     configBuildShareFolder = wrapper.Bind(section, "Build Share folder", "BuildShare/Builds", "Folder relative to the Valheim.exe.");
+    InitVisuals(wrapper);
     if (CommandWrapper.ServerDevcommands != null)
       InitBinds(wrapper);
-    section = "3. Powers";
+    section = "4. Powers";
     configRemoveArea = wrapper.Bind(section, "Remove area", "0", "Removes same objects within the radius.");
-    configSelectRange = wrapper.Bind(section, "Select range", "50", "Range for selecting objects.");
-    configRemoveRange = wrapper.Bind(section, "Remove range", "0", "Range for removing objects (0 = default).");
-    configRepairRange = wrapper.Bind(section, "Repair range", "0", "Range for repairing objects (0 = default).");
-    configBuildRange = wrapper.Bind(section, "Build range", "0", "Range for placing objects (0 = default)");
+    configRange = wrapper.Bind(section, "Hammer range", "50", "Range for actions.");
     configShowCommandValues = wrapper.Bind(section, "Show command values", false, "Always shows the command in the tool descriptions.");
-    configRemoveEffects = wrapper.Bind(section, "Remove effects", false, "Removes visual effects of building, etc.");
     configCopyRotation = wrapper.Bind(section, "Copy rotation", true, "Copies rotation of the selected object.");
     configNoCost = wrapper.Bind(section, "No cost", false, "Removes durability, resource and stamina costs.");
     configIgnoreWards = wrapper.Bind(section, "Ignore wards", true, "Ignores ward restrictions.");
@@ -185,16 +174,25 @@ public partial class Configuration
     configResetOffsetOnUnfreeze = wrapper.Bind(section, "Reset offset on unfreeze", true, "Removes the placement offset when unfreezing the placement.");
     configUnfreezeOnUnequip = wrapper.Bind(section, "Unfreeze on unequip", true, "Removes the placement freeze when unequipping the hammer.");
     configAllSnapPoints = wrapper.Bind(section, "Snap points for all objects", false, "If enabled, multi selection creates snap points for every object.");
-    configHidePlacementMarker = wrapper.Bind(section, "No placement marker", false, "Hides the yellow placement marker (also affects Gizmo mod).");
     configIgnoreOtherRestrictions = wrapper.Bind(section, "Ignore other restrictions", true, "Ignores any other restrictions (material, biome, etc.)");
-    section = "4. Items";
-    configRemoveBlacklist = wrapper.BindList(section, "Remove blacklist", "", "Object ids separated by , that can't be removed.");
-    configRemoveBlacklist.SettingChanged += (s, e) => RemoveBlacklist = ParseList(configRemoveBlacklist.Value);
-    RemoveBlacklist = ParseList(configRemoveBlacklist.Value);
-    configSelectBlacklist = wrapper.BindList(section, "Select blacklist", "", "Object ids separated by , that can't be selected.");
-    configSelectBlacklist.SettingChanged += (s, e) => SelectBlacklist = ParseList(configSelectBlacklist.Value);
-    SelectBlacklist = ParseList(configSelectBlacklist.Value);
-    section = "5. Messages";
+    section = "5. Items";
+    configIgnoredIds = wrapper.BindList(section, "Ignored ids", "", "Object ids separated by , that are ignored by this mod.");
+    configIgnoredIds.SettingChanged += (s, e) =>
+    {
+      IgnoredIds = ParseList(configIgnoredIds.Value);
+      RemoveIds = ParseList(configIgnoredRemoveIds.Value);
+      RemoveIds.AddRange(IgnoredIds);
+    };
+    IgnoredIds = ParseList(configIgnoredIds.Value);
+    configIgnoredRemoveIds = wrapper.BindList(section, "Ignored remove ids", "", "Additional ids that are ignored when removing anything.");
+    configIgnoredRemoveIds.SettingChanged += (s, e) =>
+    {
+      RemoveIds = ParseList(configIgnoredRemoveIds.Value);
+      RemoveIds.AddRange(IgnoredIds);
+    };
+    RemoveIds = ParseList(configIgnoredRemoveIds.Value);
+    RemoveIds.AddRange(IgnoredIds);
+    section = "6. Messages";
     configDisableMessages = wrapper.Bind(section, "Disable messages", false, "Disables all messages from this mod.");
     configDisableOffsetMessages = wrapper.Bind(section, "Disable offset messages", false, "Disables messages from changing placement offset.");
     configDisableScaleMessages = wrapper.Bind(section, "Disable scale messages", false, "Disables messages from changing the scale.");
@@ -204,4 +202,5 @@ public partial class Configuration
     Migrate();
     configVersion.Value = InfinityHammer.VERSION;
   }
+
 }

@@ -38,12 +38,12 @@ public class PlacePiece
   private static bool Clear = false;
   static void Prefix()
   {
-    DisableEffects.Active = true;
+    RemoveEffects.Active = true;
     Clear = Selection.IsSingleUse();
   }
   static void Finalizer(bool __result)
   {
-    DisableEffects.Active = false;
+    RemoveEffects.Active = false;
     if (__result && Clear)
     {
       Selection.Clear();
@@ -126,7 +126,7 @@ public class PlacePiece
     }
     if (command.Contains("#id"))
     {
-      var hovered = Selector.GetHovered(Configuration.SelectRange, Configuration.SelectBlacklist);
+      var hovered = Selector.GetHovered(Configuration.Range, Configuration.IgnoredIds);
       if (hovered == null)
       {
         Helper.AddError(Console.instance, "Nothing is being hovered.");
@@ -151,6 +151,7 @@ public class PlacePiece
     command = command.Replace("#ty", y);
     command = command.Replace("#tz", z);
     command = command.Replace("#h", height);
+    command = command.Replace("#ignore", Configuration.configIgnoredIds.Value);
     if (!Configuration.DisableMessages)
       Console.instance.AddString($"Hammering command: {command}");
     Console.instance.TryRunCommand(command);
@@ -302,8 +303,8 @@ public class UnlockBuildDistance
   public static void Prefix(Player __instance, ref float __state)
   {
     __state = __instance.m_maxPlaceDistance;
-    if (Configuration.BuildRange > 0f)
-      __instance.m_maxPlaceDistance = Configuration.BuildRange;
+    if (Configuration.Range > 0f)
+      __instance.m_maxPlaceDistance = Configuration.Range;
     if (Selection.Type == SelectedType.Command)
       __instance.m_maxPlaceDistance = 1000f;
   }
@@ -331,20 +332,7 @@ public class SetupPlacementGhost
     }
   }
 }
-[HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
-public class UpdatePlacementGhost
-{
-  static void Postfix(Player __instance)
-  {
-    var marker = __instance.m_placementMarkerInstance;
-    if (marker)
-    {
-      // Max 2 to only affect default game markers.
-      for (var i = 0; i < marker.transform.childCount && i < 2; i++)
-        marker.transform.GetChild(i).gameObject.SetActive(!Configuration.HidePlacementMarker);
-    }
-  }
-}
+
 [HarmonyPatch(typeof(ZoneSystem), nameof(ZoneSystem.SpawnLocation))]
 public class CustomizeSpawnLocation
 {

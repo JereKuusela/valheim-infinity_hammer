@@ -131,7 +131,7 @@ public class FejdStartupStart
     var parsTo = "terrain to=tx,tz,ty circle=r1-r2 rect=w1-w2,d";
     var sub = CommandWrapper.Substitution();
     Console.instance.TryRunCommand($"alias {tool}_terrain {tool}_command terrain {pars}");
-    Console.instance.TryRunCommand($"alias {tool}_object {tool}_command object {pars} height=h");
+    Console.instance.TryRunCommand($"alias {tool}_object {tool}_command object {pars} height=h ignore=ignore");
     Console.instance.TryRunCommand($"alias {tool}_spawn {tool}_command spawn_object {sub} {parsSpawn}");
 
     Console.instance.TryRunCommand($"alias {tool}_terrain_to hammer_shape rectangle;{tool}_command {parsTo}");
