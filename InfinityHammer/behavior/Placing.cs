@@ -95,7 +95,7 @@ public class PlacePiece
       outerSize = radius;
     }
     if (Ruler.Shape != RulerShape.Rectangle)
-      width = depth;
+      depth = width;
     if (Ruler.Shape == RulerShape.Square)
     {
       innerSize = radius;
