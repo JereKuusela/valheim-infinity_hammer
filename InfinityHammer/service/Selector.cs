@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using InfinityHammer;
 using UnityEngine;
 
 namespace Service;
@@ -158,23 +159,12 @@ public static class Selector
     if (objs.Length == 0) throw new InvalidOperationException("Nothing is nearby.");
     return objs;
   }
-  private static KeyValuePair<int, int> RaftParent = ZDO.GetHashZDOID("MBParent");
 
-  public static ZNetView[] GetConnectedRaft(ZNetView baseView, HashSet<int> ignoredPrefabs)
-  {
-    var id = baseView.GetZDO().GetZDOID(RaftParent);
-    var instances = ZNetScene.instance.m_instances.Values;
-    return instances
-      .Where(IsValid)
-      .Where(view => !ignoredPrefabs.Contains(view.GetZDO().m_prefab))
-      .Where(view => view.GetZDO().m_uid == id || view.GetZDO().GetZDOID(RaftParent) == id)
-      .ToArray();
-  }
   ///<summary>Returns connected WearNTear objects.</summary>
   public static ZNetView[] GetConnected(ZNetView baseView, List<string> ignoredIds)
   {
     var ignoredPrefabs = GetIgnoredPrefabs(ignoredIds);
-    if (baseView.GetZDO().GetZDOID(RaftParent) != ZDOID.None) return GetConnectedRaft(baseView, ignoredPrefabs);
+    if (ValheimRAFT.IsInRaft(baseView)) return ValheimRAFT.GetConnectedRaft(baseView, ignoredPrefabs);
     var baseWear = baseView.GetComponent<WearNTear>();
     if (baseWear == null) throw new InvalidOperationException("Connected doesn't work for this object.");
     HashSet<ZNetView> views = new() { baseView };

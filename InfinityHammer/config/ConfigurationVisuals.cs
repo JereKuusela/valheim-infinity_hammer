@@ -20,7 +20,7 @@ public partial class Configuration
   public static void InitVisuals(ConfigWrapper wrapper)
   {
     Wrapper = wrapper;
-    var section = "3. Visual";
+    var section = "2. Visual";
     hideEffects = wrapper.Bind(section, "No effects", false, "Hides visual effects of building, repairing and destroying.");
     hidePlacementMarker = wrapper.Bind(section, "No placement marker", false, "Hides the yellow placement marker (also affects Gizmo mod).");
     hideSupportColor = wrapper.Bind(section, "No support indicator", false, "Hides the color that shows support.");

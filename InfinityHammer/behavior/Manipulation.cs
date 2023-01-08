@@ -7,6 +7,13 @@ using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer;
 
+
+[HarmonyPatch(typeof(Player), nameof(Player.FindClosestSnapPoints))]
+public class DisableSnapsWhenFrozen
+{
+  static bool Prefix() => !Position.Override.HasValue;
+}
+
 [HarmonyPatch(typeof(Player), nameof(Player.PieceRayTest))]
 public class FreezePlacementMarker
 {

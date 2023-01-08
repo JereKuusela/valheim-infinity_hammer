@@ -55,7 +55,7 @@ public partial class Configuration
   }
   private static void InitBinds(ConfigWrapper wrapper)
   {
-    var section = "2. Binds";
+    var section = "3. Binds";
     commandModifier1 = wrapper.Bind(section, "Command modifier 1", new KeyboardShortcut(KeyCode.LeftAlt), "");
     commandModifier2 = wrapper.Bind(section, "Command modifier 2", new KeyboardShortcut(KeyCode.LeftControl), "");
 
@@ -63,8 +63,6 @@ public partial class Configuration
     moveAmount.SettingChanged += (s, e) => wrapper.SetupBinds();
     moveAmountLarge = wrapper.Bind(section, "Move amount large", "1", "Meters to move with large move binds.");
     moveAmountLarge.SettingChanged += (s, e) => wrapper.SetupBinds();
-    configHammerTools.SettingChanged += (s, e) => wrapper.SetupBinds();
-    configHoeTools.SettingChanged += (s, e) => wrapper.SetupBinds();
 
     shapeKey = wrapper.BindCommand("hammer_shape", section, "Change shape", new KeyboardShortcut(KeyCode.Q), "Changes the selection shape.", "build");
     buildScale = wrapper.BindWheelCommand("hammer_zoom 5%", section, "Build scaling (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift), "Changes the selection scale.", "build");

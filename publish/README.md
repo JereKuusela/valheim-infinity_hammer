@@ -26,6 +26,7 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 	- Adds compatibility for Valheim Raft mod.
 	- Adds a new setting "No health indicator".
 	- Adds a new setting "No support indicator".
+	- Adds dimensions for new objects.
 	- Renames the setting "Remove effects" to "No effects".
 	- Renames the setting "Select blacklist" to "Ignored ids". These now affect most operations.
 	- Renames the setting "Remove blacklist" to "Ignored remove ids".
