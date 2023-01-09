@@ -23,6 +23,7 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 # Changelog
 
 - v1.30
+	- Adds a new key bind for the grid.
 	- Adds compatibility for Valheim Raft mod.
 	- Adds a new setting "No health indicator".
 	- Adds a new setting "No support indicator".
@@ -52,9 +53,3 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 
 - v1.26
 	- Fixes incompatiblity issue with Odin Ship mod.
-
-- v1.25
-	- Adds new shapes: grid and ring.
-	- Fixes blueprints being placed incorrectly.
-	- Fixes scaling issues.
-	- Fixes continous commands (like terrain paint) being instantly used on select.
