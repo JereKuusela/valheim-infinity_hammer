@@ -53,15 +53,15 @@ public class PlacePiece
   }
   static GameObject GetPrefab(GameObject obj)
   {
-    if (!Configuration.Enabled) return obj.gameObject;
+    if (!Configuration.Enabled) return obj;
     var type = Selection.Type;
     var ghost = Helper.GetPlayer().m_placementGhost;
-    if (!ghost) return obj.gameObject;
+    if (!ghost) return obj;
     var name = Utils.GetPrefabName(ghost);
     if (type == SelectedType.Default)
     {
       DataHelper.Init(name, ghost.transform);
-      return obj.gameObject;
+      return obj;
     }
     if (type == SelectedType.Object)
     {
@@ -76,7 +76,7 @@ public class PlacePiece
       dummy.name = "Blueprint";
       return dummy;
     }
-    return obj.gameObject;
+    return obj;
   }
 
   private static void HandleCommand(GameObject ghost)
