@@ -44,13 +44,14 @@ public class PlacePiece
   static void Finalizer(bool __result)
   {
     HideEffects.Active = false;
+    DataHelper.Clear();
     if (__result && Clear)
     {
       Selection.Clear();
       Hammer.Clear();
     }
   }
-  static GameObject GetPrefab(Piece obj)
+  static GameObject GetPrefab(GameObject obj)
   {
     if (!Configuration.Enabled) return obj.gameObject;
     var type = Selection.Type;
@@ -218,10 +219,9 @@ public class PlacePiece
     return new CodeMatcher(instructions)
           .MatchForward(
               useEnd: false,
-              new CodeMatch(
-                  OpCodes.Callvirt,
-                  AccessTools.PropertyGetter(typeof(Component), nameof(Component.gameObject))))
-          .SetAndAdvance(OpCodes.Call, Transpilers.EmitDelegate<Func<Piece, GameObject>>(GetPrefab).operand)
+              new CodeMatch(OpCodes.Ldloc_2))
+          .Advance(1)
+          .Insert(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate<Func<GameObject, GameObject>>(GetPrefab).operand))
           .MatchForward(
               useEnd: false,
               new CodeMatch(OpCodes.Ldc_I4_1),

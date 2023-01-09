@@ -22,6 +22,9 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 
 # Changelog
 
+- v1.31
+	- Fixes errors with some mods (possibly crashing the game).
+
 - v1.30
 	- Adds a new key bind for the grid.
 	- Adds compatibility for Valheim Raft mod.

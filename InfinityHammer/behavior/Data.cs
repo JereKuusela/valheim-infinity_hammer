@@ -8,8 +8,10 @@ public class DataHelper
   public static void Init(string name, Transform tr, ZDO? zdo = null) => Init(name.GetStableHashCode(), tr, zdo);
   public static void Init(int hash, Transform tr, ZDO? zdo = null)
   {
+    Clear();
     if (!ZNetScene.instance.m_namedPrefabs.TryGetValue(hash, out var obj)) return;
     if (!obj.TryGetComponent<ZNetView>(out var view)) return;
+    if (zdo == null && (!view.m_syncInitialScale || tr.lossyScale == Vector3.one)) return;
     ZNetView.m_initZDO = ZDOMan.instance.CreateNewZDO(tr.position);
     if (zdo != null) Copy(zdo, ZNetView.m_initZDO);
     ZNetView.m_initZDO.m_rotation = tr.rotation;
@@ -20,6 +22,10 @@ public class DataHelper
     if (view.m_syncInitialScale)
       ZNetView.m_initZDO.Set("scale", tr.lossyScale);
     ZNetView.m_initZDO.m_dataRevision = 1;
+  }
+  public static void Clear()
+  {
+    ZNetView.m_initZDO = null;
   }
 
   public static void Copy(ZDO from, ZDO to)
