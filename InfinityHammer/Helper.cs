@@ -300,6 +300,7 @@ public static class Helper
     UnityEngine.Object.Destroy(obj.GetComponent<HoverText>());
     UnityEngine.Object.Destroy(obj.GetComponent<StaticPhysics>());
     UnityEngine.Object.Destroy(obj.GetComponent<Aoe>());
+    UnityEngine.Object.Destroy(obj.GetComponent<DungeonGenerator>());
     UnityEngine.Object.Destroy(obj.GetComponentInChildren<MusicLocation>());
     UnityEngine.Object.Destroy(obj.GetComponentInChildren<SpawnArea>());
   }

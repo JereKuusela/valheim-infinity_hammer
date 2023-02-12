@@ -22,6 +22,9 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 
 # Changelog
 
+- v1.32
+	- Improves placing of dungeon generators.
+
 - v1.31
 	- Fixes errors with some mods (possibly crashing the game).
 

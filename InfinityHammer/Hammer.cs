@@ -108,7 +108,11 @@ public static class Hammer
         mineRock.SaveHealth();
       }
     }
-    DataHelper.Fix(view);
+    if (obj.TryGetComponent<DungeonGenerator>(out var dg))
+    {
+      if (zdo.GetInt("rooms") == 0)
+        dg.Generate(ZoneSystem.SpawnMode.Full);
+    }
   }
 
   ///<summary>Restores durability and stamina to counter the usage.</summary>

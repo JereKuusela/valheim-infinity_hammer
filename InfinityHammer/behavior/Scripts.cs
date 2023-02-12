@@ -7,6 +7,11 @@ public class BaseAIAwake
 {
   static bool Prefix() => !ZNetView.m_forceDisableInit;
 }
+[HarmonyPatch(typeof(DungeonGenerator), nameof(DungeonGenerator.Awake))]
+public class DungeonGeneratorAwake
+{
+  static bool Prefix() => !ZNetView.m_forceDisableInit;
+}
 [HarmonyPatch(typeof(TreeBase), nameof(TreeBase.Awake))]
 public class TreeBaseAwake
 {

@@ -72,16 +72,13 @@ public class Undo
   }
   public static ZDO Place(ZDO zdo)
   {
+    DataHelper.Init(zdo);
     var prefab = ZNetScene.instance.GetPrefab(zdo.GetPrefab());
     if (!prefab) throw new InvalidOperationException("Invalid prefab");
     var obj = UnityEngine.Object.Instantiate<GameObject>(prefab, zdo.GetPosition(), zdo.GetRotation());
     var netView = obj.GetComponent<ZNetView>();
     if (!netView) throw new InvalidOperationException("No view");
-    var added = netView.GetZDO();
-    netView.SetLocalScale(zdo.GetVec3("scale", obj.transform.localScale));
-    DataHelper.Copy(zdo.Clone(), added);
-    DataHelper.Fix(netView);
-    return added;
+    return netView.GetZDO();
   }
   public static ZDO[] Place(ZDO[] data) => data.Select(Place).Where(obj => obj != null).ToArray();
 
