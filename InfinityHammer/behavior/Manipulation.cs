@@ -77,28 +77,39 @@ public class OverridePlacementGhost
 
 public static class Grid
 {
-  public static bool Enabled => Precision != 0f;
+  public static bool Enabled => Precision != 0f || (Configuration.PreciseCommands && Selection.IsCommand());
   private static float Precision;
   private static Vector3 Center;
+  private static Vector3 PreciseCenter;
   public static Vector3 Apply(Vector3 point, Vector3 normal)
   {
-    if (!Enabled) return point;
+    var precision = Precision;
+    var center = Center;
+    if (precision == 0f && Configuration.PreciseCommands && Selection.IsCommand())
+    {
+      precision = 1f;
+      center = PreciseCenter;
+    }
+    if (precision == 0f) return point;
     var rotation = Quaternion.FromToRotation(Vector3.up, normal);
     point = rotation * point;
-    var center = rotation * Center;
-    point.x = center.x + Mathf.Round((point.x - center.x) / Precision) * Precision;
-    point.z = center.z + Mathf.Round((point.z - center.z) / Precision) * Precision;
+    var c = rotation * Center;
+    point.x = c.x + Mathf.Round((point.x - c.x) / Precision) * Precision;
+    point.z = c.z + Mathf.Round((point.z - c.z) / Precision) * Precision;
     return Quaternion.Inverse(rotation) * point;
   }
   public static void Toggle(float precision, Vector3 center)
   {
     if (Precision == precision) Precision = 0f;
-    else Set(precision, center);
+    else
+    {
+      Center = center;
+      Precision = precision;
+    }
   }
-  public static void Set(float precision, Vector3 center)
+  public static void SetPreciseMode(Vector3 center)
   {
-    Center = center;
-    Precision = precision;
+    PreciseCenter = center;
   }
 }
 public static class Position

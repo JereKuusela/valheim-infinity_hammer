@@ -58,7 +58,7 @@ public class Ruler
     var centerX = Math.Floor(width / 0.5) % 2 == 0;
     var centerZ = Math.Floor(height / 0.5) % 2 == 0;
     Vector3 center = new Vector3(centerX ? 0f : 0.5f, 0f, centerZ ? 0f : 0.5f);
-    Grid.Set(1f, center);
+    Grid.SetPreciseMode(center);
   }
   public static void Update()
   {
