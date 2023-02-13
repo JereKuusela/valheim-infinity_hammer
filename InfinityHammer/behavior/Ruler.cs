@@ -66,18 +66,19 @@ public class Ruler
     if (Projector == null || !player) return;
     var ghost = player.m_placementGhost;
     var ptr = player.transform;
-    var gtr = ghost.transform;
     Projector.SetActive(ghost);
     if (!ghost) return;
+    var gtr = ghost.transform;
     var scale = Scaling.Command;
     if (IsTargeted)
       Projector.transform.position = (ptr.position + gtr.position) / 2f;
     else
       Projector.transform.position = gtr.position;
     var angle = gtr.rotation.eulerAngles.y;
-    if (Configuration.PreciseCommands) angle = 0f;
     if (RotateWithPlayer)
       angle = Vector3.SignedAngle(Vector3.forward, Utils.DirectionXZ(gtr.position - ptr.position), Vector3.up);
+    if (Configuration.PreciseCommands)
+      angle = 0;
     Projector.transform.rotation = Quaternion.Euler(0f, angle, 0f);
     if (IsTargeted)
     {

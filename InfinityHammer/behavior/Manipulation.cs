@@ -134,6 +134,8 @@ public static class Position
     if (Override.HasValue)
       point = Override.Value;
     var rotation = ghost.transform.rotation;
+    if (Configuration.PreciseCommands && Selection.IsCommand())
+      rotation = Quaternion.identity;
     point += rotation * Vector3.right * Offset.x;
     point += rotation * Vector3.up * Offset.y;
     point += rotation * Vector3.forward * Offset.z;
@@ -146,6 +148,8 @@ public static class Position
     if (Override.HasValue)
       point = Override.Value;
     var rotation = ghost.transform.rotation;
+    if (Configuration.PreciseCommands && Selection.IsCommand())
+      rotation = Quaternion.identity;
     point -= rotation * Vector3.right * Offset.x;
     point -= rotation * Vector3.up * Offset.y;
     point -= rotation * Vector3.forward * Offset.z;
@@ -165,10 +169,12 @@ public static class Position
   }
   public static void MoveLeft(float value)
   {
+    if (Configuration.PreciseCommands && Selection.IsCommand()) value = Mathf.Max(value, 1f);
     Offset.x -= value;
   }
   public static void MoveRight(float value)
   {
+    if (Configuration.PreciseCommands && Selection.IsCommand()) value = Mathf.Max(value, 1f);
     Offset.x += value;
   }
   public static void MoveDown(float value)
@@ -181,10 +187,12 @@ public static class Position
   }
   public static void MoveBackward(float value)
   {
+    if (Configuration.PreciseCommands && Selection.IsCommand()) value = Mathf.Max(value, 1f);
     Offset.z -= value;
   }
   public static void MoveForward(float value)
   {
+    if (Configuration.PreciseCommands && Selection.IsCommand()) value = Mathf.Max(value, 1f);
     Offset.z += value;
   }
   public static void Set(Vector3 value)
