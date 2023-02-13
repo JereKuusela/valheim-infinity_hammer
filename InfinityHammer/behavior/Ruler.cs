@@ -86,7 +86,6 @@ public class Ruler
       scale.SetScaleZ(distance);
     }
     Ruler.SanityCheckShape();
-    scale.CapXZ(0.25f);
     if (Configuration.PreciseCommands) scale.SetPrecisionXZ(0.25f, 0.5f);
     if (Circle != null)
     {

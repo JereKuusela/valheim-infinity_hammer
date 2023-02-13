@@ -4,20 +4,17 @@ namespace InfinityHammer;
 public class ToolScaling
 {
   private bool SanityY;
-  public ToolScaling(bool sanityY)
+  private bool MinXZ;
+  public ToolScaling(bool sanityY, bool minXZ)
   {
     SanityY = sanityY;
+    MinXZ = minXZ;
   }
   public Vector3 Value = Vector3.one;
-  public float X => Value.x;
+  public float X => MinXZ ? Mathf.Max(0.25f, Value.x) : Value.x;
   public float Y => Value.y;
-  public float Z => Value.z;
+  public float Z => MinXZ ? Mathf.Max(0.25f, Value.z) : Value.z;
 
-  public void CapXZ(float min)
-  {
-    Value.x = Mathf.Max(min, Value.x);
-    Value.z = Mathf.Max(min, Value.z);
-  }
   public void SetPrecisionXZ(float min, float precision)
   {
     Value.x = min + precision * Mathf.Floor((Value.x - min) / precision);
@@ -91,8 +88,8 @@ public class ToolScaling
 
 public static class Scaling
 {
-  public static ToolScaling Build = new(true);
-  public static ToolScaling Command = new(false);
+  public static ToolScaling Build = new(true, false);
+  public static ToolScaling Command = new(false, true);
   public static ToolScaling Get() => Selection.IsCommand() ? Scaling.Command : Scaling.Build;
 
   public static void UpdateGhost()

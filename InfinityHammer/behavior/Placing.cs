@@ -79,7 +79,9 @@ public class PlacePiece
     }
     if (type == SelectedType.Command)
     {
-      UnityEngine.Object.Destroy(ghost.GetComponent<TerrainOp>());
+      var dummy = new GameObject();
+      dummy.name = "Command";
+      return dummy;
     }
     return obj;
   }
