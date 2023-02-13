@@ -77,6 +77,10 @@ public class PlacePiece
       dummy.name = "Blueprint";
       return dummy;
     }
+    if (type == SelectedType.Command)
+    {
+      UnityEngine.Object.Destroy(ghost.GetComponent<TerrainOp>());
+    }
     return obj;
   }
 

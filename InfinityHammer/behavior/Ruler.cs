@@ -242,7 +242,6 @@ public class Ruler
       Square = CreateChild(obj);
       var proj = Square.AddComponent<RectangleProjector>();
       proj.m_prefab = BaseProjector.m_prefab;
-      proj.m_mask = BaseProjector.m_mask;
       proj.m_nrOfSegments = 3;
       scale.SetScaleX(pars.Width.Value);
     }
@@ -251,7 +250,6 @@ public class Ruler
       Frame = CreateChild(obj);
       var proj = Frame.AddComponent<RectangleProjector>();
       proj.m_prefab = BaseProjector.m_prefab;
-      proj.m_mask = BaseProjector.m_mask;
       proj.m_nrOfSegments = 3;
       scale.SetScaleZ(pars.Grid.Value);
     }
@@ -260,7 +258,6 @@ public class Ruler
       Rectangle = CreateChild(obj);
       var proj = Rectangle.AddComponent<RectangleProjector>();
       proj.m_prefab = BaseProjector.m_prefab;
-      proj.m_mask = BaseProjector.m_mask;
       proj.m_nrOfSegments = 3;
       scale.SetScaleX(pars.Width.Value);
       scale.SetScaleZ(pars.Depth.Value);
@@ -270,7 +267,6 @@ public class Ruler
       Circle = CreateChild(obj);
       var proj = Circle.AddComponent<CircleProjector>();
       proj.m_prefab = BaseProjector.m_prefab;
-      proj.m_mask = BaseProjector.m_mask;
       proj.m_nrOfSegments = 3;
       scale.SetScaleX(pars.Radius.Value);
     }
@@ -279,7 +275,6 @@ public class Ruler
       Ring = CreateChild(obj);
       var proj = Ring.AddComponent<CircleProjector>();
       proj.m_prefab = BaseProjector.m_prefab;
-      proj.m_mask = BaseProjector.m_mask;
       proj.m_nrOfSegments = 3;
       scale.SetScaleZ(pars.Ring.Value);
     }

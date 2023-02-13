@@ -93,9 +93,9 @@ public static class Grid
     if (precision == 0f) return point;
     var rotation = Quaternion.FromToRotation(Vector3.up, normal);
     point = rotation * point;
-    var c = rotation * Center;
-    point.x = c.x + Mathf.Round((point.x - c.x) / Precision) * Precision;
-    point.z = c.z + Mathf.Round((point.z - c.z) / Precision) * Precision;
+    var c = rotation * center;
+    point.x = c.x + Mathf.Round((point.x - c.x) / precision) * precision;
+    point.z = c.z + Mathf.Round((point.z - c.z) / precision) * precision;
     return Quaternion.Inverse(rotation) * point;
   }
   public static void Toggle(float precision, Vector3 center)

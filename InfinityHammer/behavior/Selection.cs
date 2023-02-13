@@ -340,6 +340,12 @@ public partial class Selected
     piece.m_description = description.Replace("\\n", "\n");
     piece.m_icon = icon;
     piece.m_clipEverything = true;
+    // These are required for similar placement like with the hoe.
+    piece.m_allowAltGroundPlacement = true;
+    piece.m_groundPiece = true;
+    TerrainOp.m_forceDisableTerrainOps = true;
+    Ghost.AddComponent<TerrainOp>();
+    TerrainOp.m_forceDisableTerrainOps = false;
     Type = SelectedType.Command;
     Helper.GetPlayer().SetupPlacementGhost();
     Ruler.Create(ruler);

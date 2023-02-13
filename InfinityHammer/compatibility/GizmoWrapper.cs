@@ -22,7 +22,7 @@ public static class GizmoWrapper
   {
     Reloaded = assembly;
   }
-  static bool Prefix() => !Selection.IsCommand();
+
   private static void ComfyRotation(Quaternion rotation)
   {
     if (Comfy == null) return;
