@@ -12,6 +12,17 @@ public class ToolScaling
   public float X => Value.x;
   public float Y => Value.y;
   public float Z => Value.z;
+
+  public void CapXZ(float min)
+  {
+    Value.x = Mathf.Max(min, Value.x);
+    Value.z = Mathf.Max(min, Value.z);
+  }
+  public void SetPrecisionXZ(float min, float precision)
+  {
+    Value.x = min + precision * Mathf.Floor((Value.x - min) / precision);
+    Value.z = min + precision * Mathf.Floor((Value.z - min) / precision);
+  }
   private void Sanity()
   {
     Value.x = Mathf.Max(0f, Value.x);

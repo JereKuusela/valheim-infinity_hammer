@@ -14,8 +14,9 @@ public class GetSelectedPiece
 {
   public static bool Prefix(ref Piece __result)
   {
-    if (Selection.Ghost)
-      __result = Selection.Ghost.GetComponent<Piece>();
+    CommandWrapper.SetBindMode("");
+    if (Selection.Ghost())
+      __result = Selection.Ghost().GetComponent<Piece>();
     if (__result) return false;
     return true;
   }
@@ -109,6 +110,7 @@ public class PlacePiece
     }
     var height = scale.Y.ToString(CultureInfo.InvariantCulture);
     var angle = ghost.transform.rotation.eulerAngles.y.ToString(CultureInfo.InvariantCulture);
+    if (Configuration.PreciseCommands) angle = "0";
 
     var command = Selection.Command;
     var multiShape = command.Contains("#r") && (command.Contains("#w") || command.Contains("#d"));
@@ -138,7 +140,7 @@ public class PlacePiece
     command = command.Replace("#r1-r2", $"{innerSize}-{outerSize}");
     command = command.Replace("#w1-w2", $"{innerSize}-{outerSize}");
 
-    if (Ruler.Shape == RulerShape.Grid)
+    if (Ruler.Shape == RulerShape.Frame)
       command = command.Replace("#d", $"{innerSize}-{outerSize}");
     else
       command = command.Replace("#d", depth);

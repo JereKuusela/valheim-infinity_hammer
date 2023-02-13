@@ -14,7 +14,7 @@ public static class CommandWrapper
   {
     if (Chainloader.PluginInfos.TryGetValue("server_devcommands", out var info))
     {
-      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 35)
+      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 42)
         InfinityHammer.Log.LogWarning($"Server Devcommands v{info.Metadata.Version.Major}.{info.Metadata.Version.Minor} is outdated. Please update!");
       else
         ServerDevcommands = info.Instance.GetType().Assembly;
@@ -22,7 +22,7 @@ public static class CommandWrapper
     }
     if (Chainloader.PluginInfos.TryGetValue("world_edit_commands", out info))
     {
-      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 18)
+      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 24)
         InfinityHammer.Log.LogWarning($"World Edit Commands v{info.Metadata.Version.Major}.{info.Metadata.Version.Minor} is outdated. Please update!");
       else
         WorldEditCommands = info.Instance.GetType().Assembly;
@@ -32,6 +32,7 @@ public static class CommandWrapper
   private static BindingFlags PublicBinding = BindingFlags.Static | BindingFlags.Public;
   private static Type Type() => ServerDevcommands.GetType("ServerDevcommands.AutoComplete");
   private static Type InfoType() => ServerDevcommands.GetType("ServerDevcommands.ParameterInfo");
+  private static Type BindType() => ServerDevcommands.GetType("ServerDevcommands.BindCommand");
   private static MethodInfo GetMethod(Type type, string name, Type[] types) => type.GetMethod(name, PublicBinding, null, CallingConventions.Standard, types, null);
   public static void Register(string command, Func<int, int, List<string>> action)
   {
@@ -112,5 +113,10 @@ public static class CommandWrapper
   {
     if (ServerDevcommands == null) return;
     GetMethod(InfoType(), "AddCompositeCommand", new[] { typeof(string) }).Invoke(null, new object[] { command });
+  }
+  public static void SetBindMode(string value)
+  {
+    if (ServerDevcommands == null) return;
+    GetMethod(BindType(), "SetMode", new[] { typeof(string) }).Invoke(null, new object[] { value });
   }
 }

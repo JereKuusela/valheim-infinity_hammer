@@ -59,5 +59,19 @@ public class HammerRotateCommand
       var amount = ParseArgs(args.Context, args.Args, Helper.IsSquareZ);
       Rotating.RotateZ(amount);
     });
+    CommandWrapper.Register("hammer_rotate", (int index) =>
+    {
+      if (index == 0) return CommandWrapper.Info("Direction (1 or -1) to rotate.)");
+      return null;
+    });
+    new Terminal.ConsoleCommand("hammer_rotate", "[direction] - Simulates normal rotating.", (args) =>
+    {
+      if (args.Length < 2) return;
+      var player = Helper.GetPlayer();
+      if (args.TryParameterInt(1) > 0)
+        Helper.GetPlayer().m_placeRotation--;
+      else
+        Helper.GetPlayer().m_placeRotation++;
+    });
   }
 }

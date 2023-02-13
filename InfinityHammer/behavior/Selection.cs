@@ -42,7 +42,13 @@ public static class Selection
   }
 
 #nullable disable
-  public static GameObject Ghost => Get()?.Ghost;
+  public static GameObject Ghost()
+  {
+    var ghost = Get()?.Ghost;
+    if (ghost && IsCommand())
+      CommandWrapper.SetBindMode("command");
+    return ghost;
+  }
 #nullable enable
   public static String Command => Get()?.Command ?? "";
   public static SelectedType Type => Get()?.Type ?? SelectedType.Default;

@@ -8,6 +8,18 @@ public partial class Configuration
   public static bool IsCheats => Enabled && ((ZNet.instance && ZNet.instance.IsServer()) || Console.instance.IsCheatsEnabled());
   public static ConfigEntry<bool> configNoCost;
   public static bool NoCost => configNoCost.Value && IsCheats;
+  public static ConfigEntry<bool> configShapeCircle;
+  public static bool ShapeCircle => configShapeCircle.Value;
+  public static ConfigEntry<bool> configShapeRing;
+  public static bool ShapeRing => configShapeRing.Value;
+  public static ConfigEntry<bool> configShapeSquare;
+  public static bool ShapeSquare => configShapeSquare.Value;
+  public static ConfigEntry<bool> configShapeRectangle;
+  public static bool ShapeRectangle => configShapeRectangle.Value;
+  public static ConfigEntry<bool> configShapeFrame;
+  public static bool ShapeFrame => configShapeFrame.Value;
+  public static ConfigEntry<bool> configPreciseCommands;
+  public static bool PreciseCommands => configPreciseCommands.Value;
   public static ConfigEntry<bool> configIgnoreWards;
   public static bool IgnoreWards => configIgnoreWards.Value && IsCheats;
   public static ConfigEntry<bool> configIgnoreNoBuild;
@@ -64,6 +76,8 @@ public partial class Configuration
   private static void Migrate()
   {
     if (configVersion.Value == InfinityHammer.VERSION) return;
+    commandRadius.Value = (KeyboardShortcut)commandRadius.DefaultValue;
+    commandHeight.Value = (KeyboardShortcut)commandHeight.DefaultValue;
   }
   public static void Init(ConfigWrapper wrapper)
   {
@@ -73,6 +87,13 @@ public partial class Configuration
     configRange = wrapper.Bind(section, "Hammer range", "50", "Range for actions.");
     configShowCommandValues = wrapper.Bind(section, "Show command values", false, "Always shows the command in the tool descriptions.");
     configNoCost = wrapper.Bind(section, "No cost", false, "Removes durability, resource and stamina costs.");
+    configShapeCircle = wrapper.Bind(section, "Shape circle", true, "Enables circle shape for commands.");
+    configShapeRing = wrapper.Bind(section, "Shape ring", false, "Enables ring shape for commands.");
+    configShapeRectangle = wrapper.Bind(section, "Shape rectangle", true, "Enables rectangle shape for commands.");
+    configShapeSquare = wrapper.Bind(section, "Shape square", true, "Enables square shape for commands.");
+    configShapeFrame = wrapper.Bind(section, "Shape frame", false, "Enables frame shape for commands.");
+    configPreciseCommands = wrapper.Bind(section, "Precise commands", false, "Snaps commands to a grid. Disabled rotating.");
+    configPreciseCommands.SettingChanged += (s, e) => wrapper.SetupBinds();
     configIgnoreWards = wrapper.Bind(section, "Ignore wards", true, "Ignores ward restrictions.");
     configIgnoreNoBuild = wrapper.Bind(section, "Ignore no build", true, "Ignores no build areas.");
     configAllObjects = wrapper.Bind(section, "All objects", true, "Allows placement of non-default objects.");

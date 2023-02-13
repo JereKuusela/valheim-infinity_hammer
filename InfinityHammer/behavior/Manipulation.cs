@@ -90,17 +90,15 @@ public static class Grid
     point.z = center.z + Mathf.Round((point.z - center.z) / Precision) * Precision;
     return Quaternion.Inverse(rotation) * point;
   }
+  public static void Toggle(float precision, Vector3 center)
+  {
+    if (Precision == precision) Precision = 0f;
+    else Set(precision, center);
+  }
   public static void Set(float precision, Vector3 center)
   {
-    if (Precision == precision)
-    {
-      Precision = 0f;
-    }
-    else
-    {
-      Center = center;
-      Precision = precision;
-    }
+    Center = center;
+    Precision = precision;
   }
 }
 public static class Position
