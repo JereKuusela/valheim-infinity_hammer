@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Linq;
 using HarmonyLib;
+using Service;
 using UnityEngine;
 namespace InfinityHammer;
 
@@ -26,8 +27,10 @@ public enum RulerShape
 }
 public class Ruler
 {
+  public static bool IsActive => Projector != null;
   public static GameObject? Projector = null;
   public static GameObject? Circle = null;
+  public static GameObject? HeightCircle = null;
   public static GameObject? Ring = null;
   public static GameObject? Rectangle = null;
   public static GameObject? Square = null;
@@ -60,6 +63,20 @@ public class Ruler
     Vector3 center = new Vector3(centerX ? 0f : 0.5f, 0f, centerZ ? 0f : 0.5f);
     Grid.SetPreciseMode(center);
   }
+  private static void BuildCircle(GameObject obj, float radius)
+  {
+    var proj = obj.GetComponent<CircleProjector>();
+    if (obj.activeSelf)
+    {
+      proj.m_radius = radius;
+      proj.m_nrOfSegments = Math.Max(3, (int)(proj.m_radius * 4));
+    }
+    else if (proj.m_nrOfSegments > 0)
+    {
+      proj.m_nrOfSegments = 0;
+      proj.CreateSegments();
+    }
+  }
   public static void Update()
   {
     var player = Player.m_localPlayer;
@@ -90,34 +107,24 @@ public class Ruler
     if (Circle != null)
     {
       Circle.SetActive(Shape == RulerShape.Circle || Shape == RulerShape.Ring);
-      var proj = Circle.GetComponent<CircleProjector>();
+      BuildCircle(Circle, scale.X);
       if (Circle.activeSelf)
       {
-        proj.m_radius = scale.X;
         SetGrid(scale.X, scale.X);
-        proj.m_nrOfSegments = Math.Max(3, (int)(proj.m_radius * 4));
+        HighlightCircle(Projector.transform.position, scale.X, scale.Y);
       }
-      else if (proj.m_nrOfSegments > 0)
-      {
-        proj.m_nrOfSegments = 0;
-        proj.CreateSegments();
-      }
+    }
+    if (Circle != null && HeightCircle != null)
+    {
+      HeightCircle.SetActive(Circle.activeSelf && scale.Y != 0);
+      if (HeightCircle.activeSelf)
+        HeightCircle.transform.localPosition = new Vector3(0f, scale.Y, 0f);
+      BuildCircle(HeightCircle, scale.X);
     }
     if (Circle != null && Ring != null)
     {
       Ring.SetActive(Shape == RulerShape.Ring);
-      var proj = Ring.GetComponent<CircleProjector>();
-      if (Ring.activeSelf)
-      {
-        proj.m_radius = scale.Z;
-        SetGrid(scale.Z, scale.Z);
-        proj.m_nrOfSegments = Math.Max(3, (int)(proj.m_radius * 4));
-      }
-      else if (proj.m_nrOfSegments > 0)
-      {
-        proj.m_nrOfSegments = 0;
-        proj.CreateSegments();
-      }
+      BuildCircle(Ring, scale.Z);
     }
     if (Square != null)
     {
@@ -129,6 +136,7 @@ public class Ruler
         proj.m_depth = scale.X;
         SetGrid(scale.X, scale.X);
         proj.m_nrOfSegments = Math.Max(3, (int)((proj.m_depth + proj.m_width) * 2));
+        HighlightRectangle(Projector.transform.position, angle, scale.X, scale.X, scale.Y);
       }
       else if (proj.m_nrOfSegments > 0)
       {
@@ -163,6 +171,7 @@ public class Ruler
         proj.m_depth = scale.Z;
         SetGrid(scale.X, scale.Z);
         proj.m_nrOfSegments = Math.Max(3, (int)((proj.m_depth + proj.m_width) * 2));
+        HighlightRectangle(Projector.transform.position, angle, scale.X, scale.Z, scale.Y);
       }
       else if (proj.m_nrOfSegments > 0)
       {
@@ -267,6 +276,10 @@ public class Ruler
       var proj = Circle.AddComponent<CircleProjector>();
       proj.m_prefab = BaseProjector.m_prefab;
       proj.m_nrOfSegments = 3;
+      HeightCircle = CreateChild(obj);
+      proj = HeightCircle.AddComponent<CircleProjector>();
+      proj.m_prefab = BaseProjector.m_prefab;
+      proj.m_nrOfSegments = 3;
       scale.SetScaleX(pars.Radius.Value);
     }
     if (pars.Ring.HasValue)
@@ -296,10 +309,30 @@ public class Ruler
       UnityEngine.Object.Destroy(Projector);
     Projector = null;
     Circle = null;
+    HeightCircle = null;
     Ring = null;
     Frame = null;
     Rectangle = null;
     Square = null;
+  }
+
+  private static void HighlightCircle(Vector3 center, float radius, float height)
+  {
+    foreach (var wtr in WearNTear.m_allInstances)
+    {
+      var pos = wtr.m_nview.GetZDO().GetPosition();
+      if (Selector.Within(pos, center, radius, height))
+        wtr.Highlight();
+    }
+  }
+  private static void HighlightRectangle(Vector3 center, float angle, float width, float depth, float height)
+  {
+    foreach (var wtr in WearNTear.m_allInstances)
+    {
+      var pos = wtr.m_nview.GetZDO().GetPosition();
+      if (Selector.Within(pos, center, angle, width, depth, height))
+        wtr.Highlight();
+    }
   }
 }
 
@@ -310,4 +343,10 @@ public class InitializeRuler
   {
     Ruler.Create(Selection.RulerParameters);
   }
+}
+
+[HarmonyPatch(typeof(Player), nameof(Player.UpdateWearNTearHover))]
+public class UpdateWearNTearHover
+{
+  static bool Prefix() => !Ruler.IsActive;
 }
