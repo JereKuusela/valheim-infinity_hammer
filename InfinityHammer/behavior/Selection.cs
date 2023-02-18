@@ -13,6 +13,11 @@ public enum SelectedType
   Multiple,
   Command,
 }
+public enum PlacementType
+{
+  Default,
+  PlayerHeight
+}
 
 public class SelectedObject
 {
@@ -52,6 +57,7 @@ public static class Selection
 #nullable enable
   public static String Command => Get()?.Command ?? "";
   public static SelectedType Type => Get()?.Type ?? SelectedType.Default;
+  public static PlacementType PlacementType => Get()?.PlacementType ?? PlacementType.Default;
   public static RulerParameters RulerParameters => Get()?.RulerParameters ?? new();
   public static List<SelectedObject> Objects => Get()?.Objects ?? new();
 
@@ -86,6 +92,7 @@ public partial class Selected
   public GameObject Ghost = null;
 #nullable enable
   public SelectedType Type = SelectedType.Default;
+  public PlacementType PlacementType = PlacementType.Default;
   public List<SelectedObject> Objects = new();
   public string Command = "";
   public string ExtraDescription = "";
@@ -115,6 +122,7 @@ public partial class Selected
     ZoopsY = 0;
     ZoopsZ = 0;
     Type = SelectedType.Default;
+    PlacementType = PlacementType.Default;
     RulerParameters = new();
     Ruler.Remove();
     AddExtraInfo.ShowId = false;
@@ -299,6 +307,7 @@ public partial class Selected
     }
     ZNetView.m_forceDisableInit = false;
     Type = SelectedType.Multiple;
+    PlacementType = PlacementType.Default;
     CountObjects();
     Rotating.UpdatePlacementRotation(Ghost);
     return Ghost;
@@ -340,16 +349,9 @@ public partial class Selected
     piece.m_description = description.Replace("\\n", "\n");
     piece.m_icon = icon;
     piece.m_clipEverything = true;
-    if (command.Contains("level"))
-    {
-      // These are required for similar placement like with the hoe.
-      piece.m_allowAltGroundPlacement = true;
-      piece.m_groundPiece = true;
-      TerrainOp.m_forceDisableTerrainOps = true;
-      Ghost.AddComponent<TerrainOp>();
-      TerrainOp.m_forceDisableTerrainOps = false;
-    }
     Type = SelectedType.Command;
+    if (command.Contains("level"))
+      PlacementType = PlacementType.PlayerHeight;
     Helper.GetPlayer().SetupPlacementGhost();
     Ruler.Create(ruler);
     return Ghost;
