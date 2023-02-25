@@ -3,7 +3,7 @@ using HarmonyLib;
 using Service;
 using UnityEngine;
 namespace InfinityHammer;
-public enum Tool
+public enum Equipment
 {
   Hammer,
   Hoe
@@ -18,11 +18,11 @@ public static class Hammer
   {
     Selection.Clear();
   }
-  public static bool IsTool(string name, Tool tool) => tool == Tool.Hammer ? Configuration.HammerTools.Contains(name.ToLower()) : Configuration.HoeTools.Contains(name.ToLower());
-  public static bool IsTool(GameObject obj, Tool tool) => obj && IsTool(Utils.GetPrefabName(obj), tool);
-  public static bool IsTool(ItemDrop.ItemData item, Tool tool) => item != null && IsTool(item.m_dropPrefab, tool);
-  public static bool HasTool(Player player, Tool tool) => player && IsTool(player.GetRightItem(), tool);
-  public static void Equip(Tool tool)
+  public static bool IsTool(string name, Equipment tool) => tool == Equipment.Hammer ? Configuration.HammerTools.Contains(name.ToLower()) : Configuration.HoeTools.Contains(name.ToLower());
+  public static bool IsTool(GameObject obj, Equipment tool) => obj && IsTool(Utils.GetPrefabName(obj), tool);
+  public static bool IsTool(ItemDrop.ItemData item, Equipment tool) => item != null && IsTool(item.m_dropPrefab, tool);
+  public static bool HasTool(Player player, Equipment tool) => player && IsTool(player.GetRightItem(), tool);
+  public static void Equip(Equipment tool)
   {
     var player = Helper.GetPlayer();
     if (HasTool(player, tool)) return;

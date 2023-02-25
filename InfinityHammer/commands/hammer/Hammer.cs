@@ -117,7 +117,7 @@ public class HammerSelect
     Helper.Command("hammer", "[object id] - Selects the object to be placed (the hovered object by default).", (args) =>
     {
       Helper.EnabledCheck();
-      Hammer.Equip(Tool.Hammer);
+      Hammer.Equip(Equipment.Hammer);
       HammerParameters pars = new(args);
       GameObject? selected = null;
       ZNetView[] views = new ZNetView[0];
