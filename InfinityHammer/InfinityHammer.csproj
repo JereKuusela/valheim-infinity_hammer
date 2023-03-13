@@ -44,6 +44,9 @@
     <Reference Include="UnityEngine.AnimationModule">
       <HintPath>..\..\Libs\UnityEngine.AnimationModule.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>..\..\Libs\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
     <Reference Include="0Harmony">
       <HintPath>..\..\Libs\0Harmony.dll</HintPath>
     </Reference>

@@ -22,12 +22,15 @@ Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)
 
 # Changelog
 
-- v1.32
+- v1.33
 	- Adds minimum radius of 0.25 to commands.
 	- Adds a new setting "Precise commands".
 	- Adds new settings for enabling different shapes.
 	- Changes the default key binds for commands.
 	- Improves placing of dungeon generators.
+
+- v1.32
+  - Fixes error with the new update.
 
 - v1.31
 	- Fixes errors with some mods (possibly crashing the game).
