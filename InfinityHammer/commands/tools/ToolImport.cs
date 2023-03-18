@@ -12,11 +12,11 @@ public class ToolImport
   {
     Helper.ArgsCheck(args, 2, "Missing the tool.");
     var tool = string.Join(" ", args.Args, 1, args.Length - 1);
-    CommandManager.Add(equipment, tool);
+    ToolManager.Import(equipment, tool);
     Helper.AddMessage(args.Context, $"Imported tool {tool} to {equipment.ToString()}.");
   }
 }
-public class HammerImportCommand : ToolAdd
+public class HammerImportCommand : ToolImport
 {
   public static string Name = "hammer_import";
   public static Equipment Tool = Equipment.Hammer;
@@ -24,7 +24,7 @@ public class HammerImportCommand : ToolAdd
   {
   }
 }
-public class HoeImportCommand : ToolAdd
+public class HoeImportCommand : ToolImport
 {
   public static string Name = "hoe_import";
   public static Equipment Tool = Equipment.Hoe;

@@ -5,36 +5,40 @@ public class ToolCommand
 {
   public ToolCommand(string name, Equipment tool)
   {
-    Helper.Command(name, "[command] - Executes the command at the targeted position.", (args) => Execute(args, tool));
+    Helper.Command(name, "[tool] - Executes the tool at the targeted position.", (args) => Execute(args, tool));
     CommandWrapper.Register(name, (int index, int subIndex) => null);
     CommandWrapper.AddCompositeCommand(name);
   }
-  protected static void Execute(Terminal.ConsoleEventArgs args, Equipment tool)
+  protected static void Execute(Terminal.ConsoleEventArgs args, Equipment equipment)
   {
-    Helper.ArgsCheck(args, 2, "Missing the command.");
-    Hammer.Equip(tool);
-    var command = string.Join(" ", args.Args);
-    command = command.Replace("hammer_command ", "").Replace("hoe_command ", "");
-    CommandParameters pars = new CommandParameters(command, false);
-    Selection.Set(pars.ToRuler(), pars.Name, pars.Description, pars.Command, pars.Continuous, pars.Icon);
-    AddExtraInfo.ShowId = pars.IsId;
+    Helper.ArgsCheck(args, 2, "Missing the tool name.");
+    Hammer.Equip(equipment);
+    var toolName = string.Join(" ", args.Args);
+    if (!ToolManager.TryGetTool(equipment, toolName, out var tool))
+    {
+      tool = new();
+      tool.name = "Command";
+      tool.command = toolName;
+      tool.description = tool.command;
+    }
+    Selection.Set(tool);
     GizmoWrapper.SetRotation(Quaternion.identity);
-    Helper.AddMessage(args.Context, $"Selected command {pars.Name}.");
+    Helper.AddMessage(args.Context, $"Selected command {tool.name}.");
   }
 }
-public class HammerCommand : ToolCommand
+public class HammerTool : ToolCommand
 {
-  public static string Name = "hammer_command";
+  public static string Name = "hammer_tool";
   public static Equipment Tool = Equipment.Hammer;
-  public HammerCommand() : base(Name, Tool)
+  public HammerTool() : base(Name, Tool)
   {
   }
 }
-public class HoeCommand : ToolCommand
+public class HoeTool : ToolCommand
 {
-  public static string Name = "hoe_command";
+  public static string Name = "hoe_tool";
   public static Equipment Tool = Equipment.Hoe;
-  public HoeCommand() : base(Name, Tool)
+  public HoeTool() : base(Name, Tool)
   {
   }
 }

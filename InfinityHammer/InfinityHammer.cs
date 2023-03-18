@@ -31,9 +31,9 @@ public class InfinityHammer : BaseUnityPlugin
     try
     {
       SetupWatcher();
-      CommandManager.CreateFile();
-      CommandManager.SetupWatcher();
-      CommandManager.FromFile();
+      ToolManager.CreateFile();
+      ToolManager.SetupWatcher();
+      ToolManager.FromFile();
     }
     catch
     {
@@ -106,12 +106,10 @@ public class SetCommands
     new HammerFreezeCommand();
     new HammerGridCommand();
     new HammerSaveCommand();
-    new HammerCommand();
-    new HoeCommand();
-    new HammerAddCommand();
-    new HoeAddCommand();
-    new HammerRemoveCommand();
-    new HoeRemoveCommand();
+    new HammerTool();
+    new HoeTool();
+    new HammerImportCommand();
+    new HoeImportCommand();
     new HammerMirrorCommand();
     new HammerListCommand();
     new HoeListCommand();
@@ -124,18 +122,18 @@ public class SetCommands
 [HarmonyPatch(typeof(FejdStartup), nameof(FejdStartup.Start))]
 public class FejdStartupStart
 {
-  static void Create(string tool)
+  static void Create(string equipment)
   {
     var pars = "from=x,z,y circle=r1-r2 angle=a rect=w1-w2,d";
     var parsSpawn = "from=x,z,y radius=r1-r2";
     var parsTo = "terrain to=tx,tz,ty circle=r1-r2 rect=w1-w2,d";
     var sub = CommandWrapper.Substitution();
-    Console.instance.TryRunCommand($"alias {tool}_terrain {tool}_command terrain {pars}");
-    Console.instance.TryRunCommand($"alias {tool}_object {tool}_command object {pars} height=h ignore=ignore");
-    Console.instance.TryRunCommand($"alias {tool}_spawn {tool}_command spawn_object {sub} {parsSpawn}");
+    Console.instance.TryRunCommand($"alias {equipment}_terrain {equipment}_tool terrain {pars}");
+    Console.instance.TryRunCommand($"alias {equipment}_object {equipment}_tool object {pars} height=h ignore=ignore");
+    Console.instance.TryRunCommand($"alias {equipment}_spawn {equipment}_tool spawn_object {sub} {parsSpawn}");
 
-    Console.instance.TryRunCommand($"alias {tool}_terrain_to hammer_shape rectangle;{tool}_command {parsTo}");
-    Console.instance.TryRunCommand($"alias {tool}_slope {tool}_terrain_to slope cmd_w={sub}");
+    Console.instance.TryRunCommand($"alias {equipment}_terrain_to hammer_shape rectangle;{equipment}_tool {parsTo}");
+    Console.instance.TryRunCommand($"alias {equipment}_slope {equipment}_terrain_to slope; hammer_scale_x_cmd {sub}");
 
   }
   static void Postfix()

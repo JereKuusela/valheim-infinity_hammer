@@ -5,39 +5,38 @@ using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer;
 
-public class BuildMenuCommand : Piece
+public class BuildMenuTool : Piece
 {
-  public string Command = "";
+  public ToolData tool = new();
 }
 [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpdateAvailable))]
 public static class UpdateAvailable
 {
-  private static Piece Build(string command)
+  private static Piece Build(ToolData tool)
   {
-    CommandParameters pars = new(command, Configuration.AlwaysShowCommand);
     GameObject obj = new();
-    var piece = obj.AddComponent<BuildMenuCommand>();
-    piece.Command = command;
-    piece.m_description = pars.Description;
-    piece.m_name = pars.Name;
-    piece.m_icon = pars.Icon;
+    var piece = obj.AddComponent<BuildMenuTool>();
+    piece.tool = tool;
+    piece.m_description = tool.description;
+    piece.m_name = tool.name;
+    piece.m_icon = Helper.FindSprite(tool.icon);
     return piece;
   }
   static void Postfix(PieceTable __instance)
   {
     if (!Configuration.IsCheats) return;
-    List<string>? commands = null;
+    List<ToolData>? commands = null;
     int tab = 0;
     int index = 0;
-    if (Hammer.HasTool(Helper.GetPlayer(), Tool.Hammer))
+    if (Hammer.HasTool(Helper.GetPlayer(), Equipment.Hammer))
     {
-      commands = CommandManager.HammerCommands;
+      commands = ToolManager.HammerTools;
       tab = Configuration.HammerMenuTab;
       index = Configuration.HammerMenuIndex;
     }
-    if (Hammer.HasTool(Helper.GetPlayer(), Tool.Hoe))
+    if (Hammer.HasTool(Helper.GetPlayer(), Equipment.Hoe))
     {
-      commands = CommandManager.HoeCommands;
+      commands = ToolManager.HoeTools;
       tab = Configuration.HoeMenuTab;
       index = Configuration.HoeMenuIndex;
     }
@@ -45,7 +44,7 @@ public static class UpdateAvailable
     if (__instance.m_availablePieces.Count <= tab) return;
     var pieces = __instance.m_availablePieces[tab];
     index = Math.Min(index, pieces.Count);
-    foreach (var command in commands.Reverse<string>())
+    foreach (var command in commands.Reverse<ToolData>())
       pieces.Insert(index, Build(command));
   }
 }
@@ -59,12 +58,16 @@ public class RunBuildMenuCommands
   public static bool Prefix(Player __instance, Vector2Int p)
   {
     var piece = __instance.GetPiece(p);
-    if (piece && piece.TryGetComponent<BuildMenuCommand>(out var cmd))
+    if (piece && piece.TryGetComponent<BuildMenuTool>(out var menuTool))
     {
-      InstantCommand = false;
-      Console.instance.TryRunCommand(cmd.Command);
-      if (!InstantCommand)
+      var tool = menuTool.tool;
+      if (tool.instant) Console.instance.TryRunCommand(tool.command);
+      else
       {
+        if (Hammer.HasTool(Helper.GetPlayer(), Equipment.Hammer))
+          Console.instance.TryRunCommand($"hammer_tool {tool.name}");
+        if (Hammer.HasTool(Helper.GetPlayer(), Equipment.Hoe))
+          Console.instance.TryRunCommand($"hoe_tool {tool.name}");
         __instance.m_buildPieces.SetSelected(p);
       }
       return false;
@@ -82,22 +85,7 @@ public class ReplaceModifierKeys
   {
     if (text.StartsWith("bind ", StringComparison.OrdinalIgnoreCase)) return;
     if (text.StartsWith("alias ", StringComparison.OrdinalIgnoreCase)) return;
-    text = text.Replace(CommandParameters.CmdMod1, Configuration.ModifierKey1());
-    text = text.Replace(CommandParameters.CmdMod2, Configuration.ModifierKey2());
-  }
-}
-[HarmonyPatch(typeof(Terminal), nameof(Terminal.TryRunCommand))]
-public class RemoveCmdParameters
-{
-
-  [HarmonyPriority(Priority.Low)]
-  static void Prefix(ref string text)
-  {
-    if (text.StartsWith("hammer_command ", StringComparison.OrdinalIgnoreCase)) return;
-    if (text.StartsWith("hoe_command ", StringComparison.OrdinalIgnoreCase)) return;
-    if (text.StartsWith("hammer_add ", StringComparison.OrdinalIgnoreCase)) return;
-    if (text.StartsWith("hoe_add ", StringComparison.OrdinalIgnoreCase)) return;
-    text = CommandParameters.RemoveCmdParameters(text);
-    RunBuildMenuCommands.InstantCommand = true;
+    text = text.Replace(ToolManager.CmdMod1, Configuration.ModifierKey1());
+    text = text.Replace(ToolManager.CmdMod2, Configuration.ModifierKey2());
   }
 }

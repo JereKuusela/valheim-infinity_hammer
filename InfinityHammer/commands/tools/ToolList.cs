@@ -15,12 +15,12 @@ public class ToolList
   }
   protected static void Execute(Terminal.ConsoleEventArgs args, Equipment tool)
   {
-    var commands = CommandManager.Get(tool);
+    var commands = ToolManager.Get(tool);
     var index = -1;
     if (args.Length > 1)
     {
       index = Parse.TryInt(args.Args, 1, index);
-      GUIUtility.systemCopyBuffer = CommandManager.Export(tool, index);
+      GUIUtility.systemCopyBuffer = ToolManager.Export(tool, index);
     }
     for (var i = 0; i < commands.Count; i++)
     {

@@ -94,12 +94,11 @@ public class AddExtraInfo
   private static string DescriptionHover()
   {
     if (!Selection.IsCommand()) return "";
-    if (!ShowId) return "";
+    if (!Selection.RulerParameters.IsId) return "";
     var hovered = Selector.GetHovered(Configuration.Range, Configuration.IgnoredIds);
     var name = hovered == null ? "" : Utils.GetPrefabName(hovered.gameObject);
     return $"id: {name}";
   }
-  public static bool ShowId = false;
   public static void Postfix(Hud __instance, Piece piece)
   {
     if (!piece) return;

@@ -73,7 +73,7 @@ public static class Selection
   public static GameObject Set(string name, bool singleUse) => GetOrAdd().Set(name, singleUse);
   public static GameObject Set(ZNetView view, bool singleUse) => GetOrAdd().Set(view, singleUse);
   public static GameObject Set(IEnumerable<ZNetView> views, bool singleUse) => GetOrAdd().Set(views, singleUse);
-  public static GameObject Set(RulerParameters ruler, string name, string description, string command, string continuous, Sprite? icon) => GetOrAdd().Set(ruler, name, description, command, continuous, icon);
+  public static GameObject Set(ToolData tool) => GetOrAdd().Set(tool);
   public static GameObject Set(ZoneSystem.ZoneLocation location, int seed) => GetOrAdd().Set(location, seed);
   public static GameObject Set(Terminal terminal, Blueprint bp, Vector3 scale) => GetOrAdd().Set(terminal, bp, scale);
   public static void ZoopUp(string offset) => GetOrAdd().ZoopUp(offset);
@@ -125,7 +125,6 @@ public partial class Selected
     PlacementType = PlacementType.Default;
     RulerParameters = new();
     Ruler.Remove();
-    AddExtraInfo.ShowId = false;
     Command = "";
     Objects.Clear();
   }
@@ -334,26 +333,31 @@ public partial class Selected
     }
     Helper.GetPlayer().SetupPlacementGhost();
   }
-  public GameObject Set(RulerParameters ruler, string name, string description, string command, string continuous, Sprite? icon)
+
+  public GameObject Set(ToolData tool)
   {
     Clear();
     var player = Helper.GetPlayer();
-    RulerParameters = ruler;
     HoldUse.Disabled = true;
-    Continuous = continuous;
-    Command = command;
+    Continuous = tool.continuous;
+    Command = tool.command;
+    Command = ToolParameters.Parametrize(Command);
+    RulerParameters = ToolParameters.ParseParameters(Command);
     Ghost = new GameObject();
-    Ghost.name = name;
+    Ghost.name = tool.name;
     var piece = Ghost.AddComponent<Piece>();
-    piece.m_name = name;
-    piece.m_description = description.Replace("\\n", "\n");
-    piece.m_icon = icon;
+    piece.m_name = tool.name;
+    piece.m_description = tool.description.Replace("\\n", "\n");
+    piece.m_icon = Helper.FindSprite(tool.icon);
     piece.m_clipEverything = true;
     Type = SelectedType.Command;
-    if (command.Contains("level"))
+    if (tool.command.Contains("level"))
       PlacementType = PlacementType.PlayerHeight;
     Helper.GetPlayer().SetupPlacementGhost();
-    Ruler.Create(ruler);
+    Ruler.Create(RulerParameters);
+    var size = Parse.TryFloatNullRange(tool.initialSize);
+    var height = Parse.TryFloatNullRange(tool.initialHeight);
+    Ruler.Constrain(size, height);
     return Ghost;
   }
   public GameObject Set(ZoneSystem.ZoneLocation location, int seed)

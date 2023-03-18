@@ -8,14 +8,15 @@ namespace InfinityHammer;
 
 public class RulerParameters
 {
-  public float? Radius;
-  public float? Ring;
-  public float? Width;
-  public float? Grid;
-  public float? Depth;
-  public float? Height;
+  public bool Radius;
+  public bool Ring;
+  public bool Width;
+  public bool Grid;
+  public bool Depth;
+  public bool Height;
   public bool RotateWithPlayer;
   public bool IsTargeted;
+  public bool IsId;
 }
 public enum RulerShape
 {
@@ -224,7 +225,7 @@ public class Ruler
   private static string Format1(float f) => f.ToString("F1", CultureInfo.InvariantCulture);
   private static string Format2(float f) => f.ToString("F2", CultureInfo.InvariantCulture);
 
-  private static GameObject InitializeGameObject(RulerParameters pars)
+  private static GameObject InitializeGameObject()
   {
     Projector = new();
     Projector.layer = LayerMask.NameToLayer("character_trigger");
@@ -238,6 +239,19 @@ public class Ruler
     go.transform.localRotation = Quaternion.identity;
     return go;
   }
+  public static void Constrain(Range<float?> size, Range<float?> height)
+  {
+    var scale = Scaling.Command;
+    if (size.Min.HasValue && size.Max.HasValue)
+    {
+      scale.SetScaleX(Mathf.Clamp(scale.X, size.Min.Value, size.Max.Value));
+      scale.SetScaleZ(Mathf.Clamp(scale.Z, size.Min.Value, size.Max.Value));
+    }
+    if (height.Min.HasValue && height.Max.HasValue)
+    {
+      scale.SetScaleY(Mathf.Clamp(scale.Y, height.Min.Value, height.Max.Value));
+    }
+  }
   public static void InitializeProjector(RulerParameters pars, GameObject obj)
   {
     if (BaseProjector == null)
@@ -245,32 +259,28 @@ public class Ruler
     RotateWithPlayer = pars.RotateWithPlayer;
     IsTargeted = pars.IsTargeted;
     var scale = Scaling.Command;
-    if (pars.Width.HasValue)
+    if (pars.Width)
     {
       Square = CreateChild(obj);
       var proj = Square.AddComponent<RectangleProjector>();
       proj.m_prefab = BaseProjector.m_prefab;
       proj.m_nrOfSegments = 3;
-      scale.SetScaleX(pars.Width.Value);
     }
-    if (pars.Grid.HasValue)
+    if (pars.Grid)
     {
       Frame = CreateChild(obj);
       var proj = Frame.AddComponent<RectangleProjector>();
       proj.m_prefab = BaseProjector.m_prefab;
       proj.m_nrOfSegments = 3;
-      scale.SetScaleZ(pars.Grid.Value);
     }
-    if (pars.Width.HasValue && pars.Depth.HasValue)
+    if (pars.Width && pars.Depth)
     {
       Rectangle = CreateChild(obj);
       var proj = Rectangle.AddComponent<RectangleProjector>();
       proj.m_prefab = BaseProjector.m_prefab;
       proj.m_nrOfSegments = 3;
-      scale.SetScaleX(pars.Width.Value);
-      scale.SetScaleZ(pars.Depth.Value);
     }
-    if (pars.Radius.HasValue)
+    if (pars.Radius)
     {
       Circle = CreateChild(obj);
       var proj = Circle.AddComponent<CircleProjector>();
@@ -280,27 +290,21 @@ public class Ruler
       proj = HeightCircle.AddComponent<CircleProjector>();
       proj.m_prefab = BaseProjector.m_prefab;
       proj.m_nrOfSegments = 3;
-      scale.SetScaleX(pars.Radius.Value);
     }
-    if (pars.Ring.HasValue)
+    if (pars.Ring)
     {
       Ring = CreateChild(obj);
       var proj = Ring.AddComponent<CircleProjector>();
       proj.m_prefab = BaseProjector.m_prefab;
       proj.m_nrOfSegments = 3;
-      scale.SetScaleZ(pars.Ring.Value);
     }
-    UseHeight = pars.Height.HasValue;
-    if (pars.Height.HasValue)
-    {
-      scale.SetScaleY(pars.Height.Value);
-    }
+    UseHeight = pars.Height;
   }
   public static void Create(RulerParameters pars)
   {
     Remove();
-    if (pars.Radius == null && pars.Width == null && pars.Depth == null) return;
-    InitializeProjector(pars, InitializeGameObject(pars));
+    if (!pars.Radius && !pars.Width && pars.Depth) return;
+    InitializeProjector(pars, InitializeGameObject());
   }
 
   public static void Remove()
