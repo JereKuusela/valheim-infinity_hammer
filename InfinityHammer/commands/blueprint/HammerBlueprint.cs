@@ -231,7 +231,7 @@ public class HammerBlueprintCommand
       Helper.CheatCheck();
       HammerBlueprintParameters pars = new(args);
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
-      Hammer.Equip(Equipment.Hammer);
+      Hammer.Equip();
       var name = args.Args.Skip(1).Where(arg => !arg.StartsWith("scale=", StringComparison.OrdinalIgnoreCase));
       var bp = GetBluePrint(string.Join("_", name));
       var obj = Selection.Set(args.Context, bp, pars.Scale ?? Vector3.one);

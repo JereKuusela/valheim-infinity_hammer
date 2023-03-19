@@ -3,11 +3,7 @@ using HarmonyLib;
 using Service;
 using UnityEngine;
 namespace InfinityHammer;
-public enum Equipment
-{
-  Hammer,
-  Hoe
-}
+
 public static class Hammer
 {
 
@@ -18,21 +14,37 @@ public static class Hammer
   {
     Selection.Clear();
   }
-  public static bool IsTool(string name, Equipment tool) => tool == Equipment.Hammer ? Configuration.HammerTools.Contains(name.ToLower()) : Configuration.HoeTools.Contains(name.ToLower());
-  public static bool IsTool(GameObject obj, Equipment tool) => obj && IsTool(Utils.GetPrefabName(obj), tool);
-  public static bool IsTool(ItemDrop.ItemData item, Equipment tool) => item != null && IsTool(item.m_dropPrefab, tool);
-  public static bool HasTool(Player player, Equipment tool) => player && IsTool(player.GetRightItem(), tool);
-  public static void Equip(Equipment tool)
+  public static bool IsHammer(string name) => Configuration.HammerTools.Contains(name.ToLower()) || ToolManager.Tools.ContainsKey(name.ToLower());
+  public static bool IsHammer(GameObject obj) => obj && IsHammer(Utils.GetPrefabName(obj));
+  public static bool IsHammer(ItemDrop.ItemData item) => item != null && IsHammer(item.m_dropPrefab);
+  public static bool HasHammer(Player player) => player && IsHammer(player.GetRightItem());
+  public static void Equip()
   {
     var player = Helper.GetPlayer();
-    if (HasTool(player, tool)) return;
+    if (HasHammer(player)) return;
     var inventory = player.GetInventory();
-    var item = inventory.m_inventory.Find(item => IsTool(item, tool));
+    var item = inventory.m_inventory.Find(item => IsHammer(item));
     if (item == null)
     {
-      throw new InvalidOperationException($"Unable to find the tool {tool.ToString()}.");
+      throw new InvalidOperationException($"Unable to find the hammer.");
     };
     player.EquipItem(item);
+  }
+  public static bool IsTool(ItemDrop.ItemData item) => item != null && item.m_shared.m_buildPieces != null;
+
+  public static bool HasAnyTool()
+  {
+    var player = Helper.GetPlayer();
+    if (!player) return false;
+    return IsTool(player.GetRightItem());
+  }
+  public static string GetTool()
+  {
+    var player = Helper.GetPlayer();
+    if (!player) return "";
+    var item = player.GetRightItem();
+    if (item == null) return "";
+    return Utils.GetPrefabName(item.m_dropPrefab).ToLower();
   }
   public static void Clear()
   {

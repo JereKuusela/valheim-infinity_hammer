@@ -1,8 +1,8 @@
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.Linq;
 using BepInEx;
 using UnityEngine;
 using YamlDotNet.Core;
@@ -57,9 +57,23 @@ public class Data : MonoBehaviour
     }
   }
 
-  public static T[] Read<T>(string pattern, Func<string, string, T> action)
+  public static Dictionary<string, List<T>> Read<T>(string pattern, Func<string, string, Dictionary<string, T[]>> action)
   {
-    return Directory.GetFiles(Paths.ConfigPath, pattern).Select(name => action(File.ReadAllText(name), name)).ToArray();
+    Dictionary<string, List<T>> result = new();
+    foreach (var name in Directory.GetFiles(Paths.ConfigPath, pattern))
+    {
+      var data = action(File.ReadAllText(name), name);
+      foreach (var kvp in data)
+      {
+        if (!result.TryGetValue(kvp.Key, out var list))
+        {
+          list = new();
+          result[kvp.Key] = list;
+        }
+        list.AddRange(kvp.Value);
+      }
+    }
+    return result;
   }
 }
 #nullable disable

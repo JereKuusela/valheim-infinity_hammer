@@ -106,13 +106,10 @@ public class SetCommands
     new HammerFreezeCommand();
     new HammerGridCommand();
     new HammerSaveCommand();
-    new HammerTool();
-    new HoeTool();
+    new HammerToolCommand();
     new HammerImportCommand();
-    new HoeImportCommand();
+    new HammerExportCommand();
     new HammerMirrorCommand();
-    new HammerListCommand();
-    new HoeListCommand();
     new HammerShapeCommand();
     new HammerZoopCommand();
     new HammerMeasureCommand();
@@ -122,18 +119,18 @@ public class SetCommands
 [HarmonyPatch(typeof(FejdStartup), nameof(FejdStartup.Start))]
 public class FejdStartupStart
 {
-  static void Create(string equipment)
+  static void Create()
   {
     var pars = "from=x,z,y circle=r1-r2 angle=a rect=w1-w2,d";
     var parsSpawn = "from=x,z,y radius=r1-r2";
     var parsTo = "terrain to=tx,tz,ty circle=r1-r2 rect=w1-w2,d";
     var sub = CommandWrapper.Substitution();
-    Console.instance.TryRunCommand($"alias {equipment}_terrain {equipment}_tool terrain {pars}");
-    Console.instance.TryRunCommand($"alias {equipment}_object {equipment}_tool object {pars} height=h ignore=ignore");
-    Console.instance.TryRunCommand($"alias {equipment}_spawn {equipment}_tool spawn_object {sub} {parsSpawn}");
+    Console.instance.TryRunCommand($"alias hammer_terrain hammer_tool terrain {pars}");
+    Console.instance.TryRunCommand($"alias hammer_object hammer_tool object {pars} height=h ignore=ignore");
+    Console.instance.TryRunCommand($"alias hammer_spawn hammer_tool spawn_object {sub} {parsSpawn}");
 
-    Console.instance.TryRunCommand($"alias {equipment}_terrain_to hammer_shape rectangle;{equipment}_tool {parsTo}");
-    Console.instance.TryRunCommand($"alias {equipment}_slope {equipment}_terrain_to slope; hammer_scale_x_cmd {sub}");
+    Console.instance.TryRunCommand($"alias hammer_terrain_to hammer_shape rectangle;hammer_tool {parsTo}");
+    Console.instance.TryRunCommand($"alias hammer_slope hammer_terrain_to slope; hammer_scale_x_cmd {sub}");
 
   }
   static void Postfix()
@@ -145,8 +142,7 @@ public class FejdStartupStart
     }
     if (CommandWrapper.ServerDevcommands != null && CommandWrapper.WorldEditCommands != null)
     {
-      Create("hammer");
-      Create("hoe");
+      Create();
     }
   }
 }

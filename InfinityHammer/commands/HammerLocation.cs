@@ -23,7 +23,7 @@ public class HammerLocationCommand
     {
       Helper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the location id.");
-      Hammer.Equip(Equipment.Hammer);
+      Hammer.Equip();
       try
       {
         Hammer.AllLocationsObjects = args.Length > 2 && args[2] == "all";

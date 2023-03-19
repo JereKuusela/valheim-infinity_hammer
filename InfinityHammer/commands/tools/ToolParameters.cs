@@ -17,6 +17,7 @@ public class ToolParameters
   }
   public static string Parametrize(string command)
   {
+    command = command.Replace("hammer_tool ", "");
     var args = command.Split(' ').ToArray();
     var parameters = new[]{
       "id", "r", "r1-r2", "d", "w", "w1-w2", "h", "a", "w,d", "w1-w2,d", "x", "y", "z", "tx", "ty", "tz",

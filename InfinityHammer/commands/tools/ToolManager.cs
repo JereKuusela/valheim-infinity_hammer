@@ -25,64 +25,63 @@ public class ToolManager
   }
   public static void ToFile()
   {
-    var hammerData = HammerTools.ToArray();
-    var hoeData = HoeTools.ToArray();
-    ToolsData data = new() { hammer = hammerData, hoe = hoeData };
-    var yaml = Data.Serializer().Serialize(data);
+    var yaml = Data.Serializer().Serialize(Tools);
     File.WriteAllText(FilePath, yaml);
   }
-  public static List<ToolData> Get(Equipment tool) => tool == Equipment.Hammer ? HammerTools : HoeTools;
 
-  public static void Import(Equipment tool, string command)
+  public static void Import(string equipment, string tool)
   {
-    var yaml = command.Replace("\\n", "\n");
-    var cmd = Data.Deserialize<ToolData>(yaml, "Import");
-    Get(tool).Add(cmd);
+    var yaml = tool.Replace("\\n", "\n");
+    var data = Data.Deserialize<ToolData>(yaml, "Import");
+    Add(equipment, data);
+  }
+  public static void Add(string equipment, ToolData tool)
+  {
+    if (!Tools.TryGetValue(equipment, out var tools))
+      Tools.Add(equipment, new());
+    Tools[equipment].Add(tool);
     ToFile();
   }
-  public static ToolData Get(Equipment equipment, int index)
+  public static string Export(string equipment, string name)
   {
-    if (index < 0 || Get(equipment).Count <= index) throw new InvalidOperationException($"No command at index {index}.");
-    return Get(equipment)[index];
-  }
-
-  public static string Export(Equipment equipment, int index)
-  {
-    var tool = Get(equipment, index);
+    if (!TryGetTool(equipment, name, out var tool))
+      return "";
     var yaml = Data.Serializer().Serialize(tool).Replace("\n", "\\n");
     return yaml;
   }
-  public static List<ToolData> HammerTools = new();
-  public static List<ToolData> HoeTools = new();
-  public static bool TryGetTool(Equipment equipment, string name, out ToolData tool)
+  public static Dictionary<string, List<ToolData>> Tools = new();
+  public static bool TryGetTool(string equipment, string name, out ToolData tool)
   {
     tool = null!;
-    if (equipment == Equipment.Hammer)
-      tool = HammerTools.FirstOrDefault(tool => tool.name == name);
-    else
-      tool = HoeTools.FirstOrDefault(tool => tool.name == name);
+    if (Tools.TryGetValue(equipment, out var tools))
+      tool = tools.FirstOrDefault(tool => tool.name == name);
+    if (tool == null)
+      tool = Tools.Values.SelectMany(tool => tool).FirstOrDefault(tool => tool.name == name);
     return tool != null;
+  }
+  public static List<ToolData> Get(string equipment)
+  {
+    if (Tools.TryGetValue(equipment, out var tools))
+      return tools;
+    return new();
   }
   public static void FromFile()
   {
-    var tools = Data.Read(Pattern, Data.Deserialize<ToolsData>);
-    if (tools.Length == 0)
+    var tools = Data.Read(Pattern, Data.Deserialize<Dictionary<string, ToolData[]>>);
+    if (tools.Count == 0)
     {
       CreateFile();
       return;
     }
     try
     {
-      var hammer = tools.SelectMany(value => value.hammer).ToList();
-      var hoe = tools.SelectMany(value => value.hoe).ToList();
-      var count = hammer.Count + hoe.Count;
+      var count = tools.Values.SelectMany(x => x).Count();
       if (count == 0)
       {
         InfinityHammer.Log.LogWarning($"Failed to load any tools.");
         return;
       }
-      HammerTools = hammer;
-      HoeTools = hoe;
+      Tools = tools.ToDictionary(kvp => kvp.Key.ToLower(), kvp => kvp.Value);
       InfinityHammer.Log.LogInfo($"Reloading {count} tools.");
       Player.m_localPlayer?.UpdateAvailablePiecesList();
     }

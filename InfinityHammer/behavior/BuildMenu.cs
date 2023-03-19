@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer;
@@ -25,27 +24,18 @@ public static class UpdateAvailable
   static void Postfix(PieceTable __instance)
   {
     if (!Configuration.IsCheats) return;
-    List<ToolData>? commands = null;
+    List<ToolData> tools = ToolManager.Get(Hammer.GetTool());
     int tab = 0;
-    int index = 0;
-    if (Hammer.HasTool(Helper.GetPlayer(), Equipment.Hammer))
+    int index = -1;
+    foreach (var tool in tools)
     {
-      commands = ToolManager.HammerTools;
-      tab = Configuration.HammerMenuTab;
-      index = Configuration.HammerMenuIndex;
+      tab = tool.tabIndex ?? tab;
+      index = tool.index ?? index + 1;
+      if (__instance.m_availablePieces.Count <= tab) return;
+      var pieces = __instance.m_availablePieces[tab];
+      index = Math.Min(index, pieces.Count);
+      pieces.Insert(index, Build(tool));
     }
-    if (Hammer.HasTool(Helper.GetPlayer(), Equipment.Hoe))
-    {
-      commands = ToolManager.HoeTools;
-      tab = Configuration.HoeMenuTab;
-      index = Configuration.HoeMenuIndex;
-    }
-    if (commands == null) return;
-    if (__instance.m_availablePieces.Count <= tab) return;
-    var pieces = __instance.m_availablePieces[tab];
-    index = Math.Min(index, pieces.Count);
-    foreach (var command in commands.Reverse<ToolData>())
-      pieces.Insert(index, Build(command));
   }
 }
 
@@ -64,10 +54,7 @@ public class RunBuildMenuCommands
       if (tool.instant) Console.instance.TryRunCommand(tool.command);
       else
       {
-        if (Hammer.HasTool(Helper.GetPlayer(), Equipment.Hammer))
-          Console.instance.TryRunCommand($"hammer_tool {tool.name}");
-        if (Hammer.HasTool(Helper.GetPlayer(), Equipment.Hoe))
-          Console.instance.TryRunCommand($"hoe_tool {tool.name}");
+        Console.instance.TryRunCommand($"hammer_tool {tool.name}");
         __instance.m_buildPieces.SetSelected(p);
       }
       return false;
