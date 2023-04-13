@@ -12,14 +12,23 @@ public class HammerBlueprintCommand
     if (Configuration.DisableSelectMessages) return;
     Helper.AddMessage(terminal, $"Selected {name}.");
   }
-
+  private static IEnumerable<string> LoadFiles(string folder, IEnumerable<string> bps)
+  {
+    if (Directory.Exists(folder))
+    {
+      var blueprints = Directory.EnumerateFiles(folder, "*.blueprint", SearchOption.AllDirectories);
+      var vbuilds = Directory.EnumerateFiles(folder, "*.vbuild", SearchOption.AllDirectories);
+      return bps.Concat(blueprints).Concat(vbuilds);
+    }
+    return bps;
+  }
   private static IEnumerable<string> Files()
   {
-    if (!Directory.Exists(Configuration.PlanBuildFolder)) Directory.CreateDirectory(Configuration.PlanBuildFolder);
-    if (!Directory.Exists(Configuration.BuildShareFolder)) Directory.CreateDirectory(Configuration.BuildShareFolder);
-    var planBuild = Directory.EnumerateFiles(Configuration.PlanBuildFolder, "*.blueprint", SearchOption.AllDirectories);
-    var buildShare = Directory.EnumerateFiles(Configuration.BuildShareFolder, "*.vbuild", SearchOption.AllDirectories);
-    return planBuild.Concat(buildShare).OrderBy(s => s);
+    IEnumerable<string> bps = new List<string>();
+    bps = LoadFiles(Configuration.BlueprintGlobalFolder, bps);
+    if (Path.GetFullPath(Configuration.BlueprintLocalFolder) != Path.GetFullPath(Configuration.BlueprintGlobalFolder))
+      bps = LoadFiles(Configuration.BlueprintLocalFolder, bps);
+    return bps.Distinct().OrderBy(s => s);
   }
   private static List<string> GetBlueprints() => Files().Select(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_")).ToList();
   private static Blueprint GetBluePrint(string name)

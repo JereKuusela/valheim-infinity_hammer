@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using BepInEx;
 using BepInEx.Configuration;
 using Service;
 using UnityEngine;
@@ -10,10 +12,12 @@ public partial class Configuration
 {
 #nullable disable
   public static ConfigEntry<string> configVersion;
-  public static ConfigEntry<string> configPlanBuildFolder;
-  public static string PlanBuildFolder => configPlanBuildFolder.Value;
-  public static ConfigEntry<string> configBuildShareFolder;
-  public static string BuildShareFolder => configBuildShareFolder.Value;
+  public static ConfigEntry<string> configBlueprintFolder;
+  public static string BlueprintGlobalFolder => Path.Combine("BepInEx", "config", configBlueprintFolder.Value);
+  public static string BlueprintLocalFolder => Path.Combine(Paths.ConfigPath, configBlueprintFolder.Value);
+
+  public static ConfigEntry<bool> configSaveBlueprintsToProfile;
+  public static bool SaveBlueprintsToProfile => configSaveBlueprintsToProfile.Value;
   public static ConfigEntry<string> configIgnoredRemoveIds;
   public static List<string> RemoveIds = new();
   public static ConfigEntry<string> configIgnoredIds;
@@ -103,8 +107,8 @@ public partial class Configuration
     configMirrorFlip = wrapper.Bind(section, "Mirror flip", "woodwall", "Object ids that get flipped instead of rotated when mirrored.");
     configMirrorFlip.SettingChanged += (s, e) => UpdateMirrorFlip();
     UpdateMirrorFlip();
-    configPlanBuildFolder = wrapper.Bind(section, "Plan Build folder", "BepInEx/config/PlanBuild", "Folder relative to the Valheim.exe.");
-    configBuildShareFolder = wrapper.Bind(section, "Build Share folder", "BuildShare/Builds", "Folder relative to the Valheim.exe.");
+    configBlueprintFolder = wrapper.Bind(section, "Blueprint folder", "PlanBuild", "Folder relative to the config folder.");
+    configSaveBlueprintsToProfile = wrapper.Bind(section, "Save blueprints to profile", false, "If enabled, blueprints are saved to the profile folder instead of base Valheim folder.");
 
     commandDefaultSize = wrapper.Bind(section, "Command default size", "10", "Default size for commands.");
     commandDefaultSize.SettingChanged += (s, e) =>

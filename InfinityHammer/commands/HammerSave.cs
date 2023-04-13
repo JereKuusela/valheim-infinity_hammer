@@ -243,7 +243,7 @@ public class HammerSaveCommand
       var bp = BuildBluePrint(player, ghost);
       var lines = GetPlanBuildFile(bp);
       var name = Path.GetFileNameWithoutExtension(args[1]) + ".blueprint";
-      var path = Path.Combine(Configuration.PlanBuildFolder, name);
+      var path = Path.Combine(Configuration.SaveBlueprintsToProfile ? Configuration.BlueprintLocalFolder : Configuration.BlueprintGlobalFolder, name);
       Directory.CreateDirectory(Path.GetDirectoryName(path));
       File.WriteAllLines(path, lines);
       args.Context.AddString($"Blueprint saved to {path}");

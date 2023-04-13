@@ -1,6 +1,8 @@
 - v1.33
+  - Adds a new setting "Save blueprints to profile" to determine whether profile or base Valheim folder is used.
   - Improves placing of dungeon generators.
   - Fixes build protection bypass not working with Expand World.
+  - Merges the PlanBuild and BuildShare search folders to the same folder.
   - Removes "spawnpoint" data being saved to blueprints (so creatures won't try to return to arbitrary position on the world).
 
 - v1.32

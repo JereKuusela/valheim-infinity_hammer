@@ -332,6 +332,7 @@ Following powers are available with `hammer_config` command:
 - Enabled (default: `true`, key: `enabled`): If disabled, removes most features.
 - All objects (default: `true`, key: `all_objects`): Hammer can select and place any object. Any placed object can be removed with the hammer until the area is reloaded.
 - Allow in dungeons (default: `true`, key: `allow_in_dungeons`): Building is allowed in dungeons.
+- Blueprint folder (default: `PlanBuild`, key: `blueprint_folder`): Folder relative to the config folder. Both profile and base Valheim folders are searched for .blueprint and .vbuild files.
 - Build Share folder (default: `BuildShare/Builds`, key: `build_share_folder`): Folder relative to the Valheim.exe.
 - Copy state (default: `true`, key: `copy_state`): Object state is copied (for example chest contents or item stand items).
 - Dimensions (key: `dimensions`): Measurements for objects.
@@ -345,12 +346,12 @@ Following powers are available with `hammer_config` command:
 - No cost (default: `false`, key: `no_cost`): Removes durability, resource and stamina costs.
 - No creator (default: `false`, key: `no_creator`): Builds without setting the creator information.
 - Overwrite health (default: `0`, key: `overwrite_health`): Sets the health of built or repaired objects (0 reverts to the default max health, except for creatures).
-- Plan Build folder (default: `BepInEx/config/PlanBuild`, key: `plan_build_folder`): Folder relative to the Valheim.exe.
 - Range (default: `0`, key: `range`): Range for the hammer (capped at about 50 meters).
 - Remove anything (default: `false`, key: `remove_anything`): Allows removing any object.
 - Remove area (default: `0`, key: `remove_area`): Removes same objects within the radius.
 - Repair anything (default: `false`, key: `repair_anything`): Allows healing or repairing any object.
 - Reset offset on unfreeze (default `true`, key: `reset_offset_on_unfreeze`): Removes the placement offset when unfreezing the placement.
+- Save blueprints to profile (default: `false`, key: `save_blueprints_to_profile`): If enabled, blueprints are saved to the profile folder instead of the base Valheim folder.
 - Show command values (default: `false`, key: `show_command_values`): Always show the command on tool descriptions.
 - Snap points for all objects (default: `false`, key: `snap_points_for_all_objects`):If enabled, multi selection creates snap points for every object.
 - Unfreeze on select (default `true`, key: `unfreeze_on_select`): Removes the placement freeze when selecting a new object.
