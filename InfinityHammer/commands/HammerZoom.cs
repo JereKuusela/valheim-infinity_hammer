@@ -33,6 +33,7 @@ public class HammerZoomCommand
       if (!Helper.GetPlayer().InPlaceMode()) return;
       var direction = args.Length > 2 ? args[2] : "";
       Zoom(args[1], direction, action(Scaling.Get()));
+      Scaling.UpdateGhost();
       if (!isCommand)
         Scaling.PrintScale(args.Context);
     });

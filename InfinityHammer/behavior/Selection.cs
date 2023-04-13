@@ -468,7 +468,7 @@ public partial class Selected
         obj.transform.localRotation = item.Rot;
         obj.transform.localScale = item.Scale;
         item.Data = SetData(obj, item.ExtraInfo, item.Data);
-        Objects.Add(new SelectedObject(item.Prefab, obj.GetComponent<ZNetView>().m_syncInitialScale, item.Data));
+        Objects.Add(new SelectedObject(item.Prefab, obj.GetComponent<ZNetView>()?.m_syncInitialScale ?? false, item.Data));
 
       }
       catch (InvalidOperationException e)

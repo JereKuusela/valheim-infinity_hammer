@@ -182,6 +182,7 @@ public class Ruler
     }
   }
   public static float Height => UseHeight ? Scaling.Command.Y : 0f;
+  public static bool SnapToGround => true;
 
   private static string DescriptionScale()
   {

@@ -5,8 +5,20 @@ public class RectangleProjector : CircleProjector
 {
   public float m_width = 5f;
   public float m_depth = 5f;
+  private Vector3 Snap(Vector3 pos)
+  {
+    RaycastHit raycastHit;
+    if (Physics.Raycast(pos + Vector3.up * 500f, Vector3.down, out raycastHit, 1000f, this.m_mask.value))
+      pos.y = raycastHit.point.y;
+    return pos;
+  }
   private Transform Get(int index) => m_segments[index].transform;
   private void Set(int index, Vector3 pos) => Get(index).localPosition = pos;
+  private void Snap(int index)
+  {
+    var segment = Get(index);
+    segment.position = Snap(segment.position);
+  }
   private void SetRot(int index, Vector3 rot) => Get(index).localRotation = Quaternion.LookRotation(rot, Vector3.up);
   private void EdgeFix(int index, float percent, float max, float start, float end, Vector3 direction)
   {
@@ -59,6 +71,7 @@ public class RectangleProjector : CircleProjector
       var pos = basePos + percent * size * Vector3.forward;
       Set(index, pos);
       EdgeFix(index, percent, size, start, end, Vector3.forward);
+      if (Ruler.SnapToGround) Snap(index);
     }
     basePos = m_depth * Vector3.forward - (m_width + halfLine) * Vector3.right;
     end = start + 2f * m_width;
@@ -70,6 +83,7 @@ public class RectangleProjector : CircleProjector
       var pos = basePos + percent * size * Vector3.right;
       Set(index, pos);
       EdgeFix(index, percent, size, start, end, Vector3.right);
+      if (Ruler.SnapToGround) Snap(index);
     }
     basePos = m_width * Vector3.right - (m_depth + halfLine) * Vector3.back;
     end = start + 2f * m_depth;
@@ -81,6 +95,7 @@ public class RectangleProjector : CircleProjector
       var pos = basePos + percent * size * Vector3.back;
       Set(index, pos);
       EdgeFix(index, percent, size, start, end, Vector3.back);
+      if (Ruler.SnapToGround) Snap(index);
     }
     basePos = m_depth * Vector3.back - (m_width + halfLine) * Vector3.left;
     end = start + 2f * m_width;
@@ -92,6 +107,7 @@ public class RectangleProjector : CircleProjector
       var pos = basePos + percent * size * Vector3.left;
       Set(index, pos);
       EdgeFix(index, percent, size, start, end, Vector3.left);
+      if (Ruler.SnapToGround) Snap(index);
     }
     Vector3 offset = new(0f, Ruler.Height, 0f);
     if (offset == Vector3.zero) return;

@@ -17,6 +17,10 @@ public class ToolData
   public string initialHeight = "";
   [DefaultValue("")]
   public string initialSize = "";
+  [DefaultValue("")]
+  public string snapGround = "";
+  [DefaultValue("")]
+  public string playerLevel = "";
   [DefaultValue(false)]
   public bool instant = false;
   [DefaultValue(null)]
