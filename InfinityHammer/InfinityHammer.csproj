@@ -59,6 +59,9 @@
     <Reference Include="assembly_guiutils_publicized.dll">
       <HintPath>..\..\Libs\assembly_guiutils_publicized.dll</HintPath>
     </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>..\..\Libs\Unity.TextMeshPro.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="ILRepack.Lib.MSBuild" Version="2.1.18" />

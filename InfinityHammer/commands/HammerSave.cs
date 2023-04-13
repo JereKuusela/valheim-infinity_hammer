@@ -11,6 +11,15 @@ public class HammerSaveCommand
 {
   private static void Serialize(ZDO zdo, ZPackage pkg)
   {
+    zdo.m_vec3?.Remove(Hash.Scale);
+    zdo.m_vec3?.Remove(Hash.SpawnPoint);
+    zdo.m_ints?.Remove(Hash.Seed);
+    zdo.m_ints?.Remove(Hash.Location);
+    if (zdo.m_strings != null && zdo.m_strings.ContainsKey(Hash.OverrideItems))
+    {
+      zdo.m_ints?.Remove(Hash.AddedDefaultItems);
+      zdo.m_strings?.Remove(Hash.Items);
+    }
     var num = 0;
     if (zdo.m_floats != null && zdo.m_floats.Count > 0)
       num |= 1;

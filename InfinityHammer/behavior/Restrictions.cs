@@ -43,42 +43,30 @@ public class UnlockPlacement
     __instance.SetPlacementGhostValid(true);
   }
 }
-[HarmonyPatch(typeof(Location), nameof(Location.IsInsideNoBuildLocation))]
+[HarmonyPatch(typeof(Location), nameof(Location.IsInsideNoBuildLocation)), HarmonyPriority(Priority.Last)]
 public class IsInsideNoBuildLocation
 {
-  public static bool Prefix(ref bool __result)
+  public static bool Postfix(bool result)
   {
-    if (Configuration.IgnoreNoBuild)
-    {
-      __result = false;
-      return false;
-    }
-    return true;
+    if (Configuration.IgnoreNoBuild) return false;
+    return result;
   }
 }
-[HarmonyPatch(typeof(PrivateArea), nameof(PrivateArea.CheckAccess))]
+[HarmonyPatch(typeof(PrivateArea), nameof(PrivateArea.CheckAccess)), HarmonyPriority(Priority.Last)]
 public class CheckAccess
 {
-  public static bool Prefix(ref bool __result)
+  public static bool Postfix(bool result)
   {
-    if (Configuration.IgnoreWards)
-    {
-      __result = true;
-      return false;
-    }
-    return true;
+    if (Configuration.IgnoreWards) return true;
+    return result;
   }
 }
-[HarmonyPatch(typeof(Player), nameof(Player.CheckCanRemovePiece))]
+[HarmonyPatch(typeof(Player), nameof(Player.CheckCanRemovePiece)), HarmonyPriority(Priority.Last)]
 public class CheckCanRemovePiece
 {
-  public static bool Prefix(ref bool __result)
+  public static bool Postfix(bool result)
   {
-    if (Configuration.NoCost)
-    {
-      __result = true;
-      return false;
-    }
-    return true;
+    if (Configuration.NoCost) return true;
+    return result;
   }
 }
