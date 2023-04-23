@@ -14,7 +14,7 @@ public class InfinityHammer : BaseUnityPlugin
 {
   public const string GUID = "infinity_hammer";
   public const string NAME = "Infinity Hammer";
-  public const string VERSION = "1.33";
+  public const string VERSION = "1.34";
   public static bool StructureTweaks = false;
 #nullable disable
   public static ManualLogSource Log;
@@ -48,9 +48,8 @@ public class InfinityHammer : BaseUnityPlugin
   private void SetupWatcher()
   {
     FileSystemWatcher watcher = new(Path.GetDirectoryName(Config.ConfigFilePath), Path.GetFileName(Config.ConfigFilePath));
+    watcher.NotifyFilter = NotifyFilters.Size;
     watcher.Changed += ReadConfigValues;
-    watcher.Created += ReadConfigValues;
-    watcher.Renamed += ReadConfigValues;
     watcher.IncludeSubdirectories = true;
     watcher.SynchronizingObject = ThreadingHelper.SynchronizingObject;
     watcher.EnableRaisingEvents = true;

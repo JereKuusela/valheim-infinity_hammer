@@ -1,3 +1,9 @@
+- v1.34
+  - Adds a center piece support to blueprints.
+  - Adds a new setting "Blueprint center piece" for the default center piece value.
+  - Fixes the `hammer health=` not working for creature max health.
+  - Removes snap points from blueprint saving (conflicts with the center piece).
+
 - v1.33
   - Adds a new setting "Save blueprints to profile" to determine whether profile or base Valheim folder is used.
   - Improves placing of dungeon generators.

@@ -11,6 +11,8 @@ namespace InfinityHammer;
 public partial class Configuration
 {
 #nullable disable
+  public static ConfigEntry<string> configDefaultCenterPiece;
+  public static string DefaultCenterPiece => configDefaultCenterPiece.Value;
   public static ConfigEntry<string> configVersion;
   public static ConfigEntry<string> configBlueprintFolder;
   public static string BlueprintGlobalFolder => Path.Combine("BepInEx", "config", configBlueprintFolder.Value);
@@ -109,6 +111,7 @@ public partial class Configuration
     UpdateMirrorFlip();
     configBlueprintFolder = wrapper.Bind(section, "Blueprint folder", "PlanBuild", "Folder relative to the config folder.");
     configSaveBlueprintsToProfile = wrapper.Bind(section, "Save blueprints to profile", false, "If enabled, blueprints are saved to the profile folder instead of base Valheim folder.");
+    configDefaultCenterPiece = wrapper.Bind(section, "Blueprint center piece", "piece_bpcenterpoint", "Default center piece for blueprints.");
 
     commandDefaultSize = wrapper.Bind(section, "Command default size", "10", "Default size for commands.");
     commandDefaultSize.SettingChanged += (s, e) =>

@@ -152,7 +152,14 @@ public class HammerSelect
       }
       if (selected == null) return;
       if (pars.Health.HasValue)
-        UpdateZDOs(zdo => zdo.Set(Hash.Health, pars.Health.Value));
+      {
+        if (selected.GetComponent<Character>())
+        {
+          UpdateZDOs(zdo => zdo.Set(Hash.Health, pars.Health.Value * 1.000001f));
+          UpdateZDOs(zdo => zdo.Set(Hash.MaxHealth, pars.Health.Value));
+        }
+        else UpdateZDOs(zdo => zdo.Set(Hash.Health, pars.Health.Value));
+      }
       if (pars.Level.HasValue)
         UpdateZDOs(zdo => zdo.Set(Hash.Level, pars.Level.Value));
       if (pars.Growth != Growth.Default)

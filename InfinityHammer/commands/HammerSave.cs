@@ -13,8 +13,6 @@ public class HammerSaveCommand
   {
     zdo.m_vec3?.Remove(Hash.Scale);
     zdo.m_vec3?.Remove(Hash.SpawnPoint);
-    zdo.m_ints?.Remove(Hash.Seed);
-    zdo.m_ints?.Remove(Hash.Location);
     if (zdo.m_strings != null && zdo.m_strings.ContainsKey(Hash.OverrideItems))
     {
       zdo.m_ints?.Remove(Hash.AddedDefaultItems);
@@ -141,7 +139,7 @@ public class HammerSaveCommand
     var info = GetExtraInfo(obj, zdo);
     bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), obj.transform.localPosition, obj.transform.localRotation, obj.transform.localScale, info, zdo));
   }
-  private static Blueprint BuildBluePrint(Player player, GameObject obj)
+  private static Blueprint BuildBluePrint(Player player, GameObject obj, string centerPiece)
   {
     Blueprint bp = new();
     bp.Name = Utils.GetPrefabName(obj);
@@ -155,6 +153,8 @@ public class HammerSaveCommand
     if (Selection.Type == SelectedType.Object || Selection.Type == SelectedType.Default)
     {
       AddSingleObject(bp, obj);
+      // Snap points are sort of useful for single objects.
+      // Since single objects should just have custom data but otherwise the original behavior.
       foreach (Transform child in obj.transform)
       {
         if (Helper.IsSnapPoint(child.gameObject))
@@ -166,15 +166,15 @@ public class HammerSaveCommand
       var i = 0;
       foreach (Transform tr in obj.transform)
       {
-        if (Helper.IsSnapPoint(tr.gameObject))
-          bp.SnapPoints.Add(tr.localPosition);
-        else
-        {
-          AddObject(bp, tr.gameObject, i);
-          i += 1;
-        }
+        // Snap points aren't that useful for multiple objects.
+        // Especially when they conflict with the center piece.
+        // In the future, snapPiece could be added to allow users to select the snap points.
+        if (Helper.IsSnapPoint(tr.gameObject)) continue;
+        AddObject(bp, tr.gameObject, i);
+        i += 1;
       }
     }
+    bp.Center(centerPiece);
     return bp;
   }
 
@@ -184,7 +184,8 @@ public class HammerSaveCommand
     lines.Add($"#Name:{bp.Name}");
     lines.Add($"#Creator:{bp.Creator}");
     lines.Add($"#Description:{bp.Description}");
-    lines.Add($"#Category: InfinityHammer");
+    lines.Add($"#Category:InfinityHammer");
+    lines.Add($"#Center:{bp.CenterPiece}");
     lines.Add($"#SnapPoints");
     lines.AddRange(bp.SnapPoints.Select(GetPlanBuildSnapPoint));
     lines.Add($"#Pieces");
@@ -232,15 +233,17 @@ public class HammerSaveCommand
     CommandWrapper.Register("hammer_save", (int index) =>
     {
       if (index == 0) return CommandWrapper.Info("File name.");
+      if (index == 1) return CommandWrapper.ObjectIds();
       return null;
     });
-    Helper.Command("hammer_save", "[file name] - Saves the selection to a blueprint.", (args) =>
+    Helper.Command("hammer_save", "[file name] [center piece] - Saves the selection to a blueprint.", (args) =>
     {
       Helper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
       var player = Helper.GetPlayer();
       var ghost = Helper.GetPlacementGhost();
-      var bp = BuildBluePrint(player, ghost);
+      var center = args.Length > 2 ? args[2] : "";
+      var bp = BuildBluePrint(player, ghost, center);
       var lines = GetPlanBuildFile(bp);
       var name = Path.GetFileNameWithoutExtension(args[1]) + ".blueprint";
       var path = Path.Combine(Configuration.SaveBlueprintsToProfile ? Configuration.BlueprintLocalFolder : Configuration.BlueprintGlobalFolder, name);

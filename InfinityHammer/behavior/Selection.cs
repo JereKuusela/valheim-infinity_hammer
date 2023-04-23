@@ -436,6 +436,8 @@ public partial class Selected
     var piece = Ghost.AddComponent<Piece>();
     piece.m_name = bp.Name;
     piece.m_description = bp.Description;
+    if (piece.m_description == "")
+      ExtraDescription = "Center: " + bp.CenterPiece;
     ZNetView.m_forceDisableInit = true;
     foreach (var item in bp.Objects)
     {
@@ -447,7 +449,7 @@ public partial class Selected
         obj.transform.localRotation = item.Rot;
         obj.transform.localScale = item.Scale;
         item.Data = SetData(obj, item.ExtraInfo, item.Data);
-        Objects.Add(new SelectedObject(item.Prefab, obj.GetComponent<ZNetView>().m_syncInitialScale, item.Data));
+        Objects.Add(new SelectedObject(item.Prefab, obj.GetComponent<ZNetView>()?.m_syncInitialScale ?? false, item.Data));
 
       }
       catch (InvalidOperationException e)

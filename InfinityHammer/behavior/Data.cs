@@ -19,6 +19,7 @@ public class DataHelper
     ZNetView.m_initZDO.m_distant = view.m_distant;
     ZNetView.m_initZDO.m_persistent = view.m_persistent;
     ZNetView.m_initZDO.m_prefab = hash;
+    Console.instance.AddString("Scale: " + scale);
     if (view.m_syncInitialScale)
       ZNetView.m_initZDO.Set("scale", scale);
     ZNetView.m_initZDO.m_dataRevision = 1;

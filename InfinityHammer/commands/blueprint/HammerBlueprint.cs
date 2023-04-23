@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Service;
 using UnityEngine;
 namespace InfinityHammer;
 public class HammerBlueprintCommand
@@ -51,6 +52,8 @@ public class HammerBlueprintCommand
         bp.Name = row.Split(':')[1];
       else if (row.StartsWith("#description:", StringComparison.OrdinalIgnoreCase))
         bp.Description = row.Split(':')[1];
+      else if (row.StartsWith("#center:", StringComparison.OrdinalIgnoreCase))
+        bp.CenterPiece = row.Split(':')[1];
       else if (row.StartsWith("#snappoints", StringComparison.OrdinalIgnoreCase))
         piece = false;
       else if (row.StartsWith("#pieces", StringComparison.OrdinalIgnoreCase))
@@ -227,23 +230,24 @@ public class HammerBlueprintCommand
 
   public HammerBlueprintCommand()
   {
-    List<string> named = new() { "scale" };
     CommandWrapper.Register("hammer_blueprint", (int index, int subIndex) =>
     {
       if (index == 0) return GetBlueprints();
-      return named;
-    }, new() {
-      { "scale", (int index) => CommandWrapper.Scale("scale", "Size of the object (if the object can be scaled).", index) },
+      if (index == 1) return CommandWrapper.ObjectIds();
+      if (index == 2) return CommandWrapper.Scale("scale", "Size of the object (if the object can be scaled).", subIndex);
+      return null;
     });
-    Helper.Command("hammer_blueprint", "[blueprint file] - Selects the blueprint to be placed.", (args) =>
+    Helper.Command("hammer_blueprint", "[blueprint file] [center piece] [scale] - Selects the blueprint to be placed.", (args) =>
     {
       Helper.CheatCheck();
-      HammerBlueprintParameters pars = new(args);
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
       Hammer.Equip(Tool.Hammer);
-      var name = args.Args.Skip(1).Where(arg => !arg.StartsWith("scale=", StringComparison.OrdinalIgnoreCase));
-      var bp = GetBluePrint(string.Join("_", name));
-      var obj = Selection.Set(args.Context, bp, pars.Scale ?? Vector3.one);
+      var name = args[1];
+      var centerPiece = args.Length > 2 ? args[2] : "";
+      var scale = args.Length > 3 ? Parse.TryScale(Parse.Split(args[3])) : Vector3.one;
+      var bp = GetBluePrint(name);
+      bp.Center(centerPiece);
+      var obj = Selection.Set(args.Context, bp, scale);
       PrintSelected(args.Context, bp.Name);
 
     }, GetBlueprints);

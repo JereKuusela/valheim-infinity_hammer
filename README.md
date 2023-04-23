@@ -217,11 +217,26 @@ To place objects in a rectangle or a box, use the following command:
 
 Basic support is provided for BuildShare .vbuild and [PlanBuild](https://valheim.thunderstore.io/package/MathiasDecrock/PlanBuild/) .blueprint files.
 
-The command `hammer_blueprint [file name]` allows placing them. If no files are found, configure the source folder.
+### Placing blueprints
 
-New PlanBuild blueprints can also be created with `hammer_save [file name]` command.
+The command `hammer_blueprint [file name] [center piece] [scale]` allows placing them. If no files are found, configure the source folder.
+
+The center piece determines which object in the blueprint is used as the bottom center point. Usually this is not needed because either the blueprint has the information or the default value from the config can be used.
+
+Scale allow setting the initial scaling. This is also rarely needed because most objects can't be scaled.
+
+### Creating blueprints
+
+New PlanBuild blueprints can be created with `hammer_save [file name] [center piece]` command.
+
+If the center piece is not given, the default value is used from the config.
 
 Note: Infinity Hammer will also store the object data when creating blueprints. This can significantly increase the file size and cause incompatibility with future PlanBuild versions.
+
+Following data is not copied:
+	- Object scale (redundant because the blueprint has own fields or the scale).
+	- Creature spawn coordinates (harmful because creatures try returning to the spawn coordinates when idle).
+	- Snap points (currently no good way to edit them).
 
 ## Utility
 
