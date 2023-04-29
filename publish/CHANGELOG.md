@@ -1,15 +1,13 @@
-- v1.34
+- v1.33
   - Adds a center piece support to blueprints.
   - Adds a new setting "Blueprint center piece" for the default center piece value.
-  - Fixes the `hammer health=` not working for creature max health.
-  - Removes snap points from blueprint saving (conflicts with the center piece).
-
-- v1.33
   - Adds a new setting "Save blueprints to profile" to determine whether profile or base Valheim folder is used.
   - Improves placing of dungeon generators.
   - Fixes build protection bypass not working with Expand World.
+  - Fixes the `hammer health=` not working for creature max health.
   - Merges the PlanBuild and BuildShare search folders to the same folder.
   - Removes "spawnpoint" data being saved to blueprints (so creatures won't try to return to arbitrary position on the world).
+  - Removes snap points from blueprint saving (conflicts with the center piece).
 
 - v1.32
   - Fixes error with the new update.
@@ -39,12 +37,3 @@
   - Improves compatibility with custom locations from Expand World mod.
   - Fixes error spam when trying to place creatures.
   - Fixes snap points not working when zooping.
-
-- v1.28
-  - Update for Mistlands PTB.
-
-- v1.27
-  - Fixes terrain reseting when using default hoe objects.
-
-- v1.26
-  - Fixes incompatiblity issue with Odin Ship mod.
