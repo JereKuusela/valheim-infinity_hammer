@@ -258,7 +258,7 @@ public static class Helper
     }
     return SafeInstantiate(location.m_prefab);
   }
-  public static bool IsSnapPoint(GameObject obj) => obj.CompareTag("snappoint");
+  public static bool IsSnapPoint(GameObject obj) => obj && obj.CompareTag("snappoint");
   public static List<GameObject> GetChildren(GameObject obj)
   {
     List<GameObject> children = new();

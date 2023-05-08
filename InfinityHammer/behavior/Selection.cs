@@ -209,6 +209,11 @@ public partial class Selected
     {
       Postprocess(Ghost, GetData());
       Helper.EnsurePiece(Ghost);
+      if (Helper.CountSnapPoints(Ghost) == 0)
+      {
+        SnapObj.SetActive(false);
+        UnityEngine.Object.Instantiate(SnapObj, Ghost.transform);
+      }
     }
     if (Type == SelectedType.Multiple)
     {

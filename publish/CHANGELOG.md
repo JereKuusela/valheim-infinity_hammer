@@ -1,3 +1,6 @@
+- v1.34
+  - Adds an automatic snap point to non-default objects.
+
 - v1.33
   - Adds a center piece support to blueprints.
   - Adds a new setting "Blueprint center piece" for the default center piece value.
