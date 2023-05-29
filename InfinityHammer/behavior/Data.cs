@@ -1,13 +1,12 @@
 using UnityEngine;
 namespace InfinityHammer;
 
-public class DataHelper
-{
+public class DataHelper {
   public static void Init(string name, Transform tr, ZDO? zdo = null) => Init(name.GetStableHashCode(), tr, zdo);
-  public static void Init(int hash, Transform tr, ZDO? zdo = null) => Init(hash, tr.position, tr.rotation, tr.localScale, zdo);
+  // Lossy scale is needed for multiple objects like blueprints (the container is scaled).
+  public static void Init(int hash, Transform tr, ZDO? zdo = null) => Init(hash, tr.position, tr.rotation, tr.lossyScale, zdo);
   public static void Init(ZDO zdo) => Init(zdo.GetPrefab(), zdo.GetPosition(), zdo.GetRotation(), zdo.GetVec3("scale", Vector3.one), zdo);
-  public static void Init(int hash, Vector3 pos, Quaternion rot, Vector3 scale, ZDO? zdo = null)
-  {
+  public static void Init(int hash, Vector3 pos, Quaternion rot, Vector3 scale, ZDO? zdo = null) {
     Clear();
     if (!ZNetScene.instance.m_namedPrefabs.TryGetValue(hash, out var obj)) return;
     if (!obj.TryGetComponent<ZNetView>(out var view)) return;
@@ -19,18 +18,15 @@ public class DataHelper
     ZNetView.m_initZDO.m_distant = view.m_distant;
     ZNetView.m_initZDO.m_persistent = view.m_persistent;
     ZNetView.m_initZDO.m_prefab = hash;
-    Console.instance.AddString("Scale: " + scale);
     if (view.m_syncInitialScale)
       ZNetView.m_initZDO.Set("scale", scale);
     ZNetView.m_initZDO.m_dataRevision = 1;
   }
-  public static void Clear()
-  {
+  public static void Clear() {
     ZNetView.m_initZDO = null;
   }
 
-  public static void Copy(ZDO from, ZDO to)
-  {
+  public static void Copy(ZDO from, ZDO to) {
     to.m_floats = from.m_floats;
     to.m_vec3 = from.m_vec3;
     to.m_quats = from.m_quats;

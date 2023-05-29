@@ -1,3 +1,6 @@
+- v1.35
+  - Fixes blueprint scaling not scaling the individual objects.
+
 - v1.34
   - Adds an automatic snap point to non-default objects.
 
