@@ -1,3 +1,6 @@
+- v1.36
+  - Updated for the new game version.
+
 - v1.35
   - Fixes blueprint scaling not scaling the individual objects.
 

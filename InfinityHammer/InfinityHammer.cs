@@ -13,7 +13,7 @@ namespace InfinityHammer;
 public class InfinityHammer : BaseUnityPlugin {
   public const string GUID = "infinity_hammer";
   public const string NAME = "Infinity Hammer";
-  public const string VERSION = "1.35";
+  public const string VERSION = "1.36";
   public static bool StructureTweaks = false;
 #nullable disable
   public static ManualLogSource Log;
@@ -35,13 +35,16 @@ public class InfinityHammer : BaseUnityPlugin {
       //
     }
   }
+#pragma warning disable IDE0051
   private void OnDestroy() {
+#pragma warning restore IDE0051
     Config.Save();
   }
 
   private void SetupWatcher() {
-    FileSystemWatcher watcher = new(Path.GetDirectoryName(Config.ConfigFilePath), Path.GetFileName(Config.ConfigFilePath));
-    watcher.NotifyFilter = NotifyFilters.Size;
+    FileSystemWatcher watcher = new(Path.GetDirectoryName(Config.ConfigFilePath), Path.GetFileName(Config.ConfigFilePath)) {
+      NotifyFilter = NotifyFilters.Size
+    };
     watcher.Changed += ReadConfigValues;
     watcher.IncludeSubdirectories = true;
     watcher.SynchronizingObject = ThreadingHelper.SynchronizingObject;

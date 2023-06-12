@@ -3,55 +3,27 @@ using System.Reflection;
 using HarmonyLib;
 using UnityEngine;
 namespace InfinityHammer;
-public static class GizmoWrapper
-{
+public static class GizmoWrapper {
   private static Assembly? Comfy = null;
   private static Assembly? Reloaded = null;
   private static Type ComfyType() => Comfy!.GetType("Gizmo.ComfyGizmo");
   private static Vector3 ComfyGet() => (Vector3)AccessTools.Field(ComfyType(), "_eulerAngles").GetValue(null);
-  private static void ComfySet(Vector3 angles)
-  {
+  private static void ComfySet(Vector3 angles) {
     AccessTools.Field(ComfyType(), "_eulerAngles").SetValue(null, angles);
     AccessTools.Method(ComfyType(), "Rotate").Invoke(null, new object[0]);
   }
-  public static void InitComfy(Assembly assembly)
-  {
+  public static void InitComfy(Assembly assembly) {
     Comfy = assembly;
   }
-  public static void InitReloaded(Assembly assembly)
-  {
+  public static void InitReloaded(Assembly assembly) {
     Reloaded = assembly;
   }
-  static bool Prefix() => !Selection.IsCommand();
-  private static void ComfyRotation(Quaternion rotation)
-  {
+  private static void ComfyRotation(Quaternion rotation) {
     if (Comfy == null) return;
     var euler = rotation.eulerAngles;
     ComfySet(euler);
   }
-  private static void ComfyRotationX(float rotation)
-  {
-    if (Comfy == null) return;
-    var angles = ComfyGet();
-    angles.x = rotation;
-    ComfySet(angles);
-  }
-  private static void ComfyRotationY(float rotation)
-  {
-    if (Comfy == null) return;
-    var angles = ComfyGet();
-    angles.y = rotation;
-    ComfySet(angles);
-  }
-  private static void ComfyRotationZ(float rotation)
-  {
-    if (Comfy == null) return;
-    var angles = ComfyGet();
-    angles.z = rotation;
-    ComfySet(angles);
-  }
-  private static void ComfyRotate(Vector3 rotation)
-  {
+  private static void ComfyRotate(Vector3 rotation) {
     if (Comfy == null) return;
     var angles = ComfyGet();
     angles += rotation;
@@ -60,68 +32,58 @@ public static class GizmoWrapper
   private static void ComfyRotateX(float rotation) => ComfyRotate(new(rotation, 0f, 0f));
   private static void ComfyRotateY(float rotation) => ComfyRotate(new(0f, rotation, 0f));
   private static void ComfyRotateZ(float rotation) => ComfyRotate(new(0f, 0f, rotation));
-  private static void ReloadedRotateX(float rotation)
-  {
+  private static void ReloadedRotateX(float rotation) {
     var gizmo = GetReloaded();
     if (!gizmo) return;
     var rot = gizmo.transform.rotation.eulerAngles;
     rot.x += rotation;
     gizmo.transform.rotation = Quaternion.Euler(rot);
   }
-  private static void ReloadedRotateY(float rotation)
-  {
+  private static void ReloadedRotateY(float rotation) {
     var gizmo = GetReloaded();
     if (!gizmo) return;
     var rot = gizmo.transform.rotation.eulerAngles;
     rot.y += rotation;
     gizmo.transform.rotation = Quaternion.Euler(rot);
   }
-  private static void ReloadedRotateZ(float rotation)
-  {
+  private static void ReloadedRotateZ(float rotation) {
     var gizmo = GetReloaded();
     if (!gizmo) return;
     var rot = gizmo.transform.rotation.eulerAngles;
     rot.z += rotation;
     gizmo.transform.rotation = Quaternion.Euler(rot);
   }
-  private static GameObject GetReloaded()
-  {
+  private static GameObject GetReloaded() {
 #nullable disable
     if (Reloaded == null) return null;
 #nullable enable
     var gizmo = GameObject.Find("GizmoRoot(Clone)");
     if (gizmo) return gizmo;
     var player = Player.m_localPlayer;
-    if (player)
-    {
+    if (player) {
       // Gizmo needs these to ensure that it is initialized properly.
       player.UpdatePlacementGhost(false);
       player.UpdatePlacement(false, 0);
     }
     return GameObject.Find("GizmoRoot(Clone)");
   }
-  private static void SetReloadedRotation(Quaternion rotation)
-  {
+  private static void SetReloadedRotation(Quaternion rotation) {
     var gizmo = GetReloaded();
     if (gizmo) gizmo.transform.rotation = rotation;
   }
-  public static void SetRotation(Quaternion rotation)
-  {
+  public static void SetRotation(Quaternion rotation) {
     ComfyRotation(rotation);
     SetReloadedRotation(rotation);
   }
-  public static void RotateX(float rotation)
-  {
+  public static void RotateX(float rotation) {
     ComfyRotateX(rotation);
     ReloadedRotateX(rotation);
   }
-  public static void RotateY(float rotation)
-  {
+  public static void RotateY(float rotation) {
     ComfyRotateY(rotation);
     ReloadedRotateY(rotation);
   }
-  public static void RotateZ(float rotation)
-  {
+  public static void RotateZ(float rotation) {
     ComfyRotateZ(rotation);
     ReloadedRotateZ(rotation);
   }
