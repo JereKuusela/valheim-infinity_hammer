@@ -7,9 +7,9 @@ public static class GizmoWrapper {
   private static Assembly? Comfy = null;
   private static Assembly? Reloaded = null;
   private static Type ComfyType() => Comfy!.GetType("Gizmo.ComfyGizmo");
-  private static Vector3 ComfyGet() => (Vector3)AccessTools.Field(ComfyType(), "_eulerAngles").GetValue(null);
+  private static Vector3 ComfyGet() => (Vector3)AccessTools.Field(ComfyType(), "EulerAngles").GetValue(null);
   private static void ComfySet(Vector3 angles) {
-    AccessTools.Field(ComfyType(), "_eulerAngles").SetValue(null, angles);
+    AccessTools.Field(ComfyType(), "EulerAngles").SetValue(null, angles);
     AccessTools.Method(ComfyType(), "Rotate").Invoke(null, new object[0]);
   }
   public static void InitComfy(Assembly assembly) {

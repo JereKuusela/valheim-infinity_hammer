@@ -1,6 +1,7 @@
 - v1.38
   - Fixes custom data and undo/redo not working on servers.
-   
+  - Fixes not working with the latest Comfy Gizmo.
+
 - v1.37
   - Fixes custom data.
 
