@@ -20,6 +20,8 @@ Recommended mods:
 - [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/): Enables key binds, undo and better command support.
 - [World Edit Commands](https://valheim.thunderstore.io/package/JereKuusela/World_Edit_Commands/): Enables terrain tools and additional commands.
 - [Gizmo](https://valheim.thunderstore.io/package/ComfyMods/Gizmo/): Enables free rotation.
+- [More Vanilla Builds](https://valheim.thunderstore.io/package/BippityBoppityBoo/MoreVanillaBuilds/): Adds more objects to the build menu.
+- [Structure Tweaks](https://valheim.thunderstore.io/package/JereKuusela/Structure_Tweaks/): Allows scaling every object. Everyone must have this mod installed.
 
 Similar mods:
 
@@ -223,7 +225,7 @@ The command `hammer_blueprint [file name] [center piece] [scale]` allows placing
 
 The center piece determines which object in the blueprint is used as the bottom center point. Usually this is not needed because either the blueprint has the information or the default value from the config can be used.
 
-Scale allow setting the initial scaling. This is also rarely needed because most objects can't be scaled.
+Scale allow setting the initial scaling. This is also rarely needed because most objects can't be scaled (unless [Structure Tweaks](https://valheim.thunderstore.io/package/JereKuusela/Structure_Tweaks/) is installed for all clients).
 
 ### Creating blueprints
 
@@ -408,7 +410,7 @@ Hammer configuration applies to all building, including the standard structures 
 
 When selecting an existing object, its size and rotation is copied to the placement tool. The last rotation is always used when using the build window.
 
-Object scaling only works for some objects (mostly trees and rocks). This is restricted by the base game (scaling is not stored in the save file).
+Object scaling only works for some objects (mostly trees and rocks). This is restricted by the base game (scaling is not stored in the save file). [Structure Tweaks](https://valheim.thunderstore.io/package/JereKuusela/Structure_Tweaks/) mod can be used to enable scaling for all objects (required for all clients).
 
 If "Overwrite health" is enabled, objects have a specified health (including creatures). For minerocks, the health is applied to the individual parts (the outer shell stays at 1 health). Repairing can be used to modify the shell health if needed.
 
