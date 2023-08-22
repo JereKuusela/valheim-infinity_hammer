@@ -3,23 +3,27 @@ using HarmonyLib;
 using Service;
 using UnityEngine;
 namespace InfinityHammer;
-public enum Tool {
+public enum Tool
+{
   Hammer,
   Hoe
 }
-public static class Hammer {
+public static class Hammer
+{
 
   public static bool AllLocationsObjects = false;
   public static bool RandomLocationDamage = false;
 
-  public static void RemoveSelection() {
+  public static void RemoveSelection()
+  {
     Selection.Clear();
   }
   public static bool IsTool(string name, Tool tool) => tool == Tool.Hammer ? Configuration.HammerTools.Contains(name.ToLower()) : Configuration.HoeTools.Contains(name.ToLower());
   public static bool IsTool(GameObject obj, Tool tool) => obj && IsTool(Utils.GetPrefabName(obj), tool);
   public static bool IsTool(ItemDrop.ItemData item, Tool tool) => item != null && IsTool(item.m_dropPrefab, tool);
   public static bool HasTool(Player player, Tool tool) => player && IsTool(player.GetRightItem(), tool);
-  public static void Equip(Tool tool) {
+  public static void Equip(Tool tool)
+  {
     var player = Helper.GetPlayer();
     if (HasTool(player, tool)) return;
     var inventory = player.GetInventory();
@@ -27,12 +31,14 @@ public static class Hammer {
 
     player.EquipItem(item);
   }
-  public static void Clear() {
+  public static void Clear()
+  {
     var player = Player.m_localPlayer;
     if (!player) return;
-    player.SetSelectedPiece(new(0, 0));
+    player.SetSelectedPiece(new Vector2Int(0, 0));
   }
-  public static void Place() {
+  public static void Place()
+  {
     var player = Player.m_localPlayer;
     if (!player) return;
     player.m_placePressedTime = Time.time;
@@ -40,7 +46,8 @@ public static class Hammer {
     player.UpdatePlacement(true, 0f);
   }
   ///<summary>Replaces LocationProxy with the actual location.</summary>
-  public static void SpawnLocation(ZNetView view) {
+  public static void SpawnLocation(ZNetView view)
+  {
     Helper.RemoveZDO(view.GetZDO());
     var data = Selection.GetData();
     if (data == null) return;
@@ -53,7 +60,8 @@ public static class Hammer {
     CustomizeSpawnLocation.AllViews = AllLocationsObjects;
     CustomizeSpawnLocation.RandomDamage = RandomLocationDamage;
     ZoneSystem.instance.SpawnLocation(location, seed, position, rotation, ZoneSystem.SpawnMode.Full, new());
-    foreach (var zdo in Undo.Objects) {
+    foreach (var zdo in Undo.Objects)
+    {
       if (ZNetScene.instance.m_instances.TryGetValue(zdo, out var obj))
         PostProcessPlaced(obj.gameObject);
     }
@@ -62,42 +70,51 @@ public static class Hammer {
   }
 
   ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>
-  public static void PostProcessPlaced(GameObject obj) {
+  public static void PostProcessPlaced(GameObject obj)
+  {
     var view = obj.GetComponent<ZNetView>();
     if (!Configuration.Enabled || !view) return;
     var zdo = view.GetZDO();
     var piece = obj.GetComponent<Piece>();
-    if (piece) {
+    if (piece)
+    {
       piece.m_canBeRemoved = true;
       // Creator data is only interesting for actual targets. Dummy components will have these both as false.
-      if (piece.m_randomTarget || piece.m_primaryTarget) {
-        if (Configuration.NoCreator) {
+      if (piece.m_randomTarget || piece.m_primaryTarget)
+      {
+        if (Configuration.NoCreator)
+        {
           zdo.Set(Hash.Creator, 0L);
           piece.m_creator = 0;
-        } else
+        }
+        else
           piece.SetCreator(Game.instance.GetPlayerProfile().GetPlayerID());
       }
     }
     var character = obj.GetComponent<Character>();
-    if (Configuration.OverwriteHealth > 0f) {
+    if (Configuration.OverwriteHealth > 0f)
+    {
       if (character)
         zdo.Set(Hash.MaxHealth, Configuration.OverwriteHealth);
       if (obj.GetComponent<TreeLog>() || obj.GetComponent<WearNTear>() || obj.GetComponent<Destructible>() || obj.GetComponent<TreeBase>() || character)
         zdo.Set(Hash.Health, Configuration.OverwriteHealth);
       var mineRock = obj.GetComponent<MineRock5>();
-      if (mineRock) {
+      if (mineRock)
+      {
         foreach (var area in mineRock.m_hitAreas) area.m_health = Configuration.OverwriteHealth;
         mineRock.SaveHealth();
       }
     }
-    if (obj.TryGetComponent<DungeonGenerator>(out var dg)) {
+    if (obj.TryGetComponent<DungeonGenerator>(out var dg))
+    {
       if (zdo.GetInt("rooms") == 0)
         dg.Generate(ZoneSystem.SpawnMode.Full);
     }
   }
 
   ///<summary>Restores durability and stamina to counter the usage.</summary>
-  public static void PostProcessTool(Player obj) {
+  public static void PostProcessTool(Player obj)
+  {
     var item = obj.GetRightItem();
     if (item == null) return;
     if (Configuration.NoCost)
@@ -110,8 +127,10 @@ public static class Hammer {
 
 
 [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.UnequipItem))]
-public class UnfreezeOnUnequip {
-  static void Prefix(Humanoid __instance, ItemDrop.ItemData item) {
+public class UnfreezeOnUnequip
+{
+  static void Prefix(Humanoid __instance, ItemDrop.ItemData item)
+  {
     if (__instance != Player.m_localPlayer || item == null) return;
     if (Configuration.UnfreezeOnUnequip) Position.Unfreeze();
   }
