@@ -7,9 +7,11 @@ using UnityEngine;
 namespace InfinityHammer;
 
 
-public class HammerSaveCommand {
+public class HammerSaveCommand
+{
 
-  private static string GetExtraInfo(GameObject obj, ZDOData data) {
+  private static string GetExtraInfo(GameObject obj, ZDOData data)
+  {
     var info = "";
     if (obj.GetComponent<Sign>())
       info = data.GetString(Hash.Text, "");
@@ -18,7 +20,8 @@ public class HammerSaveCommand {
     if (obj.GetComponent<Tameable>())
       info = data.GetString(Hash.TamedName, "");
 
-    if (obj.GetComponent<ItemStand>() && data.GetString(Hash.Item) != "") {
+    if (obj.GetComponent<ItemStand>() && data.GetString(Hash.Item) != "")
+    {
       var item = data.GetString(Hash.Item);
       var variant = data.GetInt(Hash.Variant);
       if (variant != 0)
@@ -26,7 +29,8 @@ public class HammerSaveCommand {
       else
         info = $"{item}";
     }
-    if (obj.TryGetComponent<ArmorStand>(out var armorStand)) {
+    if (obj.TryGetComponent<ArmorStand>(out var armorStand))
+    {
       info = $"{armorStand.m_pose}:";
       info += $"{armorStand.m_slots.Count}:";
       var slots = armorStand.m_slots.Select(slot => $"{slot.m_visualName}:{slot.m_visualVariant}");
@@ -34,38 +38,48 @@ public class HammerSaveCommand {
     }
     return info;
   }
-  private static void AddSingleObject(Blueprint bp, GameObject obj) {
+  private static void AddSingleObject(Blueprint bp, GameObject obj)
+  {
     var data = Selection.GetData();
     var info = GetExtraInfo(obj, data);
     bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), Vector3.zero, Quaternion.identity, obj.transform.localScale, info, data.Save()));
   }
-  private static void AddObject(Blueprint bp, GameObject obj, int index = 0) {
+  private static void AddObject(Blueprint bp, GameObject obj, int index = 0)
+  {
     var data = Selection.GetData(index);
     var info = GetExtraInfo(obj, data);
     bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), obj.transform.localPosition, obj.transform.localRotation, obj.transform.localScale, info, data.Save()));
   }
-  private static Blueprint BuildBluePrint(Player player, GameObject obj, string centerPiece) {
-    Blueprint bp = new() {
+  private static Blueprint BuildBluePrint(Player player, GameObject obj, string centerPiece)
+  {
+    Blueprint bp = new()
+    {
       Name = Utils.GetPrefabName(obj),
-      Creator = player.GetPlayerName()
+      Creator = player.GetPlayerName(),
+      Rotation = Helper.GetPlacementGhost().transform.rotation.eulerAngles,
     };
     var piece = obj.GetComponent<Piece>();
-    if (piece) {
+    if (piece)
+    {
       bp.Name = Localization.instance.Localize(piece.m_name);
       bp.Description = piece.m_description;
     }
-    if (Selection.Type == SelectedType.Object || Selection.Type == SelectedType.Default) {
+    if (Selection.Type == SelectedType.Object || Selection.Type == SelectedType.Default)
+    {
       AddSingleObject(bp, obj);
       // Snap points are sort of useful for single objects.
       // Since single objects should just have custom data but otherwise the original behavior.
-      foreach (Transform child in obj.transform) {
+      foreach (Transform child in obj.transform)
+      {
         if (Helper.IsSnapPoint(child.gameObject))
           bp.SnapPoints.Add(child.localPosition);
       }
     }
-    if (Selection.Type == SelectedType.Multiple || Selection.Type == SelectedType.Location) {
+    if (Selection.Type == SelectedType.Multiple || Selection.Type == SelectedType.Location)
+    {
       var i = 0;
-      foreach (Transform tr in obj.transform) {
+      foreach (Transform tr in obj.transform)
+      {
         // Snap points aren't that useful for multiple objects.
         // Especially when they conflict with the center piece.
         // In the future, snapPiece could be added to allow users to select the snap points.
@@ -74,34 +88,41 @@ public class HammerSaveCommand {
         i += 1;
       }
     }
-    bp.Center(centerPiece);
+    var offset = bp.Center(centerPiece);
+    bp.Coordinates = player.m_placementGhost.transform.position - offset;
     return bp;
   }
 
-  private static string[] GetPlanBuildFile(Blueprint bp) {
-    List<string> lines = new() {
+  private static string[] GetPlanBuildFile(Blueprint bp)
+  {
+    List<string> lines = [
       $"#Name:{bp.Name}",
       $"#Creator:{bp.Creator}",
       $"#Description:{bp.Description}",
       $"#Category:InfinityHammer",
       $"#Center:{bp.CenterPiece}",
-      $"#SnapPoints"
-    };
-    lines.AddRange(bp.SnapPoints.Select(GetPlanBuildSnapPoint));
-    lines.Add($"#Pieces");
-    lines.AddRange(bp.Objects.Select(GetPlanBuildObject));
+      $"#Coordinates:{Helper.PrintXZY(bp.Coordinates)}",
+      $"#Rotation:{Helper.PrintYXZ(bp.Rotation)}",
+      $"#SnapPoints",
+      .. bp.SnapPoints.Select(GetPlanBuildSnapPoint),
+      $"#Pieces",
+      .. bp.Objects.Select(GetPlanBuildObject),
+    ];
     return lines.ToArray();
   }
-  private static string InvariantString(float f) {
+  private static string InvariantString(float f)
+  {
     return f.ToString(NumberFormatInfo.InvariantInfo);
   }
-  private static string GetPlanBuildSnapPoint(Vector3 pos) {
+  private static string GetPlanBuildSnapPoint(Vector3 pos)
+  {
     var x = InvariantString(pos.x);
     var y = InvariantString(pos.y);
     var z = InvariantString(pos.z);
     return $"{x};{y};{z}";
   }
-  private static string GetPlanBuildObject(BlueprintObject obj) {
+  private static string GetPlanBuildObject(BlueprintObject obj)
+  {
     var name = obj.Prefab;
     var posX = InvariantString(obj.Pos.x);
     var posY = InvariantString(obj.Pos.y);
@@ -115,20 +136,24 @@ public class HammerSaveCommand {
     var scaleZ = InvariantString(obj.Scale.z);
     var info = obj.ExtraInfo;
     var data = "";
-    if (obj.Data != null) {
+    if (obj.Data != null)
+    {
       data = obj.Data.GetBase64();
       if (data == "AAAAAA==") data = "";
     }
     return $"{name};;{posX};{posY};{posZ};{rotX};{rotY};{rotZ};{rotW};{info};{scaleX};{scaleY};{scaleZ};{data}";
   }
 
-  public HammerSaveCommand() {
-    CommandWrapper.Register("hammer_save", (int index) => {
+  public HammerSaveCommand()
+  {
+    CommandWrapper.Register("hammer_save", (int index) =>
+    {
       if (index == 0) return CommandWrapper.Info("File name.");
       if (index == 1) return CommandWrapper.ObjectIds();
       return null;
     });
-    Helper.Command("hammer_save", "[file name] [center piece] - Saves the selection to a blueprint.", (args) => {
+    Helper.Command("hammer_save", "[file name] [center piece] - Saves the selection to a blueprint.", (args) =>
+    {
       Helper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
       var player = Helper.GetPlayer();
@@ -140,7 +165,8 @@ public class HammerSaveCommand {
       var path = Path.Combine(Configuration.SaveBlueprintsToProfile ? Configuration.BlueprintLocalFolder : Configuration.BlueprintGlobalFolder, name);
       Directory.CreateDirectory(Path.GetDirectoryName(path));
       File.WriteAllLines(path, lines);
-      args.Context.AddString($"Blueprint saved to {path}");
+      args.Context.AddString($"Blueprint saved to {path} (pos: {Helper.PrintXZY(bp.Coordinates)} rot: {Helper.PrintYXZ(bp.Rotation)}).");
+      Selection.Set(args.Context, bp, Vector3.one);
     });
   }
 }

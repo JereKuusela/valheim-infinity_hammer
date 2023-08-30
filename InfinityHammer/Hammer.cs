@@ -135,3 +135,16 @@ public class UnfreezeOnUnequip
     if (Configuration.UnfreezeOnUnequip) Position.Unfreeze();
   }
 }
+
+[HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
+public class DisableSnapCycleWhenTyping
+{
+  static void Prefix(Player __instance, ref int __state)
+  {
+    __state = __instance.m_manualSnapPoint;
+  }
+  static void Postfix(Player __instance, ref int __state)
+  {
+    if (!__instance.TakeInput()) __instance.m_manualSnapPoint = __state;
+  }
+}

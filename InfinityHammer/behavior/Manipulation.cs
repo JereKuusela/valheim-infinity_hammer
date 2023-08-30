@@ -75,6 +75,7 @@ public class OverridePlacementGhost
   }
 }
 
+
 public static class Grid
 {
   public static bool Enabled => Precision != 0f;
@@ -211,7 +212,7 @@ public static class Rotating
     var player = Helper.GetPlayer();
     var rotation = obj.transform.rotation;
     player.m_placeRotation = Mathf.RoundToInt(rotation.eulerAngles.y / 22.5f);
-    GizmoWrapper.SetRotation(rotation);
+    GizmoWrapper.Set(rotation);
   }
   public static void RotateX(float value)
   {
@@ -228,5 +229,11 @@ public static class Rotating
   {
     Helper.GetPlayer();
     GizmoWrapper.RotateZ(value);
+  }
+  public static void Set(Quaternion rotation)
+  {
+    var player = Helper.GetPlayer();
+    player.m_placeRotation = Mathf.RoundToInt(rotation.eulerAngles.y / 22.5f);
+    GizmoWrapper.Set(rotation);
   }
 }
