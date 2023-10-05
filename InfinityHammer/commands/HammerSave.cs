@@ -95,7 +95,7 @@ public class HammerSaveCommand
 
   private static string[] GetPlanBuildFile(Blueprint bp)
   {
-    List<string> lines = [
+    return [
       $"#Name:{bp.Name}",
       $"#Creator:{bp.Creator}",
       $"#Description:{bp.Description}",
@@ -108,7 +108,6 @@ public class HammerSaveCommand
       $"#Pieces",
       .. bp.Objects.Select(GetPlanBuildObject),
     ];
-    return lines.ToArray();
   }
   private static string InvariantString(float f)
   {

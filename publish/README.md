@@ -8,11 +8,11 @@ Install also [Server Devcommands](https://valheim.thunderstore.io/package/JereKu
 
 Install also [World Edit Commands](https://valheim.thunderstore.io/package/JereKuusela/World_Edit_Commands/) for terrain tools.
 
-# Usage
+## Usage
 
 See [documentation](https://github.com/JereKuusela/valheim-infinity_hammer/blob/main/README.md).
 
-# Credits
+## Credits
 
 Thanks for Azumatt for creating the mod icon!
 

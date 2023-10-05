@@ -5,6 +5,7 @@
   - Changes the `hammer_save` command to print hammer position and rotation to the console.
   - Changes the `hammer_save` command to automatically load the saved blueprint.
   - Changes the `hammer_grid` to use X,Z,Y format instead of X,Y,Z.
+  - Fixed for the new patch.
 
 - v1.39
   - Fixed for the new patch.
@@ -18,6 +19,3 @@
 
 - v1.36
   - Updated for the new game version.
-
-- v1.35
-  - Fixes blueprint scaling not scaling the individual objects.
