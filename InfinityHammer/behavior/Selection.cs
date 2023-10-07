@@ -22,13 +22,13 @@ public enum PlacementType
 public class SelectedObject
 {
   public string Prefab = "";
-  public ZDO Data;
+  public ZDOData Data;
   public bool Scalable;
-  public SelectedObject(string name, bool scalable, ZDO data)
+  public SelectedObject(string name, bool scalable, ZDOData data)
   {
     Prefab = name;
     Scalable = scalable;
-    Data = data.Clone();
+    Data = data;
   }
 }
 
@@ -67,7 +67,7 @@ public static class Selection
   public static void Mirror() => Get()?.Mirror();
   public static void Postprocess(Vector3? scale) => Get()?.Postprocess(scale);
   public static void SetScale(Vector3 scale) => Get()?.SetScale(scale);
-  public static ZDO? GetData(int index = 0) => Get()?.GetData(index);
+  public static ZDOData GetData(int index = 0) => GetOrAdd().GetData(index);
   public static string Description() => Get()?.ExtraDescription ?? "";
   public static bool IsCommand() => Get()?.Type == SelectedType.Command;
   public static GameObject Set(string name, bool singleUse) => GetOrAdd().Set(name, singleUse);
@@ -99,14 +99,14 @@ public partial class Selected
   public bool SingleUse = false;
   public string Continuous = "";
   public RulerParameters RulerParameters = new();
-  public ZDO? GetData(int index = 0)
+  public ZDOData GetData(int index = 0)
   {
-    if (Objects.Count <= index) return null;
-    return Objects[index].Data.Clone();
+    if (Objects.Count <= index) throw new InvalidOperationException("Invalid index.");
+    return Objects[index].Data;
   }
   public int GetPrefab(int index = 0)
   {
-    if (Objects.Count <= index) return 0;
+    if (Objects.Count <= index) throw new InvalidOperationException("Invalid index.");
     return Objects[index].Prefab.GetStableHashCode();
   }
 
@@ -203,7 +203,7 @@ public partial class Selected
       plant.m_unhealthy.SetActive(unhealthy || unhealthyGrown);
     }
   }
-  private void Postprocess(GameObject obj, ZDO? zdo)
+  private void Postprocess(GameObject obj, ZDOData? zdo)
   {
     if (zdo == null) return;
     SetLevel(obj, zdo.GetInt(Hash.Level, -1));
@@ -222,6 +222,11 @@ public partial class Selected
     {
       Postprocess(Ghost, GetData());
       Helper.EnsurePiece(Ghost);
+      if (Helper.CountSnapPoints(Ghost) == 0)
+      {
+        SnapObj.SetActive(false);
+        UnityEngine.Object.Instantiate(SnapObj, Ghost.transform);
+      }
     }
     if (Type == SelectedType.Multiple)
     {
@@ -242,7 +247,7 @@ public partial class Selected
     var name = Utils.GetPrefabName(view.gameObject);
     var originalPrefab = ZNetScene.instance.GetPrefab(name);
     var prefab = Configuration.CopyState ? view.gameObject : originalPrefab;
-    var data = Configuration.CopyState ? view.GetZDO().Clone() : new();
+    ZDOData data = Configuration.CopyState ? new(view.GetZDO()) : new();
 
     if (!prefab) throw new InvalidOperationException("Invalid prefab.");
     if (prefab.GetComponent<Player>()) throw new InvalidOperationException("Players are not valid objects.");
@@ -293,13 +298,13 @@ public partial class Selected
       var name = Utils.GetPrefabName(view.gameObject);
       var originalPrefab = ZNetScene.instance.GetPrefab(name);
       var prefab = Configuration.CopyState ? view.gameObject : originalPrefab;
-      var data = Configuration.CopyState ? view.GetZDO().Clone() : new();
+      ZDOData data = Configuration.CopyState ? new(view.GetZDO()) : new();
       var obj = Helper.SafeInstantiate(prefab, Ghost);
       obj.SetActive(true);
       obj.transform.position = view.transform.position;
       obj.transform.rotation = view.transform.rotation;
       ResetColliders(obj, originalPrefab);
-      SetData(obj, "", data);
+      SetExtraInfo(obj, "", data);
       Objects.Add(new(name, view.m_syncInitialScale, data));
       if (view == views.First() || Configuration.AllSnapPoints)
         AddSnapPoints(obj);
@@ -367,7 +372,7 @@ public partial class Selected
     Clear();
     Ghost = Helper.SafeInstantiateLocation(location, Hammer.AllLocationsObjects ? null : seed);
     Helper.EnsurePiece(Ghost);
-    ZDO data = new();
+    ZDOData data = new();
     data.Set(Hash.Location, location.m_prefabName.GetStableHashCode());
     data.Set(Hash.Seed, seed);
     Objects.Add(new(location.m_prefabName, false, data));
@@ -375,52 +380,52 @@ public partial class Selected
     Helper.GetPlayer().SetupPlacementGhost();
     return Ghost;
   }
-  private static ZDO SetData(GameObject obj, string data, ZDO zdo)
+  private static void SetExtraInfo(GameObject obj, string extraInfo, ZDOData data)
   {
     if (obj.TryGetComponent<Sign>(out var sign))
     {
-      if (data == "")
-        data = zdo.GetString(Hash.Text, data);
+      if (extraInfo == "")
+        extraInfo = data.GetString(Hash.Text, extraInfo);
       else
-        zdo.Set(Hash.Text, data);
-      sign.m_textWidget.text = data;
+        data.Set(Hash.Text, extraInfo);
+      sign.m_textWidget.text = extraInfo;
     }
-    if (obj.GetComponent<TeleportWorld>() && data != "")
+    if (obj.GetComponent<TeleportWorld>() && extraInfo != "")
     {
-      zdo.Set(Hash.Tag, data);
+      data.Set(Hash.Tag, extraInfo);
     }
-    if (obj.GetComponent<Tameable>() && data != "")
+    if (obj.GetComponent<Tameable>() && extraInfo != "")
     {
-      zdo.Set(Hash.TamedName, data);
+      data.Set(Hash.TamedName, extraInfo);
     }
     if (obj.TryGetComponent<ItemStand>(out var itemStand))
     {
-      var split = data.Split(':');
+      var split = extraInfo.Split(':');
       var name = split[0];
       var variant = Parse.TryInt(split, 1, 0);
       var quality = Parse.TryInt(split, 2, 1);
-      if (data == "")
+      if (extraInfo == "")
       {
-        name = zdo.GetString(Hash.Item, name);
-        variant = zdo.GetInt(Hash.Variant, variant);
-        quality = zdo.GetInt(Hash.Quality, quality);
+        name = data.GetString(Hash.Item, name);
+        variant = data.GetInt(Hash.Variant, variant);
+        quality = data.GetInt(Hash.Quality, quality);
       }
       else
       {
-        zdo.Set(Hash.Item, name);
-        zdo.Set(Hash.Variant, variant);
-        zdo.Set(Hash.Quality, quality);
+        data.Set(Hash.Item, name);
+        data.Set(Hash.Variant, variant);
+        data.Set(Hash.Quality, quality);
       }
       itemStand.SetVisualItem(name, variant, quality);
     }
     if (obj.TryGetComponent<ArmorStand>(out var armorStand))
     {
-      var split = data.Split(':');
+      var split = extraInfo.Split(':');
       var pose = Parse.TryInt(split, 0, 0);
-      if (data == "")
-        pose = zdo.GetInt(Hash.Pose, pose);
+      if (extraInfo == "")
+        pose = data.GetInt(Hash.Pose, pose);
       else
-        zdo.Set(Hash.Pose, pose);
+        data.Set(Hash.Pose, pose);
       armorStand.m_pose = pose;
       armorStand.m_poseAnimator.SetInteger("Pose", pose);
       SetItemHack.Hack = true;
@@ -428,22 +433,20 @@ public partial class Selected
       {
         var name = Parse.TryString(split, i * 2 + 2, "");
         var variant = Parse.TryInt(split, i * 2 + 3, 0);
-        if (data == "")
+        if (extraInfo == "")
         {
-          name = zdo.GetString($"{i}_item", name);
-          variant = zdo.GetInt($"{i}_variant", variant);
+          name = data.GetString($"{i}_item", name);
+          variant = data.GetInt($"{i}_variant", variant);
         }
         else
         {
-          zdo.Set($"{i}_item", name);
-          zdo.Set($"{i}_variant", variant);
+          data.Set($"{i}_item", name);
+          data.Set($"{i}_variant", variant);
         }
         armorStand.SetVisualItem(i, name, variant);
       }
       SetItemHack.Hack = false;
-
     }
-    return zdo;
   }
   public GameObject Set(Terminal terminal, Blueprint bp, Vector3 scale)
   {
@@ -457,6 +460,8 @@ public partial class Selected
     var piece = Ghost.AddComponent<Piece>();
     piece.m_name = bp.Name;
     piece.m_description = bp.Description;
+    if (piece.m_description == "")
+      ExtraDescription = "Center: " + bp.CenterPiece;
     ZNetView.m_forceDisableInit = true;
     foreach (var item in bp.Objects)
     {
@@ -467,8 +472,9 @@ public partial class Selected
         obj.transform.localPosition = item.Pos;
         obj.transform.localRotation = item.Rot;
         obj.transform.localScale = item.Scale;
-        item.Data = SetData(obj, item.ExtraInfo, item.Data);
-        Objects.Add(new SelectedObject(item.Prefab, obj.GetComponent<ZNetView>()?.m_syncInitialScale ?? false, item.Data));
+        ZDOData data = new(item.Data);
+        SetExtraInfo(obj, item.ExtraInfo, data);
+        Objects.Add(new SelectedObject(item.Prefab, obj.GetComponent<ZNetView>()?.m_syncInitialScale ?? false, data));
 
       }
       catch (InvalidOperationException e)

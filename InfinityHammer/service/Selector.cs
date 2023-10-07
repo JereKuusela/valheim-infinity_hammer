@@ -173,8 +173,7 @@ public static class Selector
   {
     var ignoredPrefabs = GetIgnoredPrefabs(ignoredIds);
     if (ValheimRAFT.IsInRaft(baseView)) return ValheimRAFT.GetConnectedRaft(baseView, ignoredPrefabs);
-    var baseWear = baseView.GetComponent<WearNTear>();
-    if (baseWear == null) throw new InvalidOperationException("Connected doesn't work for this object.");
+    var baseWear = baseView.GetComponent<WearNTear>() ?? throw new InvalidOperationException("Connected doesn't work for this object.");
     HashSet<ZNetView> views = new() { baseView };
     Queue<WearNTear> todo = new();
     todo.Enqueue(baseWear);
@@ -184,10 +183,10 @@ public static class Selector
       if (wear.m_colliders == null) wear.SetupColliders();
       foreach (var boundData in wear.m_bounds)
       {
-        var boxes = Physics.OverlapBoxNonAlloc(boundData.m_pos, boundData.m_size, WearNTear.m_tempColliders, boundData.m_rot, WearNTear.m_rayMask);
+        var boxes = Physics.OverlapBoxNonAlloc(boundData.m_pos, boundData.m_size, WearNTear.s_tempColliders, boundData.m_rot, WearNTear.s_rayMask);
         for (int i = 0; i < boxes; i++)
         {
-          var collider = WearNTear.m_tempColliders[i];
+          var collider = WearNTear.s_tempColliders[i];
           if (collider.isTrigger || collider.attachedRigidbody != null || wear.m_colliders.Contains(collider)) continue;
           var wear2 = collider.GetComponentInParent<WearNTear>();
           if (!wear2 || !IsValid(wear2.m_nview)) continue;

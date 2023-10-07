@@ -14,7 +14,7 @@ public class InfinityHammer : BaseUnityPlugin
 {
   public const string GUID = "infinity_hammer";
   public const string NAME = "Infinity Hammer";
-  public const string VERSION = "1.33";
+  public const string VERSION = "1.41";
   public static bool StructureTweaks = false;
 #nullable disable
   public static ManualLogSource Log;
@@ -40,17 +40,20 @@ public class InfinityHammer : BaseUnityPlugin
       //
     }
   }
+#pragma warning disable IDE0051
   private void OnDestroy()
   {
+#pragma warning restore IDE0051
     Config.Save();
   }
 
   private void SetupWatcher()
   {
-    FileSystemWatcher watcher = new(Path.GetDirectoryName(Config.ConfigFilePath), Path.GetFileName(Config.ConfigFilePath));
+    FileSystemWatcher watcher = new(Path.GetDirectoryName(Config.ConfigFilePath), Path.GetFileName(Config.ConfigFilePath))
+    {
+      NotifyFilter = NotifyFilters.Size
+    };
     watcher.Changed += ReadConfigValues;
-    watcher.Created += ReadConfigValues;
-    watcher.Renamed += ReadConfigValues;
     watcher.IncludeSubdirectories = true;
     watcher.SynchronizingObject = ThreadingHelper.SynchronizingObject;
     watcher.EnableRaisingEvents = true;
@@ -113,6 +116,7 @@ public class SetCommands
     new HammerShapeCommand();
     new HammerZoopCommand();
     new HammerMeasureCommand();
+    new HammerPosCommand();
   }
 }
 

@@ -17,13 +17,12 @@ public class GetSelectedPiece
     CommandWrapper.SetBindMode("");
     if (Selection.Ghost())
       __result = Selection.Ghost().GetComponent<Piece>();
-    if (__result) return false;
-    return true;
+    return !__result;
   }
 }
 
 ///<summary>Selecting a piece normally removes the override.</summary>
-[HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece))]
+[HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece), typeof(Vector2Int))]
 public class SetSelectedPiece
 {
   public static void Prefix(Player __instance)
@@ -32,6 +31,16 @@ public class SetSelectedPiece
     __instance.SetupPlacementGhost();
   }
 }
+[HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece), typeof(Piece))]
+public class SetSelectedPiece2
+{
+  public static void Prefix(Player __instance)
+  {
+    Hammer.RemoveSelection();
+    __instance.SetupPlacementGhost();
+  }
+}
+
 
 [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
 public class PlacePiece
@@ -73,8 +82,10 @@ public class PlacePiece
       return ZoneSystem.instance.m_locationProxyPrefab;
     if (type == SelectedType.Multiple)
     {
-      var dummy = new GameObject();
-      dummy.name = "Blueprint";
+      var dummy = new GameObject
+      {
+        name = "Blueprint"
+      };
       return dummy;
     }
     if (type == SelectedType.Command)
@@ -189,7 +200,6 @@ public class PlacePiece
   static void Postprocess(GameObject obj)
   {
     if (!Configuration.Enabled) return;
-    var player = Helper.GetPlayer();
     Helper.EnsurePiece(obj);
     var ghost = Helper.GetPlayer().m_placementGhost;
     if (!ghost) return;

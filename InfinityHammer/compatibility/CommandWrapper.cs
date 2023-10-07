@@ -14,7 +14,7 @@ public static class CommandWrapper
   {
     if (Chainloader.PluginInfos.TryGetValue("server_devcommands", out var info))
     {
-      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 42)
+      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 52)
         InfinityHammer.Log.LogWarning($"Server Devcommands v{info.Metadata.Version.Major}.{info.Metadata.Version.Minor} is outdated. Please update!");
       else
         ServerDevcommands = info.Instance.GetType().Assembly;
@@ -22,14 +22,14 @@ public static class CommandWrapper
     }
     if (Chainloader.PluginInfos.TryGetValue("world_edit_commands", out info))
     {
-      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 24)
+      if (info.Metadata.Version.Major == 1 && info.Metadata.Version.Minor < 35)
         InfinityHammer.Log.LogWarning($"World Edit Commands v{info.Metadata.Version.Major}.{info.Metadata.Version.Minor} is outdated. Please update!");
       else
         WorldEditCommands = info.Instance.GetType().Assembly;
     }
   }
 #nullable disable
-  private static BindingFlags PublicBinding = BindingFlags.Static | BindingFlags.Public;
+  private static readonly BindingFlags PublicBinding = BindingFlags.Static | BindingFlags.Public;
   private static Type Type() => ServerDevcommands.GetType("ServerDevcommands.AutoComplete");
   private static Type InfoType() => ServerDevcommands.GetType("ServerDevcommands.ParameterInfo");
   private static Type BindType() => ServerDevcommands.GetType("ServerDevcommands.BindCommand");
@@ -102,12 +102,17 @@ public static class CommandWrapper
   public static List<string> XZY(string description, int index)
   {
     if (ServerDevcommands == null) return null;
-    return GetMethod(InfoType(), "XZY", new[] { typeof(string), typeof(int) }).Invoke(null, new object[] { description, index }) as List<string>;
+    return GetMethod(InfoType(), "XZY", [typeof(string), typeof(int)]).Invoke(null, new object[] { description, index }) as List<string>;
+  }
+  public static List<string> YXZ(string description, int index)
+  {
+    if (ServerDevcommands == null) return null;
+    return GetMethod(InfoType(), "YXZ", [typeof(string), typeof(int)]).Invoke(null, new object[] { description, index }) as List<string>;
   }
   public static List<string> FRU(string description, int index)
   {
     if (ServerDevcommands == null) return null;
-    return GetMethod(InfoType(), "XYZ", new[] { typeof(string), typeof(int) }).Invoke(null, new object[] { description, index }) as List<string>;
+    return GetMethod(InfoType(), "XYZ", [typeof(string), typeof(int)]).Invoke(null, new object[] { description, index }) as List<string>;
   }
   public static void AddCompositeCommand(string command)
   {

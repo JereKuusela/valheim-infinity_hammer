@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Service;
 using UnityEngine;
 namespace InfinityHammer;
+#pragma warning disable IDE0046
 public class HammerBlueprintCommand
 {
   private static void PrintSelected(Terminal terminal, string name)
@@ -12,20 +14,29 @@ public class HammerBlueprintCommand
     if (Configuration.DisableSelectMessages) return;
     Helper.AddMessage(terminal, $"Selected {name}.");
   }
-
+  private static IEnumerable<string> LoadFiles(string folder, IEnumerable<string> bps)
+  {
+    if (Directory.Exists(folder))
+    {
+      var blueprints = Directory.EnumerateFiles(folder, "*.blueprint", SearchOption.AllDirectories);
+      var vbuilds = Directory.EnumerateFiles(folder, "*.vbuild", SearchOption.AllDirectories);
+      return bps.Concat(blueprints).Concat(vbuilds);
+    }
+    return bps;
+  }
   private static IEnumerable<string> Files()
   {
-    if (!Directory.Exists(Configuration.PlanBuildFolder)) Directory.CreateDirectory(Configuration.PlanBuildFolder);
-    if (!Directory.Exists(Configuration.BuildShareFolder)) Directory.CreateDirectory(Configuration.BuildShareFolder);
-    var planBuild = Directory.EnumerateFiles(Configuration.PlanBuildFolder, "*.blueprint", SearchOption.AllDirectories);
-    var buildShare = Directory.EnumerateFiles(Configuration.BuildShareFolder, "*.vbuild", SearchOption.AllDirectories);
-    return planBuild.Concat(buildShare).OrderBy(s => s);
+    IEnumerable<string> bps = new List<string>();
+    bps = LoadFiles(Configuration.BlueprintGlobalFolder, bps);
+    if (Path.GetFullPath(Configuration.BlueprintLocalFolder) != Path.GetFullPath(Configuration.BlueprintGlobalFolder))
+      bps = LoadFiles(Configuration.BlueprintLocalFolder, bps);
+    return bps.Distinct().OrderBy(s => s);
   }
   private static List<string> GetBlueprints() => Files().Select(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_")).ToList();
   private static Blueprint GetBluePrint(string name)
   {
-    var path = Files().FirstOrDefault(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_") == name);
-    if (path == null) throw new InvalidOperationException("Blueprint not found.");
+    var path = Files().FirstOrDefault(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_") == name)
+      ?? throw new InvalidOperationException("Blueprint not found.");
     var rows = File.ReadAllLines(path);
     var extension = Path.GetExtension(path);
     Blueprint bp = new() { Name = name };
@@ -42,6 +53,12 @@ public class HammerBlueprintCommand
         bp.Name = row.Split(':')[1];
       else if (row.StartsWith("#description:", StringComparison.OrdinalIgnoreCase))
         bp.Description = row.Split(':')[1];
+      else if (row.StartsWith("#center:", StringComparison.OrdinalIgnoreCase))
+        bp.CenterPiece = row.Split(':')[1];
+      else if (row.StartsWith("#coordinates:", StringComparison.OrdinalIgnoreCase))
+        bp.Coordinates = Helper.ParseXZY(row.Split(':')[1]);
+      else if (row.StartsWith("#rotation:", StringComparison.OrdinalIgnoreCase))
+        bp.Rotation = Helper.ParseYXZ(row.Split(':')[1]);
       else if (row.StartsWith("#snappoints", StringComparison.OrdinalIgnoreCase))
         piece = false;
       else if (row.StartsWith("#pieces", StringComparison.OrdinalIgnoreCase))
@@ -55,106 +72,7 @@ public class HammerBlueprintCommand
     }
     return bp;
   }
-  private static void Deserialize(ZDO zdo, ZPackage pkg)
-  {
-    int num = pkg.ReadInt();
-    if ((num & 1) != 0)
-    {
-      zdo.InitFloats();
-      int num2 = (int)pkg.ReadByte();
-      for (int i = 0; i < num2; i++)
-      {
-        int key = pkg.ReadInt();
-        zdo.m_floats[key] = pkg.ReadSingle();
-      }
-    }
-    else
-    {
-      zdo.ReleaseFloats();
-    }
-    if ((num & 2) != 0)
-    {
-      zdo.InitVec3();
-      int num3 = (int)pkg.ReadByte();
-      for (int j = 0; j < num3; j++)
-      {
-        int key2 = pkg.ReadInt();
-        zdo.m_vec3[key2] = pkg.ReadVector3();
-      }
-    }
-    else
-    {
-      zdo.ReleaseVec3();
-    }
-    if ((num & 4) != 0)
-    {
-      zdo.InitQuats();
-      int num4 = (int)pkg.ReadByte();
-      for (int k = 0; k < num4; k++)
-      {
-        int key3 = pkg.ReadInt();
-        zdo.m_quats[key3] = pkg.ReadQuaternion();
-      }
-    }
-    else
-    {
-      zdo.ReleaseQuats();
-    }
-    if ((num & 8) != 0)
-    {
-      zdo.InitInts();
-      int num5 = (int)pkg.ReadByte();
-      for (int l = 0; l < num5; l++)
-      {
-        int key4 = pkg.ReadInt();
-        zdo.m_ints[key4] = pkg.ReadInt();
-      }
-    }
-    else
-    {
-      zdo.ReleaseInts();
-    }
-    if ((num & 64) != 0)
-    {
-      zdo.InitLongs();
-      int num6 = (int)pkg.ReadByte();
-      for (int m = 0; m < num6; m++)
-      {
-        int key5 = pkg.ReadInt();
-        zdo.m_longs[key5] = pkg.ReadLong();
-      }
-    }
-    else
-    {
-      zdo.ReleaseLongs();
-    }
-    if ((num & 16) != 0)
-    {
-      zdo.InitStrings();
-      int num7 = (int)pkg.ReadByte();
-      for (int n = 0; n < num7; n++)
-      {
-        int key6 = pkg.ReadInt();
-        zdo.m_strings[key6] = pkg.ReadString();
-      }
-    }
-    else
-    {
-      zdo.ReleaseStrings();
-    }
-    if ((num & 128) != 0)
-    {
-      zdo.InitByteArrays();
-      int num8 = (int)pkg.ReadByte();
-      for (int num9 = 0; num9 < num8; num9++)
-      {
-        int key7 = pkg.ReadInt();
-        zdo.m_byteArrays[key7] = pkg.ReadByteArray();
-      }
-      return;
-    }
-    zdo.ReleaseByteArrays();
-  }
+
   private static BlueprintObject GetPlanBuildObject(string row)
   {
     if (row.IndexOf(',') > -1) row = row.Replace(',', '.');
@@ -172,14 +90,9 @@ public class HammerBlueprintCommand
     var scaleY = InvariantFloat(split, 11, 1f);
     var scaleZ = InvariantFloat(split, 12, 1f);
     var data = split.Length > 13 ? split[13] : "";
-    ZDO zdo = new();
-    if (data != "")
-    {
-      ZPackage pkg = new(data);
-      Deserialize(zdo, pkg);
-    }
-    return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), new(scaleX, scaleY, scaleZ), info, zdo);
+    return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), new(scaleX, scaleY, scaleZ), info, Deserialize(data));
   }
+  public static ZPackage? Deserialize(string data) => data == "" ? null : new(data);
   private static Vector3 GetPlanBuildSnapPoint(string row)
   {
     if (row.IndexOf(',') > -1) row = row.Replace(',', '.');
@@ -206,7 +119,8 @@ public class HammerBlueprintCommand
     var posX = InvariantFloat(split, 5);
     var posY = InvariantFloat(split, 6);
     var posZ = InvariantFloat(split, 7);
-    return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), Vector3.one, "", new());
+    var data = split.Length > 8 ? split[8] : "";
+    return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), Vector3.one, "", Deserialize(data));
   }
   private static float InvariantFloat(string[] row, int index, float defaultValue = 0f)
   {
@@ -218,23 +132,46 @@ public class HammerBlueprintCommand
 
   public HammerBlueprintCommand()
   {
-    List<string> named = new() { "scale" };
     CommandWrapper.Register("hammer_blueprint", (int index, int subIndex) =>
     {
       if (index == 0) return GetBlueprints();
-      return named;
-    }, new() {
-      { "scale", (int index) => CommandWrapper.Scale("scale", "Size of the object (if the object can be scaled).", index) },
+      if (index == 1) return CommandWrapper.ObjectIds();
+      if (index == 2) return CommandWrapper.Scale("scale", "Size of the object (if the object can be scaled).", subIndex);
+      return null;
     });
-    Helper.Command("hammer_blueprint", "[blueprint file] - Selects the blueprint to be placed.", (args) =>
+    Helper.Command("hammer_blueprint", "[blueprint file] [center piece] [scale] - Selects the blueprint to be placed.", (args) =>
     {
       Helper.CheatCheck();
-      HammerBlueprintParameters pars = new(args);
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
       Hammer.Equip();
-      var name = args.Args.Skip(1).Where(arg => !arg.StartsWith("scale=", StringComparison.OrdinalIgnoreCase));
-      var bp = GetBluePrint(string.Join("_", name));
-      var obj = Selection.Set(args.Context, bp, pars.Scale ?? Vector3.one);
+      var name = args[1];
+      var centerPiece = args.Length > 2 ? args[2] : "";
+      var scale = args.Length > 3 ? Parse.TryScale(Parse.Split(args[3])) : Vector3.one;
+      var bp = GetBluePrint(name);
+      bp.Center(centerPiece);
+      var obj = Selection.Set(args.Context, bp, scale);
+      PrintSelected(args.Context, bp.Name);
+
+    }, GetBlueprints);
+
+    CommandWrapper.Register("hammer_restore", (int index, int subIndex) =>
+    {
+      if (index == 0) return GetBlueprints();
+      if (index == 1) return CommandWrapper.Scale("scale", "Size of the object (if the object can be scaled).", subIndex);
+      return null;
+    });
+    Helper.Command("hammer_restore", "[blueprint file] [scale] - Restores the blueprint at its saved position.", (args) =>
+    {
+      Helper.CheatCheck();
+      Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
+      Hammer.Equip();
+      var name = args[1];
+      var scale = args.Length > 2 ? Parse.TryScale(Parse.Split(args[2])) : Vector3.one;
+      var bp = GetBluePrint(name);
+      bp.Center("");
+      var obj = Selection.Set(args.Context, bp, scale);
+      Position.Override = bp.Coordinates;
+      Rotating.Set(Quaternion.Euler(bp.Rotation));
       PrintSelected(args.Context, bp.Name);
 
     }, GetBlueprints);

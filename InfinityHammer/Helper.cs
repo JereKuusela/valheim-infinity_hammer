@@ -8,6 +8,8 @@ using UnityEngine;
 namespace InfinityHammer;
 public static class Helper
 {
+  public static string PrintXZY(Vector3 vec) => $"{vec.x.ToString(NumberFormatInfo.InvariantInfo)},{vec.z.ToString(NumberFormatInfo.InvariantInfo)},{vec.y.ToString(NumberFormatInfo.InvariantInfo)}";
+  public static string PrintYXZ(Vector3 vec) => $"{vec.y.ToString(NumberFormatInfo.InvariantInfo)},{vec.x.ToString(NumberFormatInfo.InvariantInfo)},{vec.z.ToString(NumberFormatInfo.InvariantInfo)}";
   public static GameObject GetPlacementGhost()
   {
     var player = GetPlayer();
@@ -24,7 +26,7 @@ public static class Helper
   {
     if (!Selector.IsValid(zdo)) return;
     if (!zdo.IsOwner())
-      zdo.SetOwner(ZDOMan.instance.GetMyID());
+      zdo.SetOwner(ZDOMan.instance.m_sessionID);
     if (ZNetScene.instance.m_instances.TryGetValue(zdo, out var view))
       ZNetScene.instance.Destroy(view.gameObject);
     else
@@ -84,9 +86,9 @@ public static class Helper
   {
     var vector = Vector3.zero;
     var split = value.Split(',');
-    if (split.Length > 0) vector.z = Helper.ParseFloat(split[0]);
-    if (split.Length > 1) vector.y = Helper.ParseFloat(split[1]);
-    if (split.Length > 2) vector.x = Helper.ParseFloat(split[2]);
+    if (split.Length > 0) vector.z = ParseFloat(split[0]);
+    if (split.Length > 1) vector.y = ParseFloat(split[1]);
+    if (split.Length > 2) vector.x = ParseFloat(split[2]);
     return vector;
   }
   public static Vector3 ParseXYZ(string value) => ParseXYZ(value, Vector3.zero);
@@ -94,9 +96,29 @@ public static class Helper
   {
     var vector = defaultValue;
     var split = value.Split(',');
-    if (split.Length > 0) vector.x = Helper.ParseFloat(split[0]);
-    if (split.Length > 1) vector.y = Helper.ParseFloat(split[1]);
-    if (split.Length > 2) vector.z = Helper.ParseFloat(split[2]);
+    if (split.Length > 0) vector.x = ParseFloat(split[0]);
+    if (split.Length > 1) vector.y = ParseFloat(split[1]);
+    if (split.Length > 2) vector.z = ParseFloat(split[2]);
+    return vector;
+  }
+  public static Vector3 ParseXZY(string value) => ParseXZY(value, Vector3.zero);
+  public static Vector3 ParseXZY(string value, Vector3 defaultValue)
+  {
+    var vector = defaultValue;
+    var split = value.Split(',');
+    if (split.Length > 0) vector.x = ParseFloat(split[0]);
+    if (split.Length > 1) vector.z = ParseFloat(split[1]);
+    if (split.Length > 2) vector.y = ParseFloat(split[2]);
+    return vector;
+  }
+  public static Vector3 ParseYXZ(string value) => ParseYXZ(value, Vector3.zero);
+  public static Vector3 ParseYXZ(string value, Vector3 defaultValue)
+  {
+    var vector = defaultValue;
+    var split = value.Split(',');
+    if (split.Length > 0) vector.y = ParseFloat(split[0]);
+    if (split.Length > 1) vector.x = ParseFloat(split[1]);
+    if (split.Length > 2) vector.z = ParseFloat(split[2]);
     return vector;
   }
   public static Range<Vector3Int> ParseZYXRange(string value)
@@ -106,19 +128,19 @@ public static class Helper
     var split = value.Split(',');
     if (split.Length > 0)
     {
-      var range = Helper.ParseIntRange(split[0]);
+      var range = ParseIntRange(split[0]);
       min.z = range.Min;
       max.z = range.Max;
     }
     if (split.Length > 1)
     {
-      var range = Helper.ParseIntRange(split[1]);
+      var range = ParseIntRange(split[1]);
       min.y = range.Min;
       max.y = range.Max;
     }
     if (split.Length > 2)
     {
-      var range = Helper.ParseIntRange(split[2]);
+      var range = ParseIntRange(split[2]);
       min.x = range.Min;
       max.x = range.Max;
     }
@@ -218,7 +240,7 @@ public static class Helper
     Helper.CleanObject(ret);
     obj.SetActive(true);
     if (ret.TryGetComponent<Character>(out var character))
-      Character.m_characters.Remove(character);
+      Character.s_characters.Remove(character);
     if (highlight)
       wear.Highlight();
     return ret;
@@ -258,13 +280,13 @@ public static class Helper
     }
     return SafeInstantiate(location.m_prefab);
   }
-  public static bool IsSnapPoint(GameObject obj) => obj.CompareTag("snappoint");
+  public static bool IsSnapPoint(GameObject obj) => obj && obj.CompareTag("snappoint");
   public static List<GameObject> GetChildren(GameObject obj)
   {
-    List<GameObject> children = new();
+    List<GameObject> children = [];
     foreach (Transform tr in obj.transform)
     {
-      if (Helper.IsSnapPoint(tr.gameObject)) continue;
+      if (IsSnapPoint(tr.gameObject)) continue;
       children.Add(tr.gameObject);
     }
     return children;

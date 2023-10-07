@@ -9,103 +9,21 @@ namespace InfinityHammer;
 
 public class HammerSaveCommand
 {
-  private static void Serialize(ZDO zdo, ZPackage pkg)
-  {
-    var num = 0;
-    if (zdo.m_floats != null && zdo.m_floats.Count > 0)
-      num |= 1;
-    if (zdo.m_vec3 != null && zdo.m_vec3.Count > 0)
-      num |= 2;
-    if (zdo.m_quats != null && zdo.m_quats.Count > 0)
-      num |= 4;
-    if (zdo.m_ints != null && zdo.m_ints.Count > 0)
-      num |= 8;
-    if (zdo.m_strings != null && zdo.m_strings.Count > 0)
-      num |= 16;
-    if (zdo.m_longs != null && zdo.m_longs.Count > 0)
-      num |= 64;
-    if (zdo.m_byteArrays != null && zdo.m_byteArrays.Count > 0)
-      num |= 128;
 
-    pkg.Write(num);
-    if (zdo.m_floats != null && zdo.m_floats.Count > 0)
-    {
-      pkg.Write((byte)zdo.m_floats.Count);
-      foreach (KeyValuePair<int, float> keyValuePair in zdo.m_floats)
-      {
-        pkg.Write(keyValuePair.Key);
-        pkg.Write(keyValuePair.Value);
-      }
-    }
-    if (zdo.m_vec3 != null && zdo.m_vec3.Count > 0)
-    {
-      pkg.Write((byte)zdo.m_vec3.Count);
-      foreach (KeyValuePair<int, Vector3> keyValuePair2 in zdo.m_vec3)
-      {
-        pkg.Write(keyValuePair2.Key);
-        pkg.Write(keyValuePair2.Value);
-      }
-    }
-    if (zdo.m_quats != null && zdo.m_quats.Count > 0)
-    {
-      pkg.Write((byte)zdo.m_quats.Count);
-      foreach (KeyValuePair<int, Quaternion> keyValuePair3 in zdo.m_quats)
-      {
-        pkg.Write(keyValuePair3.Key);
-        pkg.Write(keyValuePair3.Value);
-      }
-    }
-    if (zdo.m_ints != null && zdo.m_ints.Count > 0)
-    {
-      pkg.Write((byte)zdo.m_ints.Count);
-      foreach (KeyValuePair<int, int> keyValuePair4 in zdo.m_ints)
-      {
-        pkg.Write(keyValuePair4.Key);
-        pkg.Write(keyValuePair4.Value);
-      }
-    }
-    if (zdo.m_longs != null && zdo.m_longs.Count > 0)
-    {
-      pkg.Write((byte)zdo.m_longs.Count);
-      foreach (KeyValuePair<int, long> keyValuePair5 in zdo.m_longs)
-      {
-        pkg.Write(keyValuePair5.Key);
-        pkg.Write(keyValuePair5.Value);
-      }
-    }
-    if (zdo.m_strings != null && zdo.m_strings.Count > 0)
-    {
-      pkg.Write((byte)zdo.m_strings.Count);
-      foreach (KeyValuePair<int, string> keyValuePair6 in zdo.m_strings)
-      {
-        pkg.Write(keyValuePair6.Key);
-        pkg.Write(keyValuePair6.Value);
-      }
-    }
-    if (zdo.m_byteArrays != null && zdo.m_byteArrays.Count > 0)
-    {
-      pkg.Write((byte)zdo.m_byteArrays.Count);
-      foreach (KeyValuePair<int, byte[]> keyValuePair7 in zdo.m_byteArrays)
-      {
-        pkg.Write(keyValuePair7.Key);
-        pkg.Write(keyValuePair7.Value);
-      }
-    }
-  }
-  private static string GetExtraInfo(GameObject obj, ZDO zdo)
+  private static string GetExtraInfo(GameObject obj, ZDOData data)
   {
     var info = "";
     if (obj.GetComponent<Sign>())
-      info = zdo.GetString(Hash.Text, "");
+      info = data.GetString(Hash.Text, "");
     if (obj.GetComponent<TeleportWorld>())
-      info = zdo.GetString(Hash.Tag, "");
+      info = data.GetString(Hash.Tag, "");
     if (obj.GetComponent<Tameable>())
-      info = zdo.GetString(Hash.TamedName, "");
+      info = data.GetString(Hash.TamedName, "");
 
-    if (obj.GetComponent<ItemStand>() && zdo?.GetString(Hash.Item) != "")
+    if (obj.GetComponent<ItemStand>() && data.GetString(Hash.Item) != "")
     {
-      var item = zdo?.GetString(Hash.Item) ?? "";
-      var variant = zdo?.GetInt(Hash.Variant) ?? 0;
+      var item = data.GetString(Hash.Item);
+      var variant = data.GetInt(Hash.Variant);
       if (variant != 0)
         info = $"{item}:{variant}";
       else
@@ -122,21 +40,24 @@ public class HammerSaveCommand
   }
   private static void AddSingleObject(Blueprint bp, GameObject obj)
   {
-    var zdo = Selection.GetData() ?? new();
-    var info = GetExtraInfo(obj, zdo);
-    bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), Vector3.zero, Quaternion.identity, obj.transform.localScale, info, zdo));
+    var data = Selection.GetData();
+    var info = GetExtraInfo(obj, data);
+    bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), Vector3.zero, Quaternion.identity, obj.transform.localScale, info, data.Save()));
   }
   private static void AddObject(Blueprint bp, GameObject obj, int index = 0)
   {
-    var zdo = Selection.GetData(index) ?? new();
-    var info = GetExtraInfo(obj, zdo);
-    bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), obj.transform.localPosition, obj.transform.localRotation, obj.transform.localScale, info, zdo));
+    var data = Selection.GetData(index);
+    var info = GetExtraInfo(obj, data);
+    bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), obj.transform.localPosition, obj.transform.localRotation, obj.transform.localScale, info, data.Save()));
   }
-  private static Blueprint BuildBluePrint(Player player, GameObject obj)
+  private static Blueprint BuildBluePrint(Player player, GameObject obj, string centerPiece)
   {
-    Blueprint bp = new();
-    bp.Name = Utils.GetPrefabName(obj);
-    bp.Creator = player.GetPlayerName();
+    Blueprint bp = new()
+    {
+      Name = Utils.GetPrefabName(obj),
+      Creator = player.GetPlayerName(),
+      Rotation = Helper.GetPlacementGhost().transform.rotation.eulerAngles,
+    };
     var piece = obj.GetComponent<Piece>();
     if (piece)
     {
@@ -146,6 +67,8 @@ public class HammerSaveCommand
     if (Selection.Type == SelectedType.Object || Selection.Type == SelectedType.Default)
     {
       AddSingleObject(bp, obj);
+      // Snap points are sort of useful for single objects.
+      // Since single objects should just have custom data but otherwise the original behavior.
       foreach (Transform child in obj.transform)
       {
         if (Helper.IsSnapPoint(child.gameObject))
@@ -157,30 +80,34 @@ public class HammerSaveCommand
       var i = 0;
       foreach (Transform tr in obj.transform)
       {
-        if (Helper.IsSnapPoint(tr.gameObject))
-          bp.SnapPoints.Add(tr.localPosition);
-        else
-        {
-          AddObject(bp, tr.gameObject, i);
-          i += 1;
-        }
+        // Snap points aren't that useful for multiple objects.
+        // Especially when they conflict with the center piece.
+        // In the future, snapPiece could be added to allow users to select the snap points.
+        if (Helper.IsSnapPoint(tr.gameObject)) continue;
+        AddObject(bp, tr.gameObject, i);
+        i += 1;
       }
     }
+    var offset = bp.Center(centerPiece);
+    bp.Coordinates = player.m_placementGhost.transform.position - offset;
     return bp;
   }
 
   private static string[] GetPlanBuildFile(Blueprint bp)
   {
-    List<string> lines = new();
-    lines.Add($"#Name:{bp.Name}");
-    lines.Add($"#Creator:{bp.Creator}");
-    lines.Add($"#Description:{bp.Description}");
-    lines.Add($"#Category: InfinityHammer");
-    lines.Add($"#SnapPoints");
-    lines.AddRange(bp.SnapPoints.Select(GetPlanBuildSnapPoint));
-    lines.Add($"#Pieces");
-    lines.AddRange(bp.Objects.Select(GetPlanBuildObject));
-    return lines.ToArray();
+    return [
+      $"#Name:{bp.Name}",
+      $"#Creator:{bp.Creator}",
+      $"#Description:{bp.Description}",
+      $"#Category:InfinityHammer",
+      $"#Center:{bp.CenterPiece}",
+      $"#Coordinates:{Helper.PrintXZY(bp.Coordinates)}",
+      $"#Rotation:{Helper.PrintYXZ(bp.Rotation)}",
+      $"#SnapPoints",
+      .. bp.SnapPoints.Select(GetPlanBuildSnapPoint),
+      $"#Pieces",
+      .. bp.Objects.Select(GetPlanBuildObject),
+    ];
   }
   private static string InvariantString(float f)
   {
@@ -210,9 +137,7 @@ public class HammerSaveCommand
     var data = "";
     if (obj.Data != null)
     {
-      ZPackage pkg = new();
-      Serialize(obj.Data, pkg);
-      data = pkg.GetBase64();
+      data = obj.Data.GetBase64();
       if (data == "AAAAAA==") data = "";
     }
     return $"{name};;{posX};{posY};{posZ};{rotX};{rotY};{rotZ};{rotW};{info};{scaleX};{scaleY};{scaleZ};{data}";
@@ -223,21 +148,24 @@ public class HammerSaveCommand
     CommandWrapper.Register("hammer_save", (int index) =>
     {
       if (index == 0) return CommandWrapper.Info("File name.");
+      if (index == 1) return CommandWrapper.ObjectIds();
       return null;
     });
-    Helper.Command("hammer_save", "[file name] - Saves the selection to a blueprint.", (args) =>
+    Helper.Command("hammer_save", "[file name] [center piece] - Saves the selection to a blueprint.", (args) =>
     {
       Helper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
       var player = Helper.GetPlayer();
       var ghost = Helper.GetPlacementGhost();
-      var bp = BuildBluePrint(player, ghost);
+      var center = args.Length > 2 ? args[2] : "";
+      var bp = BuildBluePrint(player, ghost, center);
       var lines = GetPlanBuildFile(bp);
       var name = Path.GetFileNameWithoutExtension(args[1]) + ".blueprint";
-      var path = Path.Combine(Configuration.PlanBuildFolder, name);
+      var path = Path.Combine(Configuration.SaveBlueprintsToProfile ? Configuration.BlueprintLocalFolder : Configuration.BlueprintGlobalFolder, name);
       Directory.CreateDirectory(Path.GetDirectoryName(path));
       File.WriteAllLines(path, lines);
-      args.Context.AddString($"Blueprint saved to {path}");
+      args.Context.AddString($"Blueprint saved to {path} (pos: {Helper.PrintXZY(bp.Coordinates)} rot: {Helper.PrintYXZ(bp.Rotation)}).");
+      Selection.Set(args.Context, bp, Vector3.one);
     });
   }
 }

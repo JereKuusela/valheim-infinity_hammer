@@ -23,11 +23,7 @@ public static class Hammer
     var player = Helper.GetPlayer();
     if (HasHammer(player)) return;
     var inventory = player.GetInventory();
-    var item = inventory.m_inventory.Find(item => IsHammer(item));
-    if (item == null)
-    {
-      throw new InvalidOperationException($"Unable to find the hammer.");
-    };
+    var item = inventory.m_inventory.Find(IsHammer) ?? throw new InvalidOperationException($"Unable to find the hammer.");
     player.EquipItem(item);
   }
   public static bool IsTool(ItemDrop.ItemData item) => item != null && item.m_shared.m_buildPieces != null;
@@ -50,7 +46,7 @@ public static class Hammer
   {
     var player = Player.m_localPlayer;
     if (!player) return;
-    player.SetSelectedPiece(new(0, 0));
+    player.SetSelectedPiece(new Vector2Int(0, 0));
   }
   public static void Place()
   {
@@ -148,5 +144,18 @@ public class UnfreezeOnUnequip
   {
     if (__instance != Player.m_localPlayer || item == null) return;
     if (Configuration.UnfreezeOnUnequip) Position.Unfreeze();
+  }
+}
+
+[HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
+public class DisableSnapCycleWhenTyping
+{
+  static void Prefix(Player __instance, ref int __state)
+  {
+    __state = __instance.m_manualSnapPoint;
+  }
+  static void Postfix(Player __instance, ref int __state)
+  {
+    if (!__instance.TakeInput()) __instance.m_manualSnapPoint = __state;
   }
 }

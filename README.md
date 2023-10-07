@@ -20,6 +20,8 @@ Recommended mods:
 - [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/): Enables key binds, undo and better command support.
 - [World Edit Commands](https://valheim.thunderstore.io/package/JereKuusela/World_Edit_Commands/): Enables terrain tools and additional commands.
 - [Gizmo](https://valheim.thunderstore.io/package/ComfyMods/Gizmo/): Enables free rotation.
+- [More Vanilla Builds](https://valheim.thunderstore.io/package/BippityBoppityBoo/MoreVanillaBuilds/): Adds more objects to the build menu.
+- [Structure Tweaks](https://valheim.thunderstore.io/package/JereKuusela/Structure_Tweaks/): Allows scaling every object. Everyone must have this mod installed.
 
 Similar mods:
 
@@ -44,6 +46,7 @@ Holding alt key will select the entire building. Holding ctrl key picks up the o
 The hammer build menu also contains Pipette and Area select tools.
 
 The `hammer` command has following extra parameters which allow modifying the selected objects:
+
 - `freeze`: Instantly freezes the placement position, allowing precise movement with key binds.
 - `pick`: Removes the selected object, to more easily move objects.
 - `from=x,z,y`: Overrides the player position when doing an area selection.
@@ -70,7 +73,7 @@ For example `hammer Beech1 scale=2 health=1000` would select a beech tree with a
 
 The scale can be directly set with following commands:
 
-- `hammer_scale `: Resets the size.
+- `hammer_scale`: Resets the size.
 - `hammer_scale [x,z,y or amount]`: Sets the size.
 - `hammer_scale_x [amount]`: Sets only the x-axis.
 - `hammer_scale_y [amount]`: Sets only the y-axis.
@@ -95,9 +98,9 @@ This can be also done with following commands:
 - `hammer_zoom_y_cmd [percentage or amount]`: Zooms only the y-axis.
 - `hammer_zoom_z_cmd [percentage or amount]`: Zooms only the z-axis.
 
-For example `hammer_zoom 5%` changes 100 % to 105 % or 200 % to 210 %. While `hammer_zoom -5%` changes 100 % to 95.2 % or 200 % to 190.5 %. 
+For example `hammer_zoom 5%` changes 100 % to 105 % or 200 % to 210 %. While `hammer_zoom -5%` changes 100 % to 95.2 % or 200 % to 190.5 %.
 
-For example `hammer_zoom 0.1` changes 100 % to 110 % or 200 % to 210 %. While `hammer_zoom -0.1` changes 100 % to 90 % or 200 % to 190 %. 
+For example `hammer_zoom 0.1` changes 100 % to 110 % or 200 % to 210 %. While `hammer_zoom -0.1` changes 100 % to 90 % or 200 % to 190 %.
 
 Note: If you notice using these commands frequency, make a [key binding](https://docs.unity3d.com/ScriptReference/KeyCode.html) for them.
 
@@ -114,6 +117,7 @@ The `seed` parameter can be used to set the random parts. If missing or `0`, the
 By the default, the location doesn't get randomly damaged. To set this on, put any value to the fourth parameter.
 
 For example:
+
 - `hammer_location StoneTowerRuins04` creates a stone fortress with random parts (which change when using the command again).
 - `hammer_location StoneTowerRuins04 100` creates a stone fortress with some parts (always the same).
 - `hammer_location StoneTowerRuins04 all` creates a stone fortress with all parts.
@@ -134,6 +138,7 @@ Holding alt key will move by 1 meter instead of 0.1 meters.
 Note: Placement keys also work without freezing.
 
 Following commands exist for this:
+
 - `hammer_move [forward,up,right]`: Moves the placement ghost offset for precise placement. Auto value can be used for the object size.
 - `hammer_move_backward [meters or number*auto]`: Moves the placement towards the backward direction.
 - `hammer_move_down [meters or number*auto]`: Moves the placement towards the down direction.
@@ -153,16 +158,19 @@ Requires installing either [Comfy Gizmo](https://github.com/redseiko/ValheimMods
 For basic usage that is all you need but extra commands are provided for advanced usage.
 
 Fine-tuning the rotation:
+
 - `hammer_rotate_x [degrees]`
 - `hammer_rotate_y [degrees]`
 - `hammer_rotate_z [degrees]`
 
 Random rotation (90 or 180 degrees depending on the object shape)
+
 - `hammer_rotate_x random`
 - `hammer_rotate_y random`
 - `hammer_rotate_z random`
 
 Random rotation with custom precision.
+
 - `hammer_rotate_x [number]*random`
 - `hammer_rotate_y [number]*random`
 - `hammer_rotate_z [number]*random`
@@ -180,22 +188,25 @@ Note: Any other removal like buildings collapsing due to lack of support or dest
 ## Multiplacement
 
 The selection can be multiplied with zooping:
+
 - `hammer_zoop_[direction] [step=auto]`
 
 Possible directions are `backward`, `down`, `forward`,`left`, `right` and `up`.
 
-The step sets the distance between cloned objects. By default this is the size of the object. 
+The step sets the distance between cloned objects. By default this is the size of the object.
 
 The recommended way is to set a keybinding in the config (with Server Devcommands mod). Custom bindings can also be used for special cases.
 
 Examples:
--  `hammer_zoop_right auto`: Clones the selected object to next to it.
--  `hammer_zoop_right 2*auto`: Clones the selected object while leaving a gap (equal to the object size).
--  `hammer_zoop_up 5`: Clones the selected object to 5 meters above it.
+
+- `hammer_zoop_right auto`: Clones the selected object to next to it.
+- `hammer_zoop_right 2*auto`: Clones the selected object while leaving a gap (equal to the object size).
+- `hammer_zoop_up 5`: Clones the selected object to 5 meters above it.
 
 ### Stacking
 
 Stacking is similar to zooping but instantly places the objects:
+
 - `hammer_stack_[direction] [amount or min-max] [step=auto]`
 
 The amount determines how many objects are placed. This can be fine-tuned by giving a range.
@@ -203,11 +214,12 @@ The amount determines how many objects are placed. This can be fine-tuned by giv
 Note: Choosing the correction direction can be difficult when rotating the selection. But you can easily try things by reverting the changes with `undo`.
 
 Examples:
--  `hammer_stack_up 10`: Places 10 objects on top of each other.
--  `hammer_stack_up -5-4`: Places 10 objects with 5 below and 4 on top of the main object.
--  `hammer_stack_left 5 10`: Places 5 objects with 10 meters between each of them.
--  `hammer_stack_left 5 2*auto`: Places 5 objects while leaving a gap between them (equal to the object size).
--  `hammer_stack_left 3-4`: Places 2 objects some distance away from the selected position.
+
+- `hammer_stack_up 10`: Places 10 objects on top of each other.
+- `hammer_stack_up -5-4`: Places 10 objects with 5 below and 4 on top of the main object.
+- `hammer_stack_left 5 10`: Places 5 objects with 10 meters between each of them.
+- `hammer_stack_left 5 2*auto`: Places 5 objects while leaving a gap between them (equal to the object size).
+- `hammer_stack_left 3-4`: Places 2 objects some distance away from the selected position.
 
 To place objects in a rectangle or a box, use the following command:
 
@@ -217,11 +229,27 @@ To place objects in a rectangle or a box, use the following command:
 
 Basic support is provided for BuildShare .vbuild and [PlanBuild](https://valheim.thunderstore.io/package/MathiasDecrock/PlanBuild/) .blueprint files.
 
-The command `hammer_blueprint [file name]` allows placing them. If no files are found, configure the source folder.
+### Placing blueprints
 
-New PlanBuild blueprints can also be created with `hammer_save [file name]` command.
+The command `hammer_blueprint [file name] [center piece] [scale]` allows placing them. If no files are found, configure the source folder.
+
+The center piece determines which object in the blueprint is used as the bottom center point. Usually this is not needed because either the blueprint has the information or the default value from the config can be used.
+
+Scale allow setting the initial scaling. This is also rarely needed because most objects can't be scaled (unless [Structure Tweaks](https://valheim.thunderstore.io/package/JereKuusela/Structure_Tweaks/) is installed for all clients).
+
+### Creating blueprints
+
+New PlanBuild blueprints can be created with `hammer_save [file name] [center piece]` command.
+
+If the center piece is not given, the default value is used from the config.
 
 Note: Infinity Hammer will also store the object data when creating blueprints. This can significantly increase the file size and cause incompatibility with future PlanBuild versions.
+
+Following data is not copied:
+
+- Object scale (redundant because the blueprint has own fields or the scale).
+- Creature spawn coordinates (harmful because creatures try returning to the spawn coordinates when idle).
+- Snap points (currently no good way to edit them).
 
 ## Utility
 
@@ -243,6 +271,7 @@ The hammer (and hoe) can execute any console commands, which provides a quick an
 Unfortunately adding new commands won't be that simple. Probably the easiest way is editing the config directly. That way you can see how the default commands are done.
 
 Commands also exist for this:
+
 - `hammer_add [command]` or `hoe_add [command]`: Adds a new command. Useful for sharing commands with other players.
 - `hammer_list [index to clipboard]` or `hoe_list [index to clipboard]`: Prints added commmand and their index numbers. If indes is given, copies to the command to the clipboard for easier sharing.
 - `hammer_remove [index]` or `hoe_remove [index]`: Removes the command with the given index.
@@ -283,6 +312,7 @@ This command can be added to the menu with `hammer_add hammer_area`. It's recomm
 The full potential of commands can be unlocked by installing [World Edit Commands](https://valheim.thunderstore.io/package/JereKuusela/World_Edit_Commands/) mod. This automatically adds new commands to the hoe (mainly for terrain modifications).
 
 Full list of parameters:
+
 - `id`: Id of the hovered object.
 - `x`: X coordinate.
 - `y`: Y coordinate.
@@ -302,6 +332,7 @@ To reduce typing, use aliases `hoe_object` and `hoe_terrain`. For example `hoe_o
 Similar aliases also exist for the hammer (`hammer_object` and `hammer_terrain`).
 
 Key binds to change values:
+
 - Q: Changes the shape (uses `hammer_shape` command).
 - Shift + Mouse wheel: Circle radius and rectangle width.
 - Shift + Alt + Mouse wheel: Rectangle depth.
@@ -332,6 +363,7 @@ Following powers are available with `hammer_config` command:
 - Enabled (default: `true`, key: `enabled`): If disabled, removes most features.
 - All objects (default: `true`, key: `all_objects`): Hammer can select and place any object. Any placed object can be removed with the hammer until the area is reloaded.
 - Allow in dungeons (default: `true`, key: `allow_in_dungeons`): Building is allowed in dungeons.
+- Blueprint folder (default: `PlanBuild`, key: `blueprint_folder`): Folder relative to the config folder. Both profile and base Valheim folders are searched for .blueprint and .vbuild files.
 - Build Share folder (default: `BuildShare/Builds`, key: `build_share_folder`): Folder relative to the Valheim.exe.
 - Copy state (default: `true`, key: `copy_state`): Object state is copied (for example chest contents or item stand items).
 - Dimensions (key: `dimensions`): Measurements for objects.
@@ -345,12 +377,12 @@ Following powers are available with `hammer_config` command:
 - No cost (default: `false`, key: `no_cost`): Removes durability, resource and stamina costs.
 - No creator (default: `false`, key: `no_creator`): Builds without setting the creator information.
 - Overwrite health (default: `0`, key: `overwrite_health`): Sets the health of built or repaired objects (0 reverts to the default max health, except for creatures).
-- Plan Build folder (default: `BepInEx/config/PlanBuild`, key: `plan_build_folder`): Folder relative to the Valheim.exe.
 - Range (default: `0`, key: `range`): Range for the hammer (capped at about 50 meters).
 - Remove anything (default: `false`, key: `remove_anything`): Allows removing any object.
 - Remove area (default: `0`, key: `remove_area`): Removes same objects within the radius.
 - Repair anything (default: `false`, key: `repair_anything`): Allows healing or repairing any object.
 - Reset offset on unfreeze (default `true`, key: `reset_offset_on_unfreeze`): Removes the placement offset when unfreezing the placement.
+- Save blueprints to profile (default: `false`, key: `save_blueprints_to_profile`): If enabled, blueprints are saved to the profile folder instead of the base Valheim folder.
 - Show command values (default: `false`, key: `show_command_values`): Always show the command on tool descriptions.
 - Snap points for all objects (default: `false`, key: `snap_points_for_all_objects`):If enabled, multi selection creates snap points for every object.
 - Unfreeze on select (default `true`, key: `unfreeze_on_select`): Removes the placement freeze when selecting a new object.
@@ -385,14 +417,13 @@ This means that [Server Devcommands](https://valheim.thunderstore.io/package/Jer
 
 If you don't wish to use this system you can set all binds to none and make your own bindings with the `bind` command.
 
-
 # Building
 
 Hammer configuration applies to all building, including the standard structures selected from the build menu.
 
 When selecting an existing object, its size and rotation is copied to the placement tool. The last rotation is always used when using the build window.
 
-Object scaling only works for some objects (mostly trees and rocks). This is restricted by the base game (scaling is not stored in the save file).
+Object scaling only works for some objects (mostly trees and rocks). This is restricted by the base game (scaling is not stored in the save file). [Structure Tweaks](https://valheim.thunderstore.io/package/JereKuusela/Structure_Tweaks/) mod can be used to enable scaling for all objects (required for all clients).
 
 If "Overwrite health" is enabled, objects have a specified health (including creatures). For minerocks, the health is applied to the individual parts (the outer shell stays at 1 health). Repairing can be used to modify the shell health if needed.
 
@@ -427,4 +458,3 @@ By default, destroying only works for standard structures and placed objects. Pl
 If "Destroy anything" is enabled, all objects can be removed.
 
 If "Disable loot" is enabled, destroying creatures or structures won't drop loot. This can be useful to get rid of very high starred creatures that crash the game when killed.
-

@@ -6,7 +6,7 @@ public class HammerGridCommand
     CommandWrapper.Register("hammer_grid", (int index, int subIndex) =>
     {
       if (index == 0) return CommandWrapper.Info("Grid precision in meters.");
-      if (index == 1) return CommandWrapper.XYZ("Grid center point. If not given, uses the current placement position.", subIndex);
+      if (index == 1) return CommandWrapper.XZY("Grid center point. If not given, uses the current placement position.", subIndex);
       return null;
     });
     Helper.Command("hammer_grid", " [precision] [center=current] - Restricts possible placement coordinates. Using the same command removes the restriction.", (args) =>

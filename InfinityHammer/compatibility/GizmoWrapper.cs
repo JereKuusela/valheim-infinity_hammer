@@ -8,10 +8,10 @@ public static class GizmoWrapper
   private static Assembly? Comfy = null;
   private static Assembly? Reloaded = null;
   private static Type ComfyType() => Comfy!.GetType("Gizmo.ComfyGizmo");
-  private static Vector3 ComfyGet() => (Vector3)AccessTools.Field(ComfyType(), "_eulerAngles").GetValue(null);
+  private static Vector3 ComfyGet() => (Vector3)AccessTools.Field(ComfyType(), "EulerAngles").GetValue(null);
   private static void ComfySet(Vector3 angles)
   {
-    AccessTools.Field(ComfyType(), "_eulerAngles").SetValue(null, angles);
+    AccessTools.Field(ComfyType(), "EulerAngles").SetValue(null, angles);
     AccessTools.Method(ComfyType(), "Rotate").Invoke(null, new object[0]);
   }
   public static void InitComfy(Assembly assembly)
@@ -22,33 +22,11 @@ public static class GizmoWrapper
   {
     Reloaded = assembly;
   }
-
   private static void ComfyRotation(Quaternion rotation)
   {
     if (Comfy == null) return;
     var euler = rotation.eulerAngles;
     ComfySet(euler);
-  }
-  private static void ComfyRotationX(float rotation)
-  {
-    if (Comfy == null) return;
-    var angles = ComfyGet();
-    angles.x = rotation;
-    ComfySet(angles);
-  }
-  private static void ComfyRotationY(float rotation)
-  {
-    if (Comfy == null) return;
-    var angles = ComfyGet();
-    angles.y = rotation;
-    ComfySet(angles);
-  }
-  private static void ComfyRotationZ(float rotation)
-  {
-    if (Comfy == null) return;
-    var angles = ComfyGet();
-    angles.z = rotation;
-    ComfySet(angles);
   }
   private static void ComfyRotate(Vector3 rotation)
   {
@@ -100,15 +78,15 @@ public static class GizmoWrapper
     }
     return GameObject.Find("GizmoRoot(Clone)");
   }
-  private static void SetReloadedRotation(Quaternion rotation)
+  private static void SetReloaded(Quaternion rotation)
   {
     var gizmo = GetReloaded();
     if (gizmo) gizmo.transform.rotation = rotation;
   }
-  public static void SetRotation(Quaternion rotation)
+  public static void Set(Quaternion rotation)
   {
     ComfyRotation(rotation);
-    SetReloadedRotation(rotation);
+    SetReloaded(rotation);
   }
   public static void RotateX(float rotation)
   {

@@ -1,15 +1,8 @@
 using System.Linq;
 using UnityEngine;
 namespace InfinityHammer;
-public class ToolScaling
+public class ToolScaling(bool SanityY, bool MinXZ)
 {
-  private bool SanityY;
-  private bool MinXZ;
-  public ToolScaling(bool sanityY, bool minXZ)
-  {
-    SanityY = sanityY;
-    MinXZ = minXZ;
-  }
   public Vector3 Value = Vector3.one;
   public float X => MinXZ ? Mathf.Max(0.25f, Value.x) : Value.x;
   public float Y => Value.y;
@@ -120,9 +113,9 @@ public static class Scaling
     if (IsScalingSupported(Helper.GetPlacementGhost()))
     {
       if (scaling.X != scaling.Y || scaling.X != scaling.Z)
-        Helper.AddMessage(terminal, $"Scale set to X: {scaling.X.ToString("P0")}, Z: {scaling.Z.ToString("P0")}, Y: {scaling.Y.ToString("P0")}.");
+        Helper.AddMessage(terminal, $"Scale set to X: {scaling.X:P0}, Z: {scaling.Z:P0}, Y: {scaling.Y:P0}.");
       else
-        Helper.AddMessage(terminal, $"Scale set to {scaling.Y.ToString("P0")}.");
+        Helper.AddMessage(terminal, $"Scale set to {scaling.Y:P0}.");
 
     }
     else

@@ -9,7 +9,7 @@ namespace Service;
 public class ConfigWrapper
 {
 
-  private ConfigFile ConfigFile;
+  private readonly ConfigFile ConfigFile;
   public ConfigWrapper(string command, ConfigFile configFile)
   {
     ConfigFile = configFile;
@@ -24,13 +24,13 @@ public class ConfigWrapper
         handler(args.Context, string.Join(" ", args.Args, 2, args.Length - 2));
     }, optionsFetcher: () => SettingHandlers.Keys.ToList());
   }
-  private ConfigEntry<T> Create<T>(string group, string name, T value, ConfigDescription description, bool synchronizedSetting = true)
+  private ConfigEntry<T> Create<T>(string group, string name, T value, ConfigDescription description)
   {
     var configEntry = ConfigFile.Bind(group, name, value, description);
     return configEntry;
   }
-  private ConfigEntry<T> Create<T>(string group, string name, T value, string description, bool synchronizedSetting = true) => Create(group, name, value, new ConfigDescription(description), synchronizedSetting);
-  public ConfigEntry<T> Bind<T>(string group, string name, T value, ConfigDescription description, bool synchronizedSetting = true)
+  private ConfigEntry<T> Create<T>(string group, string name, T value, string description) => Create(group, name, value, new ConfigDescription(description));
+  public ConfigEntry<T> Bind<T>(string group, string name, T value, ConfigDescription description)
   {
     var configEntry = Create(group, name, value, description);
     if (configEntry is ConfigEntry<bool> boolEntry)
@@ -41,8 +41,8 @@ public class ConfigWrapper
       Register(configEntry);
     return configEntry;
   }
-  public ConfigEntry<string> BindList(string group, string name, string value, string description, bool synchronizedSetting = true) => Bind(group, name, value, new ConfigDescription(description), synchronizedSetting);
-  public ConfigEntry<string> BindList(string group, string name, string value, ConfigDescription description, bool synchronizedSetting = true)
+  public ConfigEntry<string> BindList(string group, string name, string value, string description) => Bind(group, name, value, new ConfigDescription(description));
+  public ConfigEntry<string> BindList(string group, string name, string value, ConfigDescription description)
   {
     var configEntry = Create(group, name, value, description);
     RegisterList(configEntry);
@@ -50,32 +50,31 @@ public class ConfigWrapper
   }
   public ConfigEntry<KeyboardShortcut> BindCommand(Func<string> command, string group, string name, KeyboardShortcut value, string description, string mode = "")
   {
-    var configEntry = Create(group, name, value, description, false);
+    var configEntry = Create(group, name, value, description);
     RegisterCommand(configEntry, command, mode);
     return configEntry;
   }
   public ConfigEntry<KeyboardShortcut> BindCommand(string command, string group, string name, KeyboardShortcut value, string description, string mode = "")
   {
-    return BindCommand(() => command, group, name, value, description, mode);
-  }
-  public ConfigEntry<KeyboardShortcut> BindWheelCommand(Func<string> command, string group, string name, KeyboardShortcut value, string description, string mode = "")
-  {
-    var configEntry = Create(group, name, value, description, false);
-    RegisterWheelCommand(configEntry, command, mode);
+    var configEntry = Create(group, name, value, description);
+    RegisterCommand(configEntry, () => command, mode);
     return configEntry;
   }
   public ConfigEntry<KeyboardShortcut> BindWheelCommand(string command, string group, string name, KeyboardShortcut value, string description, string mode = "")
+    => BindWheelCommand(() => command, group, name, value, description, mode);
+  public ConfigEntry<KeyboardShortcut> BindWheelCommand(Func<string> command, string group, string name, KeyboardShortcut value, string description, string mode = "")
   {
-    return BindWheelCommand(() => command, group, name, value, description, mode);
+    var configEntry = Create(group, name, value, description);
+    RegisterWheelCommand(configEntry, command, mode);
+    return configEntry;
   }
-  public ConfigEntry<T> Bind<T>(string group, string name, T value, string description, bool synchronizedSetting = true) => Bind(group, name, value, new ConfigDescription(description), synchronizedSetting);
+  public ConfigEntry<T> Bind<T>(string group, string name, T value, string description) => Bind(group, name, value, new ConfigDescription(description));
   private static void AddMessage(Terminal context, string message)
   {
     context.AddString(message);
     Player.m_localPlayer?.Message(MessageHud.MessageType.TopLeft, message);
   }
-  private Dictionary<string, ConfigEntryBase> Settings = new();
-  private Dictionary<string, Action<Terminal, string>> SettingHandlers = new();
+  private readonly Dictionary<string, Action<Terminal, string>> SettingHandlers = new();
   private void Register(ConfigEntry<bool> setting)
   {
     var name = setting.Definition.Key;
@@ -100,7 +99,7 @@ public class ConfigWrapper
     var bind = $"bind {keys} tag={name} {command()}";
     Console.instance.TryRunCommand(bind);
   }
-  private List<Action> BindCalls = new();
+  private readonly List<Action> BindCalls = new();
   public void SetupBinds()
   {
     foreach (var call in BindCalls) call();
@@ -157,14 +156,14 @@ public class ConfigWrapper
   }
   private static string State(bool value) => value ? "enabled" : "disabled";
   private static string Flag(bool value) => value ? "Removed" : "Added";
-  private static HashSet<string> Truthies = new() {
+  private static readonly HashSet<string> Truthies = new() {
     "1",
     "true",
     "yes",
     "on"
   };
   private static bool IsTruthy(string value) => Truthies.Contains(value);
-  private static HashSet<string> Falsies = new() {
+  private static readonly HashSet<string> Falsies = new() {
     "0",
     "false",
     "no",
@@ -229,26 +228,6 @@ public class ConfigWrapper
       setting.Value = string.Join(",", list);
       AddMessage(context, $"{name}: {Flag(remove)} \"{flag}\".");
     }
-  }
-  private static void SetValue(Terminal context, ConfigEntry<int> setting, string name, string value)
-  {
-    if (value == "")
-    {
-      AddMessage(context, $"{name}: {setting.Value}.");
-      return;
-    }
-    setting.Value = TryParseInt(value, (int)setting.DefaultValue);
-    AddMessage(context, $"{name} set to {setting.Value}.");
-  }
-  private static void SetValue(Terminal context, ConfigEntry<float> setting, string name, string value)
-  {
-    if (value == "")
-    {
-      AddMessage(context, $"{name}: {setting.Value}.");
-      return;
-    }
-    setting.Value = TryParseFloat(value, (float)setting.DefaultValue);
-    AddMessage(context, $"{name} set to {setting.Value}.");
   }
   private static void SetValue<T>(Terminal context, ConfigEntry<T> setting, string name, string value)
   {

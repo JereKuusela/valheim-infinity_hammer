@@ -39,7 +39,7 @@ public static class UpdateAvailable
   }
 }
 
-[HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece))]
+[HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece), typeof(Vector2Int))]
 public class RunBuildMenuCommands
 {
   public static bool InstantCommand = false;

@@ -323,7 +323,7 @@ public class Ruler
 
   private static void HighlightCircle(Vector3 center, float radius, float height)
   {
-    foreach (var wtr in WearNTear.m_allInstances)
+    foreach (var wtr in WearNTear.s_allInstances)
     {
       var pos = wtr.m_nview.GetZDO().GetPosition();
       if (Selector.Within(pos, center, radius, height))
@@ -332,7 +332,7 @@ public class Ruler
   }
   private static void HighlightRectangle(Vector3 center, float angle, float width, float depth, float height)
   {
-    foreach (var wtr in WearNTear.m_allInstances)
+    foreach (var wtr in WearNTear.s_allInstances)
     {
       var pos = wtr.m_nview.GetZDO().GetPosition();
       if (Selector.Within(pos, center, angle, width, depth, height))

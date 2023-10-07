@@ -2,6 +2,9 @@ namespace Service;
 
 public static class Hash
 {
+  public static int OverrideItems = "override_items".GetStableHashCode();
+  public static int AddedDefaultItems = "addedDefaultItems".GetStableHashCode();
+  public static int Items = "items".GetStableHashCode();
   public static int PlantTime = "plantTime".GetStableHashCode();
   public static int Wear = "override_wear".GetStableHashCode();
   public static int Fall = "override_fall".GetStableHashCode();
@@ -24,7 +27,7 @@ public static class Hash
   public static int Tag = "tag".GetStableHashCode();
   public static int Seed = "seed".GetStableHashCode();
   public static int Location = "location".GetStableHashCode();
-
-
+  public static int SpawnPoint = "spawnpoint".GetStableHashCode();
+  public static int Scale = "scale".GetStableHashCode();
   public static int Portal = "portal_wood".GetStableHashCode();
 }

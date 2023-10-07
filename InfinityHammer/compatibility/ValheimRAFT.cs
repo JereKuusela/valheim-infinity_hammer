@@ -4,14 +4,12 @@ using UnityEngine;
 
 namespace InfinityHammer;
 
-public class ValheimRAFT
-{
+public class ValheimRAFT {
   private static KeyValuePair<int, int> RaftParent = ZDO.GetHashZDOID("MBParent");
 
   public static bool IsValid(ZDO zdo) => zdo != null && zdo.IsValid();
   public static bool IsValid(ZNetView view) => view && IsValid(view.GetZDO());
-  public static ZNetView[] GetConnectedRaft(ZNetView baseView, HashSet<int> ignoredPrefabs)
-  {
+  public static ZNetView[] GetConnectedRaft(ZNetView baseView, HashSet<int> ignoredPrefabs) {
     var id = baseView.GetZDO().GetZDOID(RaftParent);
     var instances = ZNetScene.instance.m_instances.Values;
     return instances
@@ -20,10 +18,8 @@ public class ValheimRAFT
       .Where(view => view.GetZDO().m_uid == id || view.GetZDO().GetZDOID(RaftParent) == id)
       .ToArray();
   }
-  private static ZDOID Spawn(List<GameObject> children)
-  {
-    for (var i = 0; i < children.Count; i++)
-    {
+  private static ZDOID Spawn(List<GameObject> children) {
+    for (var i = 0; i < children.Count; i++) {
       var child = children[i];
       var name = Utils.GetPrefabName(child);
       if (name != "MBRaft") continue;
@@ -35,15 +31,13 @@ public class ValheimRAFT
     }
     return ZDOID.None;
   }
-  public static void Handle(List<GameObject> children)
-  {
+  public static void Handle(List<GameObject> children) {
     var raft = Spawn(children);
     if (raft == ZDOID.None) return;
-    for (var i = 0; i < children.Count; i++)
-    {
-      var zdo = Selection.Objects[i].Data;
-      if (zdo.GetZDOID(RaftParent) != ZDOID.None)
-        zdo.Set(RaftParent, raft);
+    for (var i = 0; i < children.Count; i++) {
+      var data = Selection.Objects[i].Data;
+      if (data.GetZDOID(RaftParent) != ZDOID.None)
+        data.Set(RaftParent, raft);
     }
   }
   public static bool IsRaft(string name) => name == "MBRaft";

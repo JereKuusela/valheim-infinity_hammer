@@ -7,8 +7,7 @@ public class RectangleProjector : CircleProjector
   public float m_depth = 5f;
   private Vector3 Snap(Vector3 pos)
   {
-    RaycastHit raycastHit;
-    if (Physics.Raycast(pos + Vector3.up * 500f, Vector3.down, out raycastHit, 1000f, this.m_mask.value))
+    if (Physics.Raycast(pos + Vector3.up * 500f, Vector3.down, out var raycastHit, 1000f, this.m_mask.value))
       pos.y = raycastHit.point.y;
     return pos;
   }
@@ -39,8 +38,10 @@ public class RectangleProjector : CircleProjector
     else transform.gameObject.SetActive(true);
     transform.localScale = scale;
   }
+#pragma warning disable IDE0051 // Remove unused private members
   new private void Update()
   {
+#pragma warning restore IDE0051 // Remove unused private members
     var totalLength = 2 * m_width + 2 * m_depth;
     var forward = (int)Mathf.Max(2, Mathf.Ceil(m_nrOfSegments * m_depth / totalLength));
     var right = (int)Mathf.Max(2, Mathf.Ceil(m_nrOfSegments * m_width / totalLength));
