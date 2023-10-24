@@ -1,3 +1,6 @@
+- v1.41
+  - Fixes copying not working for damaged stone or mineral deposits.
+
 - v1.40
   - Adds a new command `hammer_restore` that selects a blueprint and automatically sets hammer at its position and rotation.
   - Adds a new command `hammer_pos` that allows setting the hammer position and rotation.
