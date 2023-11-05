@@ -166,7 +166,11 @@ public class PlacePiece
     command = command.Replace("#ignore", Configuration.configIgnoredIds.Value);
     if (!Configuration.DisableMessages)
       Console.instance.AddString($"Hammering command: {command}");
+    var prev = HideEffects.Active;
+    HideEffects.Active = false;
+    // Hide effects prevents some visuals from being shown (like status effects).
     Console.instance.TryRunCommand(command);
+    HideEffects.Active = prev;
   }
 
   private static void HandleMultiple(GameObject ghost)

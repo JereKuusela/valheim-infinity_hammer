@@ -28,8 +28,8 @@ public class Blueprint
   public Vector3 Coordinates = Vector3.zero;
   public Vector3 Rotation = Vector3.zero;
   public string CenterPiece = Configuration.DefaultCenterPiece;
-  public List<BlueprintObject> Objects = new();
-  public List<Vector3> SnapPoints = new();
+  public List<BlueprintObject> Objects = [];
+  public List<Vector3> SnapPoints = [];
   public float Radius = 0f;
   public Vector3 Center(string centerPiece)
   {

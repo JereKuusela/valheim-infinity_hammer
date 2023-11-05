@@ -1,3 +1,6 @@
+- v1.42
+  - Adds support for connected ZDO when copying objects.
+
 - v1.41
   - Fixes copying not working for damaged stone or mineral deposits.
 
@@ -16,9 +19,3 @@
 - v1.38
   - Fixes custom data and undo/redo not working on servers.
   - Fixes not working with the latest Comfy Gizmo.
-
-- v1.37
-  - Fixes custom data.
-
-- v1.36
-  - Updated for the new game version.

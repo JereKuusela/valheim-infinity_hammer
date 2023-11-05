@@ -4,13 +4,15 @@ using System.Linq;
 using UnityEngine;
 
 namespace InfinityHammer;
-public partial class Selected {
+public partial class Selected
+{
   private int ZoopsX = 0;
   private int ZoopsY = 0;
   private int ZoopsZ = 0;
   private Vector3 ZoopOffset = new();
-  private readonly Dictionary<Vector3Int, GameObject> Zoops = new();
-  private void ToSingle() {
+  private readonly Dictionary<Vector3Int, GameObject> Zoops = [];
+  private void ToSingle()
+  {
     var obj = Ghost.transform.GetChild(0).gameObject;
     obj.SetActive(false);
     Helper.EnsurePiece(obj);
@@ -24,9 +26,11 @@ public partial class Selected {
     ZoopsZ = 0;
     Zoops.Clear();
   }
-  private void ToMulti() {
+  private void ToMulti()
+  {
     if (Type == SelectedType.Multiple) return;
-    if (Type == SelectedType.Default) {
+    if (Type == SelectedType.Default)
+    {
       var ghost = Player.m_localPlayer.m_placementGhost;
       var name = Utils.GetPrefabName(ghost);
       Set(name, Selection.IsSingleUse());
@@ -42,7 +46,8 @@ public partial class Selected {
     obj.transform.localScale = Vector3.one;
     obj.SetActive(true);
     AddSnapPoints(obj);
-    if (obj.TryGetComponent<Piece>(out var piece)) {
+    if (obj.TryGetComponent<Piece>(out var piece))
+    {
       var name2 = Utils.GetPrefabName(obj);
       var prefab = ZNetScene.instance.GetPrefab(name2);
       if (prefab && !prefab.GetComponent<Piece>())
@@ -50,7 +55,8 @@ public partial class Selected {
     }
   }
   private int Sign(int value) => value >= 0 ? 1 : -1;
-  private void RemoveChildSub(Vector3Int index) {
+  private void RemoveChildSub(Vector3Int index)
+  {
     if (Objects.Count > 0)
       Objects.RemoveAt(0);
     var obj = Zoops[index];
@@ -59,22 +65,26 @@ public partial class Selected {
     UnityEngine.Object.Destroy(obj);
     Zoops.Remove(index);
   }
-  private void RemoveChildX() {
+  private void RemoveChildX()
+  {
     for (var y = 0; Math.Abs(y) <= Math.Abs(ZoopsY); y += Sign(ZoopsY))
       for (var z = 0; Math.Abs(z) <= Math.Abs(ZoopsZ); z += Sign(ZoopsZ))
         RemoveChildSub(new(ZoopsX, y, z));
   }
-  private void RemoveChildY() {
+  private void RemoveChildY()
+  {
     for (var x = 0; Math.Abs(x) <= Math.Abs(ZoopsX); x += Sign(ZoopsX))
       for (var z = 0; Math.Abs(z) <= Math.Abs(ZoopsZ); z += Sign(ZoopsZ))
         RemoveChildSub(new(x, ZoopsY, z));
   }
-  private void RemoveChildZ() {
+  private void RemoveChildZ()
+  {
     for (var x = 0; Math.Abs(x) <= Math.Abs(ZoopsX); x += Sign(ZoopsX))
       for (var y = 0; Math.Abs(y) <= Math.Abs(ZoopsY); y += Sign(ZoopsY))
         RemoveChildSub(new(x, y, ZoopsZ));
   }
-  private void AddChildSub(Vector3Int index) {
+  private void AddChildSub(Vector3Int index)
+  {
     var pos = GetOffset(index);
     var baseObj = Ghost.transform.GetChild(0).gameObject;
     var obj = Helper.SafeInstantiate(baseObj, Ghost);
@@ -85,7 +95,8 @@ public partial class Selected {
     Objects.Add(new SelectedObject(Objects[0].Prefab, Objects[0].Scalable, Objects[0].Data));
     Zoops[index] = obj;
   }
-  private void AddChildX(string offset) {
+  private void AddChildX(string offset)
+  {
     UpdateOffsetX(offset);
     ZNetView.m_forceDisableInit = true;
     for (var y = 0; Math.Abs(y) <= Math.Abs(ZoopsY); y += Sign(ZoopsY))
@@ -93,7 +104,8 @@ public partial class Selected {
         AddChildSub(new(ZoopsX, y, z));
     ZNetView.m_forceDisableInit = false;
   }
-  private void AddChildY(string offset) {
+  private void AddChildY(string offset)
+  {
     UpdateOffsetY(offset);
     ZNetView.m_forceDisableInit = true;
     for (var x = 0; Math.Abs(x) <= Math.Abs(ZoopsX); x += Sign(ZoopsX))
@@ -102,7 +114,8 @@ public partial class Selected {
     ZNetView.m_forceDisableInit = false;
   }
 
-  private void AddChildZ(string offset) {
+  private void AddChildZ(string offset)
+  {
     UpdateOffsetZ(offset);
     ZNetView.m_forceDisableInit = true;
     for (var x = 0; Math.Abs(x) <= Math.Abs(ZoopsX); x += Sign(ZoopsX))
@@ -110,129 +123,171 @@ public partial class Selected {
         AddChildSub(new(x, y, ZoopsZ));
     ZNetView.m_forceDisableInit = false;
   }
-  private static readonly GameObject SnapObj = new() {
+  private static readonly GameObject SnapObj = new()
+  {
     name = "_snappoint",
     layer = LayerMask.NameToLayer("piece"),
     tag = "snappoint",
   };
-  private Vector3 GetOffset(Vector3Int index) {
+  private Vector3 GetOffset(Vector3Int index)
+  {
     var offset = ZoopOffset;
     offset.x *= index.x;
     offset.y *= index.y;
     offset.z *= index.z;
     return offset;
   }
-  private void UpdateOffsetX(string offset) {
+  private void UpdateOffsetX(string offset)
+  {
     var baseObj = Ghost.transform.GetChild(0).gameObject;
     var size = Helper.ParseSize(baseObj, offset);
     ZoopOffset.x = size.x * Ghost.transform.localScale.z;
   }
-  private void UpdateOffsetY(string offset) {
+  private void UpdateOffsetY(string offset)
+  {
     var baseObj = Ghost.transform.GetChild(0).gameObject;
     var size = Helper.ParseSize(baseObj, offset);
     ZoopOffset.y = size.y * Ghost.transform.localScale.y;
   }
-  private void UpdateOffsetZ(string offset) {
+  private void UpdateOffsetZ(string offset)
+  {
     var baseObj = Ghost.transform.GetChild(0).gameObject;
     var size = Helper.ParseSize(baseObj, offset);
     ZoopOffset.z = size.z * Ghost.transform.localScale.z;
   }
-  private void ZoopPostprocess() {
+  private void ZoopPostprocess()
+  {
     CountObjects();
     var scale = Scaling.Build.Value;
     Helper.GetPlayer().SetupPlacementGhost();
     Scaling.Build.SetScale(scale);
   }
-  public void ZoopRight(string offset) {
+  public void ZoopRight(string offset)
+  {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
     if (Type == SelectedType.Command) return;
     if (Type == SelectedType.Location) return;
-    if (ZoopsX == -1 && ZoopsY == 0 && ZoopsZ == 0) {
+    if (ZoopsX == -1 && ZoopsY == 0 && ZoopsZ == 0)
+    {
       ToSingle();
-    } else if (ZoopsX < 0) {
+    }
+    else if (ZoopsX < 0)
+    {
       RemoveChildX();
       ZoopsX += 1;
-    } else {
+    }
+    else
+    {
       ToMulti();
       ZoopsX += 1;
       AddChildX(offset);
     }
     ZoopPostprocess();
   }
-  public void ZoopLeft(string offset) {
+  public void ZoopLeft(string offset)
+  {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
     if (Type == SelectedType.Command) return;
     if (Type == SelectedType.Location) return;
-    if (ZoopsX == 1 && ZoopsY == 0 && ZoopsZ == 0) {
+    if (ZoopsX == 1 && ZoopsY == 0 && ZoopsZ == 0)
+    {
       ToSingle();
-    } else if (ZoopsX > 0) {
+    }
+    else if (ZoopsX > 0)
+    {
       RemoveChildX();
       ZoopsX -= 1;
-    } else {
+    }
+    else
+    {
       ToMulti();
       ZoopsX -= 1;
       AddChildX(offset);
     }
     ZoopPostprocess();
   }
-  public void ZoopUp(string offset) {
+  public void ZoopUp(string offset)
+  {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
     if (Type == SelectedType.Command) return;
     if (Type == SelectedType.Location) return;
-    if (ZoopsX == 0 && ZoopsY == -1 && ZoopsZ == 0) {
+    if (ZoopsX == 0 && ZoopsY == -1 && ZoopsZ == 0)
+    {
       ToSingle();
-    } else if (ZoopsY < 0) {
+    }
+    else if (ZoopsY < 0)
+    {
       RemoveChildY();
       ZoopsY += 1;
-    } else {
+    }
+    else
+    {
       ToMulti();
       ZoopsY += 1;
       AddChildY(offset);
     }
     ZoopPostprocess();
   }
-  public void ZoopDown(string offset) {
+  public void ZoopDown(string offset)
+  {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
     if (Type == SelectedType.Command) return;
     if (Type == SelectedType.Location) return;
-    if (ZoopsX == 0 && ZoopsY == 1 && ZoopsZ == 0) {
+    if (ZoopsX == 0 && ZoopsY == 1 && ZoopsZ == 0)
+    {
       ToSingle();
-    } else if (ZoopsY > 0) {
+    }
+    else if (ZoopsY > 0)
+    {
       RemoveChildY();
       ZoopsY -= 1;
-    } else {
+    }
+    else
+    {
       ToMulti();
       ZoopsY -= 1;
       AddChildY(offset);
     }
     ZoopPostprocess();
   }
-  public void ZoopForward(string offset) {
+  public void ZoopForward(string offset)
+  {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
     if (Type == SelectedType.Command) return;
     if (Type == SelectedType.Location) return;
-    if (ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == -1) {
+    if (ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == -1)
+    {
       ToSingle();
-    } else if (ZoopsZ < 0) {
+    }
+    else if (ZoopsZ < 0)
+    {
       RemoveChildZ();
       ZoopsZ += 1;
-    } else {
+    }
+    else
+    {
       ToMulti();
       ZoopsZ += 1;
       AddChildZ(offset);
     }
     ZoopPostprocess();
   }
-  public void ZoopBackward(string offset) {
+  public void ZoopBackward(string offset)
+  {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
     if (Type == SelectedType.Command) return;
     if (Type == SelectedType.Location) return;
-    if (ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 1) {
+    if (ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 1)
+    {
       ToSingle();
-    } else if (ZoopsZ > 0) {
+    }
+    else if (ZoopsZ > 0)
+    {
       RemoveChildZ();
       ZoopsZ -= 1;
-    } else {
+    }
+    else
+    {
       ToMulti();
       ZoopsZ -= 1;
       AddChildZ(offset);

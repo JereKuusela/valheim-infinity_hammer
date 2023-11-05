@@ -12,6 +12,8 @@ Install also [World Edit Commands](https://valheim.thunderstore.io/package/JereK
 
 See [documentation](https://github.com/JereKuusela/valheim-infinity_hammer/blob/main/README.md).
 
+[<img width="80px" style="margin-bottom: -4" src="https://cdn.prod.website-files.com/6257adef93867e50d84d30e2/636e0b5493894cf60b300587_full_logo_white_RGB.svg">](https://discord.gg/VFRJcPwUdm) for help and examples.
+
 ## Credits
 
 Thanks for Azumatt for creating the mod icon!

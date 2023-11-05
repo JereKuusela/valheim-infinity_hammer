@@ -29,7 +29,7 @@ public class SelectedObject
 
 public static class Selection
 {
-  public static Dictionary<string, Selected> Selections = new();
+  public static Dictionary<string, Selected> Selections = [];
   public static Selected? Get() => Selections.TryGetValue(Helper.GetTool(), out var selection) ? selection : null;
   public static Selected GetOrAdd()
   {
@@ -47,7 +47,7 @@ public static class Selection
   public static String Command => Get()?.Command ?? "";
   public static SelectedType Type => Get()?.Type ?? SelectedType.Default;
   public static RulerParameters RulerParameters => Get()?.RulerParameters ?? new();
-  public static List<SelectedObject> Objects => Get()?.Objects ?? new();
+  public static List<SelectedObject> Objects => Get()?.Objects ?? [];
 
   public static void Clear() => Get()?.Clear();
   public static bool IsSingleUse() => GetOrAdd().SingleUse;
@@ -80,7 +80,7 @@ public partial class Selected
   public GameObject Ghost = null;
 #nullable enable
   public SelectedType Type = SelectedType.Default;
-  public List<SelectedObject> Objects = new();
+  public List<SelectedObject> Objects = [];
   public string Command = "";
   public string ExtraDescription = "";
   public bool SingleUse = false;
@@ -477,7 +477,7 @@ public partial class Selected
   }
   private List<GameObject> AddSnapPoints(GameObject obj)
   {
-    List<GameObject> added = new();
+    List<GameObject> added = [];
     // Null reference exception is sometimes thrown, no idea why but added some checks.
     if (!Ghost || !obj || !SnapObj) return added;
     foreach (Transform tr in obj.transform)

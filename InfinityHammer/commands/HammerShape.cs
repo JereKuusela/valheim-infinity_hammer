@@ -4,11 +4,11 @@ public class HammerShapeCommand
 {
   public HammerShapeCommand()
   {
-    List<string> shapes = new() {
+    List<string> shapes = [
       RulerShape.Circle.ToString(),
       RulerShape.Rectangle.ToString(),
       RulerShape.Square.ToString(),
-    };
+    ];
     CommandWrapper.Register("hammer_shape", (int index, int subIndex) =>
     {
       if (index == 0) return shapes;

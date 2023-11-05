@@ -59,7 +59,7 @@ public static class Hammer
     var rotation = ghost.transform.rotation;
     CustomizeSpawnLocation.AllViews = AllLocationsObjects;
     CustomizeSpawnLocation.RandomDamage = RandomLocationDamage;
-    ZoneSystem.instance.SpawnLocation(location, seed, position, rotation, ZoneSystem.SpawnMode.Full, new());
+    ZoneSystem.instance.SpawnLocation(location, seed, position, rotation, ZoneSystem.SpawnMode.Full, []);
     foreach (var zdo in Undo.Objects)
     {
       if (ZNetScene.instance.m_instances.TryGetValue(zdo, out var obj))
