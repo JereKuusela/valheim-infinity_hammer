@@ -14,7 +14,7 @@ public class InfinityHammer : BaseUnityPlugin
 {
   public const string GUID = "infinity_hammer";
   public const string NAME = "Infinity Hammer";
-  public const string VERSION = "1.43";
+  public const string VERSION = "1.44";
   public static bool StructureTweaks = false;
 #nullable disable
   public static ManualLogSource Log;
@@ -31,9 +31,9 @@ public class InfinityHammer : BaseUnityPlugin
     try
     {
       SetupWatcher();
-      CommandManager.CreateFile();
-      CommandManager.SetupWatcher();
-      CommandManager.FromFile();
+      ToolManager.CreateFile();
+      ToolManager.SetupWatcher();
+      ToolManager.FromFile();
     }
     catch
     {
@@ -107,17 +107,11 @@ public class SetCommands
     new HammerZoomCommand();
     new HammerStackCommand();
     new HammerFreezeCommand();
+    new HammerToolCommand();
     new HammerGridCommand();
     new HammerSaveCommand();
-    new HammerCommand();
-    new HoeCommand();
-    new HammerAddCommand();
-    new HoeAddCommand();
-    new HammerRemoveCommand();
-    new HoeRemoveCommand();
+    new HammerImportCommand();
     new HammerMirrorCommand();
-    new HammerListCommand();
-    new HoeListCommand();
     new HammerShapeCommand();
     new HammerZoopCommand();
     new HammerMeasureCommand();
@@ -128,18 +122,18 @@ public class SetCommands
 [HarmonyPatch(typeof(FejdStartup), nameof(FejdStartup.Start))]
 public class FejdStartupStart
 {
-  static void Create(string tool)
+  static void Create()
   {
     var pars = "from=x,z,y circle=r1-r2 angle=a rect=w1-w2,d";
     var parsSpawn = "from=x,z,y radius=r1-r2";
     var parsTo = "terrain to=tx,tz,ty circle=r1-r2 rect=w1-w2,d";
     var sub = CommandWrapper.Substitution();
-    Console.instance.TryRunCommand($"alias {tool}_terrain {tool}_command terrain {pars}");
-    Console.instance.TryRunCommand($"alias {tool}_object {tool}_command object {pars} height=h ignore=ignore");
-    Console.instance.TryRunCommand($"alias {tool}_spawn {tool}_command spawn_object {sub} {parsSpawn}");
+    Console.instance.TryRunCommand($"alias hammer_terrain hammer_tool terrain {pars}");
+    Console.instance.TryRunCommand($"alias hammer_object hammer_tool object {pars} height=h ignore=ignore");
+    Console.instance.TryRunCommand($"alias hammer_spawn hammer_tool spawn_object {sub} {parsSpawn}");
 
-    Console.instance.TryRunCommand($"alias {tool}_terrain_to hammer_shape rectangle;{tool}_command {parsTo}");
-    Console.instance.TryRunCommand($"alias {tool}_slope {tool}_terrain_to slope cmd_w={sub}");
+    Console.instance.TryRunCommand($"alias hammer_terrain_to hammer_shape rectangle;hammer_tool {parsTo}");
+    Console.instance.TryRunCommand($"alias hammer_slope hammer_terrain_to slope; hammer_scale_x_cmd {sub}");
 
   }
   static void Postfix()
@@ -147,12 +141,11 @@ public class FejdStartupStart
     if (CommandWrapper.ServerDevcommands != null)
     {
       var pars = "from=x,z,y circle=r angle=a rect=w,d";
-      Console.instance.TryRunCommand($"alias hammer_area hammer_command hammer {pars} height=h");
+      Console.instance.TryRunCommand($"alias hammer_area hammer_tool hammer {pars} height=h");
     }
     if (CommandWrapper.ServerDevcommands != null && CommandWrapper.WorldEditCommands != null)
     {
-      Create("hammer");
-      Create("hoe");
+      Create();
     }
   }
 }

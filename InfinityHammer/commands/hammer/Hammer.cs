@@ -47,11 +47,12 @@ public class HammerSelect
   }
   private void UpdateZDOs(Action<ZDOData> action)
   {
-    for (var i = 0; i < Selection.Objects.Count; i++)
+    var items = Selection.Objects();
+    for (var i = 0; i < items.Count; i++)
     {
-      var data = Selection.Objects[i].Data;
+      var data = items[i].Data;
       action(data);
-      Selection.Objects[i].Data = data;
+      items[i].Data = data;
     }
   }
   public HammerSelect()
@@ -117,7 +118,7 @@ public class HammerSelect
     Helper.Command("hammer", "[object id] - Selects the object to be placed (the hovered object by default).", (args) =>
     {
       Helper.EnabledCheck();
-      Hammer.Equip(Tool.Hammer);
+      Hammer.Equip();
       HammerParameters pars = new(args);
       GameObject? selected = null;
       ZNetView[] views = [];

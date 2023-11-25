@@ -21,7 +21,7 @@ public class HammerScaleCommand
     {
       Helper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
-      if (Selection.IsCommand() != isCommand) return;
+      if (Selection.IsTool() != isCommand) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;
       var direction = args.Length > 2 ? args[2] : "";
       Scale(args[1], direction, action(Scaling.Get()));
@@ -40,7 +40,7 @@ public class HammerScaleCommand
     Helper.Command(name, "[amount or x,z,y] - Sets the scale (if the object supports it).", (args) =>
     {
       Helper.CheatCheck();
-      if (Selection.IsCommand() != isCommand) return;
+      if (Selection.IsTool() != isCommand) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;
       var scaling = Scaling.Get();
       var scale = Parse.TryScale(Parse.Split(args[1])) * Parse.Direction(args.Args, 2);

@@ -32,6 +32,8 @@ public static class CommandWrapper
   private static readonly BindingFlags PublicBinding = BindingFlags.Static | BindingFlags.Public;
   private static Type Type() => ServerDevcommands.GetType("ServerDevcommands.AutoComplete");
   private static Type InfoType() => ServerDevcommands.GetType("ServerDevcommands.ParameterInfo");
+  private static Type AliasType() => ServerDevcommands.GetType("ServerDevcommands.Aliasing");
+  private static Type BindType() => ServerDevcommands.GetType("ServerDevcommands.BindCommand");
   private static MethodInfo GetMethod(Type type, string name, Type[] types) => type.GetMethod(name, PublicBinding, null, CallingConventions.Standard, types, null);
   public static void Register(string command, Func<int, int, List<string>> action)
   {
@@ -117,5 +119,15 @@ public static class CommandWrapper
   {
     if (ServerDevcommands == null) return;
     GetMethod(InfoType(), "AddCompositeCommand", [typeof(string)]).Invoke(null, [command]);
+  }
+  public static string Plain(string command)
+  {
+    if (ServerDevcommands == null) return command;
+    return (string)GetMethod(AliasType(), "Plain", [typeof(string), typeof(int)]).Invoke(null, [command, 10]);
+  }
+  public static void SetBindMode(string value)
+  {
+    if (ServerDevcommands == null) return;
+    GetMethod(BindType(), "SetMode", new[] { typeof(string) }).Invoke(null, new object[] { value });
   }
 }

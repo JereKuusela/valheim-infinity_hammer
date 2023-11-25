@@ -143,7 +143,7 @@ public class HammerBlueprintCommand
     {
       Helper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
-      Hammer.Equip(Tool.Hammer);
+      Hammer.Equip();
       var name = args[1];
       var centerPiece = args.Length > 2 ? args[2] : "";
       var scale = args.Length > 3 ? Parse.TryScale(Parse.Split(args[3])) : Vector3.one;
@@ -164,7 +164,7 @@ public class HammerBlueprintCommand
     {
       Helper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
-      Hammer.Equip(Tool.Hammer);
+      Hammer.Equip();
       var name = args[1];
       var scale = args.Length > 2 ? Parse.TryScale(Parse.Split(args[2])) : Vector3.one;
       var bp = GetBluePrint(name);

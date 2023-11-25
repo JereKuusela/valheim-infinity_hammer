@@ -11,20 +11,14 @@ public enum SelectedType
   Object,
   Location,
   Multiple,
-  Command,
+  Tool,
 }
 
-public class SelectedObject
+public class SelectedObject(string name, bool scalable, ZDOData data)
 {
-  public string Prefab = "";
-  public ZDOData Data;
-  public bool Scalable;
-  public SelectedObject(string name, bool scalable, ZDOData data)
-  {
-    Prefab = name;
-    Scalable = scalable;
-    Data = data;
-  }
+  public string Prefab = name;
+  public ZDOData Data = data;
+  public bool Scalable = scalable;
 }
 
 public static class Selection
@@ -42,26 +36,32 @@ public static class Selection
   }
 
 #nullable disable
-  public static GameObject Ghost => Get()?.Ghost;
+  public static GameObject Ghost()
+  {
+    var ghost = Get()?.Ghost;
+    if (ghost && IsTool())
+      CommandWrapper.SetBindMode("command");
+    return ghost;
+  }
 #nullable enable
-  public static String Command => Get()?.Command ?? "";
-  public static SelectedType Type => Get()?.Type ?? SelectedType.Default;
-  public static RulerParameters RulerParameters => Get()?.RulerParameters ?? new();
-  public static List<SelectedObject> Objects => Get()?.Objects ?? [];
+  public static SelectedType Type() => Get()?.Type ?? SelectedType.Default;
+  public static Tool Tool() => Get()?.Tool ?? throw new InvalidOperationException("No tool selected.");
+  public static List<SelectedObject> Objects() => Get()?.Objects ?? [];
 
   public static void Clear() => Get()?.Clear();
   public static bool IsSingleUse() => GetOrAdd().SingleUse;
-  public static bool IsContinuous() => GetOrAdd().Continuous == "true" || Helper.IsDown(GetOrAdd().Continuous);
   public static void Mirror() => Get()?.Mirror();
   public static void Postprocess(Vector3? scale) => Get()?.Postprocess(scale);
   public static void SetScale(Vector3 scale) => Get()?.SetScale(scale);
   public static ZDOData GetData(int index = 0) => GetOrAdd().GetData(index);
   public static string Description() => Get()?.ExtraDescription ?? "";
-  public static bool IsCommand() => Get()?.Type == SelectedType.Command;
+  public static bool IsTool() => Get()?.Tool != null;
+  public static bool IsContinuous() => Get()?.Tool?.Continuous ?? false;
+  public static bool IsPlayerHeight() => Get()?.Tool?.PlayerHeight ?? false;
   public static GameObject Set(string name, bool singleUse) => GetOrAdd().Set(name, singleUse);
   public static GameObject Set(ZNetView view, bool singleUse) => GetOrAdd().Set(view, singleUse);
   public static GameObject Set(IEnumerable<ZNetView> views, bool singleUse) => GetOrAdd().Set(views, singleUse);
-  public static GameObject Set(RulerParameters ruler, string name, string description, string command, string continuous, Sprite? icon) => GetOrAdd().Set(ruler, name, description, command, continuous, icon);
+  public static GameObject Set(Tool tool) => GetOrAdd().Set(tool);
   public static GameObject Set(ZoneSystem.ZoneLocation location, int seed) => GetOrAdd().Set(location, seed);
   public static GameObject Set(Terminal terminal, Blueprint bp, Vector3 scale) => GetOrAdd().Set(terminal, bp, scale);
   public static void ZoopUp(string offset) => GetOrAdd().ZoopUp(offset);
@@ -81,11 +81,9 @@ public partial class Selected
 #nullable enable
   public SelectedType Type = SelectedType.Default;
   public List<SelectedObject> Objects = [];
-  public string Command = "";
+  public Tool? Tool;
   public string ExtraDescription = "";
   public bool SingleUse = false;
-  public string Continuous = "";
-  public RulerParameters RulerParameters = new();
   public ZDOData GetData(int index = 0)
   {
     if (Objects.Count <= index) throw new InvalidOperationException("Invalid index.");
@@ -102,17 +100,14 @@ public partial class Selected
     if (Configuration.UnfreezeOnSelect) Position.Unfreeze();
     if (Ghost) UnityEngine.Object.Destroy(Ghost);
     SingleUse = false;
-    Continuous = "";
     ExtraDescription = "";
     Ghost = null;
     ZoopsX = 0;
     ZoopsY = 0;
     ZoopsZ = 0;
     Type = SelectedType.Default;
-    RulerParameters = new();
     Ruler.Remove();
-    AddExtraInfo.ShowId = false;
-    Command = "";
+    Tool = null;
     Objects.Clear();
   }
   public GameObject Set(string name, bool singleUse)
@@ -324,25 +319,24 @@ public partial class Selected
     }
     Helper.GetPlayer().SetupPlacementGhost();
   }
-  public GameObject Set(RulerParameters ruler, string name, string description, string command, string continuous, Sprite? icon)
+  public GameObject Set(Tool tool)
   {
     Clear();
-    RulerParameters = ruler;
-    HoldUse.Disabled = true;
-    Continuous = continuous;
-    Command = command;
-    Ghost = new GameObject
-    {
-      name = name
-    };
+    HoldUse.Selecting = true;
+    Tool = tool;
+    Ghost = new GameObject();
+    Ghost.name = Tool.Name;
     var piece = Ghost.AddComponent<Piece>();
-    piece.m_name = name;
-    piece.m_description = description.Replace("\\n", "\n");
-    piece.m_icon = icon;
+    piece.m_name = Tool.Name;
+    piece.m_description = Tool.Description;
+    piece.m_icon = Tool.Icon;
     piece.m_clipEverything = true;
-    Type = SelectedType.Command;
+    Type = SelectedType.Tool;
     Helper.GetPlayer().SetupPlacementGhost();
-    Ruler.Create(ruler);
+    var size = Parse.TryFloatNullRange(Tool.InitialSize);
+    var height = Parse.TryFloatNullRange(Tool.InitialHeight);
+    Ruler.Constrain(size, height);
+    Ruler.Create(Tool);
     return Ghost;
   }
   public GameObject Set(ZoneSystem.ZoneLocation location, int seed)

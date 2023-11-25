@@ -29,10 +29,11 @@ public class HammerZoomCommand
     {
       Helper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
-      if (Selection.IsCommand() != isCommand) return;
+      if (Selection.IsTool() != isCommand) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;
       var direction = args.Length > 2 ? args[2] : "";
       Zoom(args[1], direction, action(Scaling.Get()));
+      Scaling.UpdateGhost();
       if (!isCommand)
         Scaling.PrintScale(args.Context);
     });
@@ -49,7 +50,7 @@ public class HammerZoomCommand
     {
       Helper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
-      if (Selection.IsCommand() != isCommand) return;
+      if (Selection.IsTool() != isCommand) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;
       var scale = Scaling.Get();
       var split = args[1].Split(',');

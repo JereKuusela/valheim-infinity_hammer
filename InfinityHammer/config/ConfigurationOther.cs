@@ -26,20 +26,10 @@ public partial class Configuration
   public static List<string> IgnoredIds = [];
   public static ConfigEntry<string> configHammerTools;
   public static HashSet<string> HammerTools = [];
-  public static ConfigEntry<string> configHoeTools;
-  public static HashSet<string> HoeTools = [];
   public static ConfigEntry<string> configMirrorFlip;
   public static HashSet<string> MirrorFlip = [];
   public static ConfigEntry<string> configDimensions;
   public static Dictionary<string, Vector3> Dimensions = [];
-  public static ConfigEntry<int> hammerMenuTab;
-  public static int HammerMenuTab => hammerMenuTab.Value;
-  public static ConfigEntry<int> hammerMenuIndex;
-  public static int HammerMenuIndex => hammerMenuIndex.Value;
-  public static ConfigEntry<int> hoeMenuTab;
-  public static int HoeMenuTab => hoeMenuTab.Value;
-  public static ConfigEntry<int> hoeMenuIndex;
-  public static int HoeMenuIndex => hoeMenuIndex.Value;
   public static ConfigEntry<string> commandDefaultSize;
   public static float CommandDefaultSize => ConfigWrapper.TryParseFloat(commandDefaultSize);
   public static ConfigEntry<bool> configEnabled;
@@ -54,7 +44,6 @@ public partial class Configuration
   private static void UpdateTools()
   {
     HammerTools = ParseHashList(configHammerTools.Value);
-    HoeTools = ParseHashList(configHoeTools.Value);
   }
   private static void UpdateMirrorFlip()
   {
@@ -103,8 +92,6 @@ public partial class Configuration
     };
     configHammerTools = wrapper.BindList(section, "Hammer tools", "hammer", "List of hammers.");
     configHammerTools.SettingChanged += (s, e) => UpdateTools();
-    configHoeTools = wrapper.Bind(section, "Hoe tools", "hoe", "List of hoes.");
-    configHoeTools.SettingChanged += (s, e) => UpdateTools();
     UpdateTools();
     configMirrorFlip = wrapper.Bind(section, "Mirror flip", "woodwall", "Object ids that get flipped instead of rotated when mirrored.");
     configMirrorFlip.SettingChanged += (s, e) => UpdateMirrorFlip();
@@ -122,10 +109,5 @@ public partial class Configuration
     Scaling.Command.SetScaleX(CommandDefaultSize);
     Scaling.Command.SetScaleZ(CommandDefaultSize);
     Scaling.Command.SetScaleY(0f);
-
-    hammerMenuTab = wrapper.Bind(section, "Hammer menu tab", 0, "Index of the menu tab.");
-    hammerMenuIndex = wrapper.Bind(section, "Hammer menu index", 1, "Index on the menu.");
-    hoeMenuTab = wrapper.Bind(section, "Hoe menu tab", 0, "Index of the menu tab.");
-    hoeMenuIndex = wrapper.Bind(section, "Hoe menu index", 5, "Index on the menu.");
   }
 }

@@ -73,13 +73,10 @@ public class Undo
   }
 }
 
-public class UndoRemove : MonoBehaviour, IUndoAction
+public class UndoRemove(IEnumerable<FakeZDO> zdos) : MonoBehaviour, IUndoAction
 {
-  private FakeZDO[] Zdos;
-  public UndoRemove(IEnumerable<FakeZDO> zdos)
-  {
-    Zdos = zdos.ToArray();
-  }
+  private FakeZDO[] Zdos = zdos.ToArray();
+
   public string Undo()
   {
     Zdos = Zdos.Select(UndoHelper.Place).ToArray();
@@ -93,14 +90,11 @@ public class UndoRemove : MonoBehaviour, IUndoAction
 }
 
 
-public class UndoPlace : MonoBehaviour, IUndoAction
+public class UndoPlace(IEnumerable<ZDO> zdos) : MonoBehaviour, IUndoAction
 {
 
-  private FakeZDO[] Zdos;
-  public UndoPlace(IEnumerable<ZDO> zdos)
-  {
-    Zdos = zdos.Select(zdo => new FakeZDO(zdo)).ToArray();
-  }
+  private FakeZDO[] Zdos = zdos.Select(zdo => new FakeZDO(zdo)).ToArray();
+
   public string Undo()
   {
     UndoHelper.Remove(Zdos);

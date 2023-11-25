@@ -165,7 +165,7 @@ public partial class Selected
   public void ZoopRight(string offset)
   {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
-    if (Type == SelectedType.Command) return;
+    if (Type == SelectedType.Tool) return;
     if (Type == SelectedType.Location) return;
     if (ZoopsX == -1 && ZoopsY == 0 && ZoopsZ == 0)
     {
@@ -187,7 +187,7 @@ public partial class Selected
   public void ZoopLeft(string offset)
   {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
-    if (Type == SelectedType.Command) return;
+    if (Type == SelectedType.Tool) return;
     if (Type == SelectedType.Location) return;
     if (ZoopsX == 1 && ZoopsY == 0 && ZoopsZ == 0)
     {
@@ -209,7 +209,7 @@ public partial class Selected
   public void ZoopUp(string offset)
   {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
-    if (Type == SelectedType.Command) return;
+    if (Type == SelectedType.Tool) return;
     if (Type == SelectedType.Location) return;
     if (ZoopsX == 0 && ZoopsY == -1 && ZoopsZ == 0)
     {
@@ -231,7 +231,7 @@ public partial class Selected
   public void ZoopDown(string offset)
   {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
-    if (Type == SelectedType.Command) return;
+    if (Type == SelectedType.Tool) return;
     if (Type == SelectedType.Location) return;
     if (ZoopsX == 0 && ZoopsY == 1 && ZoopsZ == 0)
     {
@@ -253,7 +253,7 @@ public partial class Selected
   public void ZoopForward(string offset)
   {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
-    if (Type == SelectedType.Command) return;
+    if (Type == SelectedType.Tool) return;
     if (Type == SelectedType.Location) return;
     if (ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == -1)
     {
@@ -275,7 +275,7 @@ public partial class Selected
   public void ZoopBackward(string offset)
   {
     if (Type == SelectedType.Multiple && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
-    if (Type == SelectedType.Command) return;
+    if (Type == SelectedType.Tool) return;
     if (Type == SelectedType.Location) return;
     if (ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 1)
     {

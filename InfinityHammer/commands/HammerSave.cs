@@ -64,7 +64,7 @@ public class HammerSaveCommand
       bp.Name = Localization.instance.Localize(piece.m_name);
       bp.Description = piece.m_description;
     }
-    if (Selection.Type == SelectedType.Object || Selection.Type == SelectedType.Default)
+    if (Selection.Type() == SelectedType.Object || Selection.Type() == SelectedType.Default)
     {
       AddSingleObject(bp, obj, saveData);
       // Snap points are sort of useful for single objects.
@@ -75,7 +75,7 @@ public class HammerSaveCommand
           bp.SnapPoints.Add(child.localPosition);
       }
     }
-    if (Selection.Type == SelectedType.Multiple || Selection.Type == SelectedType.Location)
+    if (Selection.Type() == SelectedType.Multiple || Selection.Type() == SelectedType.Location)
     {
       var i = 0;
       foreach (Transform tr in obj.transform)

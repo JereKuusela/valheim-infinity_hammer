@@ -12,15 +12,10 @@ public enum ObjectType
   Character,
   Structure
 }
-public class Hovered
+public class Hovered(ZNetView obj, int index)
 {
-  public ZNetView Obj;
-  public int Index;
-  public Hovered(ZNetView obj, int index)
-  {
-    Obj = obj;
-    Index = index;
-  }
+  public ZNetView Obj = obj;
+  public int Index = index;
 }
 public static class Selector
 {
@@ -83,15 +78,23 @@ public static class Selector
     var dz = position.z - center.z;
     var distanceX = GetX(dx, dz, angle);
     var distanceZ = GetY(dx, dz, angle);
-    if (center.y - position.y > 1000f) return false;
-    if (position.y - center.y > (height == 0f ? 1000f : height)) return false;
     if (Mathf.Abs(distanceX) > width) return false;
     if (Mathf.Abs(distanceZ) > depth) return false;
-    return true;
+    return WithinHeight(position, center, height);
+  }
+  private static bool WithinHeight(Vector3 position, Vector3 center, float height)
+  {
+    var cy = center.y;
+    var y = position.y;
+    if (Mathf.Abs(y - cy) > 1000f) return false;
+    var min = Mathf.Min(cy, cy + height);
+    var max = Mathf.Max(cy, cy + height);
+    if (min == max) return true;
+    return y >= min && y <= max;
   }
   public static bool Within(Vector3 position, Vector3 center, float radius, float height)
   {
-    return Utils.DistanceXZ(position, center) <= radius && center.y - position.y < 1000f && position.y - center.y <= (height == 0f ? 1000f : height);
+    return Utils.DistanceXZ(position, center) <= radius && WithinHeight(position, center, height);
   }
   private static bool IsIncluded(string id, string name)
   {

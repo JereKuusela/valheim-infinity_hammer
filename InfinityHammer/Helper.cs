@@ -396,6 +396,33 @@ public static class Helper
     else
       return Enum.TryParse<KeyCode>(key, true, out var code) && Input.GetKey(code);
   }
+  private static Dictionary<string, int> PrefabNames = [];
+  public static Sprite? FindSprite(string name)
+  {
+    if (!ZNetScene.instance) return null;
+    if (PrefabNames.Count == 0)
+    {
+      PrefabNames = ZNetScene.instance.m_namedPrefabs.GroupBy(kvp => kvp.Value.name.ToLower()).ToDictionary(kvp => kvp.Key, kvp => kvp.First().Key);
+    }
+
+    name = name.ToLower();
+    Sprite? sprite;
+    if (PrefabNames.TryGetValue(name, out var hash))
+    {
+      var prefab = ZNetScene.instance.GetPrefab(hash);
+      sprite = prefab?.GetComponent<Piece>()?.m_icon;
+      if (sprite) return sprite;
+      sprite = prefab?.GetComponent<ItemDrop>()?.m_itemData?.m_shared?.m_icons.FirstOrDefault();
+      if (sprite) return sprite;
+    }
+    var effect = ObjectDB.instance.m_StatusEffects.Find(se => se.name.ToLower() == name);
+    sprite = effect?.m_icon;
+    if (sprite) return sprite;
+    var skill = Player.m_localPlayer.m_skills.m_skills.Find(skill => skill.m_skill.ToString().ToLower() == name);
+    sprite = skill?.m_icon;
+    if (sprite) return sprite;
+    return null;
+  }
 }
 [HarmonyPatch(typeof(Player), nameof(Player.Message))]
 public class ReplaceMessage

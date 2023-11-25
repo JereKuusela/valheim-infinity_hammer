@@ -66,8 +66,7 @@ public class OverridePlacementGhost
                   AccessTools.Method(typeof(Location), nameof(Location.IsInsideNoBuildLocation))))
           .Advance(-2)
           // If-branches require using ops from the IsInsideBuildLocation so just duplicate the used ops afterwards.
-          .Insert(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate<Action<GameObject>>(
-                 (GameObject ghost) => ghost.transform.position = Position.Apply(ghost.transform.position)).operand),
+          .Insert(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate<Action<GameObject>>(Position.Apply).operand),
                 new CodeInstruction(OpCodes.Ldarg_0),
                 new CodeInstruction(OpCodes.Ldfld, AccessTools.Field(typeof(Player), nameof(Player.m_placementGhost)))
           )
@@ -78,30 +77,39 @@ public class OverridePlacementGhost
 
 public static class Grid
 {
-  public static bool Enabled => Precision != 0f;
+  public static bool Enabled => Precision != 0f || (Configuration.PreciseTools && Selection.IsTool());
   private static float Precision;
   private static Vector3 Center;
+  private static Vector3 PreciseCenter;
   public static Vector3 Apply(Vector3 point, Vector3 normal)
   {
-    if (!Enabled) return point;
+    var precision = Precision;
+    var center = Center;
+    if (precision == 0f && Configuration.PreciseTools && Selection.IsTool())
+    {
+      precision = 1f;
+      center = PreciseCenter;
+    }
+    if (precision == 0f) return point;
     var rotation = Quaternion.FromToRotation(Vector3.up, normal);
     point = rotation * point;
-    var center = rotation * Center;
-    point.x = center.x + Mathf.Round((point.x - center.x) / Precision) * Precision;
-    point.z = center.z + Mathf.Round((point.z - center.z) / Precision) * Precision;
+    var c = rotation * center;
+    point.x = c.x + Mathf.Round((point.x - c.x) / precision) * precision;
+    point.z = c.z + Mathf.Round((point.z - c.z) / precision) * precision;
     return Quaternion.Inverse(rotation) * point;
   }
-  public static void Set(float precision, Vector3 center)
+  public static void Toggle(float precision, Vector3 center)
   {
-    if (Precision == precision)
-    {
-      Precision = 0f;
-    }
+    if (Precision == precision) Precision = 0f;
     else
     {
       Center = center;
       Precision = precision;
     }
+  }
+  public static void SetPreciseMode(Vector3 center)
+  {
+    PreciseCenter = center;
   }
 }
 public static class Position
@@ -123,32 +131,39 @@ public static class Position
   {
     var player = Helper.GetPlayer();
     var ghost = player.m_placementGhost;
-    Override = ghost ? Deapply(ghost.transform.position) : player.transform.position;
+    Override = ghost ? Deapply(ghost.transform.position, ghost.transform.rotation) : player.transform.position;
   }
   public static void Unfreeze()
   {
     Override = null;
     if (Configuration.ResetOffsetOnUnfreeze) Offset = Vector3.zero;
   }
-  public static Vector3 Apply(Vector3 point)
+  public static void Apply(GameObject ghost)
   {
-    var ghost = Helper.GetPlayer().m_placementGhost;
-    if (!ghost) return point;
+    if (Selection.IsPlayerHeight() && (ZInput.GetButton("AltPlace") || ZInput.GetButton("JoyAltPlace")))
+    {
+      var player = Helper.GetPlayer();
+      ghost.transform.position = new Vector3(ghost.transform.position.x, player.transform.position.y, ghost.transform.position.z);
+    }
+    ghost.transform.position = Apply(ghost.transform.position, ghost.transform.rotation);
+  }
+  public static Vector3 Apply(Vector3 point, Quaternion rotation)
+  {
     if (Override.HasValue)
       point = Override.Value;
-    var rotation = ghost.transform.rotation;
+    if (Configuration.PreciseTools && Selection.IsTool())
+      rotation = Quaternion.identity;
     point += rotation * Vector3.right * Offset.x;
     point += rotation * Vector3.up * Offset.y;
     point += rotation * Vector3.forward * Offset.z;
     return point;
   }
-  public static Vector3 Deapply(Vector3 point)
+  public static Vector3 Deapply(Vector3 point, Quaternion rotation)
   {
-    var ghost = Helper.GetPlayer().m_placementGhost;
-    if (!ghost) return point;
     if (Override.HasValue)
       point = Override.Value;
-    var rotation = ghost.transform.rotation;
+    if (Configuration.PreciseTools && Selection.IsTool())
+      rotation = Quaternion.identity;
     point -= rotation * Vector3.right * Offset.x;
     point -= rotation * Vector3.up * Offset.y;
     point -= rotation * Vector3.forward * Offset.z;
@@ -168,10 +183,12 @@ public static class Position
   }
   public static void MoveLeft(float value)
   {
+    if (Configuration.PreciseTools && Selection.IsTool()) value = Mathf.Max(value, 1f);
     Offset.x -= value;
   }
   public static void MoveRight(float value)
   {
+    if (Configuration.PreciseTools && Selection.IsTool()) value = Mathf.Max(value, 1f);
     Offset.x += value;
   }
   public static void MoveDown(float value)
@@ -184,10 +201,12 @@ public static class Position
   }
   public static void MoveBackward(float value)
   {
+    if (Configuration.PreciseTools && Selection.IsTool()) value = Mathf.Max(value, 1f);
     Offset.z -= value;
   }
   public static void MoveForward(float value)
   {
+    if (Configuration.PreciseTools && Selection.IsTool()) value = Mathf.Max(value, 1f);
     Offset.z += value;
   }
   public static void Set(Vector3 value)

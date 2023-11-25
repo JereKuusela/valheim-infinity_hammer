@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -12,7 +13,7 @@ using YamlDotNet.Serialization.NamingConventions;
 
 namespace InfinityHammer;
 
-public class Data : MonoBehaviour
+public class Yaml
 {
   public static void SetupWatcher(string pattern, Action action)
   {
@@ -57,7 +58,25 @@ public class Data : MonoBehaviour
     }
   }
 
-  public static T[] Read<T>(string pattern, Func<string, string, T> action)
+  public static Dictionary<string, List<T>> Read<T>(string pattern, Func<string, string, Dictionary<string, T[]>> action)
+  {
+    Dictionary<string, List<T>> result = [];
+    foreach (var name in Directory.GetFiles(Paths.ConfigPath, pattern))
+    {
+      var data = action(File.ReadAllText(name), name);
+      foreach (var kvp in data)
+      {
+        if (!result.TryGetValue(kvp.Key, out var list))
+        {
+          list = [];
+          result[kvp.Key] = list;
+        }
+        list.AddRange(kvp.Value);
+      }
+    }
+    return result;
+  }
+  public static T[] ReadOld<T>(string pattern, Func<string, string, T> action)
   {
     return Directory.GetFiles(Paths.ConfigPath, pattern).Select(name => action(File.ReadAllText(name), name)).ToArray();
   }
@@ -82,11 +101,8 @@ public class FloatConverter : IYamlTypeConverter
   }
 }
 
-public class MultilineScalarFlowStyleEmitter : ChainedEventEmitter
+public class MultilineScalarFlowStyleEmitter(IEventEmitter nextEmitter) : ChainedEventEmitter(nextEmitter)
 {
-  public MultilineScalarFlowStyleEmitter(IEventEmitter nextEmitter)
-      : base(nextEmitter) { }
-
   public override void Emit(ScalarEventInfo eventInfo, IEmitter emitter)
   {
 
