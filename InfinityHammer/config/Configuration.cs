@@ -56,6 +56,8 @@ public partial class Configuration
   public static float Range => IsCheats ? Helper.ParseFloat(configRange.Value, 0f) : 0f;
   public static ConfigEntry<bool> configShowCommandValues;
   public static bool AlwaysShowCommand => configShowCommandValues.Value;
+  public static ConfigEntry<bool> configSaveBlueprintData;
+  public static bool SaveBlueprintData => configSaveBlueprintData.Value;
 
   public static ConfigWrapper Wrapper;
 
@@ -89,6 +91,7 @@ public partial class Configuration
     configUnfreezeOnUnequip = wrapper.Bind(section, "Unfreeze on unequip", true, "Removes the placement freeze when unequipping the hammer.");
     configAllSnapPoints = wrapper.Bind(section, "Snap points for all objects", false, "If enabled, multi selection creates snap points for every object.");
     configIgnoreOtherRestrictions = wrapper.Bind(section, "Ignore other restrictions", true, "Ignores any other restrictions (material, biome, etc.)");
+    configSaveBlueprintData = wrapper.Bind(section, "Save data to blueprints", true, "If enabled, object data values are saved to blueprints.");
 
     InitVisuals(wrapper);
     if (CommandWrapper.ServerDevcommands != null)

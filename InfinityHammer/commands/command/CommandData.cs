@@ -4,8 +4,8 @@ namespace InfinityHammer;
 
 public class CommandsData
 {
-  public CommandData[] hammer = new CommandData[0];
-  public CommandData[] hoe = new CommandData[0];
+  public CommandData[] hammer = [];
+  public CommandData[] hoe = [];
 }
 public class CommandData
 {
@@ -53,14 +53,14 @@ public class InitialData
   public static string[] Hammer()
   {
     if (CommandWrapper.ServerDevcommands == null)
-      return new[] { SELECT, PICK, AREA_SELECT };
-    return new[] { SELECT_DEVCOMMANDS, CONNECT_DEVCOMMANDS, AREA_SELECT_DEVCOMMANDS };
+      return [SELECT, PICK, AREA_SELECT];
+    return [SELECT_DEVCOMMANDS, CONNECT_DEVCOMMANDS, AREA_SELECT_DEVCOMMANDS];
   }
   public static string[] Hoe()
   {
     if (CommandWrapper.WorldEditCommands == null)
-      return new string[0];
-    return new[] {
+      return [];
+    return [
       $"{HT} {I}=mud_road {N}=Level {D}=Flattens_terrain.\nHold_{M1}_to_smooth. level {SMOOTH}",
       $"{HT} {I}=raise {N}=Raise {INIITIAL_H} {D}=Raises_terrain.\nHold_{M1}_to_smooth. raise=h {SMOOTH}",
       $"{HT} {I}=paved_road {N}=Pave {D}=Paves_terrain.\nHold_{M1}_for_single_use. {P}=paved {CONT}",
@@ -75,6 +75,6 @@ public class InitialData
       $"{HS} {I}=wood_wall_roof_45 {N}=Slope {D}=Slope_between_you_and_aim_point.",
       $"{HO} {I}=softdeath {N}=Remove {D}=Removes_objects.\nHold_{M1}_to_also_reset_the_terrain. remove id=*;{HT} keys={M1} reset",
       $"{HO} {I}=Carrot {N}=Tame {D}=Tames_creatures.\nHold_{M1}_to_untame tame {K}=-{M1};{HO} wild {K}={M1}",
-    };
+    ];
   }
 }

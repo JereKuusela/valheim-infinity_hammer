@@ -383,6 +383,7 @@ Following powers are available with `hammer_config` command:
 - Repair anything (default: `false`, key: `repair_anything`): Allows healing or repairing any object.
 - Reset offset on unfreeze (default `true`, key: `reset_offset_on_unfreeze`): Removes the placement offset when unfreezing the placement.
 - Save blueprints to profile (default: `false`, key: `save_blueprints_to_profile`): If enabled, blueprints are saved to the profile folder instead of the base Valheim folder.
+- Save blueprint data (default: `true`, key: `save_blueprint_data`): If enabled, object data values are saved to blueprints.
 - Show command values (default: `false`, key: `show_command_values`): Always show the command on tool descriptions.
 - Snap points for all objects (default: `false`, key: `snap_points_for_all_objects`):If enabled, multi selection creates snap points for every object.
 - Unfreeze on select (default `true`, key: `unfreeze_on_select`): Removes the placement freeze when selecting a new object.

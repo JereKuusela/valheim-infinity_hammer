@@ -120,7 +120,7 @@ public class HammerSelect
       Hammer.Equip(Tool.Hammer);
       HammerParameters pars = new(args);
       GameObject? selected = null;
-      ZNetView[] views = new ZNetView[0];
+      ZNetView[] views = [];
       if (pars.Radius.HasValue)
         views = Selector.GetNearby("", pars.ObjectType, Configuration.IgnoredIds, pars.Position, pars.Radius.Value, pars.Height);
       else if (pars.Width.HasValue && pars.Depth.HasValue)
@@ -133,7 +133,7 @@ public class HammerSelect
         if (pars.Connect)
           views = Selector.GetConnected(hovered, Configuration.IgnoredIds);
         else
-          views = new ZNetView[] { hovered };
+          views = [hovered];
       }
       if (selected == null && views.Length > 0)
       {

@@ -13,18 +13,18 @@ public class Repair
   private static bool RepairCharacter(ZNetView obj)
   {
     var character = obj.GetComponent<Character>();
-    if (!character || character.IsPlayer()) return false;
+    if (!character) return false;
     obj.ClaimOwnership();
     var zdo = obj.GetZDO();
-    var currentHealth = zdo.GetFloat("health", character.GetMaxHealth());
+    var currentHealth = zdo.GetFloat(ZDOVars.s_health, character.GetMaxHealth());
     var maxHealth = Configuration.OverwriteHealth > 0f ? Configuration.OverwriteHealth : character.GetMaxHealth();
     var newHealth = Configuration.OverwriteHealth > 0f ? Configuration.OverwriteHealth * 1.000001f : character.GetMaxHealth();
-    zdo.Set("max_health", maxHealth);
+    zdo.Set(ZDOVars.s_maxHealth, maxHealth);
     var heal = newHealth - currentHealth;
     if (heal != 0f)
     {
       // Max health resets on awake if health is equal to max.
-      zdo.Set("health", newHealth);
+      zdo.Set(ZDOVars.s_health, newHealth);
       DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, character.GetTopPoint(), Mathf.Abs(heal));
       return true;
     }
@@ -48,7 +48,7 @@ public class Repair
     if (result)
     {
       wearNTear.m_lastRepair = Time.time;
-      obj.InvokeRPC(ZNetView.Everybody, "WNTHealthChanged", new object[] { obj.GetZDO().GetFloat("health", wearNTear.m_health) });
+      obj.InvokeRPC(ZNetView.Everybody, "WNTHealthChanged", [obj.GetZDO().GetFloat("health", wearNTear.m_health)]);
     }
     return result;
   }
@@ -128,11 +128,13 @@ public class Repair
   private static bool RepairObject(ZNetView obj, int index)
   {
     var repaired = false;
+    if (RepairPlayer(obj))
+      repaired = true;
+    if (obj.GetComponent<Player>())
+      return repaired;
     if (RepairStructure(obj))
       repaired = true;
     if (RepairCharacter(obj))
-      repaired = true;
-    if (RepairPlayer(obj))
       repaired = true;
     if (RepairDestructible(obj))
       repaired = true;
@@ -157,7 +159,7 @@ public class Repair
     var name = piece ? piece.m_name : Utils.GetPrefabName(obj.gameObject);
     // Copy paste from the game code.
     piece?.m_placeEffect.Create(obj.transform.position, obj.transform.rotation, null, 1f, -1);
-    player.Message(MessageHud.MessageType.TopLeft, Localization.instance.Localize("$msg_repaired", new[] { name }), 0, null);
+    player.Message(MessageHud.MessageType.TopLeft, Localization.instance.Localize("$msg_repaired", [name]), 0, null);
     var tool = player.GetRightItem();
     if (tool != null)
     {

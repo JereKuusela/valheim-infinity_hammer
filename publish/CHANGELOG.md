@@ -1,3 +1,8 @@
+- v1.43
+  - Adds a new setting to disable blueprint data saving.
+  - Fixes repair destroying players (not tested).
+  - Fixes copied objects or objects from blueprints sometimes disappearing.
+
 - v1.42
   - Adds support for connected ZDO when copying objects.
 

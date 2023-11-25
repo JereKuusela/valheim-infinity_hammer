@@ -3,9 +3,11 @@ using System.Linq;
 using UnityEngine;
 
 namespace InfinityHammer;
-public class HammerMeasureCommand {
-  private static readonly int[] IgnoredLayers = new[] { LayerMask.NameToLayer("character_trigger"), LayerMask.NameToLayer("viewblock"), LayerMask.NameToLayer("pathblocker") };
-  public static void CheckWithCollider(GameObject obj) {
+public class HammerMeasureCommand
+{
+  private static readonly int[] IgnoredLayers = [LayerMask.NameToLayer("character_trigger"), LayerMask.NameToLayer("viewblock"), LayerMask.NameToLayer("pathblocker")];
+  public static void CheckWithCollider(GameObject obj)
+  {
     if (obj.transform.rotation != Quaternion.identity) return;
     var name = Utils.GetPrefabName(obj);
     if (Configuration.Dimensions.ContainsKey(name.ToLower())) return;
@@ -17,12 +19,15 @@ public class HammerMeasureCommand {
       bounds.Encapsulate(c.bounds);
     Configuration.SetDimension(name, bounds.size);
   }
-  public HammerMeasureCommand() {
+  public HammerMeasureCommand()
+  {
     CommandWrapper.RegisterEmpty("hammer_measure");
-    Helper.Command("hammer_measure", "Tries to measure all structures.", (args) => {
+    Helper.Command("hammer_measure", "Tries to measure all structures.", (args) =>
+    {
       Helper.CheatCheck();
       ZNetView.m_forceDisableInit = true;
-      foreach (var prefab in ZNetScene.instance.m_prefabs) {
+      foreach (var prefab in ZNetScene.instance.m_prefabs)
+      {
         if (prefab.name == "Player") continue;
         if (prefab.name.StartsWith("_", StringComparison.Ordinal)) continue;
         if (prefab.name.StartsWith("fx_", StringComparison.Ordinal)) continue;

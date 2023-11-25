@@ -235,14 +235,14 @@ public class PlacePiece
               useEnd: false,
               new CodeMatch(OpCodes.Ldloc_2))
           .Advance(1)
-          .Insert(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate<Func<GameObject, GameObject>>(GetPrefab).operand))
+          .Insert(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate(GetPrefab).operand))
           .MatchForward(
               useEnd: false,
               new CodeMatch(OpCodes.Ldc_I4_1),
               new CodeMatch(OpCodes.Ret))
           .Advance(-1)
           .Insert(new CodeInstruction(OpCodes.Ldloc_3),
-            new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate<Action<GameObject>>(Postprocess).operand))
+            new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate(Postprocess).operand))
           .InstructionEnumeration();
   }
 }
