@@ -6,35 +6,39 @@ namespace InfinityHammer;
 
 public class BuildMenuTool : Piece
 {
-  public ToolData tool = new();
+  public Tool? tool;
 }
 [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpdateAvailable))]
 public static class UpdateAvailable
 {
-  private static Piece Build(ToolData tool)
+  private static Piece Build(Tool tool)
   {
     GameObject obj = new();
     var piece = obj.AddComponent<BuildMenuTool>();
     piece.tool = tool;
-    piece.m_description = tool.description;
-    piece.m_name = tool.name;
-    piece.m_icon = Helper.FindSprite(tool.icon);
+    piece.m_description = tool.Description;
+    piece.m_name = tool.Name;
+    piece.m_icon = tool.Icon;
     return piece;
   }
   static void Postfix(PieceTable __instance)
   {
     if (!Configuration.IsCheats) return;
-    List<ToolData> tools = ToolManager.Get(Hammer.GetTool());
+    var hammer = Hammer.Get();
+    List<Tool> tools = ToolManager.Get(hammer);
     int tab = 0;
-    int index = -1;
+    Dictionary<int, int> indices = [];
     foreach (var tool in tools)
     {
-      tab = tool.tabIndex ?? tab;
-      index = tool.index ?? index + 1;
+      tab = tool.TabIndex ?? tab;
       if (__instance.m_availablePieces.Count <= tab) return;
+      if (!indices.ContainsKey(tab))
+        indices[tab] = hammer == "hammer" ? 0 : __instance.m_availablePieces[tab].Count - 1;
+      var index = tool.Index ?? indices[tab] + 1;
       var pieces = __instance.m_availablePieces[tab];
       index = Math.Min(index, pieces.Count);
       pieces.Insert(index, Build(tool));
+      indices[tab] = index;
     }
   }
 }
@@ -42,19 +46,17 @@ public static class UpdateAvailable
 [HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece), typeof(Vector2Int))]
 public class RunBuildMenuCommands
 {
-  public static bool InstantCommand = false;
-
   [HarmonyPriority(Priority.Low)]
   public static bool Prefix(Player __instance, Vector2Int p)
   {
     var piece = __instance.GetPiece(p);
-    if (piece && piece.TryGetComponent<BuildMenuTool>(out var menuTool))
+    if (piece && piece.TryGetComponent<BuildMenuTool>(out var menuTool) && menuTool.tool != null)
     {
       var tool = menuTool.tool;
-      if (tool.instant) Console.instance.TryRunCommand(tool.command);
+      if (tool.Instant) Console.instance.TryRunCommand(tool.Command);
       else
       {
-        Console.instance.TryRunCommand($"hammer_tool {tool.name}");
+        Console.instance.TryRunCommand($"hammer_tool {tool.Name}");
         __instance.m_buildPieces.SetSelected(p);
       }
       return false;

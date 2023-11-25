@@ -15,6 +15,6 @@ public class HammerImportCommand
     var equipment = args[1];
     var tool = string.Join(" ", args.Args, 2, args.Length - 1);
     ToolManager.Import(equipment, tool);
-    Helper.AddMessage(args.Context, $"Imported tool {tool} to {equipment.ToString()}.");
+    Helper.AddMessage(args.Context, $"Imported tool {tool} to {equipment}.");
   }
 }

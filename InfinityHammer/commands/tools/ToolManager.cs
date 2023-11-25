@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using BepInEx;
 using HarmonyLib;
-using UnityEngine;
 namespace InfinityHammer;
 
 [HarmonyPatch]
@@ -15,7 +14,6 @@ public class ToolManager
   public static string FileName = "infinity_hammer.yaml";
   public static string FilePath = Path.Combine(Paths.ConfigPath, FileName);
   public static string Pattern = "infinity_hammer*.yaml";
-  private static Dictionary<string, GameObject> Prefabs = new();
 
 
   public static void CreateFile()
@@ -25,49 +23,45 @@ public class ToolManager
   }
   public static void ToFile()
   {
-    var yaml = Data.Serializer().Serialize(Tools);
+    var yaml = Yaml.Serializer().Serialize(ToolData);
     File.WriteAllText(FilePath, yaml);
   }
 
   public static void Import(string equipment, string tool)
   {
     var yaml = tool.Replace("\\n", "\n");
-    var data = Data.Deserialize<ToolData>(yaml, "Import");
+    var data = Yaml.Deserialize<ToolData>(yaml, "Import");
     Add(equipment, data);
   }
   public static void Add(string equipment, ToolData tool)
   {
-    if (!Tools.TryGetValue(equipment, out var tools))
-      Tools.Add(equipment, new());
-    Tools[equipment].Add(tool);
+    if (!ToolData.ContainsKey(equipment))
+      ToolData.Add(equipment, []);
+    ToolData[equipment].Add(tool);
     ToFile();
   }
   public static string Export(string equipment, string name)
   {
     if (!TryGetTool(equipment, name, out var tool))
       return "";
-    var yaml = Data.Serializer().Serialize(tool).Replace("\n", "\\n");
+    var yaml = Yaml.Serializer().Serialize(tool).Replace("\n", "\\n");
     return yaml;
   }
-  public static Dictionary<string, List<ToolData>> Tools = new();
-  public static bool TryGetTool(string equipment, string name, out ToolData tool)
+  private static Dictionary<string, List<ToolData>> ToolData = [];
+  public static Dictionary<string, List<Tool>> Tools = [];
+  public static bool TryGetTool(string equipment, string name, out Tool tool)
   {
     tool = null!;
     if (Tools.TryGetValue(equipment, out var tools))
-      tool = tools.FirstOrDefault(tool => tool.name == name);
+      tool = tools.FirstOrDefault(tool => tool.Name == name);
     if (tool == null)
-      tool = Tools.Values.SelectMany(tool => tool).FirstOrDefault(tool => tool.name == name);
+      tool = Tools.Values.SelectMany(tool => tool).FirstOrDefault(tool => tool.Name == name);
     return tool != null;
   }
-  public static List<ToolData> Get(string equipment)
-  {
-    if (Tools.TryGetValue(equipment, out var tools))
-      return tools;
-    return new();
-  }
+  public static List<Tool> Get(string equipment) => Tools.TryGetValue(equipment, out var tools) ? tools : [];
   public static void FromFile()
   {
-    var tools = Data.Read(Pattern, Data.Deserialize<Dictionary<string, ToolData[]>>);
+    var tools = Yaml.Read(Pattern, Yaml.Deserialize<Dictionary<string, ToolData[]>>);
     if (tools.Count == 0)
     {
       CreateFile();
@@ -81,7 +75,8 @@ public class ToolManager
         InfinityHammer.Log.LogWarning($"Failed to load any tools.");
         return;
       }
-      Tools = tools.ToDictionary(kvp => kvp.Key.ToLower(), kvp => kvp.Value);
+      ToolData = tools.ToDictionary(kvp => kvp.Key.ToLower(), kvp => kvp.Value);
+      Tools = tools.ToDictionary(kvp => kvp.Key.ToLower(), kvp => kvp.Value.Select(s => new Tool(s)).ToList());
       InfinityHammer.Log.LogInfo($"Reloading {count} tools.");
       Player.m_localPlayer?.UpdateAvailablePiecesList();
     }
@@ -92,6 +87,6 @@ public class ToolManager
   }
   public static void SetupWatcher()
   {
-    Data.SetupWatcher(Pattern, FromFile);
+    Yaml.SetupWatcher(Pattern, FromFile);
   }
 }

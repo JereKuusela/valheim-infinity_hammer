@@ -2,23 +2,14 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 namespace InfinityHammer;
-public class BlueprintObject
+public class BlueprintObject(string name, Vector3 pos, Quaternion rot, Vector3 scale, string info, ZPackage? data)
 {
-  public string Prefab = "";
-  public Vector3 Pos;
-  public Quaternion Rot;
-  public ZPackage? Data;
-  public Vector3 Scale;
-  public string ExtraInfo;
-  public BlueprintObject(string name, Vector3 pos, Quaternion rot, Vector3 scale, string info, ZPackage? data)
-  {
-    Prefab = name;
-    Pos = pos;
-    Rot = rot.normalized;
-    Scale = scale;
-    ExtraInfo = info;
-    Data = data;
-  }
+  public string Prefab = name;
+  public Vector3 Pos = pos;
+  public Quaternion Rot = rot.normalized;
+  public ZPackage? Data = data;
+  public Vector3 Scale = scale;
+  public string ExtraInfo = info;
 }
 public class Blueprint
 {
@@ -28,8 +19,8 @@ public class Blueprint
   public Vector3 Coordinates = Vector3.zero;
   public Vector3 Rotation = Vector3.zero;
   public string CenterPiece = Configuration.DefaultCenterPiece;
-  public List<BlueprintObject> Objects = new();
-  public List<Vector3> SnapPoints = new();
+  public List<BlueprintObject> Objects = [];
+  public List<Vector3> SnapPoints = [];
   public float Radius = 0f;
   public Vector3 Center(string centerPiece)
   {

@@ -12,15 +12,10 @@ public enum ObjectType
   Character,
   Structure
 }
-public class Hovered
+public class Hovered(ZNetView obj, int index)
 {
-  public ZNetView Obj;
-  public int Index;
-  public Hovered(ZNetView obj, int index)
-  {
-    Obj = obj;
-    Index = index;
-  }
+  public ZNetView Obj = obj;
+  public int Index = index;
 }
 public static class Selector
 {
@@ -41,8 +36,8 @@ public static class Selector
   {
     var ignoredPrefabs = GetIgnoredPrefabs(ignoredIds);
     var raycast = Math.Max(maxDistance + 5f, 50f);
-    var mask = LayerMask.GetMask(new string[]
-    {
+    var mask = LayerMask.GetMask(
+    [
       "item",
       "piece",
       "piece_nonsolid",
@@ -54,9 +49,9 @@ public static class Selector
       "terrain",
       "vehicle",
       "character_trigger" // Added to remove spawners with ESP mod.
-    });
+    ]);
     var hits = Physics.RaycastAll(GameCamera.instance.transform.position, GameCamera.instance.transform.forward, raycast, mask);
-    Array.Sort<RaycastHit>(hits, (RaycastHit x, RaycastHit y) => x.distance.CompareTo(y.distance));
+    Array.Sort(hits, (RaycastHit x, RaycastHit y) => x.distance.CompareTo(y.distance));
     foreach (var hit in hits)
     {
       if (Vector3.Distance(hit.point, obj.m_eye.position) >= maxDistance) continue;
@@ -111,14 +106,14 @@ public static class Selector
   }
   private static HashSet<int> GetIgnoredPrefabs(List<string> ids)
   {
-    HashSet<int> prefabs = new();
+    HashSet<int> prefabs = [];
     foreach (var id in ids)
       prefabs.UnionWith(GetIgnoredPrefabs(id));
     return prefabs;
   }
   private static HashSet<int> GetIgnoredPrefabs(string id)
   {
-    if (id == "") return new();
+    if (id == "") return [];
     id = id.ToLower();
     return ZNetScene.instance.m_namedPrefabs.Values
       .Where(prefab => IsIncluded(id, prefab.name.ToLower()))
@@ -174,7 +169,7 @@ public static class Selector
     var ignoredPrefabs = GetIgnoredPrefabs(ignoredIds);
     if (ValheimRAFT.IsInRaft(baseView)) return ValheimRAFT.GetConnectedRaft(baseView, ignoredPrefabs);
     var baseWear = baseView.GetComponent<WearNTear>() ?? throw new InvalidOperationException("Connected doesn't work for this object.");
-    HashSet<ZNetView> views = new() { baseView };
+    HashSet<ZNetView> views = [baseView];
     Queue<WearNTear> todo = new();
     todo.Enqueue(baseWear);
     while (todo.Count > 0)

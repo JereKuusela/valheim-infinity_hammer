@@ -12,7 +12,7 @@ public static class GizmoWrapper
   private static void ComfySet(Vector3 angles)
   {
     AccessTools.Field(ComfyType(), "EulerAngles").SetValue(null, angles);
-    AccessTools.Method(ComfyType(), "Rotate").Invoke(null, new object[0]);
+    AccessTools.Method(ComfyType(), "Rotate").Invoke(null, []);
   }
   public static void InitComfy(Assembly assembly)
   {

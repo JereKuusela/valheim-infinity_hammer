@@ -38,19 +38,19 @@ public class HammerSaveCommand
     }
     return info;
   }
-  private static void AddSingleObject(Blueprint bp, GameObject obj)
+  private static void AddSingleObject(Blueprint bp, GameObject obj, bool saveData)
   {
-    var data = Selection.GetData();
-    var info = GetExtraInfo(obj, data);
-    bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), Vector3.zero, Quaternion.identity, obj.transform.localScale, info, data.Save()));
+    var data = saveData ? Selection.GetData() : null;
+    var info = data == null ? "" : GetExtraInfo(obj, data);
+    bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), Vector3.zero, Quaternion.identity, obj.transform.localScale, info, data?.Save()));
   }
-  private static void AddObject(Blueprint bp, GameObject obj, int index = 0)
+  private static void AddObject(Blueprint bp, GameObject obj, bool saveData, int index = 0)
   {
-    var data = Selection.GetData(index);
-    var info = GetExtraInfo(obj, data);
-    bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), obj.transform.localPosition, obj.transform.localRotation, obj.transform.localScale, info, data.Save()));
+    var data = saveData ? Selection.GetData(index) : null;
+    var info = data == null ? "" : GetExtraInfo(obj, data);
+    bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), obj.transform.localPosition, obj.transform.localRotation, obj.transform.localScale, info, data?.Save()));
   }
-  private static Blueprint BuildBluePrint(Player player, GameObject obj, string centerPiece)
+  private static Blueprint BuildBluePrint(Player player, GameObject obj, string centerPiece, bool saveData)
   {
     Blueprint bp = new()
     {
@@ -64,9 +64,9 @@ public class HammerSaveCommand
       bp.Name = Localization.instance.Localize(piece.m_name);
       bp.Description = piece.m_description;
     }
-    if (Selection.Type == SelectedType.Object || Selection.Type == SelectedType.Default)
+    if (Selection.Type() == SelectedType.Object || Selection.Type() == SelectedType.Default)
     {
-      AddSingleObject(bp, obj);
+      AddSingleObject(bp, obj, saveData);
       // Snap points are sort of useful for single objects.
       // Since single objects should just have custom data but otherwise the original behavior.
       foreach (Transform child in obj.transform)
@@ -75,7 +75,7 @@ public class HammerSaveCommand
           bp.SnapPoints.Add(child.localPosition);
       }
     }
-    if (Selection.Type == SelectedType.Multiple || Selection.Type == SelectedType.Location)
+    if (Selection.Type() == SelectedType.Multiple || Selection.Type() == SelectedType.Location)
     {
       var i = 0;
       foreach (Transform tr in obj.transform)
@@ -84,7 +84,7 @@ public class HammerSaveCommand
         // Especially when they conflict with the center piece.
         // In the future, snapPiece could be added to allow users to select the snap points.
         if (Helper.IsSnapPoint(tr.gameObject)) continue;
-        AddObject(bp, tr.gameObject, i);
+        AddObject(bp, tr.gameObject, saveData, i);
         i += 1;
       }
     }
@@ -158,13 +158,13 @@ public class HammerSaveCommand
       var player = Helper.GetPlayer();
       var ghost = Helper.GetPlacementGhost();
       var center = args.Length > 2 ? args[2] : "";
-      var bp = BuildBluePrint(player, ghost, center);
+      var bp = BuildBluePrint(player, ghost, center, Configuration.SaveBlueprintData);
       var lines = GetPlanBuildFile(bp);
       var name = Path.GetFileNameWithoutExtension(args[1]) + ".blueprint";
       var path = Path.Combine(Configuration.SaveBlueprintsToProfile ? Configuration.BlueprintLocalFolder : Configuration.BlueprintGlobalFolder, name);
       Directory.CreateDirectory(Path.GetDirectoryName(path));
       File.WriteAllLines(path, lines);
-      args.Context.AddString($"Blueprint saved to {path} (pos: {Helper.PrintXZY(bp.Coordinates)} rot: {Helper.PrintYXZ(bp.Rotation)}).");
+      args.Context.AddString($"Blueprint saved to {path.Replace("\\", "\\\\")} (pos: {Helper.PrintXZY(bp.Coordinates)} rot: {Helper.PrintYXZ(bp.Rotation)}).");
       Selection.Set(args.Context, bp, Vector3.one);
     });
   }

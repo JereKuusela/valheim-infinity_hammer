@@ -4,41 +4,37 @@ public class HammerShapeCommand
 {
   public HammerShapeCommand()
   {
-    List<string> shapes = new() {
+    List<string> shapes = [
       RulerShape.Circle.ToString(),
       RulerShape.Rectangle.ToString(),
       RulerShape.Square.ToString(),
-    };
-    CommandWrapper.Register("hammer_shape", (int index, int subIndex) =>
-    {
-      if (index == 0) return shapes;
-      return null;
-    });
+    ];
+    CommandWrapper.Register("hammer_shape", (int index, int subIndex) => index == 0 ? shapes : null);
     Helper.Command("hammer_shape", "[shape] - Toggles or sets the selection shape.", (args) =>
     {
+      if (!Selection.IsTool()) return;
+      var tool = Selection.Tool();
       if (args.Length > 1)
       {
         var arg = args[1].ToLower();
-        if (arg == RulerShape.Circle.ToString().ToLower()) Ruler.Shape = RulerShape.Circle;
-        else if (arg == RulerShape.Ring.ToString().ToLower()) Ruler.Shape = RulerShape.Ring;
-        else if (arg == RulerShape.Rectangle.ToString().ToLower()) Ruler.Shape = RulerShape.Rectangle;
-        else if (arg == RulerShape.Frame.ToString().ToLower()) Ruler.Shape = RulerShape.Frame;
-        else if (arg == RulerShape.Square.ToString().ToLower()) Ruler.Shape = RulerShape.Square;
+        if (arg == RulerShape.Circle.ToString().ToLower()) tool.Shape = RulerShape.Circle;
+        else if (arg == RulerShape.Ring.ToString().ToLower()) tool.Shape = RulerShape.Ring;
+        else if (arg == RulerShape.Rectangle.ToString().ToLower()) tool.Shape = RulerShape.Rectangle;
+        else if (arg == RulerShape.Frame.ToString().ToLower()) tool.Shape = RulerShape.Frame;
+        else if (arg == RulerShape.Square.ToString().ToLower()) tool.Shape = RulerShape.Square;
         else return;
       }
       else
       {
-        var projector = Ruler.Projector;
-        if (projector == null) return;
-        if (Ruler.Shape == RulerShape.Circle) Ruler.Shape = RulerShape.Ring;
-        else if (Ruler.Shape == RulerShape.Ring) Ruler.Shape = RulerShape.Square;
-        else if (Ruler.Shape == RulerShape.Square) Ruler.Shape = RulerShape.Frame;
-        else if (Ruler.Shape == RulerShape.Frame) Ruler.Shape = RulerShape.Rectangle;
-        else if (Ruler.Shape == RulerShape.Rectangle) Ruler.Shape = RulerShape.Circle;
+        if (tool.Shape == RulerShape.Circle) tool.Shape = RulerShape.Ring;
+        else if (tool.Shape == RulerShape.Ring) tool.Shape = RulerShape.Square;
+        else if (tool.Shape == RulerShape.Square) tool.Shape = RulerShape.Frame;
+        else if (tool.Shape == RulerShape.Frame) tool.Shape = RulerShape.Rectangle;
+        else if (tool.Shape == RulerShape.Rectangle) tool.Shape = RulerShape.Circle;
 
         Ruler.SanityCheckShape();
       }
-      Helper.AddMessage(args.Context, $"Selection shape set to {Ruler.Shape}.");
+      Helper.AddMessage(args.Context, $"Selection shape set to {tool.Shape}.");
     });
   }
 }

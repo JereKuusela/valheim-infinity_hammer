@@ -14,7 +14,7 @@ public class InfinityHammer : BaseUnityPlugin
 {
   public const string GUID = "infinity_hammer";
   public const string NAME = "Infinity Hammer";
-  public const string VERSION = "1.41";
+  public const string VERSION = "1.44";
   public static bool StructureTweaks = false;
 #nullable disable
   public static ManualLogSource Log;
@@ -107,11 +107,10 @@ public class SetCommands
     new HammerZoomCommand();
     new HammerStackCommand();
     new HammerFreezeCommand();
+    new HammerToolCommand();
     new HammerGridCommand();
     new HammerSaveCommand();
-    new HammerToolCommand();
     new HammerImportCommand();
-    new HammerExportCommand();
     new HammerMirrorCommand();
     new HammerShapeCommand();
     new HammerZoopCommand();
@@ -142,7 +141,7 @@ public class FejdStartupStart
     if (CommandWrapper.ServerDevcommands != null)
     {
       var pars = "from=x,z,y circle=r angle=a rect=w,d";
-      Console.instance.TryRunCommand($"alias hammer_area hammer_command hammer {pars} height=h");
+      Console.instance.TryRunCommand($"alias hammer_area hammer_tool hammer {pars} height=h");
     }
     if (CommandWrapper.ServerDevcommands != null && CommandWrapper.WorldEditCommands != null)
     {

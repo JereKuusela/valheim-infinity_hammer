@@ -77,7 +77,7 @@ public class OverridePlacementGhost
 
 public static class Grid
 {
-  public static bool Enabled => Precision != 0f || (Configuration.PreciseCommands && Selection.IsCommand());
+  public static bool Enabled => Precision != 0f || (Configuration.PreciseTools && Selection.IsTool());
   private static float Precision;
   private static Vector3 Center;
   private static Vector3 PreciseCenter;
@@ -85,7 +85,7 @@ public static class Grid
   {
     var precision = Precision;
     var center = Center;
-    if (precision == 0f && Configuration.PreciseCommands && Selection.IsCommand())
+    if (precision == 0f && Configuration.PreciseTools && Selection.IsTool())
     {
       precision = 1f;
       center = PreciseCenter;
@@ -140,19 +140,18 @@ public static class Position
   }
   public static void Apply(GameObject ghost)
   {
-    if (Selection.PlacementType == PlacementType.PlayerHeight && (ZInput.GetButton("AltPlace") || ZInput.GetButton("JoyAltPlace")))
+    if (Selection.IsPlayerHeight() && (ZInput.GetButton("AltPlace") || ZInput.GetButton("JoyAltPlace")))
     {
       var player = Helper.GetPlayer();
       ghost.transform.position = new Vector3(ghost.transform.position.x, player.transform.position.y, ghost.transform.position.z);
     }
-
     ghost.transform.position = Apply(ghost.transform.position, ghost.transform.rotation);
   }
   public static Vector3 Apply(Vector3 point, Quaternion rotation)
   {
     if (Override.HasValue)
       point = Override.Value;
-    if (Configuration.PreciseCommands && Selection.IsCommand())
+    if (Configuration.PreciseTools && Selection.IsTool())
       rotation = Quaternion.identity;
     point += rotation * Vector3.right * Offset.x;
     point += rotation * Vector3.up * Offset.y;
@@ -163,7 +162,7 @@ public static class Position
   {
     if (Override.HasValue)
       point = Override.Value;
-    if (Configuration.PreciseCommands && Selection.IsCommand())
+    if (Configuration.PreciseTools && Selection.IsTool())
       rotation = Quaternion.identity;
     point -= rotation * Vector3.right * Offset.x;
     point -= rotation * Vector3.up * Offset.y;
@@ -184,12 +183,12 @@ public static class Position
   }
   public static void MoveLeft(float value)
   {
-    if (Configuration.PreciseCommands && Selection.IsCommand()) value = Mathf.Max(value, 1f);
+    if (Configuration.PreciseTools && Selection.IsTool()) value = Mathf.Max(value, 1f);
     Offset.x -= value;
   }
   public static void MoveRight(float value)
   {
-    if (Configuration.PreciseCommands && Selection.IsCommand()) value = Mathf.Max(value, 1f);
+    if (Configuration.PreciseTools && Selection.IsTool()) value = Mathf.Max(value, 1f);
     Offset.x += value;
   }
   public static void MoveDown(float value)
@@ -202,12 +201,12 @@ public static class Position
   }
   public static void MoveBackward(float value)
   {
-    if (Configuration.PreciseCommands && Selection.IsCommand()) value = Mathf.Max(value, 1f);
+    if (Configuration.PreciseTools && Selection.IsTool()) value = Mathf.Max(value, 1f);
     Offset.z -= value;
   }
   public static void MoveForward(float value)
   {
-    if (Configuration.PreciseCommands && Selection.IsCommand()) value = Mathf.Max(value, 1f);
+    if (Configuration.PreciseTools && Selection.IsTool()) value = Mathf.Max(value, 1f);
     Offset.z += value;
   }
   public static void Set(Vector3 value)

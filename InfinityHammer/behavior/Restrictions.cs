@@ -1,7 +1,7 @@
 using HarmonyLib;
 namespace InfinityHammer;
 ///<summary>Disables the resource check.</summary>
-[HarmonyPatch(typeof(Player), nameof(Player.HaveRequirements), new[] { typeof(Piece), typeof(Player.RequirementMode) })]
+[HarmonyPatch(typeof(Player), nameof(Player.HaveRequirements), typeof(Piece), typeof(Player.RequirementMode))]
 public class HaveRequirements
 {
   public static bool Prefix(ref bool __result)

@@ -63,7 +63,7 @@ public static class CoverCheck
   }
   public static void GetCover(Vector3 position, float limit, bool checkRoof = true, bool minLimit = true)
   {
-    List<string> lines = new();
+    List<string> lines = [];
     Cover.GetCoverForPoint(position, out var percent, out var roof);
     var text = $"{Percent(percent)} cover";
     if (limit > 0)
@@ -93,8 +93,8 @@ public class AddExtraInfo
 {
   private static string DescriptionHover()
   {
-    if (!Selection.IsCommand()) return "";
-    if (!Selection.RulerParameters.IsId) return "";
+    if (!Selection.IsTool()) return "";
+    if (!Selection.Tool().IsId) return "";
     var hovered = Selector.GetHovered(Configuration.Range, Configuration.IgnoredIds);
     var name = hovered == null ? "" : Utils.GetPrefabName(hovered.gameObject);
     return $"id: {name}";

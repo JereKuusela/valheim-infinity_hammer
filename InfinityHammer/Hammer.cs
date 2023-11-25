@@ -24,17 +24,18 @@ public static class Hammer
     if (HasHammer(player)) return;
     var inventory = player.GetInventory();
     var item = inventory.m_inventory.Find(IsHammer) ?? throw new InvalidOperationException($"Unable to find the hammer.");
+
     player.EquipItem(item);
   }
-  public static bool IsTool(ItemDrop.ItemData item) => item != null && item.m_shared.m_buildPieces != null;
 
-  public static bool HasAnyTool()
+  public static bool Is(ItemDrop.ItemData item) => item != null && item.m_shared.m_buildPieces != null;
+
+  public static bool HasAny()
   {
     var player = Helper.GetPlayer();
-    if (!player) return false;
-    return IsTool(player.GetRightItem());
+    return player && Is(player.GetRightItem());
   }
-  public static string GetTool()
+  public static string Get()
   {
     var player = Helper.GetPlayer();
     if (!player) return "";
@@ -70,7 +71,7 @@ public static class Hammer
     var rotation = ghost.transform.rotation;
     CustomizeSpawnLocation.AllViews = AllLocationsObjects;
     CustomizeSpawnLocation.RandomDamage = RandomLocationDamage;
-    ZoneSystem.instance.SpawnLocation(location, seed, position, rotation, ZoneSystem.SpawnMode.Full, new());
+    ZoneSystem.instance.SpawnLocation(location, seed, position, rotation, ZoneSystem.SpawnMode.Full, []);
     foreach (var zdo in Undo.Objects)
     {
       if (ZNetScene.instance.m_instances.TryGetValue(zdo, out var obj))

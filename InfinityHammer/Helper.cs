@@ -396,7 +396,7 @@ public static class Helper
     else
       return Enum.TryParse<KeyCode>(key, true, out var code) && Input.GetKey(code);
   }
-  private static Dictionary<string, int> PrefabNames = new();
+  private static Dictionary<string, int> PrefabNames = [];
   public static Sprite? FindSprite(string name)
   {
     if (!ZNetScene.instance) return null;

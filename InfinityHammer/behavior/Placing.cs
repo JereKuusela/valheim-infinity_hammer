@@ -64,7 +64,7 @@ public class PlacePiece
   static GameObject GetPrefab(GameObject obj)
   {
     if (!Configuration.Enabled) return obj;
-    var type = Selection.Type;
+    var type = Selection.Type();
     var ghost = Helper.GetPlayer().m_placementGhost;
     if (!ghost) return obj;
     var name = Utils.GetPrefabName(ghost);
@@ -88,16 +88,10 @@ public class PlacePiece
       };
       return dummy;
     }
-    if (type == SelectedType.Command)
-    {
-      var dummy = new GameObject();
-      dummy.name = "Command";
-      return dummy;
-    }
     return obj;
   }
 
-  private static void HandleCommand(GameObject ghost)
+  private static void HandleCommand(GameObject ghost, Tool tool)
   {
     var scale = Scaling.Command;
     var x = ghost.transform.position.x.ToString(CultureInfo.InvariantCulture);
@@ -108,32 +102,32 @@ public class PlacePiece
     var outerSize = Mathf.Max(scale.X, scale.Z).ToString(CultureInfo.InvariantCulture);
     var depth = scale.Z.ToString(CultureInfo.InvariantCulture);
     var width = scale.X.ToString(CultureInfo.InvariantCulture);
-    if (Ruler.Shape == RulerShape.Circle)
+    if (tool.Shape == RulerShape.Circle)
     {
       innerSize = radius;
       outerSize = radius;
     }
-    if (Ruler.Shape != RulerShape.Rectangle)
+    if (tool.Shape != RulerShape.Rectangle)
       depth = width;
-    if (Ruler.Shape == RulerShape.Square)
+    if (tool.Shape == RulerShape.Square)
     {
       innerSize = radius;
       outerSize = radius;
     }
-    if (Ruler.Shape == RulerShape.Rectangle)
+    if (tool.Shape == RulerShape.Rectangle)
     {
       innerSize = width;
       outerSize = width;
     }
     var height = scale.Y.ToString(CultureInfo.InvariantCulture);
     var angle = ghost.transform.rotation.eulerAngles.y.ToString(CultureInfo.InvariantCulture);
-    if (Configuration.PreciseCommands) angle = "0";
+    if (Configuration.PreciseTools) angle = "0";
 
-    var command = Selection.Command;
+    var command = tool.Command;
     var multiShape = command.Contains("#r") && (command.Contains("#w") || command.Contains("#d"));
     if (multiShape)
     {
-      var circle = Ruler.Shape == RulerShape.Circle || Ruler.Shape == RulerShape.Ring;
+      var circle = tool.Shape == RulerShape.Circle || tool.Shape == RulerShape.Ring;
       var args = command.Split(' ').ToList();
       for (var i = args.Count - 1; i > -1; i--)
       {
@@ -157,7 +151,7 @@ public class PlacePiece
     command = command.Replace("#r1-r2", $"{innerSize}-{outerSize}");
     command = command.Replace("#w1-w2", $"{innerSize}-{outerSize}");
 
-    if (Ruler.Shape == RulerShape.Frame)
+    if (tool.Shape == RulerShape.Frame)
       command = command.Replace("#d", $"{innerSize}-{outerSize}");
     else
       command = command.Replace("#d", depth);
@@ -174,7 +168,11 @@ public class PlacePiece
     command = command.Replace("#ignore", Configuration.configIgnoredIds.Value);
     if (!Configuration.DisableMessages)
       Console.instance.AddString($"Hammering command: {command}");
+    var prev = HideEffects.Active;
+    HideEffects.Active = false;
+    // Hide effects prevents some visuals from being shown (like status effects).
     Console.instance.TryRunCommand(command);
+    HideEffects.Active = prev;
   }
 
   private static void HandleMultiple(GameObject ghost)
@@ -204,13 +202,13 @@ public class PlacePiece
     var ghost = Helper.GetPlayer().m_placementGhost;
     if (!ghost) return;
     var piece = obj.GetComponent<Piece>();
-    if (Selection.Type == SelectedType.Command)
+    if (Selection.Type() == SelectedType.Tool)
     {
-      HandleCommand(ghost);
+      HandleCommand(ghost, Selection.Tool());
       UnityEngine.Object.Destroy(obj);
       return;
     }
-    if (Selection.Type == SelectedType.Multiple)
+    if (Selection.Type() == SelectedType.Multiple)
     {
       HandleMultiple(ghost);
       UnityEngine.Object.Destroy(obj);
@@ -220,7 +218,7 @@ public class PlacePiece
     // Hoe adds pieces too.
     if (!view) return;
     view.m_body?.WakeUp();
-    if (Selection.Type == SelectedType.Location && obj.GetComponent<LocationProxy>())
+    if (Selection.Type() == SelectedType.Location && obj.GetComponent<LocationProxy>())
     {
       Undo.StartTracking();
       Hammer.SpawnLocation(view);
@@ -239,14 +237,14 @@ public class PlacePiece
               useEnd: false,
               new CodeMatch(OpCodes.Ldloc_2))
           .Advance(1)
-          .Insert(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate<Func<GameObject, GameObject>>(GetPrefab).operand))
+          .Insert(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate(GetPrefab).operand))
           .MatchForward(
               useEnd: false,
               new CodeMatch(OpCodes.Ldc_I4_1),
               new CodeMatch(OpCodes.Ret))
           .Advance(-1)
           .Insert(new CodeInstruction(OpCodes.Ldloc_3),
-            new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate<Action<GameObject>>(Postprocess).operand))
+            new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate(Postprocess).operand))
           .InstructionEnumeration();
   }
 }
@@ -255,12 +253,12 @@ public class PlacePiece
 public class HoldUse
 {
   // Needed to prevent instant usage when selecting continuous command.
-  public static bool Disabled = true;
+  public static bool Selecting = true;
   static void CheckHold()
   {
     if (!ZInput.GetButton("Attack") && !ZInput.GetButton("JoyPlace"))
-      Disabled = false;
-    if (Disabled || !Selection.IsContinuous()) return;
+      Selecting = false;
+    if (Selecting || !Selection.IsContinuous()) return;
     var player = Player.m_localPlayer;
     if (ZInput.GetButton("Attack") || ZInput.GetButton("JoyPlace"))
       player.m_placePressedTime = Time.time;
@@ -275,7 +273,8 @@ public class HoldUse
               new CodeMatch(
                   OpCodes.Ldstr,
                   "Attack"))
-          .Insert(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate(CheckHold).operand))
+          .SetAndAdvance(OpCodes.Call, Transpilers.EmitDelegate(CheckHold).operand)
+          .Insert(new CodeInstruction(OpCodes.Ldstr, "Attack"))
           .InstructionEnumeration();
   }
 }
@@ -297,7 +296,7 @@ public class UnlockBuildDistance
     __state = __instance.m_maxPlaceDistance;
     if (Configuration.Range > 0f)
       __instance.m_maxPlaceDistance = Configuration.Range;
-    if (Selection.Type == SelectedType.Command)
+    if (Selection.Type() == SelectedType.Tool)
       __instance.m_maxPlaceDistance = 1000f;
   }
   public static void Postfix(Player __instance, float __state)

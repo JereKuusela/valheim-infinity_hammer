@@ -37,13 +37,15 @@ public class Ruler
   public static GameObject? Square = null;
   public static GameObject? Frame = null;
   private static CircleProjector? BaseProjector = null;
+  private static LayerMask EmptyMask = new();
   public static void SanityCheckShape()
   {
-    if (Ruler.Shape == RulerShape.Circle && (!Circle || !Configuration.ShapeCircle)) Ruler.Shape = RulerShape.Ring;
-    if (Ruler.Shape == RulerShape.Ring && (!Ring || !Configuration.ShapeRing)) Ruler.Shape = RulerShape.Square;
-    if (Ruler.Shape == RulerShape.Square && (!Square || !Configuration.ShapeSquare)) Ruler.Shape = RulerShape.Frame;
-    if (Ruler.Shape == RulerShape.Frame && (!Frame || !Configuration.ShapeFrame)) Ruler.Shape = RulerShape.Rectangle;
-    if (Ruler.Shape == RulerShape.Rectangle && (!Rectangle || !Configuration.ShapeRectangle)) Ruler.Shape = RulerShape.Circle;
+    if (Tool == null) return;
+    if (Tool.Shape == RulerShape.Circle && (!Circle || !Configuration.ShapeCircle)) Tool.Shape = RulerShape.Ring;
+    if (Tool.Shape == RulerShape.Ring && (!Ring || !Configuration.ShapeRing)) Tool.Shape = RulerShape.Square;
+    if (Tool.Shape == RulerShape.Square && (!Square || !Configuration.ShapeSquare)) Tool.Shape = RulerShape.Frame;
+    if (Tool.Shape == RulerShape.Frame && (!Frame || !Configuration.ShapeFrame)) Tool.Shape = RulerShape.Rectangle;
+    if (Tool.Shape == RulerShape.Rectangle && (!Rectangle || !Configuration.ShapeRectangle)) Tool.Shape = RulerShape.Circle;
   }
   private static CircleProjector GetBaseProjector()
   {
@@ -52,17 +54,31 @@ public class Ruler
     BaseProjector = workbench.GetComponentInChildren<CircleProjector>();
     return BaseProjector;
   }
-  private static bool RotateWithPlayer = false;
-  private static bool UseHeight = false;
-  private static bool IsTargeted = false;
-  public static RulerShape Shape = RulerShape.Circle;
+  private static Tool? Tool;
   private static void SetGrid(float width, float height)
   {
-    if (!Configuration.PreciseCommands) return;
+    if (!Configuration.PreciseTools) return;
     var centerX = Math.Floor(width / 0.5) % 2 == 0;
     var centerZ = Math.Floor(height / 0.5) % 2 == 0;
     Vector3 center = new Vector3(centerX ? 0f : 0.5f, 0f, centerZ ? 0f : 0.5f);
     Grid.SetPreciseMode(center);
+  }
+  private static void UpdateMasks()
+  {
+    if (Tool == null || BaseProjector == null) return;
+    var mask = Tool?.SnapGround == true ? BaseProjector.m_mask : EmptyMask;
+    if (Circle != null)
+      Circle.GetComponent<CircleProjector>().m_mask = mask;
+    if (HeightCircle != null)
+      HeightCircle.GetComponent<CircleProjector>().m_mask = mask;
+    if (Ring != null)
+      Ring.GetComponent<CircleProjector>().m_mask = mask;
+    if (Square != null)
+      Square.GetComponent<RectangleProjector>().m_mask = mask;
+    if (Frame != null)
+      Frame.GetComponent<RectangleProjector>().m_mask = mask;
+    if (Rectangle != null)
+      Rectangle.GetComponent<RectangleProjector>().m_mask = mask;
   }
   private static void BuildCircle(GameObject obj, float radius)
   {
@@ -80,6 +96,7 @@ public class Ruler
   }
   public static void Update()
   {
+    if (Tool == null) return;
     var player = Player.m_localPlayer;
     if (Projector == null || !player) return;
     var ghost = player.m_placementGhost;
@@ -88,31 +105,34 @@ public class Ruler
     if (!ghost) return;
     var gtr = ghost.transform;
     var scale = Scaling.Command;
-    if (IsTargeted)
+    if (Tool.IsTargeted)
       Projector.transform.position = (ptr.position + gtr.position) / 2f;
     else
       Projector.transform.position = gtr.position;
     var angle = gtr.rotation.eulerAngles.y;
-    if (RotateWithPlayer)
+    if (Tool.RotateWithPlayer)
       angle = Vector3.SignedAngle(Vector3.forward, Utils.DirectionXZ(gtr.position - ptr.position), Vector3.up);
-    if (Configuration.PreciseCommands)
+    if (Configuration.PreciseTools)
       angle = 0;
     Projector.transform.rotation = Quaternion.Euler(0f, angle, 0f);
-    if (IsTargeted)
+    if (Tool.IsTargeted)
     {
       var distance = Utils.DistanceXZ(ptr.position, gtr.position) / 2f;
       scale.SetScaleZ(distance);
     }
-    Ruler.SanityCheckShape();
-    if (Configuration.PreciseCommands) scale.SetPrecisionXZ(0.25f, 0.5f);
+    SanityCheckShape();
+    UpdateMasks();
+    var shape = Tool.Shape;
+    if (Configuration.PreciseTools) scale.SetPrecisionXZ(0.25f, 0.5f);
     if (Circle != null)
     {
-      Circle.SetActive(Shape == RulerShape.Circle || Shape == RulerShape.Ring);
+      Circle.SetActive(shape == RulerShape.Circle || shape == RulerShape.Ring);
       BuildCircle(Circle, scale.X);
       if (Circle.activeSelf)
       {
         SetGrid(scale.X, scale.X);
-        HighlightCircle(Projector.transform.position, scale.X, scale.Y);
+        if (Tool.Highlight)
+          HighlightCircle(Projector.transform.position, scale.X, scale.Y);
       }
     }
     if (Circle != null && HeightCircle != null)
@@ -124,12 +144,12 @@ public class Ruler
     }
     if (Circle != null && Ring != null)
     {
-      Ring.SetActive(Shape == RulerShape.Ring);
+      Ring.SetActive(shape == RulerShape.Ring);
       BuildCircle(Ring, scale.Z);
     }
     if (Square != null)
     {
-      Square.SetActive(Shape == RulerShape.Square || Shape == RulerShape.Frame);
+      Square.SetActive(shape == RulerShape.Square || shape == RulerShape.Frame);
       var proj = Square.GetComponent<RectangleProjector>();
       if (Square.activeSelf)
       {
@@ -137,7 +157,8 @@ public class Ruler
         proj.m_depth = scale.X;
         SetGrid(scale.X, scale.X);
         proj.m_nrOfSegments = Math.Max(3, (int)((proj.m_depth + proj.m_width) * 2));
-        HighlightRectangle(Projector.transform.position, angle, scale.X, scale.X, scale.Y);
+        if (Tool.Highlight)
+          HighlightRectangle(Projector.transform.position, angle, scale.X, scale.X, scale.Y);
       }
       else if (proj.m_nrOfSegments > 0)
       {
@@ -147,7 +168,7 @@ public class Ruler
     }
     if (Square != null && Frame != null)
     {
-      Frame.SetActive(Shape == RulerShape.Frame);
+      Frame.SetActive(shape == RulerShape.Frame);
       var proj = Frame.GetComponent<RectangleProjector>();
       if (Frame.activeSelf)
       {
@@ -164,7 +185,7 @@ public class Ruler
     }
     if (Rectangle != null)
     {
-      Rectangle.SetActive(Shape == RulerShape.Rectangle);
+      Rectangle.SetActive(shape == RulerShape.Rectangle);
       var proj = Rectangle.GetComponent<RectangleProjector>();
       if (Rectangle.activeSelf)
       {
@@ -172,7 +193,8 @@ public class Ruler
         proj.m_depth = scale.Z;
         SetGrid(scale.X, scale.Z);
         proj.m_nrOfSegments = Math.Max(3, (int)((proj.m_depth + proj.m_width) * 2));
-        HighlightRectangle(Projector.transform.position, angle, scale.X, scale.Z, scale.Y);
+        if (Tool.Highlight)
+          HighlightRectangle(Projector.transform.position, angle, scale.X, scale.Z, scale.Y);
       }
       else if (proj.m_nrOfSegments > 0)
       {
@@ -181,28 +203,28 @@ public class Ruler
       }
     }
   }
-  public static float Height => UseHeight ? Scaling.Command.Y : 0f;
-  public static bool SnapToGround => true;
+  public static float Height => Tool != null && Tool.Height ? Scaling.Command.Y : 0f;
 
-  private static string DescriptionScale()
+  private static string DescriptionScale(Tool tool)
   {
     var scale = Scaling.Command;
-    var height = UseHeight ? $", h: {Format2(scale.Y)}" : "";
-    if (Shape == RulerShape.Rectangle)
+    var height = tool.Height ? $", h: {Format2(scale.Y)}" : "";
+    var shape = tool.Shape;
+    if (shape == RulerShape.Rectangle)
       return $"w: {Format2(scale.X)}, d: {Format2(scale.Z)}" + height;
 
-    if (Shape == RulerShape.Square)
+    if (shape == RulerShape.Square)
       return $"w: {Format2(scale.X)}" + height;
 
-    if (Shape == RulerShape.Circle)
+    if (shape == RulerShape.Circle)
       return $"r: {Format2(scale.X)}" + height;
-    if (Shape == RulerShape.Ring)
+    if (shape == RulerShape.Ring)
     {
       var min = Mathf.Min(scale.X, scale.Z);
       var max = Mathf.Max(scale.X, scale.Z);
       return $"r: {Format2(min)}-{Format2(max)}" + height;
     }
-    if (Shape == RulerShape.Frame)
+    if (shape == RulerShape.Frame)
     {
       var min = Mathf.Min(scale.X, scale.Z);
       var max = Mathf.Max(scale.X, scale.Z);
@@ -218,9 +240,9 @@ public class Ruler
   }
   public static string Description()
   {
-    if (!Selection.IsCommand() || Projector == null) return "";
+    if (Tool == null || Projector == null) return "";
     if (Hud.instance.m_pieceSelectionWindow.activeSelf) return "";
-    var lines = new[] { DescriptionScale(), DescriptionPosition() };
+    var lines = new[] { DescriptionScale(Tool), DescriptionPosition() };
     return string.Join("\n", lines.Where(s => s != ""));
   }
   private static string Format1(float f) => f.ToString("F1", CultureInfo.InvariantCulture);
@@ -253,59 +275,63 @@ public class Ruler
       scale.SetScaleY(Mathf.Clamp(scale.Y, height.Min.Value, height.Max.Value));
     }
   }
-  public static void InitializeProjector(RulerParameters pars, GameObject obj)
+  public static void InitializeProjector(Tool tool, GameObject obj)
   {
+    Tool = tool;
     if (BaseProjector == null)
       BaseProjector = GetBaseProjector();
-    RotateWithPlayer = pars.RotateWithPlayer;
-    IsTargeted = pars.IsTargeted;
-    var scale = Scaling.Command;
-    if (pars.Width)
+    if (tool.Width)
     {
       Square = CreateChild(obj);
       var proj = Square.AddComponent<RectangleProjector>();
+      proj.m_mask = LayerMask.GetMask("Default", "static_solid", "Default_small", "terrain", "vehicle");
       proj.m_prefab = BaseProjector.m_prefab;
+      proj.m_mask = BaseProjector.m_mask;
       proj.m_nrOfSegments = 3;
     }
-    if (pars.Grid)
+    if (tool.Grid)
     {
       Frame = CreateChild(obj);
       var proj = Frame.AddComponent<RectangleProjector>();
       proj.m_prefab = BaseProjector.m_prefab;
+      proj.m_mask = BaseProjector.m_mask;
       proj.m_nrOfSegments = 3;
     }
-    if (pars.Width && pars.Depth)
+    if (tool.Width && tool.Depth)
     {
       Rectangle = CreateChild(obj);
       var proj = Rectangle.AddComponent<RectangleProjector>();
       proj.m_prefab = BaseProjector.m_prefab;
+      proj.m_mask = BaseProjector.m_mask;
       proj.m_nrOfSegments = 3;
     }
-    if (pars.Radius)
+    if (tool.Radius)
     {
       Circle = CreateChild(obj);
       var proj = Circle.AddComponent<CircleProjector>();
       proj.m_prefab = BaseProjector.m_prefab;
+      proj.m_mask = BaseProjector.m_mask;
       proj.m_nrOfSegments = 3;
       HeightCircle = CreateChild(obj);
       proj = HeightCircle.AddComponent<CircleProjector>();
       proj.m_prefab = BaseProjector.m_prefab;
+      proj.m_mask = BaseProjector.m_mask;
       proj.m_nrOfSegments = 3;
     }
-    if (pars.Ring)
+    if (tool.Ring)
     {
       Ring = CreateChild(obj);
       var proj = Ring.AddComponent<CircleProjector>();
       proj.m_prefab = BaseProjector.m_prefab;
+      proj.m_mask = BaseProjector.m_mask;
       proj.m_nrOfSegments = 3;
     }
-    UseHeight = pars.Height;
   }
-  public static void Create(RulerParameters pars)
+  public static void Create(Tool tool)
   {
     Remove();
-    if (!pars.Radius && !pars.Width && pars.Depth) return;
-    InitializeProjector(pars, InitializeGameObject());
+    if (!tool.Radius && !tool.Width && tool.Depth) return;
+    InitializeProjector(tool, InitializeGameObject());
   }
 
   public static void Remove()
@@ -346,7 +372,10 @@ public class InitializeRuler
 {
   static void Postfix()
   {
-    Ruler.Create(Selection.RulerParameters);
+    if (Selection.IsTool())
+      Ruler.Create(Selection.Tool());
+    else
+      Ruler.Remove();
   }
 }
 

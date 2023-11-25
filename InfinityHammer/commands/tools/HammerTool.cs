@@ -12,18 +12,21 @@ public class HammerToolCommand
   protected static void Execute(Terminal.ConsoleEventArgs args)
   {
     Helper.ArgsCheck(args, 2, "Missing the tool name.");
-    if (!Hammer.HasAnyTool())
+    if (!Hammer.HasAny())
       Hammer.Equip();
     var toolName = string.Join(" ", args.Args, 1, args.Length - 1);
-    if (!ToolManager.TryGetTool(Hammer.GetTool(), toolName, out var tool))
+    if (!ToolManager.TryGetTool(Hammer.Get(), toolName, out var tool))
     {
-      tool = new();
-      tool.name = "Command";
-      tool.command = toolName;
-      tool.description = tool.command;
+      ToolData data = new()
+      {
+        name = "Command",
+        command = toolName,
+        description = toolName,
+      };
+      tool = new(data);
     }
     Selection.Set(tool);
-    GizmoWrapper.SetRotation(Quaternion.identity);
-    Helper.AddMessage(args.Context, $"Selected command {tool.name}.");
+    GizmoWrapper.Set(Quaternion.identity);
+    Helper.AddMessage(args.Context, $"Selected tool {tool.Name}.");
   }
 }

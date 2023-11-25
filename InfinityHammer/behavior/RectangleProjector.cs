@@ -7,7 +7,7 @@ public class RectangleProjector : CircleProjector
   public float m_depth = 5f;
   private Vector3 Snap(Vector3 pos)
   {
-    if (Physics.Raycast(pos + Vector3.up * 500f, Vector3.down, out var raycastHit, 1000f, this.m_mask.value))
+    if (Physics.Raycast(pos + Vector3.up * 500f, Vector3.down, out var raycastHit, 1000f, m_mask.value))
       pos.y = raycastHit.point.y;
     return pos;
   }
@@ -38,10 +38,10 @@ public class RectangleProjector : CircleProjector
     else transform.gameObject.SetActive(true);
     transform.localScale = scale;
   }
-#pragma warning disable IDE0051 // Remove unused private members
+#pragma warning disable IDE0051
   new private void Update()
+#pragma warning restore IDE0051
   {
-#pragma warning restore IDE0051 // Remove unused private members
     var totalLength = 2 * m_width + 2 * m_depth;
     var forward = (int)Mathf.Max(2, Mathf.Ceil(m_nrOfSegments * m_depth / totalLength));
     var right = (int)Mathf.Max(2, Mathf.Ceil(m_nrOfSegments * m_width / totalLength));
@@ -65,50 +65,50 @@ public class RectangleProjector : CircleProjector
     var start = 0.5f;
     var end = start + 2f * m_depth;
     var size = 2f * m_depth * forward / (forward - 1);
-    var time = baseTime / (forward);
+    var time = baseTime / forward;
     for (int i = 0; i < forward; i++, index++)
     {
       var percent = ((float)i / forward + time) % 1f;
       var pos = basePos + percent * size * Vector3.forward;
       Set(index, pos);
       EdgeFix(index, percent, size, start, end, Vector3.forward);
-      if (Ruler.SnapToGround) Snap(index);
+      Snap(index);
     }
     basePos = m_depth * Vector3.forward - (m_width + halfLine) * Vector3.right;
     end = start + 2f * m_width;
     size = 2f * m_width * right / (right - 1);
-    time = baseTime / (right);
+    time = baseTime / right;
     for (int i = 0; i < right; i++, index++)
     {
       var percent = ((float)i / right + time) % 1f;
       var pos = basePos + percent * size * Vector3.right;
       Set(index, pos);
       EdgeFix(index, percent, size, start, end, Vector3.right);
-      if (Ruler.SnapToGround) Snap(index);
+      Snap(index);
     }
     basePos = m_width * Vector3.right - (m_depth + halfLine) * Vector3.back;
     end = start + 2f * m_depth;
     size = 2f * m_depth * back / (back - 1);
-    time = baseTime / (back);
+    time = baseTime / back;
     for (int i = 0; i < back; i++, index++)
     {
       var percent = ((float)i / back + time) % 1f;
       var pos = basePos + percent * size * Vector3.back;
       Set(index, pos);
       EdgeFix(index, percent, size, start, end, Vector3.back);
-      if (Ruler.SnapToGround) Snap(index);
+      Snap(index);
     }
     basePos = m_depth * Vector3.back - (m_width + halfLine) * Vector3.left;
     end = start + 2f * m_width;
     size = 2f * m_width * left / (left - 1);
-    time = baseTime / (left);
+    time = baseTime / left;
     for (int i = 0; i < left; i++, index++)
     {
       var percent = ((float)i / left + time) % 1f;
       var pos = basePos + percent * size * Vector3.left;
       Set(index, pos);
       EdgeFix(index, percent, size, start, end, Vector3.left);
-      if (Ruler.SnapToGround) Snap(index);
+      Snap(index);
     }
     Vector3 offset = new(0f, Ruler.Height, 0f);
     if (offset == Vector3.zero) return;
@@ -118,4 +118,3 @@ public class RectangleProjector : CircleProjector
     }
   }
 }
-

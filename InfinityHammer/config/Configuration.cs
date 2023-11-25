@@ -18,8 +18,8 @@ public partial class Configuration
   public static bool ShapeRectangle => configShapeRectangle.Value;
   public static ConfigEntry<bool> configShapeFrame;
   public static bool ShapeFrame => configShapeFrame.Value;
-  public static ConfigEntry<bool> configPreciseCommands;
-  public static bool PreciseCommands => configPreciseCommands.Value;
+  public static ConfigEntry<bool> configPreciseTools;
+  public static bool PreciseTools => configPreciseTools.Value;
   public static ConfigEntry<bool> configIgnoreWards;
   public static bool IgnoreWards => configIgnoreWards.Value && IsCheats;
   public static ConfigEntry<bool> configIgnoreNoBuild;
@@ -68,6 +68,8 @@ public partial class Configuration
   public static float Range => IsCheats ? Helper.ParseFloat(configRange.Value, 0f) : 0f;
   public static ConfigEntry<bool> configShowCommandValues;
   public static bool AlwaysShowCommand => configShowCommandValues.Value;
+  public static ConfigEntry<bool> configSaveBlueprintData;
+  public static bool SaveBlueprintData => configSaveBlueprintData.Value;
 
   public static ConfigWrapper Wrapper;
 
@@ -92,8 +94,8 @@ public partial class Configuration
     configShapeRectangle = wrapper.Bind(section, "Shape rectangle", true, "Enables rectangle shape for commands.");
     configShapeSquare = wrapper.Bind(section, "Shape square", true, "Enables square shape for commands.");
     configShapeFrame = wrapper.Bind(section, "Shape frame", false, "Enables frame shape for commands.");
-    configPreciseCommands = wrapper.Bind(section, "Precise commands", false, "Snaps commands to a grid. Disabled rotating.");
-    configPreciseCommands.SettingChanged += (s, e) => wrapper.SetupBinds();
+    configPreciseTools = wrapper.Bind(section, "Precise tools", false, "Snaps tools to a grid. Disables rotating.");
+    configPreciseTools.SettingChanged += (s, e) => wrapper.SetupBinds();
     configIgnoreWards = wrapper.Bind(section, "Ignore wards", true, "Ignores ward restrictions.");
     configIgnoreNoBuild = wrapper.Bind(section, "Ignore no build", true, "Ignores no build areas.");
     configAllObjects = wrapper.Bind(section, "All objects", true, "Allows placement of non-default objects.");
@@ -110,6 +112,7 @@ public partial class Configuration
     configUnfreezeOnUnequip = wrapper.Bind(section, "Unfreeze on unequip", true, "Removes the placement freeze when unequipping the hammer.");
     configAllSnapPoints = wrapper.Bind(section, "Snap points for all objects", false, "If enabled, multi selection creates snap points for every object.");
     configIgnoreOtherRestrictions = wrapper.Bind(section, "Ignore other restrictions", true, "Ignores any other restrictions (material, biome, etc.)");
+    configSaveBlueprintData = wrapper.Bind(section, "Save data to blueprints", true, "If enabled, object data values are saved to blueprints.");
 
     InitVisuals(wrapper);
     if (CommandWrapper.ServerDevcommands != null)

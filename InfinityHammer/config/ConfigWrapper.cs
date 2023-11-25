@@ -48,20 +48,20 @@ public class ConfigWrapper
     RegisterList(configEntry);
     return configEntry;
   }
+  public ConfigEntry<KeyboardShortcut> BindCommand(string command, string group, string name, KeyboardShortcut value, string description, string mode = "")
+  {
+    return BindCommand(() => command, group, name, value, description, mode);
+  }
   public ConfigEntry<KeyboardShortcut> BindCommand(Func<string> command, string group, string name, KeyboardShortcut value, string description, string mode = "")
   {
     var configEntry = Create(group, name, value, description);
     RegisterCommand(configEntry, command, mode);
     return configEntry;
   }
-  public ConfigEntry<KeyboardShortcut> BindCommand(string command, string group, string name, KeyboardShortcut value, string description, string mode = "")
-  {
-    var configEntry = Create(group, name, value, description);
-    RegisterCommand(configEntry, () => command, mode);
-    return configEntry;
-  }
   public ConfigEntry<KeyboardShortcut> BindWheelCommand(string command, string group, string name, KeyboardShortcut value, string description, string mode = "")
-    => BindWheelCommand(() => command, group, name, value, description, mode);
+  {
+    return BindWheelCommand(() => command, group, name, value, description, mode);
+  }
   public ConfigEntry<KeyboardShortcut> BindWheelCommand(Func<string> command, string group, string name, KeyboardShortcut value, string description, string mode = "")
   {
     var configEntry = Create(group, name, value, description);
@@ -74,7 +74,7 @@ public class ConfigWrapper
     context.AddString(message);
     Player.m_localPlayer?.Message(MessageHud.MessageType.TopLeft, message);
   }
-  private readonly Dictionary<string, Action<Terminal, string>> SettingHandlers = new();
+  private readonly Dictionary<string, Action<Terminal, string>> SettingHandlers = [];
   private void Register(ConfigEntry<bool> setting)
   {
     var name = setting.Definition.Key;
@@ -99,7 +99,7 @@ public class ConfigWrapper
     var bind = $"bind {keys} tag={name} {command()}";
     Console.instance.TryRunCommand(bind);
   }
-  private readonly List<Action> BindCalls = new();
+  private readonly List<Action> BindCalls = [];
   public void SetupBinds()
   {
     foreach (var call in BindCalls) call();
@@ -119,7 +119,7 @@ public class ConfigWrapper
     // Dirty hack to allow command specific binds to work without a modifier key.
     // This should be ok since they only affect Infinity Hammer related actions.
     if (key.MainKey == KeyCode.None && (mode == "" || mode == "build")) return;
-    List<string> keys = new() { "wheel" };
+    List<string> keys = ["wheel"];
     if (key.MainKey != KeyCode.None)
       keys.Add(key.MainKey.ToString().ToLower());
     keys.AddRange(key.Modifiers.Select(x => x.ToString().ToLower()));
@@ -156,19 +156,19 @@ public class ConfigWrapper
   }
   private static string State(bool value) => value ? "enabled" : "disabled";
   private static string Flag(bool value) => value ? "Removed" : "Added";
-  private static readonly HashSet<string> Truthies = new() {
+  private static readonly HashSet<string> Truthies = [
     "1",
     "true",
     "yes",
     "on"
-  };
+  ];
   private static bool IsTruthy(string value) => Truthies.Contains(value);
-  private static readonly HashSet<string> Falsies = new() {
+  private static readonly HashSet<string> Falsies = [
     "0",
     "false",
     "no",
     "off"
-  };
+  ];
   private static bool IsFalsy(string value) => Falsies.Contains(value);
 
   private static void Toggle(Terminal context, ConfigEntry<bool> setting, string name, string value)

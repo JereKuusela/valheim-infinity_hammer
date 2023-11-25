@@ -20,46 +20,43 @@
     <Message Text="Copied to Libs folder." Importance="High" />
   </Target>
   <ItemGroup>
-    <Reference Include="BepInEx">
+    <Reference Include="BepInEx.dll">
       <HintPath>..\..\Libs\BepinEx.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine">
+    <Reference Include="UnityEngine.dll">
       <HintPath>..\..\Libs\UnityEngine.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.CoreModule">
+    <Reference Include="UnityEngine.CoreModule.dll">
       <HintPath>..\..\Libs\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.PhysicsModule">
+    <Reference Include="UnityEngine.PhysicsModule.dll">
       <HintPath>..\..\Libs\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.UI">
+    <Reference Include="UnityEngine.UI.dll">
       <HintPath>..\..\Libs\UnityEngine.UI.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.IMGUIModule">
+    <Reference Include="UnityEngine.IMGUIModule.dll">
       <HintPath>..\..\Libs\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.InputLegacyModule">
+    <Reference Include="UnityEngine.InputLegacyModule.dll">
       <HintPath>..\..\Libs\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.AnimationModule">
+    <Reference Include="UnityEngine.AnimationModule.dll">
       <HintPath>..\..\Libs\UnityEngine.AnimationModule.dll</HintPath>
     </Reference>
-    <Reference Include="Unity.TextMeshPro">
-      <HintPath>..\..\Libs\Unity.TextMeshPro.dll</HintPath>
-    </Reference>
-    <Reference Include="0Harmony">
+    <Reference Include="0Harmony.dll">
       <HintPath>..\..\Libs\0Harmony.dll</HintPath>
     </Reference>
-    <Reference Include="BepInEx.Harmony">
+    <Reference Include="BepInEx.Harmony.dll">
       <HintPath>..\..\Libs\BepInEx.Harmony.dll</HintPath>
     </Reference>
-    <Reference Include="assembly_valheim_publicized">
+    <Reference Include="assembly_valheim_publicized.dll">
       <HintPath>..\..\Libs\assembly_valheim_publicized.dll</HintPath>
     </Reference>
-    <Reference Include="assembly_utils_publicized">
+    <Reference Include="assembly_utils_publicized.dll">
       <HintPath>..\..\Libs\assembly_utils_publicized.dll</HintPath>
     </Reference>
-    <Reference Include="assembly_guiutils_publicized">
+    <Reference Include="assembly_guiutils_publicized.dll">
       <HintPath>..\..\Libs\assembly_guiutils_publicized.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">

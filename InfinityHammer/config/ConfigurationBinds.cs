@@ -74,8 +74,8 @@ public partial class Configuration
 
     shapeKey = wrapper.BindCommand("hammer_shape", section, "Change shape", new KeyboardShortcut(KeyCode.Q), "Changes the selection shape.", "build");
     buildScale = wrapper.BindWheelCommand("hammer_zoom 5%", section, "Build scaling (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift), "Changes the selection scale.", "build");
-    commandRadius = wrapper.BindWheelCommand(() => $"hammer_zoom_x_cmd {(PreciseCommands ? "0.5" : "1")}", section, "Command radius (mouse wheel)", new KeyboardShortcut(KeyCode.None), "Changes the command radius.", "command");
-    commandDepth = wrapper.BindWheelCommand(() => $"hammer_zoom_z_cmd {(PreciseCommands ? "0.5" : "1")}", section, "Command depth (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift, KeyCode.LeftAlt), "Changes the command rectangle depth.", "command");
+    commandRadius = wrapper.BindWheelCommand(() => $"hammer_zoom_x_cmd {(PreciseTools ? "0.5" : "1")}", section, "Command radius (mouse wheel)", new KeyboardShortcut(KeyCode.None), "Changes the command radius.", "command");
+    commandDepth = wrapper.BindWheelCommand(() => $"hammer_zoom_z_cmd {(PreciseTools ? "0.5" : "1")}", section, "Command depth (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift, KeyCode.LeftAlt), "Changes the command rectangle depth.", "command");
     commandHeight = wrapper.BindWheelCommand(() => $"hammer_zoom_y_cmd {commandHeightAmount.Value}", section, "Command height (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift), "Changes the command height.", "command");
     commandRotate = wrapper.BindWheelCommand("hammer_rotate", section, "Command rotation (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift, KeyCode.LeftControl), "Changes the command rotation.", "command");
     zoopForward = wrapper.BindWheelCommand("hammer_zoop_forward auto", section, "Zooping forward (mouse wheel)", new KeyboardShortcut(KeyCode.None), "Zoops next to each other.", "build");
