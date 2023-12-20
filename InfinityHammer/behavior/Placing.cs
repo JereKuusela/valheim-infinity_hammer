@@ -27,13 +27,7 @@ public class PlacePiece
       Hammer.Clear();
     }
   }
-  static GameObject GetPrefab(GameObject obj)
-  {
-    if (!Configuration.Enabled) return obj;
-    var selection = Selection.Get();
-    return selection == null ? obj : selection.GetPrefab(obj);
-  }
-
+  static GameObject GetPrefab(GameObject obj) => Configuration.Enabled ? Selection.Get().GetPrefab(obj) : obj;
 
   static void Postprocess(GameObject obj)
   {
@@ -68,7 +62,7 @@ public class HoldUse
   {
     if (!ZInput.GetButton("Attack") && !ZInput.GetButton("JoyPlace"))
       Selecting = false;
-    if (Selecting || !Selection.IsContinuous()) return;
+    if (Selecting || !Selection.Get().Continuous) return;
     var player = Player.m_localPlayer;
     if (ZInput.GetButton("Attack") || ZInput.GetButton("JoyPlace"))
       player.m_placePressedTime = Time.time;
@@ -104,7 +98,7 @@ public class UnlockBuildDistance
   public static void Prefix(Player __instance, ref float __state)
   {
     __state = __instance.m_maxPlaceDistance;
-    var selection = Selection.TryGet();
+    var selection = Selection.Get();
     if (selection != null)
       __instance.m_maxPlaceDistance = selection.MaxPlaceDistance(__instance.m_maxPlaceDistance);
   }

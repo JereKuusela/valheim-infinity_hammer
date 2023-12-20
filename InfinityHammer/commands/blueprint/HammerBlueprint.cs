@@ -151,7 +151,6 @@ public class HammerBlueprintCommand
       bp.Center(centerPiece);
       var obj = Selection.Create(new ObjectSelection(args.Context, bp, scale));
       PrintSelected(args.Context, bp.Name);
-
     });
 
     AutoComplete.Register("hammer_restore", (int index, int subIndex) =>
@@ -173,7 +172,6 @@ public class HammerBlueprintCommand
       Position.Override = bp.Coordinates;
       Rotating.Set(Quaternion.Euler(bp.Rotation));
       PrintSelected(args.Context, bp.Name);
-
     });
   }
 }

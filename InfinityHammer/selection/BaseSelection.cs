@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace InfinityHammer;
 
-public abstract class BaseSelection
+public class BaseSelection
 {
   protected static readonly GameObject SnapObj = new()
   {
@@ -16,18 +16,21 @@ public abstract class BaseSelection
 
 #nullable disable
   ///<summary>Copy of the selected entity. Only needed for the placement ghost because armor and item stands have a different model depending on their state.</summary>
-  public GameObject SelectedObject = null;
+  protected GameObject SelectedObject = null;
 #nullable enable
   public bool SingleUse = false;
   public string ExtraDescription = "";
   public virtual bool IsTool => false;
   public virtual bool TerrainGrid => false;
+  public virtual bool Continuous => false;
+  public virtual bool PlayerHeight => false;
   public virtual float MaxPlaceDistance(float value) => Configuration.Range > 0f ? Configuration.Range : value;
   public virtual Piece GetSelectedPiece()
   {
     BindCommand.SetMode("");
-    return SelectedObject.GetComponent<Piece>();
+    return SelectedObject ? SelectedObject.GetComponent<Piece>() : null!;
   }
+  public void Destroy() => UnityEngine.Object.Destroy(SelectedObject);
 
   public virtual void Postprocess(Vector3? scale)
   {
@@ -185,8 +188,8 @@ public abstract class BaseSelection
   public virtual void UpdateZDOs(Action<ZDOData> action)
   {
   }
-  public abstract GameObject GetPrefab(GameObject obj);
-  public abstract void AfterPlace(GameObject obj);
+  public virtual GameObject GetPrefab(GameObject obj) => obj;
+  public virtual void AfterPlace(GameObject obj) { }
 
 
   ///<summary>Copies state and ensures visuals are updated for the placed object.</summary>

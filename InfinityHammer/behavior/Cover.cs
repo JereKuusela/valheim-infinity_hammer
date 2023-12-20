@@ -102,8 +102,7 @@ public class AddExtraInfo
   public static void Postfix(Hud __instance, Piece piece)
   {
     if (!piece) return;
-    var selection = Selection.TryGet();
-    if (selection == null) return;
+    var selection = Selection.Get();
     var lines = new[] { selection.ExtraDescription, DescriptionHover(selection) };
     var text = string.Join("\n", lines.Where(s => s != ""));
     if (__instance.m_pieceDescription.text != "")

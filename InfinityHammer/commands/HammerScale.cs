@@ -8,10 +8,9 @@ public class HammerScaleCommand
     var amount = Parse.Direction(direction) * Parse.Float(amountStr, 1f);
     action(amount);
   }
-  private static void CommandAxis(string name, string axis, Func<ToolScaling, Action<float>> action, bool isCommand)
+  private static void CommandAxis(string name, string axis, Func<ToolScaling, Action<float>> action)
   {
     name = $"{name}_{axis}";
-    if (isCommand) name += "_cmd";
     AutoComplete.Register(name, (int index) =>
     {
       if (index == 0) return ParameterInfo.Create("Amount.");
@@ -21,18 +20,15 @@ public class HammerScaleCommand
     {
       HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
-      var selection = Selection.Get();
-      if (selection.IsTool != isCommand) return;
+      if (Selection.Get().IsTool) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;
       var direction = args.Length > 2 ? args[2] : "";
       Scale(args[1], direction, action(Scaling.Get()));
-      if (!isCommand)
-        Scaling.PrintScale(args.Context);
+      Scaling.PrintScale(args.Context);
     });
   }
-  private static void Command(string name, bool isCommand)
+  private static void Command(string name)
   {
-    if (isCommand) name += "_cmd";
     AutoComplete.Register(name, (int index, int subIndex) =>
     {
       if (index == 0) return ParameterInfo.XZY("Amount of scale.", subIndex);
@@ -41,27 +37,21 @@ public class HammerScaleCommand
     Helper.Command(name, "[amount or x,z,y] - Sets the scale (if the object supports it).", (args) =>
     {
       HammerHelper.CheatCheck();
-      var selection = Selection.Get();
-      if (selection.IsTool != isCommand) return;
+      if (Selection.Get().IsTool) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;
       var scaling = Scaling.Get();
       var scale = Parse.Scale(Parse.Split(args[1])) * Parse.Direction(args.Args, 2);
       scaling.SetScale(scale);
       Scaling.UpdateGhost();
-      if (!isCommand)
-        Scaling.PrintScale(args.Context);
+      Scaling.PrintScale(args.Context);
     });
   }
   public HammerScaleCommand()
   {
     var name = "hammer_scale";
-    CommandAxis(name, "x", (scale) => scale.SetScaleX, false);
-    CommandAxis(name, "y", (scale) => scale.SetScaleY, false);
-    CommandAxis(name, "z", (scale) => scale.SetScaleZ, false);
-    CommandAxis(name, "x", (scale) => scale.SetScaleX, true);
-    CommandAxis(name, "y", (scale) => scale.SetScaleY, true);
-    CommandAxis(name, "z", (scale) => scale.SetScaleZ, true);
-    Command(name, false);
-    Command(name, true);
+    CommandAxis(name, "x", (scale) => scale.SetScaleX);
+    CommandAxis(name, "y", (scale) => scale.SetScaleY);
+    CommandAxis(name, "z", (scale) => scale.SetScaleZ);
+    Command(name);
   }
 }

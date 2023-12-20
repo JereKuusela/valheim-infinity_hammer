@@ -22,8 +22,7 @@ public class HammerZoopCommand
       if (args.Args.Length > 1)
         value = args[1];
       var zoop = Parse.Direction(args.Args, 2) < 0 ? reverse : action;
-      var selected = (ObjectSelection)Selection.Get();
-      if (selected == null)
+      if (Selection.Get() is not ObjectSelection selected)
         return;
       try
       {

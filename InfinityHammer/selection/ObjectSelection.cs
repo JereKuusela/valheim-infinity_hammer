@@ -313,13 +313,12 @@ public partial class ObjectSelection : BaseSelection
   }
   private void ToSingle()
   {
-    var selection = Selection.Get();
-    var obj = selection.SelectedObject.transform.GetChild(0).gameObject;
+    var obj = SelectedObject.transform.GetChild(0).gameObject;
     obj.SetActive(false);
     HammerHelper.EnsurePiece(obj);
     obj.transform.parent = null;
-    UnityEngine.Object.Destroy(selection.SelectedObject);
-    selection.SelectedObject = obj;
+    UnityEngine.Object.Destroy(SelectedObject);
+    SelectedObject = obj;
     Objects = Objects.Take(1).ToList();
   }
 }

@@ -4,10 +4,10 @@ using UnityEngine;
 namespace InfinityHammer;
 public class HammerLocationCommand
 {
-  private static void PrintSelected(Terminal terminal, GameObject obj)
+  private static void PrintSelected(Terminal terminal, Piece obj)
   {
     if (Configuration.DisableSelectMessages) return;
-    var name = obj ? Utils.GetPrefabName(obj) : "";
+    var name = obj ? Utils.GetPrefabName(obj.gameObject) : "";
     Helper.AddMessage(terminal, $"Selected {name}.");
   }
 

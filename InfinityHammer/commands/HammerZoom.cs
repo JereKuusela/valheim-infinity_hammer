@@ -16,10 +16,9 @@ public class HammerZoomCommand
       action(amount, 0f);
     }
   }
-  private static void CommandAxis(string name, string axis, Func<ToolScaling, Action<float, float>> action, bool isCommand)
+  private static void CommandAxis(string name, string axis, Func<ToolScaling, Action<float, float>> action)
   {
     name = $"{name}_{axis}";
-    if (isCommand) name += "_cmd";
     AutoComplete.Register(name, (int index) =>
     {
       if (index == 0) return ParameterInfo.Create("Flat amount or percentage to scale.");
@@ -29,19 +28,16 @@ public class HammerZoomCommand
     {
       HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
-      var selection = Selection.Get();
-      if (selection.IsTool != isCommand) return;
+      if (Selection.Get().IsTool) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;
       var direction = args.Length > 2 ? args[2] : "";
       Zoom(args[1], direction, action(Scaling.Get()));
       Scaling.UpdateGhost();
-      if (!isCommand)
-        Scaling.PrintScale(args.Context);
+      Scaling.PrintScale(args.Context);
     });
   }
-  private static void Command(string name, bool isCommand)
+  private static void Command(string name)
   {
-    if (isCommand) name += "_cmd";
     AutoComplete.Register(name, (int index, int subIndex) =>
     {
       if (index == 0) return ParameterInfo.Create("Flat amount or percentage to scale.");
@@ -51,8 +47,7 @@ public class HammerZoomCommand
     {
       HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
-      var selection = Selection.Get();
-      if (selection.IsTool != isCommand) return;
+      if (Selection.Get().IsTool) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;
       var scale = Scaling.Get();
       var split = args[1].Split(',');
@@ -68,20 +63,15 @@ public class HammerZoomCommand
       else
         throw new InvalidOperationException("Must either have 1 or 3 values.");
       Scaling.UpdateGhost();
-      if (!isCommand)
-        Scaling.PrintScale(args.Context);
+      Scaling.PrintScale(args.Context);
     });
   }
   public HammerZoomCommand()
   {
     var name = "hammer_zoom";
-    CommandAxis(name, "x", (scale) => scale.ZoomX, false);
-    CommandAxis(name, "y", (scale) => scale.ZoomY, false);
-    CommandAxis(name, "z", (scale) => scale.ZoomZ, false);
-    CommandAxis(name, "x", (scale) => scale.ZoomX, true);
-    CommandAxis(name, "y", (scale) => scale.ZoomY, true);
-    CommandAxis(name, "z", (scale) => scale.ZoomZ, true);
-    Command(name, false);
-    Command(name, true);
+    CommandAxis(name, "x", (scale) => scale.ZoomX);
+    CommandAxis(name, "y", (scale) => scale.ZoomY);
+    CommandAxis(name, "z", (scale) => scale.ZoomZ);
+    Command(name);
   }
 }

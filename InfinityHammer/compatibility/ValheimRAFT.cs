@@ -28,7 +28,8 @@ public class ValheimRAFT
       var name = Utils.GetPrefabName(child);
       if (name != "MBRaft") continue;
       var prefab = ZNetScene.instance.GetPrefab(name);
-      DataHelper.Init(name, child.transform, Selection.Get().GetData(i));
+      if (Selection.Get() is BaseSelection selection)
+        DataHelper.Init(name, child.transform, selection.GetData(i));
       var childObj = Object.Instantiate(prefab, child.transform.position, child.transform.rotation);
       BaseSelection.PostProcessPlaced(childObj);
       return childObj.GetComponent<ZNetView>()?.GetZDO()?.m_uid ?? ZDOID.None;
@@ -39,7 +40,7 @@ public class ValheimRAFT
   {
     var raft = Spawn(children);
     if (raft == ZDOID.None) return;
-    Selection.Get()?.UpdateZDOs(data =>
+    Selection.Get().UpdateZDOs(data =>
     {
       if (data.GetZDOID(RaftParent) != ZDOID.None)
         data.Set(RaftParent, raft);

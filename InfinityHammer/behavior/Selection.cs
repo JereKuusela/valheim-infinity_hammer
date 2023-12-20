@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using HarmonyLib;
+using ServerDevcommands;
 using Service;
 using UnityEngine;
 namespace InfinityHammer;
@@ -14,25 +15,23 @@ public class SelectedObject(string name, bool scalable, ZDOData data)
 
 public static partial class Selection
 {
+  public static BaseSelection BaseSelection = new();
   public static Dictionary<string, BaseSelection> Selections = [];
-  public static BaseSelection Get() => Selections.TryGetValue(HammerHelper.GetTool(), out var selection) ? selection : throw new InvalidOperationException("No selection.");
-  public static BaseSelection? TryGet() => Selections.TryGetValue(HammerHelper.GetTool(), out var selection) ? selection : null;
+  public static BaseSelection Get() => Selections.TryGetValue(HammerHelper.GetTool(), out var selection) ? selection : BaseSelection;
   public static void Clear()
   {
     if (Configuration.UnfreezeOnSelect) Position.Unfreeze();
     if (!Selections.TryGetValue(HammerHelper.GetTool(), out var selection))
       return;
-    UnityEngine.Object.Destroy(selection.SelectedObject);
+    selection.Destroy();
     Selections.Remove(HammerHelper.GetTool());
   }
-  public static string Description() => TryGet()?.ExtraDescription ?? "";
-  public static bool IsContinuous() => false;
-  public static bool IsPlayerHeight() => false;
-  public static GameObject Create(BaseSelection selection)
+  public static Piece Create(BaseSelection selection)
   {
     Clear();
     Selections[HammerHelper.GetTool()] = selection;
-    return selection.SelectedObject;
+    Helper.GetPlayer().SetupPlacementGhost();
+    return selection.GetSelectedPiece();
   }
 }
 
@@ -96,12 +95,12 @@ public class SetItemHack
 [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetSelected))]
 public class PieceTableSetSelected
 {
+  static void Prefix() => Selection.Clear();
   static void Postfix(PieceTable __instance)
   {
-    Selection.Clear();
     var index = __instance.GetSelectedIndex();
     var piece = __instance.GetPiece((int)__instance.m_selectedCategory, index);
-    if (piece)
+    if (piece && piece.GetComponent<ZNetView>())
       Selection.Create(new ObjectSelection(Utils.GetPrefabName(piece.gameObject), false));
   }
 }
@@ -109,11 +108,5 @@ public class PieceTableSetSelected
 [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.GetSelectedPiece))]
 public class GetSelectedPiece
 {
-  public static bool Prefix(ref Piece __result)
-  {
-    var selection = Selection.TryGet();
-    if (selection == null) return true;
-    __result = selection.GetSelectedPiece();
-    return false;
-  }
+  public static Piece Postfix(Piece result) => Selection.Get().GetSelectedPiece() ?? result;
 }

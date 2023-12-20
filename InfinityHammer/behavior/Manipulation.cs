@@ -141,7 +141,7 @@ public static class Position
   }
   public static void Apply(GameObject ghost)
   {
-    if (Selection.IsPlayerHeight() && (ZInput.GetButton("AltPlace") || ZInput.GetButton("JoyAltPlace")))
+    if (Selection.Get().PlayerHeight && (ZInput.GetButton("AltPlace") || ZInput.GetButton("JoyAltPlace")))
     {
       var player = Helper.GetPlayer();
       ghost.transform.position = new Vector3(ghost.transform.position.x, player.transform.position.y, ghost.transform.position.z);

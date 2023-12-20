@@ -30,12 +30,12 @@ public class HammerSelect
     return -1;
   }
 
-  private static void PrintSelected(Terminal terminal, GameObject obj)
+  private static void PrintSelected(Terminal terminal, Piece obj)
   {
     if (Configuration.DisableSelectMessages) return;
     var scale = obj.transform.localScale;
     var view = obj.GetComponent<ZNetView>();
-    var name = Utils.GetPrefabName(obj);
+    var name = Utils.GetPrefabName(obj.gameObject);
     if (view && view.m_syncInitialScale)
     {
       if (scale.x == scale.y && scale.y == scale.z)
@@ -48,7 +48,7 @@ public class HammerSelect
   }
   private void UpdateZDOs(Action<ZDOData> action)
   {
-    Selection.Get()?.UpdateZDOs(action);
+    Selection.Get().UpdateZDOs(action);
   }
   public HammerSelect()
   {
@@ -115,7 +115,7 @@ public class HammerSelect
       HammerHelper.EnabledCheck();
       Hammer.Equip();
       HammerParameters pars = new(args);
-      GameObject? selected = null;
+      Piece? selected = null;
       ZNetView[] views = [];
       if (pars.Radius.HasValue)
         views = Selector.GetNearby("", pars.ObjectType, Configuration.IgnoredIds, pars.Position, pars.Radius.Value, pars.Height);
