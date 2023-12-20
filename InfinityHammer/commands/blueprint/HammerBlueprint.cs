@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
-using Service;
+using ServerDevcommands;
 using UnityEngine;
 namespace InfinityHammer;
 #pragma warning disable IDE0046
@@ -56,9 +56,9 @@ public class HammerBlueprintCommand
       else if (row.StartsWith("#center:", StringComparison.OrdinalIgnoreCase))
         bp.CenterPiece = row.Split(':')[1];
       else if (row.StartsWith("#coordinates:", StringComparison.OrdinalIgnoreCase))
-        bp.Coordinates = Helper.ParseXZY(row.Split(':')[1]);
+        bp.Coordinates = Parse.VectorXZY(row.Split(':')[1]);
       else if (row.StartsWith("#rotation:", StringComparison.OrdinalIgnoreCase))
-        bp.Rotation = Helper.ParseYXZ(row.Split(':')[1]);
+        bp.Rotation = Parse.VectorXZY(row.Split(':')[1]);
       else if (row.StartsWith("#snappoints", StringComparison.OrdinalIgnoreCase))
         piece = false;
       else if (row.StartsWith("#pieces", StringComparison.OrdinalIgnoreCase))
@@ -132,48 +132,48 @@ public class HammerBlueprintCommand
 
   public HammerBlueprintCommand()
   {
-    CommandWrapper.Register("hammer_blueprint", (int index, int subIndex) =>
+    AutoComplete.Register("hammer_blueprint", (int index, int subIndex) =>
     {
       if (index == 0) return GetBlueprints();
-      if (index == 1) return CommandWrapper.ObjectIds();
-      if (index == 2) return CommandWrapper.Scale("scale", "Size of the object (if the object can be scaled).", subIndex);
+      if (index == 1) return ParameterInfo.ObjectIds;
+      if (index == 2) return ParameterInfo.Scale("scale", "Size of the object (if the object can be scaled).", subIndex);
       return null;
     });
     Helper.Command("hammer_blueprint", "[blueprint file] [center piece] [scale] - Selects the blueprint to be placed.", (args) =>
     {
-      Helper.CheatCheck();
+      HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
       Hammer.Equip();
       var name = args[1];
       var centerPiece = args.Length > 2 ? args[2] : "";
-      var scale = args.Length > 3 ? Parse.TryScale(Parse.Split(args[3])) : Vector3.one;
+      var scale = args.Length > 3 ? Parse.Scale(Parse.Split(args[3])) : Vector3.one;
       var bp = GetBluePrint(name);
       bp.Center(centerPiece);
-      var obj = Selection.Set(args.Context, bp, scale);
+      var obj = Selection.Create(new ObjectSelection(args.Context, bp, scale));
       PrintSelected(args.Context, bp.Name);
 
-    }, GetBlueprints);
+    });
 
-    CommandWrapper.Register("hammer_restore", (int index, int subIndex) =>
+    AutoComplete.Register("hammer_restore", (int index, int subIndex) =>
     {
       if (index == 0) return GetBlueprints();
-      if (index == 1) return CommandWrapper.Scale("scale", "Size of the object (if the object can be scaled).", subIndex);
+      if (index == 1) return ParameterInfo.Scale("scale", "Size of the object (if the object can be scaled).", subIndex);
       return null;
     });
     Helper.Command("hammer_restore", "[blueprint file] [scale] - Restores the blueprint at its saved position.", (args) =>
     {
-      Helper.CheatCheck();
+      HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
       Hammer.Equip();
       var name = args[1];
-      var scale = args.Length > 2 ? Parse.TryScale(Parse.Split(args[2])) : Vector3.one;
+      var scale = args.Length > 2 ? Parse.Scale(Parse.Split(args[2])) : Vector3.one;
       var bp = GetBluePrint(name);
       bp.Center("");
-      var obj = Selection.Set(args.Context, bp, scale);
+      var obj = Selection.Create(new ObjectSelection(args.Context, bp, scale));
       Position.Override = bp.Coordinates;
       Rotating.Set(Quaternion.Euler(bp.Rotation));
       PrintSelected(args.Context, bp.Name);
 
-    }, GetBlueprints);
+    });
   }
 }

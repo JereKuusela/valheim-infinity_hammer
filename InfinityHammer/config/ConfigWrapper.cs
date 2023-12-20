@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using BepInEx.Configuration;
+using ServerDevcommands;
 using UnityEngine;
 
 namespace Service;
@@ -54,8 +55,12 @@ public class ConfigWrapper
   }
   public ConfigEntry<KeyboardShortcut> BindCommand(Func<string> command, string group, string name, KeyboardShortcut value, string description, string mode = "")
   {
+    var key = ToKey(name);
+    var cmd = $"_bind_{key}";
+    Helper.Command(cmd, description, args => args.Context.TryRunCommand($"{command()} {string.Join(" ", args.Args, 1, args.Length - 1)}"));
+
     var configEntry = Create(group, name, value, description);
-    RegisterCommand(configEntry, command, mode);
+    RegisterCommand(configEntry, cmd, mode);
     return configEntry;
   }
   public ConfigEntry<KeyboardShortcut> BindWheelCommand(string command, string group, string name, KeyboardShortcut value, string description, string mode = "")
@@ -64,8 +69,12 @@ public class ConfigWrapper
   }
   public ConfigEntry<KeyboardShortcut> BindWheelCommand(Func<string> command, string group, string name, KeyboardShortcut value, string description, string mode = "")
   {
+    var key = ToKey(name);
+    var cmd = $"_bind_{key}";
+    Helper.Command(cmd, description, args => args.Context.TryRunCommand($"{command()} {string.Join(" ", args.Args, 1, args.Length - 1)}"));
+
     var configEntry = Create(group, name, value, description);
-    RegisterWheelCommand(configEntry, command, mode);
+    RegisterWheelCommand(configEntry, cmd, mode);
     return configEntry;
   }
   public ConfigEntry<T> Bind<T>(string group, string name, T value, string description) => Bind(group, name, value, new ConfigDescription(description));
@@ -75,6 +84,12 @@ public class ConfigWrapper
     Player.m_localPlayer?.Message(MessageHud.MessageType.TopLeft, message);
   }
   private readonly Dictionary<string, Action<Terminal, string>> SettingHandlers = [];
+  private readonly List<Action> Binders = [];
+  public void Bind()
+  {
+    foreach (var binder in Binders)
+      binder();
+  }
   private void Register(ConfigEntry<bool> setting)
   {
     var name = setting.Definition.Key;
@@ -89,33 +104,26 @@ public class ConfigWrapper
     if (key.Modifiers.Count() > 0) keys += "," + string.Join(",", key.Modifiers);
     return keys;
   }
-  private static void UpdateKey(string name, KeyboardShortcut key, Func<string> command, string mode = "")
+  private static void UpdateKey(KeyboardShortcut key, string command, string mode = "")
   {
-    Console.instance.TryRunCommand($"unbind {name} silent");
     if (key.MainKey == KeyCode.None) return;
     var keys = GetKeys(key);
     if (mode != "")
       keys += $",{mode}";
-    var bind = $"bind {keys} tag={name} {command()}";
+    var bind = $"rebind {keys} {command}";
     Console.instance.TryRunCommand(bind);
   }
-  private readonly List<Action> BindCalls = [];
-  public void SetupBinds()
-  {
-    foreach (var call in BindCalls) call();
-  }
   private string ToKey(string name) => name.ToLower().Replace(' ', '_').Replace("(", "").Replace(")", "");
-  private void RegisterCommand(ConfigEntry<KeyboardShortcut> setting, Func<string> command, string mode = "")
+  private void RegisterCommand(ConfigEntry<KeyboardShortcut> setting, string command, string mode = "")
   {
     var name = setting.Definition.Key;
     var key = ToKey(name);
-    setting.SettingChanged += (s, e) => UpdateKey(key, setting.Value, command, mode);
-    BindCalls.Add(() => UpdateKey(key, setting.Value, command, mode));
+    setting.SettingChanged += (s, e) => UpdateKey(setting.Value, command, mode);
+    Binders.Add(() => UpdateKey(setting.Value, command, mode));
     SettingHandlers.Add(key, (Terminal terminal, string value) => SetKey(terminal, setting, name, value));
   }
-  private static void UpdateWheelKey(string name, KeyboardShortcut key, Func<string> command, string mode = "")
+  private static void UpdateWheelKey(KeyboardShortcut key, string command, string mode = "")
   {
-    Console.instance.TryRunCommand($"unbind {name} silent");
     // Dirty hack to allow command specific binds to work without a modifier key.
     // This should be ok since they only affect Infinity Hammer related actions.
     if (key.MainKey == KeyCode.None && (mode == "" || mode == "build")) return;
@@ -125,15 +133,15 @@ public class ConfigWrapper
     keys.AddRange(key.Modifiers.Select(x => x.ToString().ToLower()));
     if (mode != "")
       keys.Add(mode.ToLower());
-    var bind = $"bind {string.Join(",", keys)} tag={name} {command()}";
+    var bind = $"rebind {string.Join(",", keys)} {command}";
     Console.instance.TryRunCommand(bind);
   }
-  private void RegisterWheelCommand(ConfigEntry<KeyboardShortcut> setting, Func<string> command, string mode = "")
+  private void RegisterWheelCommand(ConfigEntry<KeyboardShortcut> setting, string command, string mode = "")
   {
     var name = setting.Definition.Key;
     var key = ToKey(name);
-    setting.SettingChanged += (s, e) => UpdateWheelKey(key, setting.Value, command, mode);
-    BindCalls.Add(() => UpdateWheelKey(key, setting.Value, command, mode));
+    setting.SettingChanged += (s, e) => UpdateWheelKey(setting.Value, command, mode);
+    Binders.Add(() => UpdateWheelKey(setting.Value, command, mode));
     SettingHandlers.Add(key, (Terminal terminal, string value) => SetKey(terminal, setting, name, value));
   }
   private void Register(ConfigEntry<KeyboardShortcut> setting)

@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using BepInEx;
 using BepInEx.Configuration;
+using ServerDevcommands;
 using Service;
 using UnityEngine;
 namespace InfinityHammer;
@@ -13,7 +14,6 @@ public partial class Configuration
 #nullable disable
   public static ConfigEntry<string> configDefaultCenterPiece;
   public static string DefaultCenterPiece => configDefaultCenterPiece.Value;
-  public static ConfigEntry<string> configVersion;
   public static ConfigEntry<string> configBlueprintFolder;
   public static string BlueprintGlobalFolder => Path.Combine("BepInEx", "config", configBlueprintFolder.Value);
   public static string BlueprintLocalFolder => Path.Combine(Paths.ConfigPath, configBlueprintFolder.Value);
@@ -39,7 +39,7 @@ public partial class Configuration
   private static HashSet<string> ParseHashList(string value) => value.Split(',').Select(s => s.Trim().ToLower()).Where(s => s != "").ToHashSet();
 
   private static Dictionary<string, Vector3> ParseSize(string value) => value.Split('|').Select(s => s.Trim().ToLower()).Where(s => s != "")
-    .Select(s => s.Split(',')).Where(split => split.Length == 4).ToDictionary(split => split[0], split => Parse.TryVectorXZY(split, 1));
+    .Select(s => s.Split(',')).Where(split => split.Length == 4).ToDictionary(split => split[0], split => Parse.VectorXZY(split, 1));
 
   private static void UpdateTools()
   {
@@ -84,12 +84,6 @@ public partial class Configuration
     };
     RemoveIds = ParseList(configIgnoredRemoveIds.Value);
     RemoveIds.AddRange(IgnoredIds);
-    configVersion = wrapper.Bind(section, "Version", InfinityHammer.ConfigExists ? "" : InfinityHammer.VERSION, "Version of this config.");
-    configVersion.SettingChanged += (s, e) =>
-    {
-      if (configVersion.Value != InfinityHammer.VERSION)
-        configVersion.Value = InfinityHammer.VERSION;
-    };
     configHammerTools = wrapper.BindList(section, "Hammer tools", "hammer", "List of hammers.");
     configHammerTools.SettingChanged += (s, e) => UpdateTools();
     UpdateTools();

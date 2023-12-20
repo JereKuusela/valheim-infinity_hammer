@@ -1,27 +1,28 @@
 using System;
-using Service;
+using ServerDevcommands;
 namespace InfinityHammer;
 public class HammerScaleCommand
 {
   private static void Scale(string amountStr, string direction, Action<float> action)
   {
-    var amount = Parse.Direction(direction) * Parse.TryFloat(amountStr, 1f);
+    var amount = Parse.Direction(direction) * Parse.Float(amountStr, 1f);
     action(amount);
   }
   private static void CommandAxis(string name, string axis, Func<ToolScaling, Action<float>> action, bool isCommand)
   {
     name = $"{name}_{axis}";
     if (isCommand) name += "_cmd";
-    CommandWrapper.Register(name, (int index) =>
+    AutoComplete.Register(name, (int index) =>
     {
-      if (index == 0) return CommandWrapper.Info("Amount.");
+      if (index == 0) return ParameterInfo.Create("Amount.");
       return null;
     });
     Helper.Command(name, $"[amount] - Sets the scale of {axis} axis (if the object supports it).", (args) =>
     {
-      Helper.CheatCheck();
+      HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
-      if (Selection.IsTool() != isCommand) return;
+      var selection = Selection.Get();
+      if (selection.IsTool != isCommand) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;
       var direction = args.Length > 2 ? args[2] : "";
       Scale(args[1], direction, action(Scaling.Get()));
@@ -32,18 +33,19 @@ public class HammerScaleCommand
   private static void Command(string name, bool isCommand)
   {
     if (isCommand) name += "_cmd";
-    CommandWrapper.Register(name, (int index, int subIndex) =>
+    AutoComplete.Register(name, (int index, int subIndex) =>
     {
-      if (index == 0) return CommandWrapper.XZY("Amount of scale.", subIndex);
+      if (index == 0) return ParameterInfo.XZY("Amount of scale.", subIndex);
       return null;
     });
     Helper.Command(name, "[amount or x,z,y] - Sets the scale (if the object supports it).", (args) =>
     {
-      Helper.CheatCheck();
-      if (Selection.IsTool() != isCommand) return;
+      HammerHelper.CheatCheck();
+      var selection = Selection.Get();
+      if (selection.IsTool != isCommand) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;
       var scaling = Scaling.Get();
-      var scale = Parse.TryScale(Parse.Split(args[1])) * Parse.Direction(args.Args, 2);
+      var scale = Parse.Scale(Parse.Split(args[1])) * Parse.Direction(args.Args, 2);
       scaling.SetScale(scale);
       Scaling.UpdateGhost();
       if (!isCommand)

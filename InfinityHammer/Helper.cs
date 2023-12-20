@@ -3,22 +3,23 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using HarmonyLib;
+using ServerDevcommands;
 using Service;
 using UnityEngine;
 namespace InfinityHammer;
-public static class Helper
+public static class HammerHelper
 {
   public static string PrintXZY(Vector3 vec) => $"{vec.x.ToString(NumberFormatInfo.InvariantInfo)},{vec.z.ToString(NumberFormatInfo.InvariantInfo)},{vec.y.ToString(NumberFormatInfo.InvariantInfo)}";
   public static string PrintYXZ(Vector3 vec) => $"{vec.y.ToString(NumberFormatInfo.InvariantInfo)},{vec.x.ToString(NumberFormatInfo.InvariantInfo)},{vec.z.ToString(NumberFormatInfo.InvariantInfo)}";
   public static GameObject GetPlacementGhost()
   {
-    var player = GetPlayer();
+    var player = Helper.GetPlayer();
     if (!player.m_placementGhost) throw new InvalidOperationException("Not currently placing anything.");
     return player.m_placementGhost;
   }
   public static string GetTool()
   {
-    var player = GetPlayer();
+    var player = Helper.GetPlayer();
     var item = player.GetRightItem();
     return item?.m_dropPrefab?.name ?? "";
   }
@@ -31,120 +32,6 @@ public static class Helper
       ZNetScene.instance.Destroy(view.gameObject);
     else
       ZDOMan.instance.DestroyZDO(zdo);
-  }
-
-  public static float ParseFloat(string value, float defaultValue = 0)
-  {
-    if (float.TryParse(value, NumberStyles.Float, CultureInfo.InvariantCulture, out var result)) return result;
-    return defaultValue;
-  }
-  public static int ParseInt(string value, int defaultValue = 0)
-  {
-    if (int.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out var result)) return result;
-    return defaultValue;
-  }
-  private static Range<string> ParseRange(string arg)
-  {
-    var range = arg.Split('-').ToList();
-    if (range.Count > 1 && range[0] == "")
-    {
-      range[0] = "-" + range[1];
-      range.RemoveAt(1);
-    }
-    if (range.Count > 2 && range[1] == "")
-    {
-      range[1] = "-" + range[2];
-      range.RemoveAt(2);
-    }
-    if (range.Count == 1) return new(range[0]);
-    else return new(range[0], range[1]);
-
-  }
-  public static Range<int> ParseIntRange(string value, int defaultValue = 0)
-  {
-    var range = ParseRange(value);
-    return ZeroIntRange(new(ParseInt(range.Min, defaultValue), ParseInt(range.Max, defaultValue)));
-  }
-  public static Range<int> ZeroIntRange(Range<int> range)
-  {
-    if (range.Max == range.Min)
-    {
-      if (range.Max > 0)
-      {
-        range.Max--;
-        range.Min = 0;
-      }
-      if (range.Max < 0)
-      {
-        range.Max = 0;
-        range.Min++;
-      }
-    }
-    return range;
-  }
-  public static Vector3 ParseZYX(string value)
-  {
-    var vector = Vector3.zero;
-    var split = value.Split(',');
-    if (split.Length > 0) vector.z = ParseFloat(split[0]);
-    if (split.Length > 1) vector.y = ParseFloat(split[1]);
-    if (split.Length > 2) vector.x = ParseFloat(split[2]);
-    return vector;
-  }
-  public static Vector3 ParseXYZ(string value) => ParseXYZ(value, Vector3.zero);
-  public static Vector3 ParseXYZ(string value, Vector3 defaultValue)
-  {
-    var vector = defaultValue;
-    var split = value.Split(',');
-    if (split.Length > 0) vector.x = ParseFloat(split[0]);
-    if (split.Length > 1) vector.y = ParseFloat(split[1]);
-    if (split.Length > 2) vector.z = ParseFloat(split[2]);
-    return vector;
-  }
-  public static Vector3 ParseXZY(string value) => ParseXZY(value, Vector3.zero);
-  public static Vector3 ParseXZY(string value, Vector3 defaultValue)
-  {
-    var vector = defaultValue;
-    var split = value.Split(',');
-    if (split.Length > 0) vector.x = ParseFloat(split[0]);
-    if (split.Length > 1) vector.z = ParseFloat(split[1]);
-    if (split.Length > 2) vector.y = ParseFloat(split[2]);
-    return vector;
-  }
-  public static Vector3 ParseYXZ(string value) => ParseYXZ(value, Vector3.zero);
-  public static Vector3 ParseYXZ(string value, Vector3 defaultValue)
-  {
-    var vector = defaultValue;
-    var split = value.Split(',');
-    if (split.Length > 0) vector.y = ParseFloat(split[0]);
-    if (split.Length > 1) vector.x = ParseFloat(split[1]);
-    if (split.Length > 2) vector.z = ParseFloat(split[2]);
-    return vector;
-  }
-  public static Range<Vector3Int> ParseZYXRange(string value)
-  {
-    var min = Vector3Int.zero;
-    var max = Vector3Int.zero;
-    var split = value.Split(',');
-    if (split.Length > 0)
-    {
-      var range = ParseIntRange(split[0]);
-      min.z = range.Min;
-      max.z = range.Max;
-    }
-    if (split.Length > 1)
-    {
-      var range = ParseIntRange(split[1]);
-      min.y = range.Min;
-      max.y = range.Max;
-    }
-    if (split.Length > 2)
-    {
-      var range = ParseIntRange(split[2]);
-      min.x = range.Min;
-      max.x = range.Max;
-    }
-    return new(min, max);
   }
 
   ///<summary>Parses a size which can be a constant number or based on the ghost size.</summary>
@@ -222,12 +109,6 @@ public static class Helper
     }
   }
 
-  public static Player GetPlayer()
-  {
-    var player = Player.m_localPlayer;
-    if (!player) throw new InvalidOperationException("No player.");
-    return player;
-  }
   ///<summary>Initializing the copy as inactive is the best way to avoid any script errors. ZNet stuff also won't run.</summary>
   public static GameObject SafeInstantiate(GameObject obj)
   {
@@ -237,7 +118,7 @@ public static class Helper
       wear.ResetHighlight();
     obj.SetActive(false);
     var ret = UnityEngine.Object.Instantiate(obj);
-    Helper.CleanObject(ret);
+    CleanObject(ret);
     obj.SetActive(true);
     if (ret.TryGetComponent<Character>(out var character))
       Character.s_characters.Remove(character);
@@ -253,7 +134,7 @@ public static class Helper
       wear.ResetHighlight();
     obj.SetActive(false);
     var ret = UnityEngine.Object.Instantiate(obj, parent.transform);
-    Helper.CleanObject(ret);
+    CleanObject(ret);
     obj.SetActive(true);
     if (highlight)
       wear.Highlight();
@@ -339,6 +220,8 @@ public static class Helper
     else
       piece.m_name = Utils.GetPrefabName(obj);
     piece.m_clipEverything = true;
+    piece.m_randomTarget = false;
+    piece.m_primaryTarget = false;
   }
   public static void CheatCheck()
   {
@@ -348,27 +231,6 @@ public static class Helper
   {
     if (!Configuration.Enabled) throw new InvalidOperationException("Infinity Hammer is disabled.");
   }
-  public static void ArgsCheck(Terminal.ConsoleEventArgs args, int amount, string message)
-  {
-    if (args.Length < amount) throw new InvalidOperationException(message);
-  }
-  public static void Command(string name, string description, Terminal.ConsoleEvent action, Terminal.ConsoleOptionsFetcher? fetcher = null)
-  {
-    new Terminal.ConsoleCommand(name, description, Helper.Catch(action), optionsFetcher: fetcher);
-  }
-  public static Terminal.ConsoleEvent Catch(Terminal.ConsoleEvent action) =>
-    (args) =>
-    {
-      try
-      {
-        if (!Player.m_localPlayer) throw new InvalidOperationException("Player not found.");
-        action(args);
-      }
-      catch (InvalidOperationException e)
-      {
-        Helper.AddError(args.Context, e.Message);
-      }
-    };
 
   public static int CountActiveChildren(GameObject obj)
   {
@@ -384,7 +246,7 @@ public static class Helper
     var count = 0;
     foreach (Transform tr in obj.transform)
     {
-      if (Helper.IsSnapPoint(tr.gameObject)) count++;
+      if (IsSnapPoint(tr.gameObject)) count++;
     }
     return count;
   }

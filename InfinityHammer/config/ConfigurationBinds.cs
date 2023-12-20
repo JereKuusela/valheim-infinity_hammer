@@ -6,12 +6,7 @@ namespace InfinityHammer;
 public partial class Configuration
 {
 #nullable disable
-  public static ConfigEntry<KeyboardShortcut> shapeKey;
   public static ConfigEntry<KeyboardShortcut> buildScale;
-  public static ConfigEntry<KeyboardShortcut> commandRadius;
-  public static ConfigEntry<KeyboardShortcut> commandRotate;
-  public static ConfigEntry<KeyboardShortcut> commandDepth;
-  public static ConfigEntry<KeyboardShortcut> commandHeight;
   public static ConfigEntry<KeyboardShortcut> zoopHorizontal;
   public static ConfigEntry<KeyboardShortcut> zoopVertical;
   public static ConfigEntry<KeyboardShortcut> zoopForward;
@@ -39,45 +34,19 @@ public partial class Configuration
   public static ConfigEntry<KeyboardShortcut> resetOffset;
   public static ConfigEntry<KeyboardShortcut> undo;
   public static ConfigEntry<KeyboardShortcut> redo;
-  public static ConfigEntry<KeyboardShortcut> commandModifier1;
-  public static ConfigEntry<KeyboardShortcut> commandModifier2;
   public static ConfigEntry<KeyboardShortcut> grid;
   public static ConfigEntry<string> moveAmount;
   public static ConfigEntry<string> moveAmountLarge;
   public static ConfigEntry<string> gridPrecision;
-  public static ConfigEntry<string> commandHeightAmount;
 #nullable enable
-  public static string ModifierKey1()
-  {
-    if (commandModifier1 == null) return "leftalt";
-    return ConfigWrapper.GetKeys(commandModifier1.Value);
-  }
-  public static string ModifierKey2()
-  {
-    if (commandModifier2 == null) return "leftcontrol";
-    return ConfigWrapper.GetKeys(commandModifier2.Value);
-  }
   private static void InitBinds(ConfigWrapper wrapper)
   {
     var section = "3. Binds";
-    commandModifier1 = wrapper.Bind(section, "Command modifier 1", new KeyboardShortcut(KeyCode.LeftAlt), "");
-    commandModifier2 = wrapper.Bind(section, "Command modifier 2", new KeyboardShortcut(KeyCode.LeftControl), "");
-
     moveAmount = wrapper.Bind(section, "Move amount", "0.1", "Meters to move with move binds.");
-    moveAmount.SettingChanged += (s, e) => wrapper.SetupBinds();
     moveAmountLarge = wrapper.Bind(section, "Move amount large", "1", "Meters to move with large move binds.");
-    moveAmountLarge.SettingChanged += (s, e) => wrapper.SetupBinds();
     gridPrecision = wrapper.Bind(section, "Grid precision", "1", "Grid precision in meters.");
-    gridPrecision.SettingChanged += (s, e) => wrapper.SetupBinds();
-    commandHeightAmount = wrapper.Bind(section, "Command height amount", "0.1", "Meters to move.");
-    commandHeightAmount.SettingChanged += (s, e) => wrapper.SetupBinds();
 
-    shapeKey = wrapper.BindCommand("hammer_shape", section, "Change shape", new KeyboardShortcut(KeyCode.Q), "Changes the selection shape.", "build");
     buildScale = wrapper.BindWheelCommand("hammer_zoom 5%", section, "Build scaling (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift), "Changes the selection scale.", "build");
-    commandRadius = wrapper.BindWheelCommand(() => $"hammer_zoom_x_cmd {(PreciseTools ? "0.5" : "1")}", section, "Command radius (mouse wheel)", new KeyboardShortcut(KeyCode.None), "Changes the command radius.", "command");
-    commandDepth = wrapper.BindWheelCommand(() => $"hammer_zoom_z_cmd {(PreciseTools ? "0.5" : "1")}", section, "Command depth (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift, KeyCode.LeftAlt), "Changes the command rectangle depth.", "command");
-    commandHeight = wrapper.BindWheelCommand(() => $"hammer_zoom_y_cmd {commandHeightAmount.Value}", section, "Command height (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift), "Changes the command height.", "command");
-    commandRotate = wrapper.BindWheelCommand("hammer_rotate", section, "Command rotation (mouse wheel)", new KeyboardShortcut(KeyCode.LeftShift, KeyCode.LeftControl), "Changes the command rotation.", "command");
     zoopForward = wrapper.BindWheelCommand("hammer_zoop_forward auto", section, "Zooping forward (mouse wheel)", new KeyboardShortcut(KeyCode.None), "Zoops next to each other.", "build");
     zoopHorizontal = wrapper.BindWheelCommand("hammer_zoop_right auto", section, "Zooping horizontal (mouse wheel)", new KeyboardShortcut(KeyCode.None), "Zoops next to each other.", "build");
     zoopVertical = wrapper.BindWheelCommand("hammer_zoop_up auto", section, "Zooping vertical (mouse wheel)", new KeyboardShortcut(KeyCode.None), "Zoops next to each other.", "build");

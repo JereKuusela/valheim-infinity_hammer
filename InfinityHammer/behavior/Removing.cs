@@ -55,7 +55,7 @@ public class RemovePiece
   {
     obj.GetComponent<CharacterDrop>()?.OnDeath();
     obj.GetComponent<Piece>()?.DropResources();
-    Helper.RemoveZDO(obj.GetZDO());
+    HammerHelper.RemoveZDO(obj.GetZDO());
   }
   private static void RemoveInArea(FakeZDO zdo, float radius)
   {

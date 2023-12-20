@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using HarmonyLib;
+using ServerDevcommands;
 using Service;
 using UnityEngine;
 namespace InfinityHammer;
 
-[HarmonyPatch(typeof(ZNetView), "Awake")]
+[HarmonyPatch(typeof(ZNetView), nameof(ZNetView.Awake))]
 public static class UndoTracker
 {
   public static void Postfix(ZNetView __instance)
@@ -18,20 +18,18 @@ public static class UndoTracker
 }
 public class Undo
 {
-  private static readonly BindingFlags PrivateBinding = BindingFlags.Static | BindingFlags.NonPublic;
-  private static Type? Type() => CommandWrapper.ServerDevcommands?.GetType("ServerDevcommands.UndoManager");
 
   public static void Place(IEnumerable<ZDO> objs)
   {
     if (objs.Count() == 0) return;
     UndoPlace action = new(objs);
-    Type()?.GetMethod("Add", PrivateBinding).Invoke(null, new[] { action });
+    UndoManager.Add(action);
   }
   public static void Remove(IEnumerable<FakeZDO> objs)
   {
     if (objs.Count() == 0) return;
     UndoRemove action = new(objs);
-    Type()?.GetMethod("Add", PrivateBinding).Invoke(null, new[] { action });
+    UndoManager.Add(action);
   }
   private static bool GroupCreating = false;
   public static List<ZDO> Objects = [];
@@ -122,7 +120,7 @@ public class UndoHelper
   public static void Remove(FakeZDO[] toRemove)
   {
     foreach (var zdo in toRemove)
-      Helper.RemoveZDO(zdo.Source);
+      HammerHelper.RemoveZDO(zdo.Source);
   }
 
   public static string Name(int hash) => Utils.GetPrefabName(ZNetScene.instance.GetPrefab(hash));
@@ -134,10 +132,4 @@ public class UndoHelper
     if (names.Count() == 1) return $"{names.First().Key} {names.First().Count()}x";
     return $" objects {data.Count()}x";
   }
-}
-
-public interface IUndoAction
-{
-  string Undo();
-  string Redo();
 }

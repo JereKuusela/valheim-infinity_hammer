@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ServerDevcommands;
 using Service;
 using UnityEngine;
 namespace InfinityHammer;
@@ -47,13 +48,7 @@ public class HammerSelect
   }
   private void UpdateZDOs(Action<ZDOData> action)
   {
-    var items = Selection.Objects();
-    for (var i = 0; i < items.Count; i++)
-    {
-      var data = items[i].Data;
-      action(data);
-      items[i].Data = data;
-    }
+    Selection.Get()?.UpdateZDOs(action);
   }
   public HammerSelect()
   {
@@ -93,19 +88,19 @@ public class HammerSelect
       "false",
     ];
     named.Sort();
-    CommandWrapper.Register("hammer", (int index, int subIndex) =>
+    AutoComplete.Register("hammer", (int index, int subIndex) =>
     {
-      if (index == 0) return CommandWrapper.ObjectIds();
+      if (index == 0) return ParameterInfo.ObjectIds;
       return named;
     }, new() {
-      { "scale", (int index) => CommandWrapper.Scale("scale", "Size of the object (if the object can be scaled).", index) },
-      { "level", (int index) => CommandWrapper.Info("Level.") },
-      { "stars", (int index) => CommandWrapper.Info("Stars.") },
-      { "text", (int index) => CommandWrapper.Info("Text.") },
-      { "health", (int index) => CommandWrapper.Info("Health.") },
-      { "freeze", (int index) => CommandWrapper.Info("Freezes in the place.") },
-      { "pick", (int index) => CommandWrapper.Info("Picks up the selection.") },
-      { "connect", (int index) => CommandWrapper.Info("Selects whole building.") },
+      { "scale", (int index) => ParameterInfo.Scale("scale", "Size of the object (if the object can be scaled).", index) },
+      { "level", (int index) => ParameterInfo.Create("Level.") },
+      { "stars", (int index) => ParameterInfo.Create("Stars.") },
+      { "text", (int index) => ParameterInfo.Create("Text.") },
+      { "health", (int index) => ParameterInfo.Create("Health.") },
+      { "freeze", (int index) => ParameterInfo.Create("Freezes in the place.") },
+      { "pick", (int index) => ParameterInfo.Create("Picks up the selection.") },
+      { "connect", (int index) => ParameterInfo.Create("Selects whole building.") },
       { "type", (int index) => ObjectTypes },
       { "wear", (int index) => Wears },
       { "fall", (int index) => Falls },
@@ -117,7 +112,7 @@ public class HammerSelect
     });
     Helper.Command("hammer", "[object id] - Selects the object to be placed (the hovered object by default).", (args) =>
     {
-      Helper.EnabledCheck();
+      HammerHelper.EnabledCheck();
       Hammer.Equip();
       HammerParameters pars = new(args);
       GameObject? selected = null;
@@ -127,7 +122,7 @@ public class HammerSelect
       else if (pars.Width.HasValue && pars.Depth.HasValue)
         views = Selector.GetNearby("", pars.ObjectType, Configuration.IgnoredIds, pars.Position, pars.Angle, pars.Width.Value, pars.Depth.Value, pars.Height);
       else if (args.Length > 1 && !args[1].Contains("=") && !pars.Connect && !pars.Pick && !pars.Freeze)
-        selected = Selection.Set(args[1], pars.Pick);
+        selected = Selection.Create(new ObjectSelection(args[1], pars.Pick));
       else
       {
         var hovered = Selector.GetHovered(Configuration.Range, Configuration.IgnoredIds) ?? throw new InvalidOperationException("Nothing is being hovered.");
@@ -138,12 +133,13 @@ public class HammerSelect
       }
       if (selected == null && views.Length > 0)
       {
-        selected = Selection.Set(views, pars.Pick);
+        ObjectSelection sel = views.Length == 1 ? new(views[0], pars.Pick) : new(views, pars.Pick);
+        selected = Selection.Create(sel);
         if (pars.Pick)
         {
           Undo.Remove(views.Select(view => new FakeZDO(view.GetZDO())).ToArray());
           foreach (var view in views)
-            Helper.RemoveZDO(view.GetZDO());
+            HammerHelper.RemoveZDO(view.GetZDO());
 
         }
       }
@@ -178,9 +174,9 @@ public class HammerSelect
         UpdateZDOs(zdo => zdo.Set(Hash.Interact, false));
       if (pars.Text != null)
         UpdateZDOs(zdo => zdo.Set(Hash.Text, pars.Text));
-      Selection.Postprocess(pars.Scale);
+      Selection.Get().Postprocess(pars.Scale);
       if (pars.Freeze) Position.Freeze(selected.transform.position);
       PrintSelected(args.Context, selected);
-    }, CommandWrapper.ObjectIds);
+    });
   }
 }

@@ -1,13 +1,14 @@
 using System;
+using ServerDevcommands;
 namespace InfinityHammer;
 public class HammerAddPieceComponentsCommand
 {
   public HammerAddPieceComponentsCommand()
   {
-    CommandWrapper.RegisterEmpty("hammer_add_piece_components");
+    AutoComplete.RegisterEmpty("hammer_add_piece_components");
     Helper.Command("hammer_add_piece_components", "Adds the Piece component to every prefab to allow copying them with PlanBuild.", (args) =>
     {
-      Helper.CheatCheck();
+      HammerHelper.CheatCheck();
       foreach (var prefab in ZNetScene.instance.m_prefabs)
       {
         if (prefab.name == "Player") continue;

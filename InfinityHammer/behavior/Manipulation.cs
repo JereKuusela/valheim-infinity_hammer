@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection.Emit;
 using HarmonyLib;
+using ServerDevcommands;
 using UnityEngine;
 namespace InfinityHammer;
 
@@ -77,7 +78,7 @@ public class OverridePlacementGhost
 
 public static class Grid
 {
-  public static bool Enabled => Precision != 0f || (Configuration.PreciseTools && Selection.IsTool());
+  public static bool Enabled => Precision != 0f || Selection.Get().TerrainGrid;
   private static float Precision;
   private static Vector3 Center;
   private static Vector3 PreciseCenter;
@@ -85,7 +86,7 @@ public static class Grid
   {
     var precision = Precision;
     var center = Center;
-    if (precision == 0f && Configuration.PreciseTools && Selection.IsTool())
+    if (precision == 0f && Selection.Get().TerrainGrid)
     {
       precision = 1f;
       center = PreciseCenter;
@@ -151,7 +152,7 @@ public static class Position
   {
     if (Override.HasValue)
       point = Override.Value;
-    if (Configuration.PreciseTools && Selection.IsTool())
+    if (Selection.Get().TerrainGrid)
       rotation = Quaternion.identity;
     point += rotation * Vector3.right * Offset.x;
     point += rotation * Vector3.up * Offset.y;
@@ -162,7 +163,7 @@ public static class Position
   {
     if (Override.HasValue)
       point = Override.Value;
-    if (Configuration.PreciseTools && Selection.IsTool())
+    if (Selection.Get().TerrainGrid)
       rotation = Quaternion.identity;
     point -= rotation * Vector3.right * Offset.x;
     point -= rotation * Vector3.up * Offset.y;
@@ -183,12 +184,12 @@ public static class Position
   }
   public static void MoveLeft(float value)
   {
-    if (Configuration.PreciseTools && Selection.IsTool()) value = Mathf.Max(value, 1f);
+    if (Selection.Get().TerrainGrid) value = Mathf.Max(value, 1f);
     Offset.x -= value;
   }
   public static void MoveRight(float value)
   {
-    if (Configuration.PreciseTools && Selection.IsTool()) value = Mathf.Max(value, 1f);
+    if (Selection.Get().TerrainGrid) value = Mathf.Max(value, 1f);
     Offset.x += value;
   }
   public static void MoveDown(float value)
@@ -201,12 +202,12 @@ public static class Position
   }
   public static void MoveBackward(float value)
   {
-    if (Configuration.PreciseTools && Selection.IsTool()) value = Mathf.Max(value, 1f);
+    if (Selection.Get().TerrainGrid) value = Mathf.Max(value, 1f);
     Offset.z -= value;
   }
   public static void MoveForward(float value)
   {
-    if (Configuration.PreciseTools && Selection.IsTool()) value = Mathf.Max(value, 1f);
+    if (Selection.Get().TerrainGrid) value = Mathf.Max(value, 1f);
     Offset.z += value;
   }
   public static void Set(Vector3 value)

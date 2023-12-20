@@ -51,7 +51,7 @@ public class ZDOData
     if (pkg == null) return;
     Load(pkg);
   }
-
+  public bool HasData() => Floats.Count > 0 || Ints.Count > 0 || Longs.Count > 0 || Strings.Count > 0 || Vecs.Count > 0 || Quats.Count > 0 || ByteArrays.Count > 0 || ConnectionType != ZDOExtraData.ConnectionType.None && ConnectionHash != 0;
   public void Copy(ZDO zdo)
   {
     var id = zdo.m_uid;

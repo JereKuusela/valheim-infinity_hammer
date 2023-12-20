@@ -26,7 +26,7 @@ public class Range<T>
 }
 
 ///<summary>Contains functions for parsing arguments, etc.</summary>
-public static class Parse
+public static class Parse2
 {
   private static Range<string> TryRange(string arg)
   {
@@ -171,18 +171,18 @@ public static class Parse
   {
     var values = Split(arg);
     var angle = Vector3.zero;
-    angle.y = Parse.TryFloat(values, 0, defaultValue.eulerAngles.y);
-    angle.x = Parse.TryFloat(values, 1, defaultValue.eulerAngles.x);
-    angle.z = Parse.TryFloat(values, 2, defaultValue.eulerAngles.z);
+    angle.y = TryFloat(values, 0, defaultValue.eulerAngles.y);
+    angle.x = TryFloat(values, 1, defaultValue.eulerAngles.x);
+    angle.z = TryFloat(values, 2, defaultValue.eulerAngles.z);
     return Quaternion.Euler(angle);
   }
   public static Range<Quaternion> TryAngleYXZRange(string arg) => TryAngleYXZRange(arg, Quaternion.identity);
   public static Range<Quaternion> TryAngleYXZRange(string arg, Quaternion defaultValue)
   {
     var parts = Split(arg);
-    var y = Parse.TryFloatRange(parts, 0, defaultValue.y);
-    var x = Parse.TryFloatRange(parts, 1, defaultValue.x);
-    var z = Parse.TryFloatRange(parts, 2, defaultValue.z);
+    var y = TryFloatRange(parts, 0, defaultValue.y);
+    var x = TryFloatRange(parts, 1, defaultValue.x);
+    var z = TryFloatRange(parts, 2, defaultValue.z);
     return ToAngleRange(x, y, z);
   }
   private static Range<Quaternion> ToAngleRange(Range<float> x, Range<float> y, Range<float> z)
@@ -304,13 +304,6 @@ public static class Parse
     return -1f;
   }
 
-  public static float Direction(string[] args, int index)
-  {
-    if (args.Length <= index) return 1f;
-    var direction = TryFloat(args[index], 1);
-    if (direction > 0) return 1f;
-    return -1f;
-  }
   public static Vector3Int ParseXYZInt(string value)
   {
     var vector = Vector3Int.zero;
@@ -319,18 +312,5 @@ public static class Parse
     if (split.Length > 1) vector.y = TryInt(split[1]);
     if (split.Length > 2) vector.z = TryInt(split[2]);
     return vector;
-  }
-
-  public static float Multiplier(string value)
-  {
-    var multiplier = 1f;
-    var split = value.Split('*');
-    foreach (var str in split) multiplier *= TryFloat(str, 1f);
-    return multiplier;
-  }
-  public static float TryMultiplier(string[] args, int index, float defaultValue = 1f)
-  {
-    if (args.Length <= index) return defaultValue;
-    return Multiplier(args[index]);
   }
 }

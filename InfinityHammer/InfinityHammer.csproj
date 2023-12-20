@@ -4,16 +4,8 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>preview</LangVersion>
     <nullable>enable</nullable>
-    <DoILRepack>false</DoILRepack>
   </PropertyGroup>
-  <Target Name="ILRepacker" AfterTargets="Build" >
-      <ItemGroup>
-          <InputAssemblies Include="$(TargetPath)" />
-          <InputAssemblies Include="$(TargetDir)YamlDotNet.dll" />
-      </ItemGroup>
-      <ILRepack Parallel="true" Internalize="true" InputAssemblies="@(InputAssemblies)" TargetKind="Dll" OutputFile="$(TargetPath)" />
-  </Target>
-  <Target Name="CopyDLL" AfterTargets="ILRepacker">
+  <Target Name="CopyDLL" AfterTargets="Build">
     <Copy
       SourceFiles="$(TargetDir)$(ProjectName).dll"
       DestinationFolder="$(ProjectDir)\..\..\Libs" />
@@ -62,9 +54,8 @@
     <Reference Include="Unity.TextMeshPro">
       <HintPath>..\..\Libs\Unity.TextMeshPro.dll</HintPath>
     </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="ILRepack.Lib.MSBuild" Version="2.1.18" />
-    <PackageReference Include="YamlDotNet" Version="11.2.1" />
+    <Reference Include="ServerDevcommands.dll">
+      <HintPath>..\..\Libs\ServerDevcommands.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>

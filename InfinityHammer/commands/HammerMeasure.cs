@@ -1,5 +1,6 @@
 using System;
 using System.Linq;
+using ServerDevcommands;
 using UnityEngine;
 
 namespace InfinityHammer;
@@ -21,10 +22,10 @@ public class HammerMeasureCommand
   }
   public HammerMeasureCommand()
   {
-    CommandWrapper.RegisterEmpty("hammer_measure");
+    AutoComplete.RegisterEmpty("hammer_measure");
     Helper.Command("hammer_measure", "Tries to measure all structures.", (args) =>
     {
-      Helper.CheatCheck();
+      HammerHelper.CheatCheck();
       ZNetView.m_forceDisableInit = true;
       foreach (var prefab in ZNetScene.instance.m_prefabs)
       {

@@ -1,4 +1,5 @@
 using BepInEx.Configuration;
+using ServerDevcommands;
 using Service;
 
 namespace InfinityHammer;
@@ -18,8 +19,6 @@ public partial class Configuration
   public static bool ShapeRectangle => configShapeRectangle.Value;
   public static ConfigEntry<bool> configShapeFrame;
   public static bool ShapeFrame => configShapeFrame.Value;
-  public static ConfigEntry<bool> configPreciseTools;
-  public static bool PreciseTools => configPreciseTools.Value;
   public static ConfigEntry<bool> configIgnoreWards;
   public static bool IgnoreWards => configIgnoreWards.Value && IsCheats;
   public static ConfigEntry<bool> configIgnoreNoBuild;
@@ -59,13 +58,13 @@ public partial class Configuration
   public static ConfigEntry<bool> configUnfreezeOnSelect;
   public static bool UnfreezeOnSelect => configUnfreezeOnSelect.Value;
   public static ConfigEntry<string> configOverwriteHealth;
-  public static float OverwriteHealth => IsCheats ? InfiniteHealth ? 1E30f : Helper.ParseFloat(configOverwriteHealth.Value, 0f) : 0f;
+  public static float OverwriteHealth => IsCheats ? InfiniteHealth ? 1E30f : Parse.Float(configOverwriteHealth.Value) : 0f;
   public static ConfigEntry<bool> configInfiniteHealth;
   public static bool InfiniteHealth => configInfiniteHealth.Value && IsCheats;
   public static ConfigEntry<string> configRemoveArea;
-  public static float RemoveArea => Enabled ? Helper.ParseFloat(configRemoveArea.Value, 0f) : 0f;
+  public static float RemoveArea => Enabled ? Parse.Float(configRemoveArea.Value) : 0f;
   public static ConfigEntry<string> configRange;
-  public static float Range => IsCheats ? Helper.ParseFloat(configRange.Value, 0f) : 0f;
+  public static float Range => IsCheats ? Parse.Float(configRange.Value) : 0f;
   public static ConfigEntry<bool> configShowCommandValues;
   public static bool AlwaysShowCommand => configShowCommandValues.Value;
   public static ConfigEntry<bool> configSaveBlueprintData;
@@ -75,12 +74,6 @@ public partial class Configuration
 
 #nullable enable
 
-  private static void Migrate()
-  {
-    if (configVersion.Value == InfinityHammer.VERSION) return;
-    commandRadius.Value = (KeyboardShortcut)commandRadius.DefaultValue;
-    commandHeight.Value = (KeyboardShortcut)commandHeight.DefaultValue;
-  }
   public static void Init(ConfigWrapper wrapper)
   {
     Wrapper = wrapper;
@@ -94,8 +87,6 @@ public partial class Configuration
     configShapeRectangle = wrapper.Bind(section, "Shape rectangle", true, "Enables rectangle shape for commands.");
     configShapeSquare = wrapper.Bind(section, "Shape square", true, "Enables square shape for commands.");
     configShapeFrame = wrapper.Bind(section, "Shape frame", false, "Enables frame shape for commands.");
-    configPreciseTools = wrapper.Bind(section, "Precise tools", false, "Snaps tools to a grid. Disables rotating.");
-    configPreciseTools.SettingChanged += (s, e) => wrapper.SetupBinds();
     configIgnoreWards = wrapper.Bind(section, "Ignore wards", true, "Ignores ward restrictions.");
     configIgnoreNoBuild = wrapper.Bind(section, "Ignore no build", true, "Ignores no build areas.");
     configAllObjects = wrapper.Bind(section, "All objects", true, "Allows placement of non-default objects.");
@@ -115,8 +106,7 @@ public partial class Configuration
     configSaveBlueprintData = wrapper.Bind(section, "Save data to blueprints", true, "If enabled, object data values are saved to blueprints.");
 
     InitVisuals(wrapper);
-    if (CommandWrapper.ServerDevcommands != null)
-      InitBinds(wrapper);
+    InitBinds(wrapper);
     section = "4. Messages";
     configDisableMessages = wrapper.Bind(section, "Disable messages", false, "Disables all messages from this mod.");
     configDisableOffsetMessages = wrapper.Bind(section, "Disable offset messages", false, "Disables messages from changing placement offset.");
@@ -125,8 +115,6 @@ public partial class Configuration
     configChatOutput = wrapper.Bind(section, "Chat output", false, "Sends messages to the chat window from bound keys.");
 
     InitOther(wrapper);
-    Migrate();
-    configVersion.Value = InfinityHammer.VERSION;
   }
 
 }

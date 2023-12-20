@@ -1,5 +1,5 @@
 using System;
-using Service;
+using ServerDevcommands;
 namespace InfinityHammer;
 public class HammerZoomCommand
 {
@@ -7,12 +7,12 @@ public class HammerZoomCommand
   {
     if (amountStr.EndsWith("%", StringComparison.Ordinal))
     {
-      var amount = Parse.Direction(direction) * Parse.TryFloat(amountStr.Substring(0, amountStr.Length - 1), 5f) / 100f;
+      var amount = Parse.Direction(direction) * Parse.Float(amountStr.Substring(0, amountStr.Length - 1), 5f) / 100f;
       action(0f, amount);
     }
     else
     {
-      var amount = Parse.Direction(direction) * Parse.TryFloat(amountStr, 1f);
+      var amount = Parse.Direction(direction) * Parse.Float(amountStr, 1f);
       action(amount, 0f);
     }
   }
@@ -20,16 +20,17 @@ public class HammerZoomCommand
   {
     name = $"{name}_{axis}";
     if (isCommand) name += "_cmd";
-    CommandWrapper.Register(name, (int index) =>
+    AutoComplete.Register(name, (int index) =>
     {
-      if (index == 0) return CommandWrapper.Info("Flat amount or percentage to scale.");
+      if (index == 0) return ParameterInfo.Create("Flat amount or percentage to scale.");
       return null;
     });
     Helper.Command(name, $"[amount or percentage] - Zooms the {axis} axis (if the object supports it).", (args) =>
     {
-      Helper.CheatCheck();
+      HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
-      if (Selection.IsTool() != isCommand) return;
+      var selection = Selection.Get();
+      if (selection.IsTool != isCommand) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;
       var direction = args.Length > 2 ? args[2] : "";
       Zoom(args[1], direction, action(Scaling.Get()));
@@ -41,16 +42,17 @@ public class HammerZoomCommand
   private static void Command(string name, bool isCommand)
   {
     if (isCommand) name += "_cmd";
-    CommandWrapper.Register(name, (int index, int subIndex) =>
+    AutoComplete.Register(name, (int index, int subIndex) =>
     {
-      if (index == 0) return CommandWrapper.Info("Flat amount or percentage to scale.");
+      if (index == 0) return ParameterInfo.Create("Flat amount or percentage to scale.");
       return null;
     });
     Helper.Command(name, "[amount/percentage or x,z,y] - Zooms the selection (if the object supports it).", (args) =>
     {
-      Helper.CheatCheck();
+      HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
-      if (Selection.IsTool() != isCommand) return;
+      var selection = Selection.Get();
+      if (selection.IsTool != isCommand) return;
       if (!Helper.GetPlayer().InPlaceMode()) return;
       var scale = Scaling.Get();
       var split = args[1].Split(',');

@@ -1,45 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 using System.Reflection.Emit;
 using HarmonyLib;
 using Service;
 using UnityEngine;
 // Code related to adding objects.
 namespace InfinityHammer;
-///<summary>Overrides the piece selection.</summary>
-[HarmonyPatch(typeof(PieceTable), nameof(PieceTable.GetSelectedPiece))]
-public class GetSelectedPiece
-{
-  public static bool Prefix(ref Piece __result)
-  {
-    CommandWrapper.SetBindMode("");
-    if (Selection.Ghost())
-      __result = Selection.Ghost().GetComponent<Piece>();
-    return !__result;
-  }
-}
-
-///<summary>Selecting a piece normally removes the override.</summary>
-[HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece), typeof(Vector2Int))]
-public class SetSelectedPiece
-{
-  public static void Prefix(Player __instance)
-  {
-    Hammer.RemoveSelection();
-    __instance.SetupPlacementGhost();
-  }
-}
-[HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece), typeof(Piece))]
-public class SetSelectedPiece2
-{
-  public static void Prefix(Player __instance)
-  {
-    Hammer.RemoveSelection();
-    __instance.SetupPlacementGhost();
-  }
-}
 
 
 [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
@@ -49,7 +15,7 @@ public class PlacePiece
   static void Prefix()
   {
     HideEffects.Active = true;
-    Clear = Selection.IsSingleUse();
+    Clear = Selection.Get().SingleUse;
   }
   static void Finalizer(bool __result)
   {
@@ -64,171 +30,15 @@ public class PlacePiece
   static GameObject GetPrefab(GameObject obj)
   {
     if (!Configuration.Enabled) return obj;
-    var type = Selection.Type();
-    var ghost = Helper.GetPlayer().m_placementGhost;
-    if (!ghost) return obj;
-    var name = Utils.GetPrefabName(ghost);
-    if (type == SelectedType.Default)
-    {
-      DataHelper.Init(name, ghost.transform);
-      return obj;
-    }
-    if (type == SelectedType.Object)
-    {
-      DataHelper.Init(name, ghost.transform, Selection.GetData(0));
-      return ZNetScene.instance.GetPrefab(name);
-    }
-    if (type == SelectedType.Location)
-      return ZoneSystem.instance.m_locationProxyPrefab;
-    if (type == SelectedType.Multiple)
-    {
-      var dummy = new GameObject
-      {
-        name = "Blueprint"
-      };
-      return dummy;
-    }
-    return obj;
+    var selection = Selection.Get();
+    return selection == null ? obj : selection.GetPrefab(obj);
   }
 
-  private static void HandleCommand(GameObject ghost, Tool tool)
-  {
-    var scale = Scaling.Command;
-    var x = ghost.transform.position.x.ToString(CultureInfo.InvariantCulture);
-    var y = ghost.transform.position.y.ToString(CultureInfo.InvariantCulture);
-    var z = ghost.transform.position.z.ToString(CultureInfo.InvariantCulture);
-    var radius = scale.X.ToString(CultureInfo.InvariantCulture);
-    var innerSize = Mathf.Min(scale.X, scale.Z).ToString(CultureInfo.InvariantCulture);
-    var outerSize = Mathf.Max(scale.X, scale.Z).ToString(CultureInfo.InvariantCulture);
-    var depth = scale.Z.ToString(CultureInfo.InvariantCulture);
-    var width = scale.X.ToString(CultureInfo.InvariantCulture);
-    if (tool.Shape == RulerShape.Circle)
-    {
-      innerSize = radius;
-      outerSize = radius;
-    }
-    if (tool.Shape != RulerShape.Rectangle)
-      depth = width;
-    if (tool.Shape == RulerShape.Square)
-    {
-      innerSize = radius;
-      outerSize = radius;
-    }
-    if (tool.Shape == RulerShape.Rectangle)
-    {
-      innerSize = width;
-      outerSize = width;
-    }
-    var height = scale.Y.ToString(CultureInfo.InvariantCulture);
-    var angle = ghost.transform.rotation.eulerAngles.y.ToString(CultureInfo.InvariantCulture);
-    if (Configuration.PreciseTools) angle = "0";
 
-    var command = tool.Command;
-    var multiShape = command.Contains("#r") && (command.Contains("#w") || command.Contains("#d"));
-    if (multiShape)
-    {
-      var circle = tool.Shape == RulerShape.Circle || tool.Shape == RulerShape.Ring;
-      var args = command.Split(' ').ToList();
-      for (var i = args.Count - 1; i > -1; i--)
-      {
-        if (circle && (args[i].Contains("#w") || args[i].Contains("#d")))
-          args.RemoveAt(i);
-        if (!circle && args[i].Contains("#r"))
-          args.RemoveAt(i);
-      }
-      command = string.Join(" ", args);
-    }
-    if (command.Contains("#id"))
-    {
-      var hovered = Selector.GetHovered(Configuration.Range, Configuration.IgnoredIds);
-      if (hovered == null)
-      {
-        Helper.AddError(Console.instance, "Nothing is being hovered.");
-        return;
-      }
-      command = command.Replace("#id", Utils.GetPrefabName(hovered.gameObject));
-    }
-    command = command.Replace("#r1-r2", $"{innerSize}-{outerSize}");
-    command = command.Replace("#w1-w2", $"{innerSize}-{outerSize}");
-
-    if (tool.Shape == RulerShape.Frame)
-      command = command.Replace("#d", $"{innerSize}-{outerSize}");
-    else
-      command = command.Replace("#d", depth);
-    command = command.Replace("#r", radius);
-    command = command.Replace("#w", width);
-    command = command.Replace("#a", angle);
-    command = command.Replace("#x", x);
-    command = command.Replace("#y", y);
-    command = command.Replace("#z", z);
-    command = command.Replace("#tx", x);
-    command = command.Replace("#ty", y);
-    command = command.Replace("#tz", z);
-    command = command.Replace("#h", height);
-    command = command.Replace("#ignore", Configuration.configIgnoredIds.Value);
-    if (!Configuration.DisableMessages)
-      Console.instance.AddString($"Hammering command: {command}");
-    var prev = HideEffects.Active;
-    HideEffects.Active = false;
-    // Hide effects prevents some visuals from being shown (like status effects).
-    Console.instance.TryRunCommand(command);
-    HideEffects.Active = prev;
-  }
-
-  private static void HandleMultiple(GameObject ghost)
-  {
-    Undo.StartTracking();
-    var children = Helper.GetChildren(ghost);
-    ValheimRAFT.Handle(children);
-    for (var i = 0; i < children.Count; i++)
-    {
-      var ghostChild = children[i];
-      var name = Utils.GetPrefabName(ghostChild);
-      if (ValheimRAFT.IsRaft(name)) continue;
-      var prefab = ZNetScene.instance.GetPrefab(name);
-      if (prefab)
-      {
-        DataHelper.Init(name, ghostChild.transform, Selection.GetData(i));
-        var childObj = UnityEngine.Object.Instantiate(prefab, ghostChild.transform.position, ghostChild.transform.rotation);
-        Hammer.PostProcessPlaced(childObj);
-      }
-    }
-    Undo.StopTracking();
-  }
   static void Postprocess(GameObject obj)
   {
     if (!Configuration.Enabled) return;
-    Helper.EnsurePiece(obj);
-    var ghost = Helper.GetPlayer().m_placementGhost;
-    if (!ghost) return;
-    var piece = obj.GetComponent<Piece>();
-    if (Selection.Type() == SelectedType.Tool)
-    {
-      HandleCommand(ghost, Selection.Tool());
-      UnityEngine.Object.Destroy(obj);
-      return;
-    }
-    if (Selection.Type() == SelectedType.Multiple)
-    {
-      HandleMultiple(ghost);
-      UnityEngine.Object.Destroy(obj);
-      return;
-    }
-    var view = obj.GetComponent<ZNetView>();
-    // Hoe adds pieces too.
-    if (!view) return;
-    view.m_body?.WakeUp();
-    if (Selection.Type() == SelectedType.Location && obj.GetComponent<LocationProxy>())
-    {
-      Undo.StartTracking();
-      Hammer.SpawnLocation(view);
-      Undo.StopTracking();
-    }
-    else
-    {
-      Hammer.PostProcessPlaced(piece.gameObject);
-      Undo.CreateObject(piece.gameObject);
-    }
+    Selection.Get().AfterPlace(obj);
   }
   static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
   {
@@ -294,10 +104,9 @@ public class UnlockBuildDistance
   public static void Prefix(Player __instance, ref float __state)
   {
     __state = __instance.m_maxPlaceDistance;
-    if (Configuration.Range > 0f)
-      __instance.m_maxPlaceDistance = Configuration.Range;
-    if (Selection.Type() == SelectedType.Tool)
-      __instance.m_maxPlaceDistance = 1000f;
+    var selection = Selection.TryGet();
+    if (selection != null)
+      __instance.m_maxPlaceDistance = selection.MaxPlaceDistance(__instance.m_maxPlaceDistance);
   }
   public static void Postfix(Player __instance, float __state)
   {
@@ -337,7 +146,7 @@ public class CustomizeSpawnLocation
     }
     if (AllViews)
     {
-      var data = Selection.GetData();
+      var data = Selection.Get().GetData();
       if (data != null)
       {
         var location = ZoneSystem.instance.GetLocation(data.GetInt(Hash.Location, 0));

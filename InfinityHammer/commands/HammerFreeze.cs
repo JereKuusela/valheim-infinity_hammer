@@ -1,11 +1,11 @@
-using Service;
+using ServerDevcommands;
 
 namespace InfinityHammer;
 public class HammerFreezeCommand
 {
   public HammerFreezeCommand()
   {
-    CommandWrapper.RegisterEmpty("hammer_freeze");
+    AutoComplete.RegisterEmpty("hammer_freeze");
     new Terminal.ConsoleCommand("hammer_freeze", "[true/false] - Toggles whether the mouse affects placement position.", (args) =>
     {
       if (args.Length > 1)

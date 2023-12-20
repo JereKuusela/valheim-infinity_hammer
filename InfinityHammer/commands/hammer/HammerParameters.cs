@@ -1,4 +1,5 @@
 using System;
+using ServerDevcommands;
 using Service;
 using UnityEngine;
 namespace InfinityHammer;
@@ -70,35 +71,35 @@ public class HammerParameters
       var value = split[1].ToLower();
       var values = Parse.Split(value);
       if (name == "connect")
-        Connect = Helper.IsDown(value);
+        Connect = HammerHelper.IsDown(value);
       if (name == "freeze")
-        Freeze = Helper.IsDown(value);
+        Freeze = HammerHelper.IsDown(value);
       if (name == "pick")
-        Pick = Helper.IsDown(value);
+        Pick = HammerHelper.IsDown(value);
       if (name == "level")
-        Level = Parse.TryInt(value, 1);
+        Level = Parse.Int(value, 1);
       if (name == "stars")
-        Level = Parse.TryInt(value, 0) + 1;
+        Level = Parse.Int(value, 0) + 1;
       if (name == "text")
         Text = value.Replace("_", " ");
       if (name == "health")
-        Health = Parse.TryFloat(value, 0f);
+        Health = Parse.Float(value);
       if (name == "from")
-        Position = Parse.TryVectorXZY(values, Position);
+        Position = Parse.VectorXZY(values, Position);
       if (name == "scale")
-        Scale = Parse.TryScale(values);
+        Scale = Parse.Scale(values);
       if (name == "circle")
-        Radius = Parse.TryFloat(value, 0f);
+        Radius = Parse.Float(value);
       if (name == "rect")
       {
-        var size = Parse.TryScale(values);
+        var size = Parse.Scale(values);
         Width = size.x;
         Depth = size.z;
       }
       if (name == "height")
-        Height = Parse.TryFloat(value, 0f);
+        Height = Parse.Float(value);
       if (name == "angle")
-        Angle = Parse.TryFloat(value, 0f) * Mathf.PI / 180f;
+        Angle = Parse.Float(value) * Mathf.PI / 180f;
       if (name == "type" && value == "creature") ObjectType = ObjectType.Character;
       if (name == "type" && value == "structure") ObjectType = ObjectType.Structure;
       if (name == "wear" && value == "broken") Wear = Wear.Broken;

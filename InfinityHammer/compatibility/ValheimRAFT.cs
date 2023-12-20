@@ -28,9 +28,9 @@ public class ValheimRAFT
       var name = Utils.GetPrefabName(child);
       if (name != "MBRaft") continue;
       var prefab = ZNetScene.instance.GetPrefab(name);
-      DataHelper.Init(name, child.transform, Selection.GetData(i));
-      var childObj = UnityEngine.Object.Instantiate(prefab, child.transform.position, child.transform.rotation);
-      Hammer.PostProcessPlaced(childObj);
+      DataHelper.Init(name, child.transform, Selection.Get().GetData(i));
+      var childObj = Object.Instantiate(prefab, child.transform.position, child.transform.rotation);
+      BaseSelection.PostProcessPlaced(childObj);
       return childObj.GetComponent<ZNetView>()?.GetZDO()?.m_uid ?? ZDOID.None;
     }
     return ZDOID.None;
@@ -39,12 +39,11 @@ public class ValheimRAFT
   {
     var raft = Spawn(children);
     if (raft == ZDOID.None) return;
-    for (var i = 0; i < children.Count; i++)
+    Selection.Get()?.UpdateZDOs(data =>
     {
-      var data = Selection.Objects()[i].Data;
       if (data.GetZDOID(RaftParent) != ZDOID.None)
         data.Set(RaftParent, raft);
-    }
+    });
   }
   public static bool IsRaft(string name) => name == "MBRaft";
   public static bool IsInRaft(ZNetView view) => IsRaft(view.GetPrefabName()) || view.GetZDO().GetZDOID(RaftParent) != ZDOID.None;

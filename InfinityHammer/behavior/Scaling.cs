@@ -1,4 +1,4 @@
-using System.Linq;
+using ServerDevcommands;
 using UnityEngine;
 namespace InfinityHammer;
 public class ToolScaling(bool sanityY, bool minXZ)
@@ -86,23 +86,22 @@ public static class Scaling
 {
   public static ToolScaling Build = new(true, false);
   public static ToolScaling Command = new(false, true);
-  public static ToolScaling Get() => Selection.IsTool() ? Command : Build;
+  public static ToolScaling Get() => Selection.Get().IsTool ? Command : Build;
 
   public static void UpdateGhost()
   {
-    if (Selection.Type() == SelectedType.Tool) return;
-    var ghost = Helper.GetPlacementGhost();
+    if (Selection.Get().IsTool) return;
+    var ghost = HammerHelper.GetPlacementGhost();
     if (!IsScalingSupported(ghost)) return;
     ghost.transform.localScale = Build.Value;
-    Selection.SetScale(Build.Value);
+    Selection.Get().SetScale(Build.Value);
   }
   public static bool IsScalingSupported(GameObject obj)
   {
     if (!Configuration.Enabled) return false;
     if (!obj) return false;
-    if (Selection.Type() == SelectedType.Tool) return true;
-    if (Selection.Type() == SelectedType.Multiple) return Selection.Objects().All(obj => obj.Scalable);
-    if (Selection.Objects().Count > 0) return Selection.Objects()[0].Scalable;
+    var selection = Selection.Get();
+    if (selection != null) return selection.IsScalingSupported();
     // Ghost won't have netview so the selected piece must be used.
     // This technically also works for the build window if other mods add scalable objects there.
     var prefab = ZNetScene.instance.GetPrefab(Utils.GetPrefabName(obj));
@@ -113,7 +112,7 @@ public static class Scaling
   {
     if (Configuration.DisableScaleMessages) return;
     var scaling = Get();
-    if (IsScalingSupported(Helper.GetPlacementGhost()))
+    if (IsScalingSupported(HammerHelper.GetPlacementGhost()))
     {
       if (scaling.X != scaling.Y || scaling.X != scaling.Z)
         Helper.AddMessage(terminal, $"Scale set to X: {scaling.X:P0}, Z: {scaling.Z:P0}, Y: {scaling.Y:P0}.");

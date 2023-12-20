@@ -91,10 +91,10 @@ public class AddCoverText {
 [HarmonyPatch(typeof(Hud), nameof(Hud.SetupPieceInfo))]
 public class AddExtraInfo
 {
-  private static string DescriptionHover()
+  private static string DescriptionHover(BaseSelection selection)
   {
-    if (!Selection.IsTool()) return "";
-    if (!Selection.Tool().IsId) return "";
+    if (!selection.IsTool) return "";
+    //if (!Selection.Tool().IsId) return "";
     var hovered = Selector.GetHovered(Configuration.Range, Configuration.IgnoredIds);
     var name = hovered == null ? "" : Utils.GetPrefabName(hovered.gameObject);
     return $"id: {name}";
@@ -102,7 +102,9 @@ public class AddExtraInfo
   public static void Postfix(Hud __instance, Piece piece)
   {
     if (!piece) return;
-    var lines = new[] { Selection.Description(), Ruler.Description(), DescriptionHover() };
+    var selection = Selection.TryGet();
+    if (selection == null) return;
+    var lines = new[] { selection.ExtraDescription, DescriptionHover(selection) };
     var text = string.Join("\n", lines.Where(s => s != ""));
     if (__instance.m_pieceDescription.text != "")
       text = "\n" + text;

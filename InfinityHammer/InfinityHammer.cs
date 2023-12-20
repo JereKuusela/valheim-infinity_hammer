@@ -8,8 +8,7 @@ namespace InfinityHammer;
 [BepInPlugin(GUID, NAME, VERSION)]
 [BepInDependency("com.rolopogo.gizmo.comfy", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("m3to.mods.GizmoReloaded", BepInDependency.DependencyFlags.SoftDependency)]
-[BepInDependency("server_devcommands", BepInDependency.DependencyFlags.SoftDependency)]
-[BepInDependency("world_edit_commands", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("server_devcommands", BepInDependency.DependencyFlags.HardDependency)]
 public class InfinityHammer : BaseUnityPlugin
 {
   public const string GUID = "infinity_hammer";
@@ -18,6 +17,7 @@ public class InfinityHammer : BaseUnityPlugin
   public static bool StructureTweaks = false;
 #nullable disable
   public static ManualLogSource Log;
+  public static ConfigWrapper Wrapper;
 #nullable enable
   public static bool ConfigExists = false;
   public void Awake()
@@ -25,15 +25,11 @@ public class InfinityHammer : BaseUnityPlugin
     ConfigExists = File.Exists(Config.ConfigFilePath);
     Log = Logger;
     new Harmony(GUID).PatchAll();
-    CommandWrapper.Init();
-    ConfigWrapper wrapper = new("hammer_config", Config);
-    Configuration.Init(wrapper);
+    Wrapper = new("hammer_config", Config);
+    Configuration.Init(Wrapper);
     try
     {
       SetupWatcher();
-      ToolManager.CreateFile();
-      ToolManager.SetupWatcher();
-      ToolManager.FromFile();
     }
     catch
     {
@@ -81,19 +77,6 @@ public class InfinityHammer : BaseUnityPlugin
     if (Chainloader.PluginInfos.TryGetValue("m3to.mods.GizmoReloaded", out info))
       GizmoWrapper.InitReloaded(info.Instance.GetType().Assembly);
     StructureTweaks = Chainloader.PluginInfos.ContainsKey("structure_tweaks");
-  }
-
-  public void LateUpdate()
-  {
-    Ruler.Update();
-  }
-}
-
-[HarmonyPatch(typeof(Terminal), nameof(Terminal.InitTerminal))]
-public class SetCommands
-{
-  static void Postfix()
-  {
     new HammerAddPieceComponentsCommand();
     new HammerSelect();
     new HammerLocationCommand();
@@ -107,45 +90,20 @@ public class SetCommands
     new HammerZoomCommand();
     new HammerStackCommand();
     new HammerFreezeCommand();
-    new HammerToolCommand();
     new HammerGridCommand();
     new HammerSaveCommand();
-    new HammerImportCommand();
     new HammerMirrorCommand();
-    new HammerShapeCommand();
     new HammerZoopCommand();
     new HammerMeasureCommand();
     new HammerPosCommand();
   }
 }
 
-[HarmonyPatch(typeof(FejdStartup), nameof(FejdStartup.Start))]
-public class FejdStartupStart
+[HarmonyPatch(typeof(Chat), nameof(Chat.Awake))]
+public class ChatAwake
 {
-  static void Create()
-  {
-    var pars = "from=x,z,y circle=r1-r2 angle=a rect=w1-w2,d";
-    var parsSpawn = "from=x,z,y radius=r1-r2";
-    var parsTo = "terrain to=tx,tz,ty circle=r1-r2 rect=w1-w2,d";
-    var sub = CommandWrapper.Substitution();
-    Console.instance.TryRunCommand($"alias hammer_terrain hammer_tool terrain {pars}");
-    Console.instance.TryRunCommand($"alias hammer_object hammer_tool object {pars} height=h ignore=ignore");
-    Console.instance.TryRunCommand($"alias hammer_spawn hammer_tool spawn_object {sub} {parsSpawn}");
-
-    Console.instance.TryRunCommand($"alias hammer_terrain_to hammer_shape rectangle;hammer_tool {parsTo}");
-    Console.instance.TryRunCommand($"alias hammer_slope hammer_terrain_to slope; hammer_scale_x_cmd {sub}");
-
-  }
   static void Postfix()
   {
-    if (CommandWrapper.ServerDevcommands != null)
-    {
-      var pars = "from=x,z,y circle=r angle=a rect=w,d";
-      Console.instance.TryRunCommand($"alias hammer_area hammer_tool hammer {pars} height=h");
-    }
-    if (CommandWrapper.ServerDevcommands != null && CommandWrapper.WorldEditCommands != null)
-    {
-      Create();
-    }
+    InfinityHammer.Wrapper.Bind();
   }
 }
