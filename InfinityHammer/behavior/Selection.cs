@@ -23,12 +23,14 @@ public static partial class Selection
     if (Configuration.UnfreezeOnSelect) Position.Unfreeze();
     if (!Selections.TryGetValue(HammerHelper.GetTool(), out var selection))
       return;
+    selection.Deactivate();
     selection.Destroy();
     Selections.Remove(HammerHelper.GetTool());
   }
   public static Piece Create(BaseSelection selection)
   {
     Clear();
+    selection.Activate();
     Selections[HammerHelper.GetTool()] = selection;
     Helper.GetPlayer().SetupPlacementGhost();
     return selection.GetSelectedPiece();
@@ -109,4 +111,11 @@ public class PieceTableSetSelected
 public class GetSelectedPiece
 {
   public static Piece Postfix(Piece result) => Selection.Get().GetSelectedPiece() ?? result;
+}
+
+[HarmonyPatch(typeof(Player), nameof(Player.SetPlaceMode))]
+public class SelectionActivate
+{
+  static void Prefix() => Selection.Get().Deactivate();
+  static void Postfix() => Selection.Get().Activate();
 }

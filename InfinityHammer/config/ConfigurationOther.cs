@@ -30,8 +30,6 @@ public partial class Configuration
   public static HashSet<string> MirrorFlip = [];
   public static ConfigEntry<string> configDimensions;
   public static Dictionary<string, Vector3> Dimensions = [];
-  public static ConfigEntry<string> commandDefaultSize;
-  public static float CommandDefaultSize => ConfigWrapper.TryParseFloat(commandDefaultSize);
   public static ConfigEntry<bool> configEnabled;
   public static bool Enabled => configEnabled.Value;
 #nullable enable
@@ -93,15 +91,5 @@ public partial class Configuration
     configBlueprintFolder = wrapper.Bind(section, "Blueprint folder", "PlanBuild", "Folder relative to the config folder.");
     configSaveBlueprintsToProfile = wrapper.Bind(section, "Save blueprints to profile", false, "If enabled, blueprints are saved to the profile folder instead of base Valheim folder.");
     configDefaultCenterPiece = wrapper.Bind(section, "Blueprint center piece", "piece_bpcenterpoint", "Default center piece for blueprints.");
-
-    commandDefaultSize = wrapper.Bind(section, "Command default size", "10", "Default size for commands.");
-    commandDefaultSize.SettingChanged += (s, e) =>
-    {
-      Scaling.Command.SetScaleX(CommandDefaultSize);
-      Scaling.Command.SetScaleZ(CommandDefaultSize);
-    };
-    Scaling.Command.SetScaleX(CommandDefaultSize);
-    Scaling.Command.SetScaleZ(CommandDefaultSize);
-    Scaling.Command.SetScaleY(0f);
   }
 }

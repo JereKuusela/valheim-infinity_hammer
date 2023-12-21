@@ -9,16 +9,6 @@ public partial class Configuration
   public static bool IsCheats => Enabled && ((ZNet.instance && ZNet.instance.IsServer()) || Console.instance.IsCheatsEnabled());
   public static ConfigEntry<bool> configNoCost;
   public static bool NoCost => configNoCost.Value && IsCheats;
-  public static ConfigEntry<bool> configShapeCircle;
-  public static bool ShapeCircle => configShapeCircle.Value;
-  public static ConfigEntry<bool> configShapeRing;
-  public static bool ShapeRing => configShapeRing.Value;
-  public static ConfigEntry<bool> configShapeSquare;
-  public static bool ShapeSquare => configShapeSquare.Value;
-  public static ConfigEntry<bool> configShapeRectangle;
-  public static bool ShapeRectangle => configShapeRectangle.Value;
-  public static ConfigEntry<bool> configShapeFrame;
-  public static bool ShapeFrame => configShapeFrame.Value;
   public static ConfigEntry<bool> configIgnoreWards;
   public static bool IgnoreWards => configIgnoreWards.Value && IsCheats;
   public static ConfigEntry<bool> configIgnoreNoBuild;
@@ -65,8 +55,6 @@ public partial class Configuration
   public static float RemoveArea => Enabled ? Parse.Float(configRemoveArea.Value) : 0f;
   public static ConfigEntry<string> configRange;
   public static float Range => IsCheats ? Parse.Float(configRange.Value) : 0f;
-  public static ConfigEntry<bool> configShowCommandValues;
-  public static bool AlwaysShowCommand => configShowCommandValues.Value;
   public static ConfigEntry<bool> configSaveBlueprintData;
   public static bool SaveBlueprintData => configSaveBlueprintData.Value;
 
@@ -80,13 +68,7 @@ public partial class Configuration
     var section = "1. General";
     configRemoveArea = wrapper.Bind(section, "Remove area", "0", "Removes same objects within the radius.");
     configRange = wrapper.Bind(section, "Hammer range", "50", "Range for actions.");
-    configShowCommandValues = wrapper.Bind(section, "Show command values", false, "Always shows the command in the tool descriptions.");
     configNoCost = wrapper.Bind(section, "No cost", false, "Removes durability, resource and stamina costs.");
-    configShapeCircle = wrapper.Bind(section, "Shape circle", true, "Enables circle shape for commands.");
-    configShapeRing = wrapper.Bind(section, "Shape ring", false, "Enables ring shape for commands.");
-    configShapeRectangle = wrapper.Bind(section, "Shape rectangle", true, "Enables rectangle shape for commands.");
-    configShapeSquare = wrapper.Bind(section, "Shape square", true, "Enables square shape for commands.");
-    configShapeFrame = wrapper.Bind(section, "Shape frame", false, "Enables frame shape for commands.");
     configIgnoreWards = wrapper.Bind(section, "Ignore wards", true, "Ignores ward restrictions.");
     configIgnoreNoBuild = wrapper.Bind(section, "Ignore no build", true, "Ignores no build areas.");
     configAllObjects = wrapper.Bind(section, "All objects", true, "Allows placement of non-default objects.");

@@ -57,6 +57,7 @@ public class PlacePiece
 public class HoldUse
 {
   // Needed to prevent instant usage when selecting continuous command.
+  // Dirty hack but not sure how to prevent this with proper logic.
   public static bool Selecting = true;
   static void CheckHold()
   {

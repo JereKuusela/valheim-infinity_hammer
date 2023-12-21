@@ -25,11 +25,7 @@ public class BaseSelection
   public virtual bool Continuous => false;
   public virtual bool PlayerHeight => false;
   public virtual float MaxPlaceDistance(float value) => Configuration.Range > 0f ? Configuration.Range : value;
-  public virtual Piece GetSelectedPiece()
-  {
-    BindCommand.SetMode("");
-    return SelectedObject ? SelectedObject.GetComponent<Piece>() : null!;
-  }
+  public Piece GetSelectedPiece() => SelectedObject ? SelectedObject.GetComponent<Piece>() : null!;
   public void Destroy() => UnityEngine.Object.Destroy(SelectedObject);
 
   public virtual void Postprocess(Vector3? scale)
@@ -233,5 +229,13 @@ public class BaseSelection
       if (zdo.GetByteArray(ZDOVars.s_roomData) == null)
         dg.Generate(ZoneSystem.SpawnMode.Full);
     }
+  }
+  public virtual void Activate()
+  {
+    BindCommand.SetMode("");
+  }
+  public virtual void Deactivate()
+  {
+
   }
 }
