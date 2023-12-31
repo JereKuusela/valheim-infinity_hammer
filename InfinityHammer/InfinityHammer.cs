@@ -7,7 +7,7 @@ using Service;
 namespace InfinityHammer;
 [BepInPlugin(GUID, NAME, VERSION)]
 [BepInDependency("com.rolopogo.gizmo.comfy", BepInDependency.DependencyFlags.SoftDependency)]
-[BepInDependency("m3to.mods.GizmoReloaded", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("bruce.valheim.comfymods.gizmo", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("server_devcommands", BepInDependency.DependencyFlags.HardDependency)]
 public class InfinityHammer : BaseUnityPlugin
 {
@@ -72,10 +72,10 @@ public class InfinityHammer : BaseUnityPlugin
 
   public void Start()
   {
-    if (Chainloader.PluginInfos.TryGetValue("com.rolopogo.gizmo.comfy", out var info))
-      GizmoWrapper.InitComfy(info.Instance.GetType().Assembly);
+    if (Chainloader.PluginInfos.TryGetValue("bruce.valheim.comfymods.gizmo", out var info))
+      PlaceRotation.Comfy = info.Instance.GetType().Assembly;
     if (Chainloader.PluginInfos.TryGetValue("m3to.mods.GizmoReloaded", out info))
-      GizmoWrapper.InitReloaded(info.Instance.GetType().Assembly);
+      PlaceRotation.Reloaded = info.Instance.GetType().Assembly;
     StructureTweaks = Chainloader.PluginInfos.ContainsKey("structure_tweaks");
     new HammerAddPieceComponentsCommand();
     new HammerSelect();

@@ -40,11 +40,14 @@ public class ValheimRAFT
   {
     var raft = Spawn(children);
     if (raft == ZDOID.None) return;
-    Selection.Get().UpdateZDOs(data =>
+    if (Selection.Get() is ObjectSelection selection)
     {
-      if (data.GetZDOID(RaftParent) != ZDOID.None)
-        data.Set(RaftParent, raft);
-    });
+      selection.Objects.ForEach(obj =>
+      {
+        if (obj.Data.GetZDOID(RaftParent) != ZDOID.None)
+          obj.Data.Set(RaftParent, raft);
+      });
+    }
   }
   public static bool IsRaft(string name) => name == "MBRaft";
   public static bool IsInRaft(ZNetView view) => IsRaft(view.GetPrefabName()) || view.GetZDO().GetZDOID(RaftParent) != ZDOID.None;

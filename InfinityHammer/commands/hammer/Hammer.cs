@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using ServerDevcommands;
 using Service;
-using UnityEngine;
 namespace InfinityHammer;
 public class HammerSelect
 {
@@ -45,10 +44,6 @@ public class HammerSelect
     }
     else
       Helper.AddMessage(terminal, $"Selected {name}.");
-  }
-  private void UpdateZDOs(Action<ZDOData> action)
-  {
-    Selection.Get().UpdateZDOs(action);
   }
   public HammerSelect()
   {
@@ -115,14 +110,14 @@ public class HammerSelect
       HammerHelper.EnabledCheck();
       Hammer.Equip();
       HammerParameters pars = new(args);
-      Piece? selected = null;
       ZNetView[] views = [];
+      ObjectSelection? selection = null;
       if (pars.Radius.HasValue)
         views = Selector.GetNearby("", pars.ObjectType, Configuration.IgnoredIds, pars.Position, pars.Radius.Value, pars.Height);
       else if (pars.Width.HasValue && pars.Depth.HasValue)
         views = Selector.GetNearby("", pars.ObjectType, Configuration.IgnoredIds, pars.Position, pars.Angle, pars.Width.Value, pars.Depth.Value, pars.Height);
       else if (args.Length > 1 && !args[1].Contains("=") && !pars.Connect && !pars.Pick && !pars.Freeze)
-        selected = Selection.Create(new ObjectSelection(args[1], pars.Pick));
+        selection = new(args[1], pars.Pick);
       else
       {
         var hovered = Selector.GetHovered(Configuration.Range, Configuration.IgnoredIds) ?? throw new InvalidOperationException("Nothing is being hovered.");
@@ -131,10 +126,9 @@ public class HammerSelect
         else
           views = [hovered];
       }
-      if (selected == null && views.Length > 0)
+      if (selection == null && views.Length > 0)
       {
-        ObjectSelection sel = views.Length == 1 ? new(views[0], pars.Pick) : new(views, pars.Pick);
-        selected = Selection.Create(sel);
+        selection = views.Length == 1 ? new(views[0], pars.Pick) : new(views, pars.Pick);
         if (pars.Pick)
         {
           Undo.Remove(views.Select(view => new FakeZDO(view.GetZDO())).ToArray());
@@ -143,40 +137,47 @@ public class HammerSelect
 
         }
       }
-      if (selected == null) return;
+      if (selection == null) return;
+      var selectedPiece = selection.GetSelectedPiece();
+      ZDOData extraData = new();
       if (pars.Health.HasValue)
       {
-        if (selected.GetComponent<Character>())
+        if (selectedPiece.GetComponent<Character>())
         {
-          UpdateZDOs(zdo => zdo.Set(Hash.Health, pars.Health.Value * 1.000001f));
-          UpdateZDOs(zdo => zdo.Set(Hash.MaxHealth, pars.Health.Value));
+          extraData.Set(Hash.Health, pars.Health.Value * 1.000001f);
+          extraData.Set(Hash.MaxHealth, pars.Health.Value);
         }
-        else UpdateZDOs(zdo => zdo.Set(Hash.Health, pars.Health.Value));
+        else extraData.Set(Hash.Health, pars.Health.Value);
       }
       if (pars.Level.HasValue)
-        UpdateZDOs(zdo => zdo.Set(Hash.Level, pars.Level.Value));
+        extraData.Set(Hash.Level, pars.Level.Value);
       if (pars.Growth != Growth.Default)
       {
-        UpdateZDOs(zdo => zdo.Set(Hash.Growth, GrowthNumber(pars.Growth)));
-        UpdateZDOs(zdo => zdo.Set(Hash.PlantTime, DateTime.MaxValue.Ticks / 2L));
+        extraData.Set(Hash.Growth, GrowthNumber(pars.Growth));
+        extraData.Set(Hash.PlantTime, DateTime.MaxValue.Ticks / 2L);
       }
-      if (pars.Fall != Fall.Default)
-        UpdateZDOs(zdo => zdo.Set(Hash.Fall, FallNumber(pars.Fall)));
       if (pars.Wear != Wear.Default)
-        UpdateZDOs(zdo => zdo.Set(Hash.Wear, WearNumber(pars.Wear)));
+        extraData.Set(Hash.Wear, WearNumber(pars.Wear));
+      if (pars.Fall != Fall.Default)
+        extraData.Set(Hash.Fall, FallNumber(pars.Fall));
+      if (pars.Wear != Wear.Default)
+        extraData.Set(Hash.Wear, WearNumber(pars.Wear));
       if (!pars.Collision)
-        UpdateZDOs(zdo => zdo.Set(Hash.Collision, false));
+        extraData.Set(Hash.Collision, false);
       if (!pars.Show)
-        UpdateZDOs(zdo => zdo.Set(Hash.Render, false));
+        extraData.Set(Hash.Render, false);
       if (!pars.Restrict)
-        UpdateZDOs(zdo => zdo.Set(Hash.Restrict, false));
+        extraData.Set(Hash.Restrict, false);
       if (!pars.Interact)
-        UpdateZDOs(zdo => zdo.Set(Hash.Interact, false));
+        extraData.Set(Hash.Interact, false);
       if (pars.Text != null)
-        UpdateZDOs(zdo => zdo.Set(Hash.Text, pars.Text));
-      Selection.Get().Postprocess(pars.Scale);
-      if (pars.Freeze) Position.Freeze(selected.transform.position);
-      PrintSelected(args.Context, selected);
+        extraData.Set(Hash.Text, pars.Text);
+      selection.UpdateZDOs(extraData);
+      selection.Postprocess(pars.Scale);
+
+      Selection.Create(selection);
+      if (pars.Freeze) Position.Freeze(selectedPiece.transform.position);
+      PrintSelected(args.Context, selectedPiece);
     });
   }
 }

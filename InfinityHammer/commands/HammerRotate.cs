@@ -35,7 +35,7 @@ public class HammerRotateCommand
     {
       if (args.Length < 2) return;
       var amount = ParseArgs(args.Args, HammerHelper.IsSquareX);
-      Rotating.RotateX(amount);
+      RotateX(amount);
     });
     AutoComplete.Register("hammer_rotate_y", (int index) =>
     {
@@ -46,7 +46,7 @@ public class HammerRotateCommand
     {
       if (args.Length < 2) return;
       var amount = ParseArgs(args.Args, HammerHelper.IsSquareY);
-      Rotating.RotateY(amount);
+      RotateY(amount);
     });
     AutoComplete.Register("hammer_rotate_z", (int index) =>
     {
@@ -57,7 +57,7 @@ public class HammerRotateCommand
     {
       if (args.Length < 2) return;
       var amount = ParseArgs(args.Args, HammerHelper.IsSquareZ);
-      Rotating.RotateZ(amount);
+      RotateZ(amount);
     });
     AutoComplete.Register("hammer_rotate", (int index) =>
    {
@@ -73,5 +73,23 @@ public class HammerRotateCommand
       else
         Helper.GetPlayer().m_placeRotation++;
     });
+  }
+
+
+  public static void RotateX(float value)
+  {
+    Helper.GetPlayer();
+    PlaceRotation.RotateX(value);
+  }
+  public static void RotateY(float value)
+  {
+    var player = Helper.GetPlayer();
+    player.m_placeRotation = Mathf.RoundToInt(((player.m_placeRotation * 22.5f) + value) / 22.5f);
+    PlaceRotation.RotateY(value);
+  }
+  public static void RotateZ(float value)
+  {
+    Helper.GetPlayer();
+    PlaceRotation.RotateZ(value);
   }
 }

@@ -51,6 +51,21 @@ public class ZDOData
     if (pkg == null) return;
     Load(pkg);
   }
+  public void Add(ZDOData data)
+  {
+    foreach (var kvp in data.Floats) Floats[kvp.Key] = kvp.Value;
+    foreach (var kvp in data.Ints) Ints[kvp.Key] = kvp.Value;
+    foreach (var kvp in data.Longs) Longs[kvp.Key] = kvp.Value;
+    foreach (var kvp in data.Strings) Strings[kvp.Key] = kvp.Value;
+    foreach (var kvp in data.Vecs) Vecs[kvp.Key] = kvp.Value;
+    foreach (var kvp in data.Quats) Quats[kvp.Key] = kvp.Value;
+    foreach (var kvp in data.ByteArrays) ByteArrays[kvp.Key] = kvp.Value;
+    if (data.ConnectionType != ZDOExtraData.ConnectionType.None && data.ConnectionHash != 0)
+    {
+      ConnectionType = data.ConnectionType;
+      ConnectionHash = data.ConnectionHash;
+    }
+  }
   public bool HasData() => Floats.Count > 0 || Ints.Count > 0 || Longs.Count > 0 || Strings.Count > 0 || Vecs.Count > 0 || Quats.Count > 0 || ByteArrays.Count > 0 || ConnectionType != ZDOExtraData.ConnectionType.None && ConnectionHash != 0;
   public void Copy(ZDO zdo)
   {

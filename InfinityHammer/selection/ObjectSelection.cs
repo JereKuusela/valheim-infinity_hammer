@@ -23,7 +23,10 @@ public partial class ObjectSelection : BaseSelection
     if (!Configuration.AllObjects && !HammerHelper.IsBuildPiece(prefab)) throw new InvalidOperationException("Only build pieces are allowed.");
     SingleUse = singleUse;
     SelectedObject = HammerHelper.SafeInstantiate(prefab);
+    HammerHelper.EnsurePiece(SelectedObject);
     Objects.Add(new(name, prefab.GetComponent<ZNetView>().m_syncInitialScale, new()));
+    // Reset for zoop bounds check.
+    SelectedObject.transform.rotation = Quaternion.identity;
   }
   public ObjectSelection(ZNetView view, bool singleUse)
   {
@@ -37,11 +40,12 @@ public partial class ObjectSelection : BaseSelection
     if (!Configuration.AllObjects && !HammerHelper.IsBuildPiece(prefab)) throw new InvalidOperationException("Only build pieces are allowed.");
     SingleUse = singleUse;
     SelectedObject = HammerHelper.SafeInstantiate(prefab);
-    // Reseted for bounds check.
-    SelectedObject.transform.rotation = Quaternion.identity;
+    HammerHelper.EnsurePiece(SelectedObject);
     ResetColliders(SelectedObject, originalPrefab);
     Objects.Add(new(name, view.m_syncInitialScale, data));
-    Rotating.UpdatePlacementRotation(view.gameObject);
+    PlaceRotation.Set(SelectedObject);
+    // Reset for zoop bounds check.
+    SelectedObject.transform.rotation = Quaternion.identity;
   }
   public ObjectSelection(IEnumerable<ZNetView> views, bool singleUse)
   {
@@ -70,7 +74,7 @@ public partial class ObjectSelection : BaseSelection
     }
     ZNetView.m_forceDisableInit = false;
     CountObjects();
-    Rotating.UpdatePlacementRotation(SelectedObject);
+    PlaceRotation.Set(SelectedObject);
   }
 
 
@@ -116,7 +120,6 @@ public partial class ObjectSelection : BaseSelection
     piece.m_clipEverything = HammerHelper.CountSnapPoints(SelectedObject) == 0;
     ZNetView.m_forceDisableInit = false;
     Scaling.Get().SetScale(SelectedObject.transform.localScale);
-    Helper.GetPlayer().SetupPlacementGhost();
   }
 
   public void Mirror()
@@ -141,11 +144,10 @@ public partial class ObjectSelection : BaseSelection
     }
     Helper.GetPlayer().SetupPlacementGhost();
   }
-  public override void Postprocess(Vector3? scale)
+  public void Postprocess(Vector3? scale)
   {
     if (Objects.Count == 1)
     {
-
       Postprocess(SelectedObject, GetData());
       HammerHelper.EnsurePiece(SelectedObject);
       if (HammerHelper.CountSnapPoints(SelectedObject) == 0)
@@ -163,9 +165,150 @@ public partial class ObjectSelection : BaseSelection
         Postprocess(tr.gameObject, GetData(i++));
       }
     }
-    base.Postprocess(scale);
+    if (scale.HasValue && Scaling.IsScalingSupported(SelectedObject))
+      SetScale(scale.Value);
+    Scaling.Get().SetScale(SelectedObject.transform.localScale);
   }
 
+  private void Postprocess(GameObject obj, ZDOData? zdo)
+  {
+    if (zdo == null) return;
+    SetLevel(obj, zdo.GetInt(Hash.Level, -1));
+    SetGrowth(obj, zdo.GetInt(Hash.Growth, -1));
+    SetWear(obj, zdo.GetInt(Hash.Wear, -1));
+    SetText(obj, zdo.GetString(Hash.Text, ""));
+  }
+
+  protected static void ResetColliders(GameObject obj, GameObject original)
+  {
+    var colliders = obj.GetComponentsInChildren<Collider>();
+    var originalColliders = original.GetComponentsInChildren<Collider>();
+    if (colliders.Length != originalColliders.Length)
+    {
+      InfinityHammer.Log.LogWarning("Object has a different amount of colliders than the original: Unable to reset colliders.");
+      return;
+    }
+    for (var i = 0; i < colliders.Length; i++)
+    {
+      colliders[i].enabled = originalColliders[i].enabled;
+      colliders[i].isTrigger = originalColliders[i].isTrigger;
+    }
+  }
+  private static void SetLevel(GameObject obj, int level)
+  {
+    if (level == -1) return;
+    if (obj.GetComponent<Character>() is not { } character) return;
+    if (obj.GetComponentInChildren<LevelEffects>() is not { } effect) return;
+    effect.m_character = character;
+    effect.SetupLevelVisualization(level);
+  }
+  private static float Convert(int value, float defaultValue)
+  {
+    if (value == 0) return 0.1f;
+    if (value == 1) return 0.5f;
+    if (value == 2) return 1f;
+    return defaultValue;
+  }
+  private static void SetWear(GameObject obj, int wear)
+  {
+    if (wear == -1) return;
+    if (obj.GetComponent<WearNTear>() is not { } wearNTear) return;
+    wearNTear.SetHealthVisual(Convert(wear, 1f), false);
+  }
+  private static void SetText(GameObject obj, string text)
+  {
+    if (obj.GetComponent<Sign>() is not { } sign) return;
+    sign.m_textWidget.text = text;
+  }
+  private static void SetGrowth(GameObject obj, int growth)
+  {
+    if (growth == -1) return;
+    if (obj.GetComponent<Plant>() is not { } plant) return;
+    var healthy = growth == 0;
+    var unhealthy = growth == 1;
+    var healthyGrown = growth == 2;
+    var unhealthyGrown = growth == 3;
+    if (plant.m_healthyGrown)
+    {
+      plant.m_healthy.SetActive(healthy);
+      plant.m_unhealthy.SetActive(unhealthy);
+      plant.m_healthyGrown.SetActive(healthyGrown);
+      plant.m_unhealthyGrown.SetActive(unhealthyGrown);
+    }
+    else
+    {
+      plant.m_healthy.SetActive(healthy || healthyGrown);
+      plant.m_unhealthy.SetActive(unhealthy || unhealthyGrown);
+    }
+  }
+  protected static void SetExtraInfo(GameObject obj, string extraInfo, ZDOData data)
+  {
+    if (obj.TryGetComponent<Sign>(out var sign))
+    {
+      if (extraInfo == "")
+        extraInfo = data.GetString(Hash.Text, extraInfo);
+      else
+        data.Set(Hash.Text, extraInfo);
+      sign.m_textWidget.text = extraInfo;
+    }
+    if (obj.GetComponent<TeleportWorld>() && extraInfo != "")
+    {
+      data.Set(Hash.Tag, extraInfo);
+    }
+    if (obj.GetComponent<Tameable>() && extraInfo != "")
+    {
+      data.Set(Hash.TamedName, extraInfo);
+    }
+    if (obj.TryGetComponent<ItemStand>(out var itemStand))
+    {
+      var split = extraInfo.Split(':');
+      var name = split[0];
+      var variant = Parse.Int(split, 1, 0);
+      var quality = Parse.Int(split, 2, 1);
+      if (extraInfo == "")
+      {
+        name = data.GetString(Hash.Item, name);
+        variant = data.GetInt(Hash.Variant, variant);
+        quality = data.GetInt(Hash.Quality, quality);
+      }
+      else
+      {
+        data.Set(Hash.Item, name);
+        data.Set(Hash.Variant, variant);
+        data.Set(Hash.Quality, quality);
+      }
+      itemStand.SetVisualItem(name, variant, quality);
+    }
+    if (obj.TryGetComponent<ArmorStand>(out var armorStand))
+    {
+      var split = extraInfo.Split(':');
+      var pose = Parse.Int(split, 0, 0);
+      if (extraInfo == "")
+        pose = data.GetInt(Hash.Pose, pose);
+      else
+        data.Set(Hash.Pose, pose);
+      armorStand.m_pose = pose;
+      armorStand.m_poseAnimator.SetInteger("Pose", pose);
+      SetItemHack.Hack = true;
+      for (var i = 0; i < armorStand.m_slots.Count; i++)
+      {
+        var name = Parse.String(split, i * 2 + 2, "");
+        var variant = Parse.Int(split, i * 2 + 3, 0);
+        if (extraInfo == "")
+        {
+          name = data.GetString($"{i}_item", name);
+          variant = data.GetInt($"{i}_variant", variant);
+        }
+        else
+        {
+          data.Set($"{i}_item", name);
+          data.Set($"{i}_variant", variant);
+        }
+        armorStand.SetVisualItem(i, name, variant);
+      }
+      SetItemHack.Hack = false;
+    }
+  }
   private void CountObjects()
   {
     if (Objects.Count < 2) return;
@@ -210,9 +353,9 @@ public partial class ObjectSelection : BaseSelection
     return Objects[index].Prefab.GetStableHashCode();
   }
   public override bool IsScalingSupported() => Objects.All(obj => obj.Scalable);
-  public override void UpdateZDOs(Action<ZDOData> action)
+  public void UpdateZDOs(ZDOData data)
   {
-    Objects.ForEach(obj => action(obj.Data));
+    Objects.ForEach(obj => obj.Data.Add(data));
   }
   public override GameObject GetPrefab(GameObject obj)
   {

@@ -17,7 +17,7 @@ public class HammerZoopCommand
     Helper.Command($"hammer_zoop_{direction}", $"[value=auto] - Zoops towards the {direction} direction.", (args) =>
     {
       HammerHelper.CheatCheck();
-      var ghost = HammerHelper.GetPlacementGhost();
+      HammerHelper.GetPlacementGhost();
       var value = "auto";
       if (args.Args.Length > 1)
         value = args[1];
@@ -101,8 +101,7 @@ public partial class ObjectSelection : BaseSelection
   private void AddChildSub(Vector3Int index)
   {
     var pos = GetOffset(index);
-    var baseObj = Zoops.Count == 0 ? SelectedObject : Zoops.First().Value;
-    Zoops[index] = AddObject(baseObj, pos);
+    Zoops[index] = AddObject(BaseObject, pos);
   }
   private void AddChildX(string offset)
   {
@@ -142,22 +141,20 @@ public partial class ObjectSelection : BaseSelection
   }
   private void UpdateOffsetX(string offset)
   {
-    var baseObj = SelectedObject.transform.GetChild(0).gameObject;
-    var size = HammerHelper.ParseSize(baseObj, offset);
+    var size = HammerHelper.ParseSize(BaseObject, offset);
     ZoopOffset.x = size.x * SelectedObject.transform.localScale.z;
   }
   private void UpdateOffsetY(string offset)
   {
-    var baseObj = SelectedObject.transform.GetChild(0).gameObject;
-    var size = HammerHelper.ParseSize(baseObj, offset);
+    var size = HammerHelper.ParseSize(BaseObject, offset);
     ZoopOffset.y = size.y * SelectedObject.transform.localScale.y;
   }
   private void UpdateOffsetZ(string offset)
   {
-    var baseObj = SelectedObject.transform.GetChild(0).gameObject;
-    var size = HammerHelper.ParseSize(baseObj, offset);
+    var size = HammerHelper.ParseSize(BaseObject, offset);
     ZoopOffset.z = size.z * SelectedObject.transform.localScale.z;
   }
+  private GameObject BaseObject => Zoops.Count == 0 ? SelectedObject : Zoops.First().Value;
   private void ZoopPostprocess()
   {
     CountObjects();

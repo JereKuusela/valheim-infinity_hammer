@@ -225,35 +225,3 @@ public static class Position
     Helper.AddMessage(terminal, $"Offset set to forward: {Offset.z.ToString("F1", CultureInfo.InvariantCulture)}, up: {Offset.y.ToString("F1", CultureInfo.InvariantCulture)}, right: {Offset.x.ToString("F1", CultureInfo.InvariantCulture)}.");
   }
 }
-public static class Rotating
-{
-  public static void UpdatePlacementRotation(GameObject obj)
-  {
-    var player = Helper.GetPlayer();
-    var rotation = obj.transform.rotation;
-    player.m_placeRotation = Mathf.RoundToInt(rotation.eulerAngles.y / 22.5f);
-    GizmoWrapper.Set(rotation);
-  }
-  public static void RotateX(float value)
-  {
-    Helper.GetPlayer();
-    GizmoWrapper.RotateX(value);
-  }
-  public static void RotateY(float value)
-  {
-    var player = Helper.GetPlayer();
-    player.m_placeRotation = Mathf.RoundToInt(((player.m_placeRotation * 22.5f) + value) / 22.5f);
-    GizmoWrapper.RotateY(value);
-  }
-  public static void RotateZ(float value)
-  {
-    Helper.GetPlayer();
-    GizmoWrapper.RotateZ(value);
-  }
-  public static void Set(Quaternion rotation)
-  {
-    var player = Helper.GetPlayer();
-    player.m_placeRotation = Mathf.RoundToInt(rotation.eulerAngles.y / 22.5f);
-    GizmoWrapper.Set(rotation);
-  }
-}

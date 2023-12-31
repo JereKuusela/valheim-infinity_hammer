@@ -170,7 +170,7 @@ public class HammerBlueprintCommand
       bp.Center("");
       var obj = Selection.Create(new ObjectSelection(args.Context, bp, scale));
       Position.Override = bp.Coordinates;
-      Rotating.Set(Quaternion.Euler(bp.Rotation));
+      PlaceRotation.Set(Quaternion.Euler(bp.Rotation));
       PrintSelected(args.Context, bp.Name);
     });
   }
