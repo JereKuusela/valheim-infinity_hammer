@@ -142,25 +142,25 @@ public partial class ObjectSelection : BaseSelection
   private void UpdateOffsetX(string offset)
   {
     var size = HammerHelper.ParseSize(BaseObject, offset);
-    ZoopOffset.x = size.x * SelectedObject.transform.localScale.z;
+    ZoopOffset.x = size.x * BaseObject.transform.localScale.z;
   }
   private void UpdateOffsetY(string offset)
   {
     var size = HammerHelper.ParseSize(BaseObject, offset);
-    ZoopOffset.y = size.y * SelectedObject.transform.localScale.y;
+    ZoopOffset.y = size.y * BaseObject.transform.localScale.y;
   }
   private void UpdateOffsetZ(string offset)
   {
     var size = HammerHelper.ParseSize(BaseObject, offset);
-    ZoopOffset.z = size.z * SelectedObject.transform.localScale.z;
+    ZoopOffset.z = size.z * BaseObject.transform.localScale.z;
   }
-  private GameObject BaseObject => Zoops.Count == 0 ? SelectedObject : Zoops.First().Value;
+  private GameObject BaseObject => Zoops.Count == 0 ? SelectedPrefab : Zoops.First().Value;
   private void ZoopPostprocess()
   {
     CountObjects();
-    var scale = Scaling.Build.Value;
+    var scale = Scale.Value;
     Helper.GetPlayer().SetupPlacementGhost();
-    Scaling.Build.SetScale(scale);
+    Scale.SetScale(scale);
   }
   public void ZoopRight(string offset)
   {

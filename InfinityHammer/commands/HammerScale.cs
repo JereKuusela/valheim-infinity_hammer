@@ -20,11 +20,16 @@ public class HammerScaleCommand
     {
       HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
-      if (Selection.Get().IsTool) return;
+      var selection = Selection.Get();
       if (!Helper.GetPlayer().InPlaceMode()) return;
+      if (!selection.IsScalingSupported())
+      {
+        Helper.AddMessage(args.Context, "Selected object doesn't support scaling.");
+        return;
+      }
       var direction = args.Length > 2 ? args[2] : "";
-      Scale(args[1], direction, action(Scaling.Get()));
-      Scaling.PrintScale(args.Context);
+      Scale(args[1], direction, action(selection.Scale));
+      selection.Scale.Print(args.Context);
     });
   }
   private static void Command(string name)
@@ -37,13 +42,15 @@ public class HammerScaleCommand
     Helper.Command(name, "[amount or x,z,y] - Sets the scale (if the object supports it).", (args) =>
     {
       HammerHelper.CheatCheck();
-      if (Selection.Get().IsTool) return;
+      var selection = Selection.Get();
       if (!Helper.GetPlayer().InPlaceMode()) return;
-      var scaling = Scaling.Get();
-      var scale = Parse.Scale(Parse.Split(args[1])) * Parse.Direction(args.Args, 2);
-      scaling.SetScale(scale);
-      Scaling.UpdateGhost();
-      Scaling.PrintScale(args.Context);
+      if (!selection.IsScalingSupported())
+      {
+        Helper.AddMessage(args.Context, "Selected object doesn't support scaling.");
+        return;
+      }
+      selection.SetScale(Parse.Scale(Parse.Split(args[1])) * Parse.Direction(args.Args, 2));
+      selection.Scale.Print(args.Context);
     });
   }
   public HammerScaleCommand()

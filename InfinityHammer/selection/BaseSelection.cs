@@ -16,7 +16,7 @@ public class BaseSelection
 
 #nullable disable
   ///<summary>Copy of the selected entity. Only needed for the placement ghost because armor and item stands have a different model depending on their state.</summary>
-  protected GameObject SelectedObject = null;
+  protected GameObject SelectedPrefab = null;
 #nullable enable
   public bool SingleUse = false;
   public string ExtraDescription = "";
@@ -25,13 +25,20 @@ public class BaseSelection
   public virtual bool Continuous => false;
   public virtual bool PlayerHeight => false;
   public virtual float MaxPlaceDistance(float value) => Configuration.Range > 0f ? Configuration.Range : value;
-  public Piece GetSelectedPiece() => SelectedObject ? SelectedObject.GetComponent<Piece>() : null!;
-  public void Destroy() => UnityEngine.Object.Destroy(SelectedObject);
+  public Piece GetSelectedPiece() => SelectedPrefab ? SelectedPrefab.GetComponent<Piece>() : null!;
+  public void Destroy() => UnityEngine.Object.Destroy(SelectedPrefab);
+  public ToolScaling Scale = new(true, false);
 
   public void SetScale(Vector3 scale)
   {
-    if (SelectedObject)
-      SelectedObject.transform.localScale = scale;
+    if (!IsScalingSupported())
+      scale = Vector3.one;
+    if (SelectedPrefab)
+      SelectedPrefab.transform.localScale = scale;
+    Scale.SetScale(scale);
+    var player = Helper.GetPlayer();
+    if (player.m_placementGhost)
+      player.m_placementGhost.transform.localScale = scale;
   }
   public virtual ZDOData GetData(int index = 0) => new();
   public virtual int GetPrefab(int index = 0) => 0;

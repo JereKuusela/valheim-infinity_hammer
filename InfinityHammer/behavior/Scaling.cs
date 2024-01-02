@@ -80,47 +80,12 @@ public class ToolScaling(bool sanityY, bool minXZ)
     Value = value;
     Sanity();
   }
-}
-
-public static class Scaling
-{
-  public static ToolScaling Build = new(true, false);
-  public static ToolScaling Command = new(false, true);
-  public static ToolScaling Get() => Selection.Get().IsTool ? Command : Build;
-
-  public static void UpdateGhost()
-  {
-    if (Selection.Get().IsTool) return;
-    var ghost = HammerHelper.GetPlacementGhost();
-    if (!IsScalingSupported(ghost)) return;
-    ghost.transform.localScale = Build.Value;
-    Selection.Get().SetScale(Build.Value);
-  }
-  public static bool IsScalingSupported(GameObject obj)
-  {
-    if (!Configuration.Enabled) return false;
-    if (!obj) return false;
-    var selection = Selection.Get();
-    if (selection != null) return selection.IsScalingSupported();
-    // Ghost won't have netview so the selected piece must be used.
-    // This technically also works for the build window if other mods add scalable objects there.
-    var prefab = ZNetScene.instance.GetPrefab(Utils.GetPrefabName(obj));
-    if (prefab && prefab.TryGetComponent<ZNetView>(out var view)) return view.m_syncInitialScale;
-    return false;
-  }
-  public static void PrintScale(Terminal terminal)
+  public void Print(Terminal terminal)
   {
     if (Configuration.DisableScaleMessages) return;
-    var scaling = Get();
-    if (IsScalingSupported(HammerHelper.GetPlacementGhost()))
-    {
-      if (scaling.X != scaling.Y || scaling.X != scaling.Z)
-        Helper.AddMessage(terminal, $"Scale set to X: {scaling.X:P0}, Z: {scaling.Z:P0}, Y: {scaling.Y:P0}.");
-      else
-        Helper.AddMessage(terminal, $"Scale set to {scaling.Y:P0}.");
-
-    }
+    if (X != Y || X != Z)
+      Helper.AddMessage(terminal, $"Scale set to X: {X:P0}, Z: {Z:P0}, Y: {Y:P0}.");
     else
-      Helper.AddMessage(terminal, "Selected object doesn't support scaling.");
+      Helper.AddMessage(terminal, $"Scale set to {Y:P0}.");
   }
 }

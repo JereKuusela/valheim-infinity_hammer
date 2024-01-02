@@ -27,7 +27,8 @@ public class PlacePiece
       Hammer.Clear();
     }
   }
-  static GameObject GetPrefab(GameObject obj) => Configuration.Enabled ? Selection.Get().GetPrefab(obj) : obj;
+  // Parameter is the selected piece which doesn't have the correct transformation.
+  static GameObject GetPrefab(GameObject obj) => Configuration.Enabled ? Selection.Get().GetPrefab(HammerHelper.GetPlacementGhost()) : obj;
 
   static void Postprocess(GameObject obj)
   {
@@ -115,8 +116,6 @@ public class SetupPlacementGhost
   public static void Postfix(Player __instance)
   {
     if (!__instance.m_placementGhost) return;
-    // Ensures that the scale is reseted when selecting objects from the build menu.
-    Scaling.Build.SetScale(__instance.m_placementGhost.transform.localScale);
     // When copying an existing object, the copy is inactive.
     // So the ghost must be manually activated while disabling ZNet stuff.
     if (__instance.m_placementGhost && !__instance.m_placementGhost.activeSelf)

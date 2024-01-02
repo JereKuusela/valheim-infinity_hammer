@@ -8,14 +8,14 @@ namespace InfinityHammer;
 
 public class LocationSelection : BaseSelection
 {
-  public SelectedObject Object;
+  private readonly SelectedObject Object;
 
   public LocationSelection(ZoneSystem.ZoneLocation location, int seed)
   {
     if (location == null) throw new InvalidOperationException("Location not found.");
     if (!location.m_prefab) throw new InvalidOperationException("Invalid location");
-    SelectedObject = HammerHelper.SafeInstantiateLocation(location, Hammer.AllLocationsObjects ? null : seed);
-    HammerHelper.EnsurePiece(SelectedObject);
+    SelectedPrefab = HammerHelper.SafeInstantiateLocation(location, Hammer.AllLocationsObjects ? null : seed);
+    HammerHelper.EnsurePiece(SelectedPrefab);
     ZDOData data = new();
     data.Set(Hash.Location, location.m_prefabName.GetStableHashCode());
     data.Set(Hash.Seed, seed);
@@ -50,10 +50,5 @@ public class LocationSelection : BaseSelection
     CustomizeSpawnLocation.RandomDamage = null;
     CustomizeSpawnLocation.AllViews = false;
     Undo.StopTracking();
-  }
-
-  ///<summary>Replaces LocationProxy with the actual location.</summary>
-  private static void SpawnLocation()
-  {
   }
 }

@@ -22,11 +22,11 @@ public partial class ObjectSelection : BaseSelection
     if (prefab.GetComponent<Player>()) throw new InvalidOperationException("Players are not valid objects.");
     if (!Configuration.AllObjects && !HammerHelper.IsBuildPiece(prefab)) throw new InvalidOperationException("Only build pieces are allowed.");
     SingleUse = singleUse;
-    SelectedObject = HammerHelper.SafeInstantiate(prefab);
-    HammerHelper.EnsurePiece(SelectedObject);
+    SelectedPrefab = HammerHelper.SafeInstantiate(prefab);
+    HammerHelper.EnsurePiece(SelectedPrefab);
     Objects.Add(new(name, prefab.GetComponent<ZNetView>().m_syncInitialScale, new()));
     // Reset for zoop bounds check.
-    SelectedObject.transform.rotation = Quaternion.identity;
+    SelectedPrefab.transform.rotation = Quaternion.identity;
   }
   public ObjectSelection(ZNetView view, bool singleUse)
   {
@@ -39,22 +39,24 @@ public partial class ObjectSelection : BaseSelection
     if (prefab.GetComponent<Player>()) throw new InvalidOperationException("Players are not valid objects.");
     if (!Configuration.AllObjects && !HammerHelper.IsBuildPiece(prefab)) throw new InvalidOperationException("Only build pieces are allowed.");
     SingleUse = singleUse;
-    SelectedObject = HammerHelper.SafeInstantiate(prefab);
-    HammerHelper.EnsurePiece(SelectedObject);
-    ResetColliders(SelectedObject, originalPrefab);
+    SelectedPrefab = HammerHelper.SafeInstantiate(prefab);
+    SelectedPrefab.transform.position = Vector3.zero;
+    HammerHelper.EnsurePiece(SelectedPrefab);
+    ResetColliders(SelectedPrefab, originalPrefab);
     Objects.Add(new(name, view.m_syncInitialScale, data));
-    PlaceRotation.Set(SelectedObject);
+    PlaceRotation.Set(SelectedPrefab);
     // Reset for zoop bounds check.
-    SelectedObject.transform.rotation = Quaternion.identity;
+    SelectedPrefab.transform.rotation = Quaternion.identity;
+    SetScale(prefab.transform.localScale);
   }
   public ObjectSelection(IEnumerable<ZNetView> views, bool singleUse)
   {
     SingleUse = singleUse;
-    SelectedObject = new GameObject();
+    SelectedPrefab = new GameObject();
     // Prevents children from disappearing.
-    SelectedObject.SetActive(false);
-    SelectedObject.name = $"Multiple ({views.Count()})";
-    SelectedObject.transform.position = views.First().transform.position;
+    SelectedPrefab.SetActive(false);
+    SelectedPrefab.name = $"Multiple ({views.Count()})";
+    SelectedPrefab.transform.position = views.First().transform.position;
     ZNetView.m_forceDisableInit = true;
     foreach (var view in views)
     {
@@ -62,7 +64,7 @@ public partial class ObjectSelection : BaseSelection
       var name = Utils.GetPrefabName(originalPrefab);
       var prefab = Configuration.CopyState ? view.gameObject : originalPrefab;
       ZDOData data = Configuration.CopyState ? new(view.GetZDO()) : new();
-      var obj = HammerHelper.SafeInstantiate(prefab, SelectedObject);
+      var obj = HammerHelper.SafeInstantiate(prefab, SelectedPrefab);
       obj.SetActive(true);
       obj.transform.position = view.transform.position;
       obj.transform.rotation = view.transform.rotation;
@@ -74,19 +76,19 @@ public partial class ObjectSelection : BaseSelection
     }
     ZNetView.m_forceDisableInit = false;
     CountObjects();
-    PlaceRotation.Set(SelectedObject);
+    PlaceRotation.Set(SelectedPrefab);
   }
 
 
   public ObjectSelection(Terminal terminal, Blueprint bp, Vector3 scale)
   {
-    SelectedObject = new GameObject();
+    SelectedPrefab = new GameObject();
     // Prevents children from disappearing.
-    SelectedObject.SetActive(false);
-    SelectedObject.name = bp.Name;
-    SelectedObject.transform.localScale = scale;
-    SelectedObject.transform.position = Helper.GetPlayer().transform.position;
-    var piece = SelectedObject.AddComponent<Piece>();
+    SelectedPrefab.SetActive(false);
+    SelectedPrefab.name = bp.Name;
+    SelectedPrefab.transform.localScale = scale;
+    SelectedPrefab.transform.position = Helper.GetPlayer().transform.position;
+    var piece = SelectedPrefab.AddComponent<Piece>();
     piece.m_name = bp.Name;
     piece.m_description = bp.Description;
     if (piece.m_description == "")
@@ -96,7 +98,7 @@ public partial class ObjectSelection : BaseSelection
     {
       try
       {
-        var obj = HammerHelper.SafeInstantiate(item.Prefab, SelectedObject);
+        var obj = HammerHelper.SafeInstantiate(item.Prefab, SelectedPrefab);
         obj.SetActive(true);
         obj.transform.localPosition = item.Pos;
         obj.transform.localRotation = item.Rot;
@@ -114,18 +116,17 @@ public partial class ObjectSelection : BaseSelection
     foreach (var position in bp.SnapPoints)
     {
       SnapObj.SetActive(false);
-      var snapObj = UnityEngine.Object.Instantiate(SnapObj, SelectedObject.transform);
+      var snapObj = UnityEngine.Object.Instantiate(SnapObj, SelectedPrefab.transform);
       snapObj.transform.localPosition = position;
     }
-    piece.m_clipEverything = HammerHelper.CountSnapPoints(SelectedObject) == 0;
+    piece.m_clipEverything = HammerHelper.CountSnapPoints(SelectedPrefab) == 0;
     ZNetView.m_forceDisableInit = false;
-    Scaling.Get().SetScale(SelectedObject.transform.localScale);
   }
 
   public void Mirror()
   {
     var i = 0;
-    foreach (Transform tr in SelectedObject.transform)
+    foreach (Transform tr in SelectedPrefab.transform)
     {
       var prefab = i < Objects.Count ? Objects[i].Prefab : "";
       i += 1;
@@ -148,26 +149,24 @@ public partial class ObjectSelection : BaseSelection
   {
     if (Objects.Count == 1)
     {
-      Postprocess(SelectedObject, GetData());
-      HammerHelper.EnsurePiece(SelectedObject);
-      if (HammerHelper.CountSnapPoints(SelectedObject) == 0)
+      Postprocess(SelectedPrefab, GetData());
+      HammerHelper.EnsurePiece(SelectedPrefab);
+      if (HammerHelper.CountSnapPoints(SelectedPrefab) == 0)
       {
         SnapObj.SetActive(false);
-        UnityEngine.Object.Instantiate(SnapObj, SelectedObject.transform);
+        UnityEngine.Object.Instantiate(SnapObj, SelectedPrefab.transform);
       }
     }
     else
     {
       var i = 0;
-      foreach (Transform tr in SelectedObject.transform)
+      foreach (Transform tr in SelectedPrefab.transform)
       {
         if (HammerHelper.IsSnapPoint(tr.gameObject)) continue;
         Postprocess(tr.gameObject, GetData(i++));
       }
     }
-    if (scale.HasValue && Scaling.IsScalingSupported(SelectedObject))
-      SetScale(scale.Value);
-    Scaling.Get().SetScale(SelectedObject.transform.localScale);
+    SetScale(scale ?? SelectedPrefab.transform.localScale);
   }
 
   private void Postprocess(GameObject obj, ZDOData? zdo)
@@ -312,11 +311,11 @@ public partial class ObjectSelection : BaseSelection
   private void CountObjects()
   {
     if (Objects.Count < 2) return;
-    SelectedObject.name = $"Multiple ({HammerHelper.CountActiveChildren(SelectedObject)})";
-    var piece = SelectedObject.GetComponent<Piece>();
-    if (!piece) piece = SelectedObject.AddComponent<Piece>();
-    piece.m_clipEverything = HammerHelper.CountSnapPoints(SelectedObject) == 0;
-    piece.m_name = SelectedObject.name;
+    SelectedPrefab.name = $"Multiple ({HammerHelper.CountActiveChildren(SelectedPrefab)})";
+    var piece = SelectedPrefab.GetComponent<Piece>();
+    if (!piece) piece = SelectedPrefab.AddComponent<Piece>();
+    piece.m_clipEverything = HammerHelper.CountSnapPoints(SelectedPrefab) == 0;
+    piece.m_name = SelectedPrefab.name;
     Dictionary<string, int> counts = Objects.GroupBy(obj => obj.Prefab).ToDictionary(kvp => kvp.Key, kvp => kvp.Count());
     var topKeys = counts.OrderBy(kvp => kvp.Value).Reverse().ToArray();
     if (topKeys.Length <= 5)
@@ -331,12 +330,12 @@ public partial class ObjectSelection : BaseSelection
   {
     List<GameObject> added = [];
     // Null reference exception is sometimes thrown, no idea why but added some checks.
-    if (!SelectedObject || !obj || !SnapObj) return added;
+    if (!SelectedPrefab || !obj || !SnapObj) return added;
     foreach (Transform tr in obj.transform)
     {
       if (!tr || !HammerHelper.IsSnapPoint(tr.gameObject)) continue;
       SnapObj.SetActive(false);
-      var snapObj = UnityEngine.Object.Instantiate(SnapObj, SelectedObject.transform);
+      var snapObj = UnityEngine.Object.Instantiate(SnapObj, SelectedPrefab.transform);
       snapObj.transform.position = tr.position;
       added.Add(snapObj);
     }
@@ -376,7 +375,6 @@ public partial class ObjectSelection : BaseSelection
   {
     if (Objects.Count == 1)
     {
-
       var view = obj.GetComponent<ZNetView>();
       // Hoe adds pieces too.
       if (!view) return;
@@ -386,7 +384,7 @@ public partial class ObjectSelection : BaseSelection
     }
     else
     {
-      HandleMultiple(SelectedObject);
+      HandleMultiple(HammerHelper.GetPlacementGhost());
       UnityEngine.Object.Destroy(obj);
     }
   }
@@ -415,7 +413,7 @@ public partial class ObjectSelection : BaseSelection
   {
     if (Objects.Count == 1)
       ToMulti();
-    var obj = HammerHelper.SafeInstantiate(baseObj, SelectedObject);
+    var obj = HammerHelper.SafeInstantiate(baseObj, SelectedPrefab);
     obj.SetActive(true);
     obj.transform.rotation = baseObj.transform.rotation;
     obj.transform.localPosition = pos;
@@ -425,13 +423,13 @@ public partial class ObjectSelection : BaseSelection
   }
   private void ToMulti()
   {
-    var obj = SelectedObject;
-    SelectedObject = new GameObject();
+    var obj = SelectedPrefab;
+    SelectedPrefab = new GameObject();
     // Prevents children from disappearing.
-    SelectedObject.SetActive(false);
-    SelectedObject.transform.position = obj.transform.position;
-    SelectedObject.transform.rotation = obj.transform.rotation;
-    obj.transform.parent = SelectedObject.transform;
+    SelectedPrefab.SetActive(false);
+    SelectedPrefab.transform.position = obj.transform.position;
+    SelectedPrefab.transform.rotation = obj.transform.rotation;
+    obj.transform.parent = SelectedPrefab.transform;
     obj.transform.localScale = Vector3.one;
     obj.SetActive(true);
     AddSnapPoints(obj);
@@ -456,12 +454,12 @@ public partial class ObjectSelection : BaseSelection
   }
   private void ToSingle()
   {
-    var obj = SelectedObject.transform.GetChild(0).gameObject;
+    var obj = SelectedPrefab.transform.GetChild(0).gameObject;
     obj.SetActive(false);
     HammerHelper.EnsurePiece(obj);
     obj.transform.parent = null;
-    UnityEngine.Object.Destroy(SelectedObject);
-    SelectedObject = obj;
+    UnityEngine.Object.Destroy(SelectedPrefab);
+    SelectedPrefab = obj;
     Objects = Objects.Take(1).ToList();
   }
 }

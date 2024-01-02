@@ -28,12 +28,18 @@ public class HammerZoomCommand
     {
       HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
-      if (Selection.Get().IsTool) return;
+      var selection = Selection.Get();
       if (!Helper.GetPlayer().InPlaceMode()) return;
+      if (!selection.IsScalingSupported())
+      {
+        Helper.AddMessage(args.Context, "Selected object doesn't support scaling.");
+        return;
+      }
       var direction = args.Length > 2 ? args[2] : "";
-      Zoom(args[1], direction, action(Scaling.Get()));
-      Scaling.UpdateGhost();
-      Scaling.PrintScale(args.Context);
+      var scale = selection.Scale;
+      Zoom(args[1], direction, action(scale));
+      selection.SetScale(scale.Value);
+      selection.Scale.Print(args.Context);
     });
   }
   private static void Command(string name)
@@ -47,9 +53,14 @@ public class HammerZoomCommand
     {
       HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
-      if (Selection.Get().IsTool) return;
+      var selection = Selection.Get();
       if (!Helper.GetPlayer().InPlaceMode()) return;
-      var scale = Scaling.Get();
+      if (!selection.IsScalingSupported())
+      {
+        Helper.AddMessage(args.Context, "Selected object doesn't support scaling.");
+        return;
+      }
+      var scale = selection.Scale;
       var split = args[1].Split(',');
       var direction = args.Length > 2 ? args[2] : "";
       if (split.Length == 1)
@@ -62,8 +73,9 @@ public class HammerZoomCommand
       }
       else
         throw new InvalidOperationException("Must either have 1 or 3 values.");
-      Scaling.UpdateGhost();
-      Scaling.PrintScale(args.Context);
+      selection.SetScale(scale.Value);
+      selection.Scale.Print(args.Context);
+
     });
   }
   public HammerZoomCommand()
