@@ -4,7 +4,7 @@ using UnityEngine;
 namespace InfinityHammer;
 public class HammerLocationCommand
 {
-  private static void PrintSelected(Terminal terminal, Piece obj)
+  private static void PrintSelected(Terminal terminal, GameObject obj)
   {
     if (Configuration.DisableSelectMessages) return;
     var name = obj ? Utils.GetPrefabName(obj.gameObject) : "";
@@ -33,9 +33,9 @@ public class HammerLocationCommand
         var seed = args.TryParameterInt(2, rng.Next());
         if (seed == 0) seed = rng.Next();
         var location = ZoneSystem.instance.GetLocation(args[1].GetStableHashCode());
-        var selected = Selection.Create(new LocationSelection(location, seed));
-        selected.name = args[1];
-        PrintSelected(args.Context, selected);
+        var ghost = Selection.CreateGhost(new LocationSelection(location, seed));
+        ghost.name = args[1];
+        PrintSelected(args.Context, ghost);
       }
       catch (InvalidOperationException e)
       {

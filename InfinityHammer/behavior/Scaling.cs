@@ -1,15 +1,36 @@
+using System.Collections.Generic;
 using ServerDevcommands;
 using UnityEngine;
 namespace InfinityHammer;
-public class ToolScaling(bool sanityY, bool minXZ)
+public class Scaling()
+{
+  private static readonly ScalingData PieceScaling = new(true, false, true, Vector3.one);
+  private static readonly ScalingData ToolScaling = new(false, true, false, new(10f, 0f, 10f));
+  public static void Set(Vector3 value) => Get().SetScale(value);
+  public static void Print(Terminal terminal) => Get().Print(terminal);
+  public static ScalingData Get() => Selection.Get().IsTool ? ToolScaling : PieceScaling;
+  public static Vector3 Value => Get().Value;
+}
+
+
+public class ScalingData(bool sanityY, bool minXZ, bool printChanges, Vector3 value)
 {
   private readonly bool SanityY = sanityY;
   private readonly bool MinXZ = minXZ;
-  public Vector3 Value = Vector3.one;
+  public Vector3 Value = value;
+  private readonly bool PrintChanges = printChanges;
   public float X => MinXZ ? Mathf.Max(0.25f, Value.x) : Value.x;
   public float Y => Value.y;
   public float Z => MinXZ ? Mathf.Max(0.25f, Value.z) : Value.z;
-
+  public void Print(Terminal terminal)
+  {
+    if (!PrintChanges) return;
+    if (Configuration.DisableScaleMessages) return;
+    if (X != Y || X != Z)
+      Helper.AddMessage(terminal, $"Scale set to X: {X:P0}, Z: {Z:P0}, Y: {Y:P0}.");
+    else
+      Helper.AddMessage(terminal, $"Scale set to {Y:P0}.");
+  }
   private void Sanity()
   {
     Value.x = Mathf.Max(0f, Value.x);
@@ -19,6 +40,8 @@ public class ToolScaling(bool sanityY, bool minXZ)
     // Little hack to keep scalings more consistent.
     if (Mathf.Approximately(Value.x, Value.z))
       Value.x = Value.z;
+    if (Mathf.Approximately(Value.y, 0f))
+      Value.y = 0f;
   }
 
   public void SetPrecisionXZ(float min, float precision)
@@ -79,13 +102,5 @@ public class ToolScaling(bool sanityY, bool minXZ)
   {
     Value = value;
     Sanity();
-  }
-  public void Print(Terminal terminal)
-  {
-    if (Configuration.DisableScaleMessages) return;
-    if (X != Y || X != Z)
-      Helper.AddMessage(terminal, $"Scale set to X: {X:P0}, Z: {Z:P0}, Y: {Y:P0}.");
-    else
-      Helper.AddMessage(terminal, $"Scale set to {Y:P0}.");
   }
 }

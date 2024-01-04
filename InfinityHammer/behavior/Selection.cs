@@ -27,13 +27,14 @@ public static partial class Selection
     selection.Destroy();
     Selections.Remove(HammerHelper.GetTool());
   }
-  public static Piece Create(BaseSelection selection)
+  public static GameObject CreateGhost(BaseSelection selection)
   {
     Clear();
     selection.Activate();
     Selections[HammerHelper.GetTool()] = selection;
-    Helper.GetPlayer().SetupPlacementGhost();
-    return selection.GetSelectedPiece();
+    var player = Helper.GetPlayer();
+    player.SetupPlacementGhost();
+    return player.m_placementGhost;
   }
 }
 
@@ -103,7 +104,7 @@ public class PieceTableSetSelected
     var index = __instance.GetSelectedIndex();
     var piece = __instance.GetPiece((int)__instance.m_selectedCategory, index);
     if (piece && piece.GetComponent<ZNetView>())
-      Selection.Create(new ObjectSelection(Utils.GetPrefabName(piece.gameObject), false));
+      Selection.CreateGhost(new ObjectSelection(Utils.GetPrefabName(piece.gameObject), false));
   }
 }
 ///<summary>Overrides the piece selection.</summary>

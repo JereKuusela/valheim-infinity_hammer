@@ -8,7 +8,7 @@ public class HammerScaleCommand
     var amount = Parse.Direction(direction) * Parse.Float(amountStr, 1f);
     action(amount);
   }
-  private static void CommandAxis(string name, string axis, Func<ToolScaling, Action<float>> action)
+  private static void CommandAxis(string name, string axis, Func<ScalingData, Action<float>> action)
   {
     name = $"{name}_{axis}";
     AutoComplete.Register(name, (int index) =>
@@ -28,8 +28,8 @@ public class HammerScaleCommand
         return;
       }
       var direction = args.Length > 2 ? args[2] : "";
-      Scale(args[1], direction, action(selection.Scale));
-      selection.Scale.Print(args.Context);
+      Scale(args[1], direction, action(Scaling.Get()));
+      Scaling.Print(args.Context);
     });
   }
   private static void Command(string name)
@@ -50,7 +50,7 @@ public class HammerScaleCommand
         return;
       }
       selection.SetScale(Parse.Scale(Parse.Split(args[1])) * Parse.Direction(args.Args, 2));
-      selection.Scale.Print(args.Context);
+      Scaling.Print(args.Context);
     });
   }
   public HammerScaleCommand()

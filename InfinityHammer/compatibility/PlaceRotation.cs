@@ -33,6 +33,8 @@ public static class PlaceRotation
   }
   public static void RotateY(float rotation)
   {
+    var player = Helper.GetPlayer();
+    player.m_placeRotation = Mathf.RoundToInt(((player.m_placeRotation * 22.5f) + rotation) / 22.5f);
     Rotate(new Vector3(0f, rotation, 0f));
   }
   public static void RotateZ(float rotation)

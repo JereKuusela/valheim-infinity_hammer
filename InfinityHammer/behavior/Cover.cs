@@ -87,26 +87,3 @@ public class AddCoverText {
     __instance.m_pieceDescription.text += " " + CoverCheck.CurrentCover;
   }
 }*/
-
-[HarmonyPatch(typeof(Hud), nameof(Hud.SetupPieceInfo))]
-public class AddExtraInfo
-{
-  private static string DescriptionHover(BaseSelection selection)
-  {
-    if (!selection.IsTool) return "";
-    //if (!Selection.Tool().IsId) return "";
-    var hovered = Selector.GetHovered(Configuration.Range, Configuration.IgnoredIds);
-    var name = hovered == null ? "" : Utils.GetPrefabName(hovered.gameObject);
-    return $"id: {name}";
-  }
-  public static void Postfix(Hud __instance, Piece piece)
-  {
-    if (!piece) return;
-    var selection = Selection.Get();
-    var lines = new[] { selection.ExtraDescription, DescriptionHover(selection) };
-    var text = string.Join("\n", lines.Where(s => s != ""));
-    if (__instance.m_pieceDescription.text != "")
-      text = "\n" + text;
-    __instance.m_pieceDescription.text += text;
-  }
-}

@@ -149,7 +149,7 @@ public class HammerBlueprintCommand
       var scale = args.Length > 3 ? Parse.Scale(Parse.Split(args[3])) : Vector3.one;
       var bp = GetBluePrint(name);
       bp.Center(centerPiece);
-      var obj = Selection.Create(new ObjectSelection(args.Context, bp, scale));
+      var obj = Selection.CreateGhost(new ObjectSelection(args.Context, bp, scale));
       PrintSelected(args.Context, bp.Name);
     });
 
@@ -168,7 +168,7 @@ public class HammerBlueprintCommand
       var scale = args.Length > 2 ? Parse.Scale(Parse.Split(args[2])) : Vector3.one;
       var bp = GetBluePrint(name);
       bp.Center("");
-      var obj = Selection.Create(new ObjectSelection(args.Context, bp, scale));
+      var obj = Selection.CreateGhost(new ObjectSelection(args.Context, bp, scale));
       Position.Override = bp.Coordinates;
       PlaceRotation.Set(Quaternion.Euler(bp.Rotation));
       PrintSelected(args.Context, bp.Name);

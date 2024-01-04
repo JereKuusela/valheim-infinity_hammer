@@ -27,15 +27,13 @@ public class BaseSelection
   public virtual float MaxPlaceDistance(float value) => Configuration.Range > 0f ? Configuration.Range : value;
   public Piece GetSelectedPiece() => SelectedPrefab ? SelectedPrefab.GetComponent<Piece>() : null!;
   public void Destroy() => UnityEngine.Object.Destroy(SelectedPrefab);
-  public ToolScaling Scale = new(true, false);
-
   public void SetScale(Vector3 scale)
   {
     if (!IsScalingSupported())
       scale = Vector3.one;
     if (SelectedPrefab)
       SelectedPrefab.transform.localScale = scale;
-    Scale.SetScale(scale);
+    Scaling.Set(scale);
     var player = Helper.GetPlayer();
     if (player.m_placementGhost)
       player.m_placementGhost.transform.localScale = scale;

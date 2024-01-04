@@ -16,7 +16,7 @@ public class HammerZoomCommand
       action(amount, 0f);
     }
   }
-  private static void CommandAxis(string name, string axis, Func<ToolScaling, Action<float, float>> action)
+  private static void CommandAxis(string name, string axis, Func<ScalingData, Action<float, float>> action)
   {
     name = $"{name}_{axis}";
     AutoComplete.Register(name, (int index) =>
@@ -36,10 +36,10 @@ public class HammerZoomCommand
         return;
       }
       var direction = args.Length > 2 ? args[2] : "";
-      var scale = selection.Scale;
+      var scale = Scaling.Get();
       Zoom(args[1], direction, action(scale));
       selection.SetScale(scale.Value);
-      selection.Scale.Print(args.Context);
+      Scaling.Print(args.Context);
     });
   }
   private static void Command(string name)
@@ -60,7 +60,7 @@ public class HammerZoomCommand
         Helper.AddMessage(args.Context, "Selected object doesn't support scaling.");
         return;
       }
-      var scale = selection.Scale;
+      var scale = Scaling.Get();
       var split = args[1].Split(',');
       var direction = args.Length > 2 ? args[2] : "";
       if (split.Length == 1)
@@ -74,7 +74,7 @@ public class HammerZoomCommand
       else
         throw new InvalidOperationException("Must either have 1 or 3 values.");
       selection.SetScale(scale.Value);
-      selection.Scale.Print(args.Context);
+      Scaling.Print(args.Context);
 
     });
   }

@@ -158,9 +158,9 @@ public partial class ObjectSelection : BaseSelection
   private void ZoopPostprocess()
   {
     CountObjects();
-    var scale = Scale.Value;
+    var scale = Scaling.Get().Value;
     Helper.GetPlayer().SetupPlacementGhost();
-    Scale.SetScale(scale);
+    Scaling.Set(scale);
   }
   public void ZoopRight(string offset)
   {

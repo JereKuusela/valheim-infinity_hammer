@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ServerDevcommands;
 using Service;
+using UnityEngine;
 namespace InfinityHammer;
 public class HammerSelect
 {
@@ -29,7 +30,7 @@ public class HammerSelect
     return -1;
   }
 
-  private static void PrintSelected(Terminal terminal, Piece obj)
+  private static void PrintSelected(Terminal terminal, GameObject obj)
   {
     if (Configuration.DisableSelectMessages) return;
     var scale = obj.transform.localScale;
@@ -138,11 +139,10 @@ public class HammerSelect
         }
       }
       if (selection == null) return;
-      var selectedPiece = selection.GetSelectedPiece();
       ZDOData extraData = new();
       if (pars.Health.HasValue)
       {
-        if (selectedPiece.GetComponent<Character>())
+        if (selection.GetSelectedPiece().GetComponent<Character>())
         {
           extraData.Set(Hash.Health, pars.Health.Value * 1.000001f);
           extraData.Set(Hash.MaxHealth, pars.Health.Value);
@@ -174,10 +174,10 @@ public class HammerSelect
         extraData.Set(Hash.Text, pars.Text);
       selection.UpdateZDOs(extraData);
       selection.Postprocess(pars.Scale);
-
-      Selection.Create(selection);
-      if (pars.Freeze) Position.Freeze(selectedPiece.transform.position);
-      PrintSelected(args.Context, selectedPiece);
+      Hammer.Clear();
+      var ghost = Selection.CreateGhost(selection);
+      if (pars.Freeze) Position.Freeze(views.Length > 0 ? views[0].transform.position : Helper.GetPlayer().transform.position);
+      PrintSelected(args.Context, ghost);
     });
   }
 }

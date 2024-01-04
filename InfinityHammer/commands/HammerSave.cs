@@ -181,7 +181,7 @@ public class HammerSaveCommand
       Directory.CreateDirectory(Path.GetDirectoryName(path));
       File.WriteAllLines(path, lines);
       args.Context.AddString($"Blueprint saved to {path.Replace("\\", "\\\\")} (pos: {HammerHelper.PrintXZY(bp.Coordinates)} rot: {HammerHelper.PrintYXZ(bp.Rotation)}).");
-      Selection.Create(new ObjectSelection(args.Context, bp, Vector3.one));
+      Selection.CreateGhost(new ObjectSelection(args.Context, bp, Vector3.one));
     });
   }
 }
