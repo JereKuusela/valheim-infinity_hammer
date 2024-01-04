@@ -125,30 +125,26 @@ public class HammerSaveCommand
       .. bp.Objects.Select(GetPlanBuildObject),
     ];
   }
-  private static string InvariantString(float f)
-  {
-    return f.ToString(NumberFormatInfo.InvariantInfo);
-  }
   private static string GetPlanBuildSnapPoint(Vector3 pos)
   {
-    var x = InvariantString(pos.x);
-    var y = InvariantString(pos.y);
-    var z = InvariantString(pos.z);
+    var x = HammerHelper.Format(pos.x);
+    var y = HammerHelper.Format(pos.y);
+    var z = HammerHelper.Format(pos.z);
     return $"{x};{y};{z}";
   }
   private static string GetPlanBuildObject(BlueprintObject obj)
   {
     var name = obj.Prefab;
-    var posX = InvariantString(obj.Pos.x);
-    var posY = InvariantString(obj.Pos.y);
-    var posZ = InvariantString(obj.Pos.z);
-    var rotX = InvariantString(obj.Rot.x);
-    var rotY = InvariantString(obj.Rot.y);
-    var rotZ = InvariantString(obj.Rot.z);
-    var rotW = InvariantString(obj.Rot.w);
-    var scaleX = InvariantString(obj.Scale.x);
-    var scaleY = InvariantString(obj.Scale.y);
-    var scaleZ = InvariantString(obj.Scale.z);
+    var posX = HammerHelper.Format(obj.Pos.x);
+    var posY = HammerHelper.Format(obj.Pos.y);
+    var posZ = HammerHelper.Format(obj.Pos.z);
+    var rotX = HammerHelper.Format(obj.Rot.x);
+    var rotY = HammerHelper.Format(obj.Rot.y);
+    var rotZ = HammerHelper.Format(obj.Rot.z);
+    var rotW = HammerHelper.Format(obj.Rot.w);
+    var scaleX = HammerHelper.Format(obj.Scale.x);
+    var scaleY = HammerHelper.Format(obj.Scale.y);
+    var scaleZ = HammerHelper.Format(obj.Scale.z);
     var info = obj.ExtraInfo;
     var data = "";
     if (obj.Data != null)

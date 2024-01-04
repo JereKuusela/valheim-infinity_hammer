@@ -1,17 +1,7 @@
 - v1.44
-  - Adds minimum radius of 0.25 to tools.
-  - Adds a new setting "Precise tools" (locks cursor to terrain grid, disables rotating).
-  - Adds new settings to disable specific tool shapes.
-  - Adds new command `hammer_tool` to select tools.
-  - Adds new command `hammer_export` and `hammer_import` to export and import tools.
-  - Adds a new field `highlight` to tools (highlights affected pieces).
-  - Adds a new field `snapGround` to tools (can be used to disable tool visual snapping to ground).
-  - Adds a new field `instant` to tools (can be used to execute command directly from the menu).
-  - Adds a new field `tabIndex` to tools (to define the build menu tab).
-  - Adds a new field `index` to tools (to define the position on build menu).
-  - Adds offset support to tools.
-  - Changes the default key binds for tools (scaling with just mouse wheel).
-  - Removes commands `hammer_command`, `hoe_command`, `hammer_add`, `hoe_add`, `hammer_remove` and `hoe_remove`.
+  - Tools split to Infinity Tools mod.
+  - Adds mandatory requirement of Server Devcommands mod.
+  - Changes number precision of blueprints from 6 to 3 (reduces file size).
 
 - v1.43
   - Adds a new setting to disable blueprint data saving.

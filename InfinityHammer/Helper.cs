@@ -9,8 +9,9 @@ using UnityEngine;
 namespace InfinityHammer;
 public static class HammerHelper
 {
-  public static string PrintXZY(Vector3 vec) => $"{vec.x.ToString(NumberFormatInfo.InvariantInfo)},{vec.z.ToString(NumberFormatInfo.InvariantInfo)},{vec.y.ToString(NumberFormatInfo.InvariantInfo)}";
-  public static string PrintYXZ(Vector3 vec) => $"{vec.y.ToString(NumberFormatInfo.InvariantInfo)},{vec.x.ToString(NumberFormatInfo.InvariantInfo)},{vec.z.ToString(NumberFormatInfo.InvariantInfo)}";
+  public static string Format(float value) => value.ToString("0.###", CultureInfo.InvariantCulture);
+  public static string PrintXZY(Vector3 vec) => $"{Format(vec.x)},{Format(vec.z)},{Format(vec.y)}";
+  public static string PrintYXZ(Vector3 vec) => $"{Format(vec.y)},{Format(vec.x)},{Format(vec.z)}";
   public static GameObject GetPlacementGhost()
   {
     var player = Helper.GetPlayer();
