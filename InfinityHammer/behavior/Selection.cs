@@ -117,18 +117,5 @@ public class GetSelectedPiece
 [HarmonyPatch(typeof(Player), nameof(Player.SetPlaceMode))]
 public class SelectionActivate
 {
-  private static BaseSelection? LastSelection = null;
-  static void Prefix()
-  {
-    var selection = Selection.Get();
-    if (selection == LastSelection) return;
-    LastSelection?.Deactivate();
-  }
-  static void Postfix()
-  {
-    var selection = Selection.Get();
-    if (selection == LastSelection) return;
-    LastSelection = selection;
-    selection.Activate();
-  }
+  static void Postfix() => Selection.Get().Activate();
 }

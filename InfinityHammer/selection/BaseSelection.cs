@@ -1,4 +1,3 @@
-using System;
 using ServerDevcommands;
 using Service;
 using UnityEngine;
@@ -7,6 +6,7 @@ namespace InfinityHammer;
 
 public class BaseSelection
 {
+  protected static BaseSelection? ActiveSelection = null;
   protected static readonly GameObject SnapObj = new()
   {
     name = "_snappoint",
@@ -26,7 +26,7 @@ public class BaseSelection
   public virtual bool PlayerHeight => false;
   public virtual float MaxPlaceDistance(float value) => Configuration.Range > 0f ? Configuration.Range : value;
   public Piece GetSelectedPiece() => SelectedPrefab ? SelectedPrefab.GetComponent<Piece>() : null!;
-  public void Destroy() => UnityEngine.Object.Destroy(SelectedPrefab);
+  public void Destroy() => Object.Destroy(SelectedPrefab);
   public void SetScale(Vector3 scale)
   {
     if (!IsScalingSupported())
@@ -89,10 +89,11 @@ public class BaseSelection
   }
   public virtual void Activate()
   {
+    ActiveSelection?.Deactivate();
     BindCommand.SetMode("");
+    ActiveSelection = this;
   }
   public virtual void Deactivate()
   {
-
   }
 }

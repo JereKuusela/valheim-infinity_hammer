@@ -150,7 +150,6 @@ public partial class ObjectSelection : BaseSelection
     if (Objects.Count == 1)
     {
       Postprocess(SelectedPrefab, GetData());
-      HammerHelper.EnsurePiece(SelectedPrefab);
       if (HammerHelper.CountSnapPoints(SelectedPrefab) == 0)
       {
         SnapObj.SetActive(false);
