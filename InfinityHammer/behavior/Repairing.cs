@@ -150,7 +150,7 @@ public class Repair
   private static bool RepairAnything(Player player)
   {
     var range = Configuration.Range > 0f ? Configuration.Range : player.m_maxPlaceDistance;
-    var hovered = Selector.GetHovered(player, range, [], true);
+    var hovered = Selector.GetHovered(player, range, [], [], true);
     if (hovered == null) return false;
     var obj = hovered.Obj;
     var repaired = RepairObject(obj, hovered.Index);

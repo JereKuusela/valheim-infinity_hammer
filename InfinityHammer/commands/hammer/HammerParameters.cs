@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using ServerDevcommands;
 using Service;
 using UnityEngine;
@@ -36,15 +37,15 @@ public class HammerParameters
   public bool Connect;
   public bool Freeze;
   public bool Pick;
-  public float? Radius;
-  public float? Width;
-  public float? Depth;
+  public Range<float>? Radius;
+  public Range<float>? Width;
+  public Range<float>? Depth;
   public bool Show = true;
   public bool Collision = true;
   public bool Interact = true;
   public bool Restrict = true;
   public float Height = 0f;
-  public ObjectType ObjectType = ObjectType.All;
+  public HashSet<string> Components = [];
   public Wear Wear = Wear.Default;
   public Growth Growth = Growth.Default;
   public Fall Fall = Fall.Default;
@@ -89,19 +90,18 @@ public class HammerParameters
       if (name == "scale")
         Scale = Parse.Scale(values);
       if (name == "circle")
-        Radius = Parse.Float(value);
+        Radius = Parse.FloatRange(value);
       if (name == "rect")
       {
-        var size = Parse.Scale(values);
-        Width = size.x;
-        Depth = size.z;
+        var size = Parse.ScaleRange(value);
+        Width = new(size.Min.x, size.Max.x);
+        Depth = new(size.Min.z, size.Max.z);
       }
       if (name == "height")
         Height = Parse.Float(value);
       if (name == "angle")
         Angle = Parse.Float(value) * Mathf.PI / 180f;
-      if (name == "type" && value == "creature") ObjectType = ObjectType.Character;
-      if (name == "type" && value == "structure") ObjectType = ObjectType.Structure;
+      if (name == "type") AddComponents(values);
       if (name == "wear" && value == "broken") Wear = Wear.Broken;
       if (name == "wear" && value == "damaged") Wear = Wear.Damaged;
       if (name == "wear" && value == "healthy") Wear = Wear.Healthy;
@@ -117,7 +117,11 @@ public class HammerParameters
       if (name == "interact") Interact = Parse.Boolean(value) ?? true;
       if (name == "restrict") Restrict = Parse.Boolean(value) ?? true;
     }
-    if (Radius.HasValue && Depth.HasValue)
+    if (Radius != null && Depth != null)
       throw new InvalidOperationException($"<color=yellow>circle</color> and <color=yellow>rect</color> parameters can't be used together.");
+  }
+  private void AddComponents(string[] values)
+  {
+    foreach (var value in values) Components.Add(value);
   }
 }

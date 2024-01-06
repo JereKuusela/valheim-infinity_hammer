@@ -1,29 +1,9 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using ServerDevcommands;
 using UnityEngine;
 namespace Service;
-public class Range<T>
-{
-  public T Min;
-  public T Max;
-  public Range(T value)
-  {
-    Min = value;
-    Max = value;
-  }
-  public Range(T min, T max)
-  {
-    Min = min;
-    Max = max;
-  }
-  public override string ToString()
-  {
-    if (Min != null && Min.Equals(Max)) return Min.ToString();
-    if (Min == null || Max == null) return "";
-    return $"{Min}-{Max}";
-  }
-}
 
 ///<summary>Contains functions for parsing arguments, etc.</summary>
 public static class Parse2

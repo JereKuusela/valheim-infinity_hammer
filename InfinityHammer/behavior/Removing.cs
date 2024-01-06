@@ -38,7 +38,7 @@ public class RemovePiece
 
   private static bool RemoveAnything(Player obj)
   {
-    var hovered = Selector.GetHovered(obj, obj.m_maxPlaceDistance, Configuration.RemoveIds);
+    var hovered = Selector.GetHovered(obj, obj.m_maxPlaceDistance, [], Configuration.RemoveIds);
     if (hovered == null) return false;
     obj.m_removeEffects.Create(hovered.Obj.transform.position, Quaternion.identity, null, 1f, -1);
     SetRemovedObject(hovered.Obj);

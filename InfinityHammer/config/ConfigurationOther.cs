@@ -21,9 +21,9 @@ public partial class Configuration
   public static ConfigEntry<bool> configSaveBlueprintsToProfile;
   public static bool SaveBlueprintsToProfile => configSaveBlueprintsToProfile.Value;
   public static ConfigEntry<string> configIgnoredRemoveIds;
-  public static List<string> RemoveIds = [];
+  public static string[] RemoveIds = [];
   public static ConfigEntry<string> configIgnoredIds;
-  public static List<string> IgnoredIds = [];
+  public static string[] IgnoredIds = [];
   public static ConfigEntry<string> configHammerTools;
   public static HashSet<string> HammerTools = [];
   public static ConfigEntry<string> configMirrorFlip;
@@ -34,6 +34,7 @@ public partial class Configuration
   public static bool Enabled => configEnabled.Value;
 #nullable enable
   private static List<string> ParseList(string value) => value.Split(',').Select(s => s.Trim().ToLower()).Where(s => s != "").ToList();
+  private static string[] ParseArray(string value) => value.Split(',').Select(s => s.Trim().ToLower()).Where(s => s != "").ToArray();
   private static HashSet<string> ParseHashList(string value) => value.Split(',').Select(s => s.Trim().ToLower()).Where(s => s != "").ToHashSet();
 
   private static Dictionary<string, Vector3> ParseSize(string value) => value.Split('|').Select(s => s.Trim().ToLower()).Where(s => s != "")
@@ -69,19 +70,19 @@ public partial class Configuration
     configIgnoredIds = wrapper.BindList(section, "Ignored ids", "", "Object ids separated by , that are ignored by this mod.");
     configIgnoredIds.SettingChanged += (s, e) =>
     {
-      IgnoredIds = ParseList(configIgnoredIds.Value);
-      RemoveIds = ParseList(configIgnoredRemoveIds.Value);
-      RemoveIds.AddRange(IgnoredIds);
+      IgnoredIds = ParseArray(configIgnoredIds.Value);
+      RemoveIds = ParseArray(configIgnoredRemoveIds.Value);
+      RemoveIds = [.. RemoveIds, .. IgnoredIds];
     };
-    IgnoredIds = ParseList(configIgnoredIds.Value);
+    IgnoredIds = ParseArray(configIgnoredIds.Value);
     configIgnoredRemoveIds = wrapper.BindList(section, "Ignored remove ids", "", "Additional ids that are ignored when removing anything.");
     configIgnoredRemoveIds.SettingChanged += (s, e) =>
     {
-      RemoveIds = ParseList(configIgnoredRemoveIds.Value);
-      RemoveIds.AddRange(IgnoredIds);
+      RemoveIds = ParseArray(configIgnoredRemoveIds.Value);
+      RemoveIds = [.. RemoveIds, .. IgnoredIds];
     };
-    RemoveIds = ParseList(configIgnoredRemoveIds.Value);
-    RemoveIds.AddRange(IgnoredIds);
+    RemoveIds = ParseArray(configIgnoredRemoveIds.Value);
+    RemoveIds = [.. RemoveIds, .. IgnoredIds];
     configHammerTools = wrapper.BindList(section, "Hammer tools", "hammer", "List of hammers.");
     configHammerTools.SettingChanged += (s, e) => UpdateTools();
     UpdateTools();

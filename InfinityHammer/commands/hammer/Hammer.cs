@@ -105,15 +105,16 @@ public class HammerSelect
       { "collision", (int index) => False },
       { "interact", (int index) => False },
       { "restrict", (int index) => False },
+      {  "type", (int index) => ParameterInfo.Components }
     });
     Helper.Command("hammer", "[object id] - Selects the object to be placed (the hovered object by default).", (args) =>
     {
       HammerParameters pars = new(args);
       ZNetView[] views = [];
-      if (pars.Radius.HasValue)
-        views = Selector.GetNearby("", pars.ObjectType, Configuration.IgnoredIds, pars.Position, pars.Radius.Value, pars.Height);
-      else if (pars.Width.HasValue && pars.Depth.HasValue)
-        views = Selector.GetNearby("", pars.ObjectType, Configuration.IgnoredIds, pars.Position, pars.Angle, pars.Width.Value, pars.Depth.Value, pars.Height);
+      if (pars.Radius != null)
+        views = Selector.GetNearby([], pars.Components, Configuration.IgnoredIds, pars.Position, pars.Radius, pars.Height);
+      else if (pars.Width != null && pars.Depth != null)
+        views = Selector.GetNearby([], pars.Components, Configuration.IgnoredIds, pars.Position, pars.Angle, pars.Width, pars.Depth, pars.Height);
       else if (args.Length > 1 && !args[1].Contains("=") && !pars.Connect && !pars.Pick && !pars.Freeze)
       {
         var obj = ZNetScene.instance.GetPrefab(args[1]) ?? throw new InvalidOperationException("Object not found.");
@@ -121,9 +122,9 @@ public class HammerSelect
       }
       else
       {
-        var hovered = Selector.GetHovered(Configuration.Range, Configuration.IgnoredIds) ?? throw new InvalidOperationException("Nothing is being hovered.");
+        var hovered = Selector.GetHovered(Configuration.Range, [], Configuration.IgnoredIds) ?? throw new InvalidOperationException("Nothing is being hovered.");
         if (pars.Connect)
-          views = Selector.GetConnected(hovered, Configuration.IgnoredIds);
+          views = Selector.GetConnected(hovered, [], Configuration.IgnoredIds);
         else
           views = [hovered];
       }
