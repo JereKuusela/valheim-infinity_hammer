@@ -108,7 +108,6 @@ public class HammerSelect
     });
     Helper.Command("hammer", "[object id] - Selects the object to be placed (the hovered object by default).", (args) =>
     {
-      HammerHelper.Init();
       HammerParameters pars = new(args);
       ZNetView[] views = [];
       if (pars.Radius.HasValue)
@@ -128,6 +127,7 @@ public class HammerSelect
         else
           views = [hovered];
       }
+      HammerHelper.Init();
       ObjectSelection selection = views.Length == 1 ? new(views[0], pars.Pick) : new(views, pars.Pick);
       ZDOData extraData = new();
       if (pars.Health.HasValue)

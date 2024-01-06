@@ -111,41 +111,37 @@ public static class HammerHelper
   }
 
   ///<summary>Initializing the copy as inactive is the best way to avoid any script errors. ZNet stuff also won't run.</summary>
-  public static GameObject SafeInstantiate(GameObject obj)
+  public static GameObject SafeInstantiate(GameObject obj, GameObject originalPrefab) => SafeInstantiate(obj, originalPrefab, null);
+  public static GameObject SafeInstantiate(GameObject obj, GameObject originalPrefab, GameObject? parent)
   {
+    var colliders = obj.GetComponentsInChildren<Collider>();
+    var originalColliders = originalPrefab.GetComponentsInChildren<Collider>();
+    // Some data changes can remove all colliders from the obj, so fallback to the original prefab if colliders can't be reseted.
+    if (colliders.Length != originalColliders.Length)
+      obj = originalPrefab;
+
     var wear = obj.GetComponent<WearNTear>();
     var highlight = wear && wear.m_oldMaterials != null;
     if (highlight)
       wear.ResetHighlight();
-    obj.SetActive(false);
-    var ret = UnityEngine.Object.Instantiate(obj);
-    CleanObject(ret);
-    obj.SetActive(true);
-    if (ret.TryGetComponent<Character>(out var character))
-      Character.s_characters.Remove(character);
+    var ret = parent == null ? SafeInstantiate(obj) : SafeInstantiate(obj, parent.transform);
     if (highlight)
       wear.Highlight();
-    return ret;
-  }
-  public static GameObject SafeInstantiate(GameObject obj, GameObject parent)
-  {
-    var wear = obj.GetComponent<WearNTear>();
-    var highlight = wear && wear.m_oldMaterials != null;
-    if (highlight)
-      wear.ResetHighlight();
-    obj.SetActive(false);
-    var ret = UnityEngine.Object.Instantiate(obj, parent.transform);
-    CleanObject(ret);
-    obj.SetActive(true);
-    if (highlight)
-      wear.Highlight();
+    if (colliders.Length == originalColliders.Length)
+    {
+      colliders = ret.GetComponentsInChildren<Collider>();
+      for (var i = 0; i < colliders.Length; i++)
+      {
+        colliders[i].enabled = originalColliders[i].enabled;
+        colliders[i].isTrigger = originalColliders[i].isTrigger;
+      }
+    }
     return ret;
   }
   public static GameObject SafeInstantiate(string name, GameObject parent)
   {
-    var obj = ZNetScene.instance.GetPrefab(name);
-    if (!obj) throw new InvalidOperationException($"Missing object {name}.");
-    return SafeInstantiate(obj, parent);
+    var obj = ZNetScene.instance.GetPrefab(name) ?? throw new InvalidOperationException($"Missing object {name}.");
+    return SafeInstantiate(obj, parent.transform);
   }
   ///<summary>Initializing the copy as inactive is the best way to avoid any script errors. ZNet stuff also won't run.</summary>
   public static GameObject SafeInstantiateLocation(ZoneSystem.ZoneLocation location, int? seed)
@@ -161,6 +157,22 @@ public static class HammerHelper
       UnityEngine.Random.state = state;
     }
     return SafeInstantiate(location.m_prefab);
+  }
+  private static GameObject SafeInstantiate(GameObject obj)
+  {
+    obj.SetActive(false);
+    var ret = UnityEngine.Object.Instantiate(obj);
+    CleanObject(ret);
+    obj.SetActive(true);
+    return ret;
+  }
+  private static GameObject SafeInstantiate(GameObject obj, Transform parent)
+  {
+    obj.SetActive(false);
+    var ret = UnityEngine.Object.Instantiate(obj, parent);
+    CleanObject(ret);
+    obj.SetActive(true);
+    return ret;
   }
   public static bool IsSnapPoint(GameObject obj) => obj && obj.CompareTag("snappoint");
   public static List<GameObject> GetChildren(GameObject obj)

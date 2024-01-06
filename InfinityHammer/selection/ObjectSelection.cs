@@ -25,10 +25,9 @@ public partial class ObjectSelection : BaseSelection
     if (!prefab) throw new InvalidOperationException("Invalid prefab.");
     if (prefab.GetComponent<Player>()) throw new InvalidOperationException("Players are not valid objects.");
     SingleUse = singleUse;
-    SelectedPrefab = HammerHelper.SafeInstantiate(prefab);
+    SelectedPrefab = HammerHelper.SafeInstantiate(prefab, originalPrefab);
     SelectedPrefab.transform.position = Vector3.zero;
     HammerHelper.EnsurePiece(SelectedPrefab);
-    ResetColliders(SelectedPrefab, originalPrefab);
     Objects.Add(new(name, view.m_syncInitialScale, data));
     if (zdo != null)
       PlaceRotation.Set(SelectedPrefab);
@@ -51,11 +50,10 @@ public partial class ObjectSelection : BaseSelection
       var name = Utils.GetPrefabName(originalPrefab);
       var prefab = view.gameObject;
       ZDOData data = new(view.GetZDO());
-      var obj = HammerHelper.SafeInstantiate(prefab, SelectedPrefab);
+      var obj = HammerHelper.SafeInstantiate(prefab, originalPrefab, SelectedPrefab);
       obj.SetActive(true);
       obj.transform.position = view.transform.position;
       obj.transform.rotation = view.transform.rotation;
-      ResetColliders(obj, originalPrefab);
       SetExtraInfo(obj, "", data);
       Objects.Add(new(name, view.m_syncInitialScale, data));
       if (view == views.First() || Configuration.AllSnapPoints)
@@ -164,21 +162,6 @@ public partial class ObjectSelection : BaseSelection
     SetText(obj, zdo.GetString(Hash.Text, ""));
   }
 
-  protected static void ResetColliders(GameObject obj, GameObject original)
-  {
-    var colliders = obj.GetComponentsInChildren<Collider>();
-    var originalColliders = original.GetComponentsInChildren<Collider>();
-    if (colliders.Length != originalColliders.Length)
-    {
-      InfinityHammer.Log.LogWarning("Object has a different amount of colliders than the original: Unable to reset colliders.");
-      return;
-    }
-    for (var i = 0; i < colliders.Length; i++)
-    {
-      colliders[i].enabled = originalColliders[i].enabled;
-      colliders[i].isTrigger = originalColliders[i].isTrigger;
-    }
-  }
   private static void SetLevel(GameObject obj, int level)
   {
     if (level == -1) return;
