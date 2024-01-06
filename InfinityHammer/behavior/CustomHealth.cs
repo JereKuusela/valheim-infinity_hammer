@@ -15,6 +15,7 @@ public class CustomHealth
   private static void SetCustomHealth(ZNetView obj, ZDO zdo)
   {
     var value = Configuration.OverwriteHealth;
+    if (value <= 0f) return;
     if (obj.GetComponent<Character>())
     {
       zdo.Set(ZDOVars.s_maxHealth, value);
