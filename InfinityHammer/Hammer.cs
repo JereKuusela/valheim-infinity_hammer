@@ -39,7 +39,7 @@ public static class Hammer
     if (item == null) return "";
     return Utils.GetPrefabName(item.m_dropPrefab).ToLower();
   }
-  public static void Clear() => Player.m_localPlayer?.SetSelectedPiece(new Vector2Int(0, 0));
+  public static void SelectRepair() => Player.m_localPlayer?.SetSelectedPiece(new Vector2Int(0, 0));
   public static void Place()
   {
     var player = Player.m_localPlayer;

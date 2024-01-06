@@ -13,10 +13,6 @@ public partial class Configuration
   public static bool IgnoreWards => configIgnoreWards.Value && IsCheats;
   public static ConfigEntry<bool> configIgnoreNoBuild;
   public static bool IgnoreNoBuild => configIgnoreNoBuild.Value && IsCheats;
-  public static ConfigEntry<bool> configAllObjects;
-  public static bool AllObjects => configAllObjects.Value && IsCheats;
-  public static ConfigEntry<bool> configCopyState;
-  public static bool CopyState => configCopyState.Value && IsCheats;
   public static ConfigEntry<bool> configAllowInDungeons;
   public static bool AllowInDungeons => configAllowInDungeons.Value && IsCheats;
   public static ConfigEntry<bool> configIgnoreOtherRestrictions;
@@ -71,8 +67,6 @@ public partial class Configuration
     configNoCost = wrapper.Bind(section, "No cost", false, "Removes durability, resource and stamina costs.");
     configIgnoreWards = wrapper.Bind(section, "Ignore wards", true, "Ignores ward restrictions.");
     configIgnoreNoBuild = wrapper.Bind(section, "Ignore no build", true, "Ignores no build areas.");
-    configAllObjects = wrapper.Bind(section, "All objects", true, "Allows placement of non-default objects.");
-    configCopyState = wrapper.Bind(section, "Copy state", true, "Copies object's internal state.");
     configAllowInDungeons = wrapper.Bind(section, "Allow in dungeons", true, "Allows building in dungeons.");
     configRemoveAnything = wrapper.Bind(section, "Remove anything", false, "Allows removing anything.");
     configDisableLoot = wrapper.Bind(section, "Disable loot", false, "Prevents creatures and structures dropping loot when removed with the hammer.");

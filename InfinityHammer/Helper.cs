@@ -232,6 +232,12 @@ public static class HammerHelper
   {
     if (!Configuration.Enabled) throw new InvalidOperationException("Infinity Hammer is disabled.");
   }
+  public static void Init()
+  {
+    EnabledCheck();
+    Hammer.Equip();
+    Hammer.SelectRepair();
+  }
 
   public static int CountActiveChildren(GameObject obj)
   {

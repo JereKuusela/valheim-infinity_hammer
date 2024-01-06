@@ -361,11 +361,9 @@ For slopes, you can use `hammer_slope [width]` and `hoe_slope [width]`. For exam
 Following powers are available with `hammer_config` command:
 
 - Enabled (default: `true`, key: `enabled`): If disabled, removes most features.
-- All objects (default: `true`, key: `all_objects`): Hammer can select and place any object. Any placed object can be removed with the hammer until the area is reloaded.
 - Allow in dungeons (default: `true`, key: `allow_in_dungeons`): Building is allowed in dungeons.
 - Blueprint folder (default: `PlanBuild`, key: `blueprint_folder`): Folder relative to the config folder. Both profile and base Valheim folders are searched for .blueprint and .vbuild files.
 - Build Share folder (default: `BuildShare/Builds`, key: `build_share_folder`): Folder relative to the Valheim.exe.
-- Copy state (default: `true`, key: `copy_state`): Object state is copied (for example chest contents or item stand items).
 - Dimensions (key: `dimensions`): Measurements for objects.
 - Disable loot (default: `false`, key: `disable_loot`): Creatures and structures won't drop loot when destroyed with the hammer.
 - Ignore no build (default: `true`, key: `ignore_no_build`): "Mystical power" no longer prevents building.
@@ -431,8 +429,6 @@ If "Overwrite health" is enabled, objects have a specified health (including cre
 Setting a very high health (like "1E30") can be used to make object indestructible because the damage taken is rounded down to zero. This also prevents structures collapsing from lack of support.
 
 For creatures, the max health resets when the area is reloaded if the current health equals the max health. For this reason, the current health is set slightly higher than the max health.
-
-"Copy state" only applies when selecting existing objects since structures from the build menu are stateless. However the creator ID is always set based on the "No creator" setting, even for non-standard structures.
 
 "No creator" is currently quite pointless since most structures ignore the value and will get targeted by the enemies regardless of the value. But maybe someone can find some use for it.
 

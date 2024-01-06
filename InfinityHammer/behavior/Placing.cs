@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using HarmonyLib;
+using ServerDevcommands;
 using Service;
 using UnityEngine;
 // Code related to adding objects.
@@ -11,20 +12,19 @@ namespace InfinityHammer;
 [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
 public class PlacePiece
 {
-  private static bool Clear = false;
   static void Prefix()
   {
     HideEffects.Active = true;
-    Clear = Selection.Get().SingleUse;
   }
   static void Finalizer(bool __result)
   {
     HideEffects.Active = false;
     DataHelper.Clear();
-    if (__result && Clear)
+    if (__result && Selection.Get().SingleUse)
     {
       Selection.Clear();
-      Hammer.Clear();
+      Hammer.SelectRepair();
+      Helper.GetPlayer().SetupPlacementGhost();
     }
   }
   // Parameter is the selected piece which doesn't have the correct transformation.

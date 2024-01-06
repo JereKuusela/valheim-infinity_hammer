@@ -108,17 +108,18 @@ public class HammerSelect
     });
     Helper.Command("hammer", "[object id] - Selects the object to be placed (the hovered object by default).", (args) =>
     {
-      HammerHelper.EnabledCheck();
-      Hammer.Equip();
+      HammerHelper.Init();
       HammerParameters pars = new(args);
       ZNetView[] views = [];
-      ObjectSelection? selection = null;
       if (pars.Radius.HasValue)
         views = Selector.GetNearby("", pars.ObjectType, Configuration.IgnoredIds, pars.Position, pars.Radius.Value, pars.Height);
       else if (pars.Width.HasValue && pars.Depth.HasValue)
         views = Selector.GetNearby("", pars.ObjectType, Configuration.IgnoredIds, pars.Position, pars.Angle, pars.Width.Value, pars.Depth.Value, pars.Height);
       else if (args.Length > 1 && !args[1].Contains("=") && !pars.Connect && !pars.Pick && !pars.Freeze)
-        selection = new(args[1], pars.Pick);
+      {
+        var obj = ZNetScene.instance.GetPrefab(args[1]) ?? throw new InvalidOperationException("Object not found.");
+        views = [obj.GetComponent<ZNetView>()];
+      }
       else
       {
         var hovered = Selector.GetHovered(Configuration.Range, Configuration.IgnoredIds) ?? throw new InvalidOperationException("Nothing is being hovered.");
@@ -127,18 +128,7 @@ public class HammerSelect
         else
           views = [hovered];
       }
-      if (selection == null && views.Length > 0)
-      {
-        selection = views.Length == 1 ? new(views[0], pars.Pick) : new(views, pars.Pick);
-        if (pars.Pick)
-        {
-          Undo.Remove(views.Select(view => new FakeZDO(view.GetZDO())).ToArray());
-          foreach (var view in views)
-            HammerHelper.RemoveZDO(view.GetZDO());
-
-        }
-      }
-      if (selection == null) return;
+      ObjectSelection selection = views.Length == 1 ? new(views[0], pars.Pick) : new(views, pars.Pick);
       ZDOData extraData = new();
       if (pars.Health.HasValue)
       {
@@ -174,9 +164,14 @@ public class HammerSelect
         extraData.Set(Hash.Text, pars.Text);
       selection.UpdateZDOs(extraData);
       selection.Postprocess(pars.Scale);
-      Hammer.Clear();
       var ghost = Selection.CreateGhost(selection);
       if (pars.Freeze) Position.Freeze(views.Length > 0 ? views[0].transform.position : Helper.GetPlayer().transform.position);
+      if (pars.Pick)
+      {
+        Undo.Remove(views.Select(view => new FakeZDO(view.GetZDO())).ToArray());
+        foreach (var view in views)
+          HammerHelper.RemoveZDO(view.GetZDO());
+      }
       PrintSelected(args.Context, ghost);
     });
   }

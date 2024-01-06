@@ -14,37 +14,24 @@ public partial class ObjectSelection : BaseSelection
 
   public List<SelectedObject> Objects = [];
 
-
-  public ObjectSelection(string name, bool singleUse)
-  {
-    var prefab = ZNetScene.instance.GetPrefab(name);
-    if (!prefab) throw new InvalidOperationException("Invalid prefab.");
-    if (prefab.GetComponent<Player>()) throw new InvalidOperationException("Players are not valid objects.");
-    if (!Configuration.AllObjects && !HammerHelper.IsBuildPiece(prefab)) throw new InvalidOperationException("Only build pieces are allowed.");
-    SingleUse = singleUse;
-    SelectedPrefab = HammerHelper.SafeInstantiate(prefab);
-    HammerHelper.EnsurePiece(SelectedPrefab);
-    Objects.Add(new(name, prefab.GetComponent<ZNetView>().m_syncInitialScale, new()));
-    // Reset for zoop bounds check.
-    SelectedPrefab.transform.rotation = Quaternion.identity;
-  }
   public ObjectSelection(ZNetView view, bool singleUse)
   {
-    var originalPrefab = ZNetScene.instance.GetPrefab(view.GetZDO().GetPrefab());
+    var zdo = view.GetZDO();
+    var originalPrefab = zdo == null ? view.gameObject : ZNetScene.instance.GetPrefab(zdo.GetPrefab());
     var name = Utils.GetPrefabName(originalPrefab);
-    var prefab = Configuration.CopyState ? view.gameObject : originalPrefab;
-    ZDOData data = Configuration.CopyState ? new(view.GetZDO()) : new();
+    var prefab = zdo != null ? view.gameObject : originalPrefab;
+    ZDOData data = zdo != null ? new(zdo) : new();
 
     if (!prefab) throw new InvalidOperationException("Invalid prefab.");
     if (prefab.GetComponent<Player>()) throw new InvalidOperationException("Players are not valid objects.");
-    if (!Configuration.AllObjects && !HammerHelper.IsBuildPiece(prefab)) throw new InvalidOperationException("Only build pieces are allowed.");
     SingleUse = singleUse;
     SelectedPrefab = HammerHelper.SafeInstantiate(prefab);
     SelectedPrefab.transform.position = Vector3.zero;
     HammerHelper.EnsurePiece(SelectedPrefab);
     ResetColliders(SelectedPrefab, originalPrefab);
     Objects.Add(new(name, view.m_syncInitialScale, data));
-    PlaceRotation.Set(SelectedPrefab);
+    if (zdo != null)
+      PlaceRotation.Set(SelectedPrefab);
     // Reset for zoop bounds check.
     SelectedPrefab.transform.rotation = Quaternion.identity;
     SetScale(prefab.transform.localScale);
@@ -62,8 +49,8 @@ public partial class ObjectSelection : BaseSelection
     {
       var originalPrefab = ZNetScene.instance.GetPrefab(view.GetZDO().GetPrefab());
       var name = Utils.GetPrefabName(originalPrefab);
-      var prefab = Configuration.CopyState ? view.gameObject : originalPrefab;
-      ZDOData data = Configuration.CopyState ? new(view.GetZDO()) : new();
+      var prefab = view.gameObject;
+      ZDOData data = new(view.GetZDO());
       var obj = HammerHelper.SafeInstantiate(prefab, SelectedPrefab);
       obj.SetActive(true);
       obj.transform.position = view.transform.position;

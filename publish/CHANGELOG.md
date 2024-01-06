@@ -2,6 +2,7 @@
   - Tools split to Infinity Tools mod.
   - Adds mandatory requirement of Server Devcommands mod.
   - Changes number precision of blueprints from 6 to 3 (reduces file size).
+  - Removes settings "All objects" and "Copy state" as obsolete. These are now always enabled.
 
 - v1.43
   - Adds a new setting to disable blueprint data saving.
