@@ -17,7 +17,7 @@ public class HammerGridCommand
       var precision = args.Length < 2 ? 0f : Parse.Float(args[1], 0f);
       var center = args.Length < 3 ? ghost.transform.position : Parse.VectorXZY(args[2]);
       Grid.Toggle(precision, center);
-      Helper.AddMessage(args.Context, Grid.Enabled ? $"Grid {precision} enabled." : "Grid disabled.");
+      HammerHelper.Message(args.Context, Grid.Enabled ? $"Grid {precision} enabled." : "Grid disabled.");
     });
   }
 }

@@ -8,7 +8,7 @@ public class HammerLocationCommand
   {
     if (Configuration.DisableSelectMessages) return;
     var name = obj ? Utils.GetPrefabName(obj.gameObject) : "";
-    Helper.AddMessage(terminal, $"Selected {name}.");
+    HammerHelper.Message(terminal, $"Selected {name}.");
   }
 
   public HammerLocationCommand()
@@ -39,7 +39,7 @@ public class HammerLocationCommand
       }
       catch (InvalidOperationException e)
       {
-        Helper.AddMessage(args.Context, e.Message);
+        HammerHelper.Message(args.Context, e.Message);
       }
     });
   }

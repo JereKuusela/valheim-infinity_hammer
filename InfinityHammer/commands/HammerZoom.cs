@@ -32,7 +32,7 @@ public class HammerZoomCommand
       if (!Helper.GetPlayer().InPlaceMode()) return;
       if (!selection.IsScalingSupported())
       {
-        Helper.AddMessage(args.Context, "Selected object doesn't support scaling.");
+        HammerHelper.Message(args.Context, "Selected object doesn't support scaling.");
         return;
       }
       var direction = args.Length > 2 ? args[2] : "";
@@ -57,7 +57,7 @@ public class HammerZoomCommand
       if (!Helper.GetPlayer().InPlaceMode()) return;
       if (!selection.IsScalingSupported())
       {
-        Helper.AddMessage(args.Context, "Selected object doesn't support scaling.");
+        HammerHelper.Message(args.Context, "Selected object doesn't support scaling.");
         return;
       }
       var scale = Scaling.Get();

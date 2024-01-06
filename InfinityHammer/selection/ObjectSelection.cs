@@ -95,7 +95,7 @@ public partial class ObjectSelection : BaseSelection
       }
       catch (InvalidOperationException e)
       {
-        HammerHelper.AddMessage(terminal, $"Warning: {e.Message}");
+        HammerHelper.Message(terminal, $"Warning: {e.Message}");
       }
     }
     foreach (var position in bp.SnapPoints)

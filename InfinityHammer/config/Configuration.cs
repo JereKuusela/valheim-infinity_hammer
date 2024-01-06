@@ -27,8 +27,6 @@ public partial class Configuration
   public static bool DisableOffsetMessages => configDisableOffsetMessages.Value;
   public static ConfigEntry<bool> configDisableScaleMessages;
   public static bool DisableScaleMessages => configDisableScaleMessages.Value;
-  public static ConfigEntry<bool> configChatOutput;
-  public static bool ChatOutput => configChatOutput.Value;
   public static ConfigEntry<bool> configDisableLoot;
   public static bool DisableLoot => configDisableLoot.Value && IsCheats;
   public static ConfigEntry<bool> configRepairAnything;
@@ -96,7 +94,6 @@ public partial class Configuration
     configDisableOffsetMessages = wrapper.Bind(section, "Disable offset messages", false, "Disables messages from changing placement offset.");
     configDisableScaleMessages = wrapper.Bind(section, "Disable scale messages", false, "Disables messages from changing the scale.");
     configDisableSelectMessages = wrapper.Bind(section, "Disable select messages", false, "Disables messages from selecting objects.");
-    configChatOutput = wrapper.Bind(section, "Chat output", false, "Sends messages to the chat window from bound keys.");
 
     InitOther(wrapper);
   }

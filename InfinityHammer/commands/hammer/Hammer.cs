@@ -39,12 +39,12 @@ public class HammerSelect
     if (view && view.m_syncInitialScale)
     {
       if (scale.x == scale.y && scale.y == scale.z)
-        Helper.AddMessage(terminal, $"Selected {name} (size {scale.y:P0}).");
+        HammerHelper.Message(terminal, $"Selected {name} (size {scale.y:P0}).");
       else
-        Helper.AddMessage(terminal, $"Selected {name} (scale {scale:F2}).");
+        HammerHelper.Message(terminal, $"Selected {name} (scale {scale:F2}).");
     }
     else
-      Helper.AddMessage(terminal, $"Selected {name}.");
+      HammerHelper.Message(terminal, $"Selected {name}.");
   }
   public HammerSelect()
   {
@@ -71,10 +71,6 @@ public class HammerSelect
       "small",
       "small_bad"
     ];
-    List<string> ObjectTypes = [
-      "creature",
-      "structure"
-    ];
     List<string> Falls = [
       "off",
       "solid",
@@ -97,7 +93,6 @@ public class HammerSelect
       { "freeze", (int index) => ParameterInfo.Create("Freezes in the place.") },
       { "pick", (int index) => ParameterInfo.Create("Picks up the selection.") },
       { "connect", (int index) => ParameterInfo.Create("Selects whole building.") },
-      { "type", (int index) => ObjectTypes },
       { "wear", (int index) => Wears },
       { "fall", (int index) => Falls },
       { "growth", (int index) => Growths },
@@ -105,7 +100,7 @@ public class HammerSelect
       { "collision", (int index) => False },
       { "interact", (int index) => False },
       { "restrict", (int index) => False },
-      {  "type", (int index) => ParameterInfo.Components }
+      { "type", (int index) => ParameterInfo.Components }
     });
     Helper.Command("hammer", "[object id] - Selects the object to be placed (the hovered object by default).", (args) =>
     {
@@ -169,7 +164,7 @@ public class HammerSelect
       if (pars.Freeze) Position.Freeze(views.Length > 0 ? views[0].transform.position : Helper.GetPlayer().transform.position);
       if (pars.Pick)
       {
-        Undo.Remove(views.Select(view => new FakeZDO(view.GetZDO())).ToArray());
+        Undo.AddRemoveStep(views);
         foreach (var view in views)
           HammerHelper.RemoveZDO(view.GetZDO());
       }

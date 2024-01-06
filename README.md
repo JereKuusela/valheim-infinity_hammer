@@ -402,7 +402,6 @@ Visual settings work even without cheat access. These all are disabled by defaul
 
 Messages from the mod can be configured with following settings:
 
-- `chat_output`: Sends messages to the chat window (when using binds or commands in the chat window).
 - `disable_messages`: Disables all messages from the mod (console output not affected).
 - `disable_offset_messages`: Disables messages from changing the placement offset.
 - `disable_scale_messages`: Disables messages from changing the object scale.

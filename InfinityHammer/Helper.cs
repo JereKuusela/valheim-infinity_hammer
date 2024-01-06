@@ -84,32 +84,11 @@ public static class HammerHelper
     var size = Configuration.Dimensions[Utils.GetPrefabName(ghost).ToLower()];
     return size.x - size.y < 0.01f;
   }
-
-  public static void AddError(Terminal context, string message, bool priority = true)
+  public static void Message(Terminal instance, string message)
   {
-    AddMessage(context, $"Error: {message}", priority);
+    if (Configuration.DisableMessages) return;
+    Helper.AddMessage(instance, message, true);
   }
-  public static void AddMessage(Terminal context, string message, bool priority = true)
-  {
-    if (context == Console.instance || Configuration.ChatOutput)
-      context.AddString(message);
-    var hud = MessageHud.instance;
-    if (!hud || Configuration.DisableMessages) return;
-    if (priority)
-    {
-      var items = hud.m_msgQeue.ToArray();
-      hud.m_msgQeue.Clear();
-      Player.m_localPlayer?.Message(MessageHud.MessageType.TopLeft, message);
-      foreach (var item in items)
-        hud.m_msgQeue.Enqueue(item);
-      hud.m_msgQueueTimer = 10f;
-    }
-    else
-    {
-      Player.m_localPlayer?.Message(MessageHud.MessageType.TopLeft, message);
-    }
-  }
-
   ///<summary>Initializing the copy as inactive is the best way to avoid any script errors. ZNet stuff also won't run.</summary>
   public static GameObject SafeInstantiate(GameObject obj, GameObject originalPrefab) => SafeInstantiate(obj, originalPrefab, null);
   public static GameObject SafeInstantiate(GameObject obj, GameObject originalPrefab, GameObject? parent)

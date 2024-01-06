@@ -41,7 +41,7 @@ public class HammerMeasureCommand
         UnityEngine.Object.Destroy(obj);
       }
       ZNetView.m_forceDisableInit = false;
-      Helper.AddMessage(args.Context, "Objects measured.");
+      HammerHelper.Message(args.Context, "Objects measured.");
     });
   }
 }

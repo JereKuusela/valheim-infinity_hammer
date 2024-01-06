@@ -26,9 +26,9 @@ public class ScalingData(bool sanityY, bool minXZ, bool printChanges, Vector3 va
     if (!PrintChanges) return;
     if (Configuration.DisableScaleMessages) return;
     if (X != Y || X != Z)
-      Helper.AddMessage(terminal, $"Scale set to X: {X:P0}, Z: {Z:P0}, Y: {Y:P0}.");
+      HammerHelper.Message(terminal, $"Scale set to X: {X:P0}, Z: {Z:P0}, Y: {Y:P0}.");
     else
-      Helper.AddMessage(terminal, $"Scale set to {Y:P0}.");
+      HammerHelper.Message(terminal, $"Scale set to {Y:P0}.");
   }
   private void Sanity()
   {

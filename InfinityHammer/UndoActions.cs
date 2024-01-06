@@ -19,16 +19,16 @@ public static class UndoTracker
 public class Undo
 {
 
-  public static void Place(IEnumerable<ZDO> objs)
+  public static void AddPlaceStep(IEnumerable<ZDO> objs)
   {
     if (objs.Count() == 0) return;
     UndoPlace action = new(objs);
     UndoManager.Add(action);
   }
-  public static void Remove(IEnumerable<FakeZDO> objs)
+  public static void AddRemoveStep(IEnumerable<ZNetView> objs)
   {
     if (objs.Count() == 0) return;
-    UndoRemove action = new(objs);
+    UndoRemove action = new(objs.Select(obj => new FakeZDO(obj.GetZDO())));
     UndoManager.Add(action);
   }
   private static bool GroupCreating = false;
@@ -64,7 +64,7 @@ public class Undo
   }
   private static void Finish()
   {
-    Place(Objects);
+    AddPlaceStep(Objects);
     Objects.Clear();
     GroupCreating = false;
     Track = false;

@@ -12,7 +12,7 @@ public class HammerBlueprintCommand
   private static void PrintSelected(Terminal terminal, string name)
   {
     if (Configuration.DisableSelectMessages) return;
-    Helper.AddMessage(terminal, $"Selected {name}.");
+    HammerHelper.Message(terminal, $"Selected {name}.");
   }
   private static IEnumerable<string> LoadFiles(string folder, IEnumerable<string> bps)
   {

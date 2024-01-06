@@ -31,7 +31,7 @@ public class HammerAddPieceComponentsCommand
         piece.m_name = Utils.GetPrefabName(piece.gameObject);
         piece.m_clipEverything = true;
       }
-      Helper.AddMessage(args.Context, "Piece component added to every prefab.");
+      HammerHelper.Message(args.Context, "Piece component added to every prefab.");
     });
   }
 }

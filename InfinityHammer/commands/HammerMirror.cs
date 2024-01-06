@@ -11,7 +11,7 @@ public class HammerMirrorCommand
       var selected = (ObjectSelection?)Selection.Get();
       if (selected == null) throw new InvalidOperationException("Mirroring only works for multiple objects.");
       selected.Mirror();
-      Helper.AddMessage(args.Context, "Mirrored the selection.");
+      HammerHelper.Message(args.Context, "Mirrored the selection.");
     });
   }
 }
