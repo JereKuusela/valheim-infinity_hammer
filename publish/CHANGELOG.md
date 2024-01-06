@@ -1,7 +1,9 @@
 - v1.44
   - Tools split to Infinity Tools mod.
   - Adds mandatory requirement of Server Devcommands mod.
+  - Adds new settings "No primary target" and "No secondary target".
   - Changes number precision of blueprints from 6 to 3 (reduces file size).
+  - Changes setting "Infinite health" to "Set invulnerability".
   - Removes settings "All objects" and "Copy state" as obsolete. These are now always enabled.
 
 - v1.43

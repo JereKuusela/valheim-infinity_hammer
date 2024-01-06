@@ -162,7 +162,7 @@ public class CustomizeSpawnLocation
                   OpCodes.Stsfld,
                   AccessTools.Field(typeof(WearNTear), nameof(WearNTear.m_randomInitialDamage))))
           .Advance(1)
-          .Insert(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate<Action>(Customize).operand))
+          .Insert(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate(Customize).operand))
           .InstructionEnumeration();
   }
 }

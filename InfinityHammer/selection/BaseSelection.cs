@@ -50,39 +50,15 @@ public class BaseSelection
   {
     var view = obj.GetComponent<ZNetView>();
     if (!Configuration.Enabled || !view) return;
-    var zdo = view.GetZDO();
-    var piece = obj.GetComponent<Piece>();
-    if (piece)
+    if (obj.TryGetComponent<Piece>(out var piece))
     {
       piece.m_canBeRemoved = true;
-      // Creator data is only interesting for actual targets. Dummy components will have these both as false.
-      if (piece.m_randomTarget || piece.m_primaryTarget)
-      {
-        if (Configuration.NoCreator)
-        {
-          zdo.Set(Hash.Creator, 0L);
-          piece.m_creator = 0;
-        }
-        else
-          piece.SetCreator(Game.instance.GetPlayerProfile().GetPlayerID());
-      }
+      NoCreator.Set(view, piece);
     }
-    var character = obj.GetComponent<Character>();
-    if (Configuration.OverwriteHealth > 0f)
-    {
-      if (character)
-        zdo.Set(Hash.MaxHealth, Configuration.OverwriteHealth);
-      if (obj.GetComponent<TreeLog>() || obj.GetComponent<WearNTear>() || obj.GetComponent<Destructible>() || obj.GetComponent<TreeBase>() || character)
-        zdo.Set(Hash.Health, Configuration.OverwriteHealth);
-      var mineRock = obj.GetComponent<MineRock5>();
-      if (mineRock)
-      {
-        foreach (var area in mineRock.m_hitAreas) area.m_health = Configuration.OverwriteHealth;
-        mineRock.SaveHealth();
-      }
-    }
+    CustomHealth.SetHealth(view);
     if (obj.TryGetComponent<DungeonGenerator>(out var dg))
     {
+      var zdo = view.GetZDO();
       if (zdo.GetByteArray(ZDOVars.s_roomData) == null)
         dg.Generate(ZoneSystem.SpawnMode.Full);
     }
@@ -96,4 +72,5 @@ public class BaseSelection
   public virtual void Deactivate()
   {
   }
+
 }

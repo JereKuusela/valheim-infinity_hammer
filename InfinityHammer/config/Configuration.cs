@@ -35,6 +35,11 @@ public partial class Configuration
   public static bool RepairAnything => configRepairAnything.Value && IsCheats;
   public static ConfigEntry<bool> configNoCreator;
   public static bool NoCreator => configNoCreator.Value && IsCheats;
+  public static ConfigEntry<bool> configNoPrimaryTarget;
+  public static bool NoPrimaryTarget => configNoPrimaryTarget.Value && IsCheats;
+  public static ConfigEntry<bool> configNoSecondaryTarget;
+  public static bool NoSecondaryTarget => configNoSecondaryTarget.Value && IsCheats;
+
   public static ConfigEntry<bool> configResetOffsetOnUnfreeze;
   public static bool ResetOffsetOnUnfreeze => configResetOffsetOnUnfreeze.Value;
   public static ConfigEntry<bool> configUnfreezeOnUnequip;
@@ -44,9 +49,9 @@ public partial class Configuration
   public static ConfigEntry<bool> configUnfreezeOnSelect;
   public static bool UnfreezeOnSelect => configUnfreezeOnSelect.Value;
   public static ConfigEntry<string> configOverwriteHealth;
-  public static float OverwriteHealth => IsCheats ? InfiniteHealth ? 1E30f : Parse.Float(configOverwriteHealth.Value) : 0f;
-  public static ConfigEntry<bool> configInfiniteHealth;
-  public static bool InfiniteHealth => configInfiniteHealth.Value && IsCheats;
+  public static float OverwriteHealth => IsCheats ? Parse.Float(configOverwriteHealth.Value) : 0f;
+  public static ConfigEntry<string> configInvulnerability;
+  public static string Invulnerability => IsCheats ? configInvulnerability.Value : InvulnerabilityMode.Off;
   public static ConfigEntry<string> configRemoveArea;
   public static float RemoveArea => Enabled ? Parse.Float(configRemoveArea.Value) : 0f;
   public static ConfigEntry<string> configRange;
@@ -72,8 +77,11 @@ public partial class Configuration
     configDisableLoot = wrapper.Bind(section, "Disable loot", false, "Prevents creatures and structures dropping loot when removed with the hammer.");
     configRepairAnything = wrapper.Bind(section, "Repair anything", false, "Allows reparing anything.");
     configOverwriteHealth = wrapper.Bind(section, "Overwrite health", "0", "Overwrites the health of built or repaired objects.");
-    configInfiniteHealth = wrapper.Bind(section, "Infinite health", false, "Sets the Overwrite health to 1E30.");
-    configNoCreator = wrapper.Bind(section, "No creator", false, "Build without setting the creator.");
+    configInvulnerability = wrapper.Bind(section, "Set invulnerability", InvulnerabilityMode.Off, new ConfigDescription("Build objects are invulnerable.", new AcceptableValueList<string>(InvulnerabilityMode.Off, InvulnerabilityMode.On, InvulnerabilityMode.Damaged, InvulnerabilityMode.Worn)));
+
+    configNoCreator = wrapper.Bind(section, "No creator", false, "Reduce save data by not setting the creator id.");
+    configNoPrimaryTarget = wrapper.Bind(section, "No primary target", false, "Removes primary target status. Requires World Edit Commands mod on the server.");
+    configNoSecondaryTarget = wrapper.Bind(section, "No secondary target", false, "Removes secondary target status. Requires World Edit Commands mod on the server.");
     configUnfreezeOnSelect = wrapper.Bind(section, "Unfreeze on select", true, "Removes the placement freeze when selecting a new object.");
     configResetOffsetOnUnfreeze = wrapper.Bind(section, "Reset offset on unfreeze", true, "Removes the placement offset when unfreezing the placement.");
     configUnfreezeOnUnequip = wrapper.Bind(section, "Unfreeze on unequip", true, "Removes the placement freeze when unequipping the hammer.");
@@ -93,4 +101,12 @@ public partial class Configuration
     InitOther(wrapper);
   }
 
+}
+
+public static class InvulnerabilityMode
+{
+  public const string Off = "Off";
+  public const string On = "On";
+  public const string Damaged = "Damaged";
+  public const string Worn = "Worn";
 }
