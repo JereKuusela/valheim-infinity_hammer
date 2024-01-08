@@ -16,24 +16,22 @@ public partial class ObjectSelection : BaseSelection
 
   public ObjectSelection(ZNetView view, bool singleUse)
   {
-    var zdo = view.GetZDO();
-    var originalPrefab = zdo == null ? view.gameObject : ZNetScene.instance.GetPrefab(zdo.GetPrefab());
-    var name = Utils.GetPrefabName(originalPrefab);
-    var prefab = zdo != null ? view.gameObject : originalPrefab;
-    ZDOData data = zdo != null ? new(zdo) : new();
+    if (view.GetComponent<Player>()) throw new InvalidOperationException("Players are not valid objects.");
 
-    if (!prefab) throw new InvalidOperationException("Invalid prefab.");
-    if (prefab.GetComponent<Player>()) throw new InvalidOperationException("Players are not valid objects.");
+    var zdo = view.GetZDO();
+    var prefabHash = zdo == null ? view.GetPrefabName().GetStableHashCode() : zdo.GetPrefab();
+    ZDOData data = zdo == null ? new() : new(zdo);
+
     SingleUse = singleUse;
-    SelectedPrefab = HammerHelper.SafeInstantiate(prefab, originalPrefab);
+    SelectedPrefab = HammerHelper.SafeInstantiate(view);
     SelectedPrefab.transform.position = Vector3.zero;
     HammerHelper.EnsurePiece(SelectedPrefab);
-    Objects.Add(new(name, view.m_syncInitialScale, data));
+    Objects.Add(new(prefabHash, view.m_syncInitialScale, data));
     if (zdo != null)
       PlaceRotation.Set(SelectedPrefab);
     // Reset for zoop bounds check.
     SelectedPrefab.transform.rotation = Quaternion.identity;
-    SetScale(prefab.transform.localScale);
+    SetScale(view.transform.localScale);
   }
   public ObjectSelection(IEnumerable<ZNetView> views, bool singleUse)
   {
@@ -46,16 +44,14 @@ public partial class ObjectSelection : BaseSelection
     ZNetView.m_forceDisableInit = true;
     foreach (var view in views)
     {
-      var originalPrefab = ZNetScene.instance.GetPrefab(view.GetZDO().GetPrefab());
-      var name = Utils.GetPrefabName(originalPrefab);
       var prefab = view.gameObject;
       ZDOData data = new(view.GetZDO());
-      var obj = HammerHelper.SafeInstantiate(prefab, originalPrefab, SelectedPrefab);
+      var obj = HammerHelper.SafeInstantiate(view, SelectedPrefab);
       obj.SetActive(true);
       obj.transform.position = view.transform.position;
       obj.transform.rotation = view.transform.rotation;
       SetExtraInfo(obj, "", data);
-      Objects.Add(new(name, view.m_syncInitialScale, data));
+      Objects.Add(new(view.GetZDO().GetPrefab(), view.m_syncInitialScale, data));
       if (view == views.First() || Configuration.AllSnapPoints)
         AddSnapPoints(obj);
     }
@@ -90,7 +86,7 @@ public partial class ObjectSelection : BaseSelection
         obj.transform.localScale = item.Scale;
         ZDOData data = new(item.Data);
         SetExtraInfo(obj, item.ExtraInfo, data);
-        Objects.Add(new SelectedObject(item.Prefab, obj.GetComponent<ZNetView>()?.m_syncInitialScale ?? false, data));
+        Objects.Add(new SelectedObject(item.Prefab.GetStableHashCode(), obj.GetComponent<ZNetView>()?.m_syncInitialScale ?? false, data));
 
       }
       catch (InvalidOperationException e)
@@ -113,11 +109,11 @@ public partial class ObjectSelection : BaseSelection
     var i = 0;
     foreach (Transform tr in SelectedPrefab.transform)
     {
-      var prefab = i < Objects.Count ? Objects[i].Prefab : "";
+      var prefab = i < Objects.Count ? Objects[i].Prefab : 0;
       i += 1;
       if (HammerHelper.IsSnapPoint(tr.gameObject))
       {
-        prefab = "";
+        prefab = 0;
         i -= 1;
       }
       tr.localPosition = new(tr.localPosition.x, tr.localPosition.y, -tr.localPosition.z);
@@ -285,13 +281,13 @@ public partial class ObjectSelection : BaseSelection
     if (!piece) piece = SelectedPrefab.AddComponent<Piece>();
     piece.m_clipEverything = HammerHelper.CountSnapPoints(SelectedPrefab) == 0;
     piece.m_name = SelectedPrefab.name;
-    Dictionary<string, int> counts = Objects.GroupBy(obj => obj.Prefab).ToDictionary(kvp => kvp.Key, kvp => kvp.Count());
+    Dictionary<int, int> counts = Objects.GroupBy(obj => obj.Prefab).ToDictionary(kvp => kvp.Key, kvp => kvp.Count());
     var topKeys = counts.OrderBy(kvp => kvp.Value).Reverse().ToArray();
     if (topKeys.Length <= 5)
-      ExtraDescription = string.Join("\n", topKeys.Select(kvp => $"{kvp.Key}: {kvp.Value}"));
+      ExtraDescription = string.Join("\n", topKeys.Select(kvp => $"{ZNetScene.instance.GetPrefab(kvp.Key).name}: {kvp.Value}"));
     else
     {
-      ExtraDescription = string.Join("\n", topKeys.Take(4).Select(kvp => $"{kvp.Key}: {kvp.Value}"));
+      ExtraDescription = string.Join("\n", topKeys.Take(4).Select(kvp => $"{ZNetScene.instance.GetPrefab(kvp.Key).name}: {kvp.Value}"));
       ExtraDescription += $"\n{topKeys.Length - 4} other types: {topKeys.Skip(4).Sum(kvp => kvp.Value)}";
     }
   }
@@ -318,7 +314,7 @@ public partial class ObjectSelection : BaseSelection
   public override int GetPrefab(int index = 0)
   {
     if (Objects.Count <= index) throw new InvalidOperationException("Invalid index.");
-    return Objects[index].Prefab.GetStableHashCode();
+    return Objects[index].Prefab;
   }
   public override bool IsScalingSupported() => Objects.All(obj => obj.Scalable);
   public void UpdateZDOs(ZDOData data)
@@ -378,13 +374,13 @@ public partial class ObjectSelection : BaseSelection
     Undo.StopTracking();
   }
 
-  public GameObject AddObject(GameObject baseObj, Vector3 pos)
+  public GameObject AddObject(ZNetView view, Vector3 pos)
   {
     if (Objects.Count == 1)
       ToMulti();
-    var obj = HammerHelper.SafeInstantiate(baseObj, SelectedPrefab);
+    var obj = HammerHelper.SafeInstantiate(view, SelectedPrefab);
     obj.SetActive(true);
-    obj.transform.rotation = baseObj.transform.rotation;
+    obj.transform.rotation = view.transform.rotation;
     obj.transform.localPosition = pos;
     if (Configuration.AllSnapPoints) AddSnapPoints(obj);
     Objects.Add(new SelectedObject(Objects[0].Prefab, Objects[0].Scalable, Objects[0].Data));

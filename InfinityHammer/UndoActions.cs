@@ -25,10 +25,11 @@ public class Undo
     UndoPlace action = new(objs);
     UndoManager.Add(action);
   }
-  public static void AddRemoveStep(IEnumerable<ZNetView> objs)
+  public static void AddRemoveStep(IEnumerable<ZNetView> objs) => AddRemoveStep(objs.Select(obj => new FakeZDO(obj.GetZDO())));
+  public static void AddRemoveStep(IEnumerable<FakeZDO> objs)
   {
     if (objs.Count() == 0) return;
-    UndoRemove action = new(objs.Select(obj => new FakeZDO(obj.GetZDO())));
+    UndoRemove action = new(objs);
     UndoManager.Add(action);
   }
   private static bool GroupCreating = false;

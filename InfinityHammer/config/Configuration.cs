@@ -75,11 +75,11 @@ public partial class Configuration
     configDisableLoot = wrapper.Bind(section, "Disable loot", false, "Prevents creatures and structures dropping loot when removed with the hammer.");
     configRepairAnything = wrapper.Bind(section, "Repair anything", false, "Allows reparing anything.");
     configOverwriteHealth = wrapper.Bind(section, "Overwrite health", "0", "Overwrites the health of built or repaired objects.");
-    configInvulnerability = wrapper.Bind(section, "Set invulnerability", InvulnerabilityMode.Off, new ConfigDescription("Build objects are invulnerable.", new AcceptableValueList<string>(InvulnerabilityMode.Off, InvulnerabilityMode.On, InvulnerabilityMode.Damaged, InvulnerabilityMode.Worn)));
+    configInvulnerability = wrapper.Bind(section, "Set invulnerability", InvulnerabilityMode.Off, new ConfigDescription("Built objects are invulnerable.", new AcceptableValueList<string>(InvulnerabilityMode.Off, InvulnerabilityMode.On, InvulnerabilityMode.Damaged, InvulnerabilityMode.Worn)));
 
-    configNoCreator = wrapper.Bind(section, "No creator", false, "Reduce save data by not setting the creator id.");
-    configNoPrimaryTarget = wrapper.Bind(section, "No primary target", false, "Removes primary target status. Requires World Edit Commands mod on the server.");
-    configNoSecondaryTarget = wrapper.Bind(section, "No secondary target", false, "Removes secondary target status. Requires World Edit Commands mod on the server.");
+    configNoCreator = wrapper.Bind(section, "No creator", false, "Reduces save data by not setting the creator id.");
+    configNoPrimaryTarget = wrapper.Bind(section, "No primary target", false, "Removes the primary target status. Requires World Edit Commands mod on the server.");
+    configNoSecondaryTarget = wrapper.Bind(section, "No secondary target", false, "Removes the secondary target status. Requires World Edit Commands mod on the server.");
     configUnfreezeOnSelect = wrapper.Bind(section, "Unfreeze on select", true, "Removes the placement freeze when selecting a new object.");
     configResetOffsetOnUnfreeze = wrapper.Bind(section, "Reset offset on unfreeze", true, "Removes the placement offset when unfreezing the placement.");
     configUnfreezeOnUnequip = wrapper.Bind(section, "Unfreeze on unequip", true, "Removes the placement freeze when unequipping the hammer.");

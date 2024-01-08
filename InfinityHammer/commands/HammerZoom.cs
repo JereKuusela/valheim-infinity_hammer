@@ -38,7 +38,7 @@ public class HammerZoomCommand
       var direction = args.Length > 2 ? args[2] : "";
       var scale = Scaling.Get();
       Zoom(args[1], direction, action(scale));
-      selection.SetScale(scale.Value);
+      selection.SetScale(scale.Vec3);
       Scaling.Print(args.Context);
     });
   }
@@ -73,7 +73,7 @@ public class HammerZoomCommand
       }
       else
         throw new InvalidOperationException("Must either have 1 or 3 values.");
-      selection.SetScale(scale.Value);
+      selection.SetScale(scale.Vec3);
       Scaling.Print(args.Context);
 
     });

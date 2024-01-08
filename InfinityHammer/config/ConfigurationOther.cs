@@ -27,15 +27,15 @@ public partial class Configuration
   public static ConfigEntry<string> configHammerTools;
   public static HashSet<string> HammerTools = [];
   public static ConfigEntry<string> configMirrorFlip;
-  public static HashSet<string> MirrorFlip = [];
+  public static HashSet<int> MirrorFlip = [];
   public static ConfigEntry<string> configDimensions;
   public static Dictionary<string, Vector3> Dimensions = [];
   public static ConfigEntry<bool> configEnabled;
   public static bool Enabled => configEnabled.Value;
 #nullable enable
-  private static List<string> ParseList(string value) => value.Split(',').Select(s => s.Trim().ToLower()).Where(s => s != "").ToList();
   private static string[] ParseArray(string value) => value.Split(',').Select(s => s.Trim().ToLower()).Where(s => s != "").ToArray();
   private static HashSet<string> ParseHashList(string value) => value.Split(',').Select(s => s.Trim().ToLower()).Where(s => s != "").ToHashSet();
+  private static HashSet<int> ParseHashedList(string value) => value.Split(',').Select(s => s.Trim().GetStableHashCode()).ToHashSet();
 
   private static Dictionary<string, Vector3> ParseSize(string value) => value.Split('|').Select(s => s.Trim().ToLower()).Where(s => s != "")
     .Select(s => s.Split(',')).Where(split => split.Length == 4).ToDictionary(split => split[0], split => Parse.VectorXZY(split, 1));
@@ -46,7 +46,7 @@ public partial class Configuration
   }
   private static void UpdateMirrorFlip()
   {
-    MirrorFlip = ParseHashList(configMirrorFlip.Value);
+    MirrorFlip = ParseHashedList(configMirrorFlip.Value);
   }
   private static void UpdateDimensions()
   {

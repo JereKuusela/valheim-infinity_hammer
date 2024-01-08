@@ -8,15 +8,17 @@ public class Scaling()
   public static void Set(Vector3 value) => Get().SetScale(value);
   public static void Print(Terminal terminal) => Get().Print(terminal);
   public static ScalingData Get() => Selection.Get().IsTool ? ToolScaling : PieceScaling;
-  public static Vector3 Value => Get().Value;
+  public static ScalingData Get(bool tool) => tool ? ToolScaling : PieceScaling;
+  public static Vector3 Value => Get().Vec3;
 }
 
 
 public class ScalingData(bool sanityY, bool minXZ, bool printChanges, Vector3 value)
 {
-  private readonly bool SanityY = sanityY;
+  private readonly bool OnlyPositiveHeight = sanityY;
   private readonly bool MinXZ = minXZ;
-  public Vector3 Value = value;
+  private Vector3 Value = value;
+  public Vector3 Vec3 => Value;
   private readonly bool PrintChanges = printChanges;
   public float X => MinXZ ? Mathf.Max(0.25f, Value.x) : Value.x;
   public float Y => Value.y;
@@ -33,14 +35,13 @@ public class ScalingData(bool sanityY, bool minXZ, bool printChanges, Vector3 va
   private void Sanity()
   {
     Value.x = Mathf.Max(0f, Value.x);
-    if (SanityY)
+    if (OnlyPositiveHeight)
       Value.y = Mathf.Max(0f, Value.y);
     Value.z = Mathf.Max(0f, Value.z);
-    // Little hack to keep scalings more consistent.
-    if (Mathf.Approximately(Value.x, Value.z))
-      Value.x = Value.z;
-    if (Mathf.Approximately(Value.y, 0f))
-      Value.y = 0f;
+
+    Value.x = Helper.Round(Value.x);
+    Value.y = Helper.Round(Value.y);
+    Value.z = Helper.Round(Value.z);
   }
 
   public void SetPrecisionXZ(float min, float precision)

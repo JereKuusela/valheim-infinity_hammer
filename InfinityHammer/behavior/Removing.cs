@@ -93,7 +93,7 @@ public class RemovePiece
     if (RemovedObjects.Count > 0)
     {
       RemoveInArea(RemovedObjects[0], Configuration.RemoveArea);
-      Undo.Remove(RemovedObjects);
+      Undo.AddRemoveStep(RemovedObjects);
     }
     RemovedObjects.Clear();
     HideEffects.Active = false;

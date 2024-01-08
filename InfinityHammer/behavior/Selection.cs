@@ -6,9 +6,9 @@ using Service;
 using UnityEngine;
 namespace InfinityHammer;
 
-public class SelectedObject(string name, bool scalable, ZDOData data)
+public class SelectedObject(int prefab, bool scalable, ZDOData data)
 {
-  public string Prefab = name;
+  public int Prefab = prefab;
   public ZDOData Data = data;
   public bool Scalable = scalable;
 }

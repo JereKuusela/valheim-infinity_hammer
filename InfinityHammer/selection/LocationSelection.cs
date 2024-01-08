@@ -17,13 +17,14 @@ public class LocationSelection : BaseSelection
     SelectedPrefab = HammerHelper.SafeInstantiateLocation(location, Hammer.AllLocationsObjects ? null : seed);
     HammerHelper.EnsurePiece(SelectedPrefab);
     ZDOData data = new();
-    data.Set(Hash.Location, location.m_prefabName.GetStableHashCode());
+    var hash = location.m_prefabName.GetStableHashCode();
+    data.Set(Hash.Location, hash);
     data.Set(Hash.Seed, seed);
-    Object = new(location.m_prefabName, false, data);
+    Object = new(hash, false, data);
     Helper.GetPlayer().SetupPlacementGhost();
   }
   public override ZDOData GetData(int index = 0) => Object.Data;
-  public override int GetPrefab(int index = 0) => Object.Prefab.GetStableHashCode();
+  public override int GetPrefab(int index = 0) => Object.Prefab;
   public override GameObject GetPrefab(GameObject obj) => ZoneSystem.instance.m_locationProxyPrefab;
 
   public override void AfterPlace(GameObject obj)

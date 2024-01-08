@@ -90,14 +90,15 @@ public static class HammerHelper
     Helper.AddMessage(instance, message, true);
   }
   ///<summary>Initializing the copy as inactive is the best way to avoid any script errors. ZNet stuff also won't run.</summary>
-  public static GameObject SafeInstantiate(GameObject obj, GameObject originalPrefab) => SafeInstantiate(obj, originalPrefab, null);
-  public static GameObject SafeInstantiate(GameObject obj, GameObject originalPrefab, GameObject? parent)
+  public static GameObject SafeInstantiate(ZNetView view) => SafeInstantiate(view, null);
+  public static GameObject SafeInstantiate(ZNetView view, GameObject? parent)
   {
-    var colliders = obj.GetComponentsInChildren<Collider>();
+    var hash = view.GetZDO() == null ? view.GetPrefabName().GetStableHashCode() : view.GetZDO().GetPrefab();
+    var originalPrefab = ZNetScene.instance.GetPrefab(hash);
+    var colliders = view.GetComponentsInChildren<Collider>();
     var originalColliders = originalPrefab.GetComponentsInChildren<Collider>();
     // Some data changes can remove all colliders from the obj, so fallback to the original prefab if colliders can't be reseted.
-    if (colliders.Length != originalColliders.Length)
-      obj = originalPrefab;
+    var obj = colliders.Length == originalColliders.Length ? view.gameObject : originalPrefab;
 
     var wear = obj.GetComponent<WearNTear>();
     var highlight = wear && wear.m_oldMaterials != null;

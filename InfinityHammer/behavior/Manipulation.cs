@@ -141,7 +141,7 @@ public static class Position
   }
   public static void Apply(GameObject ghost)
   {
-    if (Selection.Get().PlayerHeight && (ZInput.GetButton("AltPlace") || ZInput.GetButton("JoyAltPlace")))
+    if (Selection.Get().PlayerHeight)
     {
       var player = Helper.GetPlayer();
       ghost.transform.position = new Vector3(ghost.transform.position.x, player.transform.position.y, ghost.transform.position.z);
@@ -185,30 +185,30 @@ public static class Position
   public static void MoveLeft(float value)
   {
     if (Selection.Get().TerrainGrid) value = Mathf.Max(value, 1f);
-    Offset.x -= value;
+    Offset.x = Helper.Round(Offset.x - value);
   }
   public static void MoveRight(float value)
   {
     if (Selection.Get().TerrainGrid) value = Mathf.Max(value, 1f);
-    Offset.x += value;
+    Offset.x = Helper.Round(Offset.x + value);
   }
   public static void MoveDown(float value)
   {
-    Offset.y -= value;
+    Offset.y = Helper.Round(Offset.y - value);
   }
   public static void MoveUp(float value)
   {
-    Offset.y += value;
+    Offset.y = Helper.Round(Offset.y + value);
   }
   public static void MoveBackward(float value)
   {
     if (Selection.Get().TerrainGrid) value = Mathf.Max(value, 1f);
-    Offset.z -= value;
+    Offset.z = Helper.Round(Offset.z - value);
   }
   public static void MoveForward(float value)
   {
     if (Selection.Get().TerrainGrid) value = Mathf.Max(value, 1f);
-    Offset.z += value;
+    Offset.z = Helper.Round(Offset.z + value);
   }
   public static void Set(Vector3 value)
   {

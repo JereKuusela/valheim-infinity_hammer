@@ -4,9 +4,9 @@ Bend the rules of building! Copy any object, make structures indestructible, rem
 
 Install on the admin client (modding [guide](https://youtu.be/L9ljm2eKLrk)).
 
-Install also [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) and [World Edit Commands](https://valheim.thunderstore.io/package/JereKuusela/World_Edit_Commands/).
+Install [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/).
 
-# Features
+## Features
 
 - Build anything. Trees, rocks, creatures... All can be placed with the hammer, with a precise placement!
 - Copy anything. Armor stands, chests and item stands with their contents. Even boss altars!
@@ -17,8 +17,6 @@ Install also [Server Devcommands](https://valheim.thunderstore.io/package/JereKu
 
 Recommended mods:
 
-- [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/): Enables key binds, undo and better command support.
-- [World Edit Commands](https://valheim.thunderstore.io/package/JereKuusela/World_Edit_Commands/): Enables terrain tools and additional commands.
 - [Gizmo](https://valheim.thunderstore.io/package/ComfyMods/Gizmo/): Enables free rotation.
 - [More Vanilla Builds](https://valheim.thunderstore.io/package/BippityBoppityBoo/MoreVanillaBuilds/): Adds more objects to the build menu.
 - [Structure Tweaks](https://valheim.thunderstore.io/package/JereKuusela/Structure_Tweaks/): Allows scaling every object. Everyone must have this mod installed.
@@ -26,9 +24,10 @@ Recommended mods:
 Similar mods:
 
 - [Better Creative](https://valheim.thunderstore.io/package/Heinermann/BetterCreative/): Adds most objects to the build menu and some enhancements.
+- [Plan Build](https://valheim.thunderstore.io/package/MathiasDecrock/PlanBuild/): Advanced blueprint support.
 - [OCDheim](https://valheim.thunderstore.io/package/javadevils/OCDheim/): Lots of enhancements, especially for precise building.
 
-# Selecting objects
+## Selecting objects
 
 The main feature of this mod is the ability to build any object with the hammer.
 
@@ -55,7 +54,7 @@ The `hammer` command has following extra parameters which allow modifying the se
 - `scale=number` or `scale=x,z,y`: Overrides the size (if the object can be scaled).
 - `stars=number`: Overrides the creature stars (level - 1).
 - `text=string`: Overrides the sign text.
-- `type=creature/structure`: Select only certain object types.
+- `type=component1,component2,...`: Select only certain object types.
 
 For Structure Tweaks mod:
 
@@ -78,10 +77,6 @@ The scale can be directly set with following commands:
 - `hammer_scale_x [amount]`: Sets only the x-axis.
 - `hammer_scale_y [amount]`: Sets only the y-axis.
 - `hammer_scale_z [amount]`: Sets only the z-axis.
-- `hammer_scale_cmd [x,z,y or amount]`: Sets the size of commands.
-- `hammer_scale_x_cmd [amount]`: Sets only the x-axis.
-- `hammer_scale_y_cmd [amount]`: Sets only the y-axis.
-- `hammer_scale_z_cmd [amount]`: Sets only the z-axis.
 
 ## Zoom
 
@@ -93,10 +88,6 @@ This can be also done with following commands:
 - `hammer_zoom_x [percentage or amount]`: Zooms only the x-axis.
 - `hammer_zoom_y [percentage or amount]`: Zooms only the y-axis.
 - `hammer_zoom_z [percentage or amount]`: Zooms only the z-axis.
-- `hammer_zoom_cmd [x,z,y or percentage or amount]`: Zooms the size of commands.
-- `hammer_zoom_x_cmd [percentage or amount]`: Zooms only the x-axis.
-- `hammer_zoom_y_cmd [percentage or amount]`: Zooms only the y-axis.
-- `hammer_zoom_z_cmd [percentage or amount]`: Zooms only the z-axis.
 
 For example `hammer_zoom 5%` changes 100 % to 105 % or 200 % to 210 %. While `hammer_zoom -5%` changes 100 % to 95.2 % or 200 % to 190.5 %.
 
@@ -179,8 +170,6 @@ For example `3*random` would randomly rotate 0, 120 or 240 degrees.
 
 ## Undo / redo
 
-Requires installing [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/).
-
 Building and removing objects can be quickly reversed by pressing NumPad7. Reversed actions can be redone with NumPad9.
 
 Note: Any other removal like buildings collapsing due to lack of support or destroyed by enemies is not tracked. Only your direct actions can be undone.
@@ -195,7 +184,7 @@ Possible directions are `backward`, `down`, `forward`,`left`, `right` and `up`.
 
 The step sets the distance between cloned objects. By default this is the size of the object.
 
-The recommended way is to set a keybinding in the config (with Server Devcommands mod). Custom bindings can also be used for special cases.
+The recommended way is to set a keybinding in the config. Custom bindings can also be used for special cases.
 
 Examples:
 
@@ -243,7 +232,7 @@ New PlanBuild blueprints can be created with `hammer_save [file name] [center pi
 
 If the center piece is not given, the default value is used from the config.
 
-Note: Infinity Hammer will also store the object data when creating blueprints. This can significantly increase the file size and cause incompatibility with future PlanBuild versions.
+Note: Infinity Hammer will also store the object data when creating blueprints. This can significantly increase the file size and cause incompatibility with future PlanBuild versions. If needed, disable "Save blueprint data" from the config.
 
 Following data is not copied:
 
@@ -262,101 +251,9 @@ Some special commands exist for advaced cases. Usually you want to bind these.
 - `hammer_place`: Allows placing with a key press.
 - `hammer_repair`: Selects the repair tool for quickly clearing the selection.
 
-For example with [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) you could bind command `hammer_rotate_y random;hammer_place` to build objects with a random rotation.
+For example you could bind command `hammer_rotate_y random;hammer_place` to build objects with a random rotation.
 
-# Executing commands
-
-The hammer (and hoe) can execute any console commands, which provides a quick and an intuitive way to use them. These commands can be found at the build menu with a configurable position.
-
-Unfortunately adding new commands won't be that simple. Probably the easiest way is editing the config directly. That way you can see how the default commands are done.
-
-Commands also exist for this:
-
-- `hammer_add [command]` or `hoe_add [command]`: Adds a new command. Useful for sharing commands with other players.
-- `hammer_list [index to clipboard]` or `hoe_list [index to clipboard]`: Prints added commmand and their index numbers. If indes is given, copies to the command to the clipboard for easier sharing.
-- `hammer_remove [index]` or `hoe_remove [index]`: Removes the command with the given index.
-- `hammer_remove [command]` or `hoe_remove [command]`: Removes all commands that start with the given parameter.
-
-For example `hammer_add killall` would add a new item to the hammer menu that killed all nearby creatures when clicked.
-
-## Command style
-
-By default all added commands have name "Command" and have the command as the description.
-
-This can be customized with parameters `cmd_name`, `cmd_desc` and `cmd_icon`. Valid icons are object ids, skill ids and status effect ids.
-
-For example `hammer_add cmd_name=Kill cmd_desc=Kills_everything cmd_icon=softdeath killall`
-
-## Modifier keys
-
-Multiple commands can be executed by having ; between them. For example `hammer_add goto 5000;killall` would both teleport to the sky and kill all nearby creatures.
-
-`keys` parameter can be used to decide which commands get executed. For example `hammer_add goto 5000 keys=-leftalt;goto keys=leftalt` would teleport up or down depending on whether the left alt key was pressed.
-
-The config has keybindings for two modifier keys. These can be used in the commands with a value of `cmd_mod1` (default value is left alt) and `cmd_mod2` (default value is left control). For example `hammer_add cmd_name=Teleport cmd_icon=Shelter goto 5000 keys=-cmd_mod1;goto keys=cmd_mod1`.
-
-Modifiers key also work for the `hammer_command` or `hoe_command` explained below.
-
-## Command placement
-
-Some commands have coordinates as their parameters. These can be set with hammer/hoe by using commands `hammer_command` or `hoe_command`.
-
-For example using `hammer_command hammer circle=10 from=x,z,y` would select every object within 10 meters of the hovered position.
-
-The radius can be modified by using shift + mousewheel, when using `hammer_command hammer circle=r from=x,z,y` (10 changed to r). This also makes the mod highlight the affected area! For less typing you can use the alias `hammer_area`.
-
-This command can be added to the menu with `hammer_add hammer_area`. It's recommended to always test commands first before adding them.
-
-## World Edit Commands
-
-The full potential of commands can be unlocked by installing [World Edit Commands](https://valheim.thunderstore.io/package/JereKuusela/World_Edit_Commands/) mod. This automatically adds new commands to the hoe (mainly for terrain modifications).
-
-Full list of parameters:
-
-- `id`: Id of the hovered object.
-- `x`: X coordinate.
-- `y`: Y coordinate.
-- `z`: Z coordinate.
-- `a`: Angle. Mostly matters for rectangles.
-- `r`: Radius. Enables circle shape.
-- `r1-r2`: Radius range. Enables circle and ring shapes.
-- `w`: Rectangle width. Enables square shape.
-- `w1-w2`: Square range. Enables square and grid shapes.
-- `d`: Rectangle depth. Enables rectangle shape.
-- `h`: Height.
-
-For example `hoe_command terrain from=x,z,y circle=r rect=w,d angle=a raise=h` raises terrain by a variable height.
-
-To reduce typing, use aliases `hoe_object` and `hoe_terrain`. For example `hoe_object tame` or `hoe_terrain raise=h`.
-
-Similar aliases also exist for the hammer (`hammer_object` and `hammer_terrain`).
-
-Key binds to change values:
-
-- Q: Changes the shape (uses `hammer_shape` command).
-- Shift + Mouse wheel: Circle radius and rectangle width.
-- Shift + Alt + Mouse wheel: Rectangle depth.
-- Shift + Control + Mouse wheel: Height.
-
-The current values are shared between different commands. For example if you changed radius to 20 while leveling then the radius would still be 20 when switching to the raise command.
-
-It's possible to restrict the starting value with parameters `cmd_r`, `cmd_w`, `cmd_d` and `cmd_h`. This is generally not recommended (unless you really need it).
-
-For example `hoe_object tame cmd_r=10-20` would restrict the starting radius between 10 and 20 meters. If the radius was 15 it would stay at 15. But a radius of 5 would become 10 and a radius of 50 would become 20.
-
-### Edge targeted commands
-
-By default, the visualization expects the targeted coordinates to be at the center of the command. Edge targeting can be enabled by switching parameters `x,z,y` to `tx,tz,ty`.
-
-This changes the visualization and causes `r` and `d` parameters to be automatically calculated from the distance between the player and the targeted position.
-
-Otherwise the logic and usage stays the same as before.
-
-To reduce typing, use aliases `hammer_terrain_to` and `hoe_terrain_to` which also automatically switch to the rectangle mode.
-
-For slopes, you can use `hammer_slope [width]` and `hoe_slope [width]`. For example `hoe_slope 5 paint=paved;hoe_terrain_to lower=1 smooth=.25`.
-
-# Configuration
+## Configuration
 
 Following powers are available with `hammer_config` command:
 
@@ -373,7 +270,11 @@ Following powers are available with `hammer_config` command:
 - Ignored remove ids (key: `ignored_remove_ids`): Additional ids that are ignored when removing anything.
 - Infinite health (default: `false`, key: `infinite_health`): Sets the Overwrite health setting to 1E30.
 - No cost (default: `false`, key: `no_cost`): Removes durability, resource and stamina costs.
-- No creator (default: `false`, key: `no_creator`): Builds without setting the creator information.
+- No creator (default: `false`, key: `no_creator`): Reduces save data by not setting the creator id.
+- No primary target (default: `false`, key: `no_primary_target`): Removes the primary target status.
+  - Requires World Edit Commands mod on the server, otherwise the change is removed on world load.
+- No secondary target (default: `false`, key: `no_secondary_target`): Removes the secondary target status.
+  - Requires World Edit Commands mod on the server, otherwise the change is removed on world load.
 - Overwrite health (default: `0`, key: `overwrite_health`): Sets the health of built or repaired objects (0 reverts to the default max health, except for creatures).
 - Range (default: `0`, key: `range`): Range for the hammer (capped at about 50 meters).
 - Remove anything (default: `false`, key: `remove_anything`): Allows removing any object.
@@ -382,6 +283,10 @@ Following powers are available with `hammer_config` command:
 - Reset offset on unfreeze (default `true`, key: `reset_offset_on_unfreeze`): Removes the placement offset when unfreezing the placement.
 - Save blueprints to profile (default: `false`, key: `save_blueprints_to_profile`): If enabled, blueprints are saved to the profile folder instead of the base Valheim folder.
 - Save blueprint data (default: `true`, key: `save_blueprint_data`): If enabled, object data values are saved to blueprints.
+- Set invulnerability (default: `false`, key: `set_invulnerability`): Built objects are invulnerable.
+  - Creatures get very high health which makes them immune to damage.
+  - Destructibles, mine rocks and trees get very high tool tier which makes them immune to damage.
+  - Structures get negative health which prevents them from taking any damage.
 - Show command values (default: `false`, key: `show_command_values`): Always show the command on tool descriptions.
 - Snap points for all objects (default: `false`, key: `snap_points_for_all_objects`):If enabled, multi selection creates snap points for every object.
 - Unfreeze on select (default `true`, key: `unfreeze_on_select`): Removes the placement freeze when selecting a new object.
@@ -389,7 +294,7 @@ Following powers are available with `hammer_config` command:
 
 On servers, above features are disabled without cheat access (except visual changes and offsetting).
 
-## Visual
+### Visual
 
 Visual settings work even without cheat access. These all are disabled by default.
 
@@ -398,7 +303,7 @@ Visual settings work even without cheat access. These all are disabled by defaul
 - No placement marker: Hides the yellow placement marker (also affects Gizmo mod).
 - No support indicator: Hides the color that shows support.
 
-## Output
+### Output
 
 Messages from the mod can be configured with following settings:
 
@@ -407,15 +312,13 @@ Messages from the mod can be configured with following settings:
 - `disable_scale_messages`: Disables messages from changing the object scale.
 - `disable_select_messages`: Disables messages from selecting objects.
 
-## Key bindings
+### Key bindings
 
 Some commonly used features have pre-made key binds in the configuration. Internally these use the `bind` command.
 
-This means that [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) mod is needed for multi-key binds or for using the mouse wheel.
-
 If you don't wish to use this system you can set all binds to none and make your own bindings with the `bind` command.
 
-# Building
+## Building
 
 Hammer configuration applies to all building, including the standard structures selected from the build menu.
 
@@ -423,34 +326,40 @@ When selecting an existing object, its size and rotation is copied to the placem
 
 Object scaling only works for some objects (mostly trees and rocks). This is restricted by the base game (scaling is not stored in the save file). [Structure Tweaks](https://valheim.thunderstore.io/package/JereKuusela/Structure_Tweaks/) mod can be used to enable scaling for all objects (required for all clients).
 
-If "Overwrite health" is enabled, objects have a specified health (including creatures). For minerocks, the health is applied to the individual parts (the outer shell stays at 1 health). Repairing can be used to modify the shell health if needed.
+If "Overwrite health" is enabled, objects have a specified health (including creatures). For minerocks, the health is applied to the individual parts.
 
-Setting a very high health (like "1E30") can be used to make object indestructible because the damage taken is rounded down to zero. This also prevents structures collapsing from lack of support.
+Setting a very high health (like "1E30") can be used to make object indestructible because the damage taken is rounded down to zero. This also prevents structures collapsing from lack of support. However this will increase network traffic because of constant health updates. Recommended to use the "Set invulnerability" setting instead.
 
 For creatures, the max health resets when the area is reloaded if the current health equals the max health. For this reason, the current health is set slightly higher than the max health.
 
-"No creator" is currently quite pointless since most structures ignore the value and will get targeted by the enemies regardless of the value. But maybe someone can find some use for it.
+"No creator" is mainly for reducing the save file size.
 
 Locations (Points of Interest) can also be copied. However only static parts are included in the actual location. For example in the start temple, each boss stone is a separate object and can be copied separately if needed.
 
-# Repairing
+## Repairing
 
 By default, only change is that the UI shows how much damage was repaired.
 
 If "Repair anything" is enabled, most destructible objects can be repaired or healed. This includes creatures and players.
 
-For minerocks, if the targeted part is already at full health, a random part is restored instead. This is not very practical but can be used to restore any accidental changes to minerocks.
+For minerocks, if the targeted part is already at full health, a random part is restored instead. This is not very practical but can be used to restore  accidental changes to minerocks.
 
 If "Overwrite health" is enabled, the object is repaired or damaged to the specified health value.
 
 For creatures, the maximum health value is also set. So they will keep their max health even when disabling "Overwrite health". Other objects will revert to the original max health when repaired.
 
-Unfortunately, the max health resets when the area is reloaded if the current health equals the max health. For this reason, the current health is set slightly higher than the max health.
-
-# Destroying
+## Destroying
 
 By default, destroying only works for standard structures and placed objects. Placed objects can only be removed temporarily since the required information is lost when the area is reloaded.
 
 If "Destroy anything" is enabled, all objects can be removed.
 
 If "Disable loot" is enabled, destroying creatures or structures won't drop loot. This can be useful to get rid of very high starred creatures that crash the game when killed.
+
+## Credits
+
+Thanks for Azumatt for creating the mod icon!
+
+Sources: [GitHub](https://github.com/JereKuusela/valheim-infinity_hammer)
+
+Donations: [Buy me a computer](https://www.buymeacoffee.com/jerekuusela)

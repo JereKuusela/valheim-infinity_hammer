@@ -101,7 +101,7 @@ public partial class ObjectSelection : BaseSelection
   private void AddChildSub(Vector3Int index)
   {
     var pos = GetOffset(index);
-    Zoops[index] = AddObject(BaseObject, pos);
+    Zoops[index] = AddObject(BaseObject.GetComponent<ZNetView>(), pos);
   }
   private void AddChildX(string offset)
   {
@@ -158,7 +158,7 @@ public partial class ObjectSelection : BaseSelection
   private void ZoopPostprocess()
   {
     CountObjects();
-    var scale = Scaling.Get().Value;
+    var scale = Scaling.Get().Vec3;
     Helper.GetPlayer().SetupPlacementGhost();
     Scaling.Set(scale);
   }

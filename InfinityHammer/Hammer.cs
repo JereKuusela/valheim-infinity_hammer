@@ -21,7 +21,8 @@ public static class Hammer
     var inventory = player.GetInventory();
     var item = inventory.m_inventory.Find(IsHammer) ?? throw new InvalidOperationException($"Unable to find the hammer.");
 
-    player.EquipItem(item);
+    if (!player.EquipItem(item))
+      throw new InvalidOperationException($"Unable to equip the hammer.");
   }
 
   public static bool Is(ItemDrop.ItemData item) => item != null && item.m_shared.m_buildPieces != null;
