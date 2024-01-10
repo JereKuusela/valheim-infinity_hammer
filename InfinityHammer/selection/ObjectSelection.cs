@@ -12,6 +12,7 @@ namespace InfinityHammer;
 public partial class ObjectSelection : BaseSelection
 {
 
+  private readonly GameObject BasePrefab;
   public List<SelectedObject> Objects = [];
 
   public ObjectSelection(ZNetView view, bool singleUse)
@@ -24,6 +25,7 @@ public partial class ObjectSelection : BaseSelection
 
     SingleUse = singleUse;
     SelectedPrefab = HammerHelper.SafeInstantiate(view);
+    BasePrefab = SelectedPrefab;
     SelectedPrefab.transform.position = Vector3.zero;
     HammerHelper.EnsurePiece(SelectedPrefab);
     Objects.Add(new(prefabHash, view.m_syncInitialScale, data));
@@ -33,10 +35,23 @@ public partial class ObjectSelection : BaseSelection
     SelectedPrefab.transform.rotation = Quaternion.identity;
     SetScale(view.transform.localScale);
   }
+  // This is for compatibility. Many mods don't expect a cleaned up ghost.
+  // So when selecting from the build menu, the ghost doesn't have to be cleaned up.
+  public ObjectSelection(Piece piece, bool singleUse)
+  {
+    var view = piece.GetComponent<ZNetView>();
+    var prefabHash = view.GetPrefabName().GetStableHashCode();
+    BasePrefab = ZNetScene.instance.GetPrefab(prefabHash);
+
+    SingleUse = singleUse;
+    Objects.Add(new(prefabHash, view.m_syncInitialScale, new()));
+    SetScale(view.transform.localScale);
+  }
   public ObjectSelection(IEnumerable<ZNetView> views, bool singleUse)
   {
     SingleUse = singleUse;
     SelectedPrefab = new GameObject();
+    BasePrefab = null!;
     // Prevents children from disappearing.
     SelectedPrefab.SetActive(false);
     SelectedPrefab.name = $"Multiple ({views.Count()})";
@@ -44,7 +59,6 @@ public partial class ObjectSelection : BaseSelection
     ZNetView.m_forceDisableInit = true;
     foreach (var view in views)
     {
-      var prefab = view.gameObject;
       ZDOData data = new(view.GetZDO());
       var obj = HammerHelper.SafeInstantiate(view, SelectedPrefab);
       obj.SetActive(true);
@@ -64,6 +78,7 @@ public partial class ObjectSelection : BaseSelection
   public ObjectSelection(Terminal terminal, Blueprint bp, Vector3 scale)
   {
     SelectedPrefab = new GameObject();
+    BasePrefab = null!;
     // Prevents children from disappearing.
     SelectedPrefab.SetActive(false);
     SelectedPrefab.name = bp.Name;
@@ -388,6 +403,8 @@ public partial class ObjectSelection : BaseSelection
   }
   private void ToMulti()
   {
+    if (!SelectedPrefab)
+      SelectedPrefab = HammerHelper.SafeInstantiate(BasePrefab.GetComponent<ZNetView>());
     var obj = SelectedPrefab;
     SelectedPrefab = new GameObject();
     // Prevents children from disappearing.

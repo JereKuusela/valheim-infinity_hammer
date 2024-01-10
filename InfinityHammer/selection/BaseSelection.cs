@@ -16,7 +16,7 @@ public class BaseSelection
 
 #nullable disable
   ///<summary>Copy of the selected entity. Only needed for the placement ghost because armor and item stands have a different model depending on their state.</summary>
-  protected GameObject SelectedPrefab = null;
+  protected GameObject SelectedPrefab;
 #nullable enable
   public bool SingleUse = false;
   public string ExtraDescription = "";

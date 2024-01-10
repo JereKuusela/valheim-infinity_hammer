@@ -104,14 +104,14 @@ public class PieceTableSetSelected
     var index = __instance.GetSelectedIndex();
     var piece = __instance.GetPiece((int)__instance.m_selectedCategory, index);
     if (piece && piece.GetComponent<ZNetView>())
-      Selection.CreateGhost(new ObjectSelection(piece.GetComponent<ZNetView>(), false));
+      Selection.CreateGhost(new ObjectSelection(piece, false));
   }
 }
 ///<summary>Overrides the piece selection.</summary>
 [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.GetSelectedPiece))]
 public class GetSelectedPiece
 {
-  public static Piece Postfix(Piece result) => Selection.Get().GetSelectedPiece() ?? result;
+  public static Piece Postfix(Piece result) => Configuration.Enabled ? Selection.Get().GetSelectedPiece() ?? result : result;
 }
 
 [HarmonyPatch(typeof(Player), nameof(Player.SetPlaceMode))]

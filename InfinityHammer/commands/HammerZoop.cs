@@ -101,7 +101,7 @@ public partial class ObjectSelection : BaseSelection
   private void AddChildSub(Vector3Int index)
   {
     var pos = GetOffset(index);
-    Zoops[index] = AddObject(BaseObject.GetComponent<ZNetView>(), pos);
+    Zoops[index] = AddObject(BasePrefab.GetComponent<ZNetView>(), pos);
   }
   private void AddChildX(string offset)
   {
@@ -141,20 +141,19 @@ public partial class ObjectSelection : BaseSelection
   }
   private void UpdateOffsetX(string offset)
   {
-    var size = HammerHelper.ParseSize(BaseObject, offset);
-    ZoopOffset.x = size.x * BaseObject.transform.localScale.z;
+    var size = HammerHelper.ParseSize(BasePrefab, offset);
+    ZoopOffset.x = size.x * BasePrefab.transform.localScale.z;
   }
   private void UpdateOffsetY(string offset)
   {
-    var size = HammerHelper.ParseSize(BaseObject, offset);
-    ZoopOffset.y = size.y * BaseObject.transform.localScale.y;
+    var size = HammerHelper.ParseSize(BasePrefab, offset);
+    ZoopOffset.y = size.y * BasePrefab.transform.localScale.y;
   }
   private void UpdateOffsetZ(string offset)
   {
-    var size = HammerHelper.ParseSize(BaseObject, offset);
-    ZoopOffset.z = size.z * BaseObject.transform.localScale.z;
+    var size = HammerHelper.ParseSize(BasePrefab, offset);
+    ZoopOffset.z = size.z * BasePrefab.transform.localScale.z;
   }
-  private GameObject BaseObject => Zoops.Count == 0 ? SelectedPrefab : Zoops.First().Value;
   private void ZoopPostprocess()
   {
     CountObjects();
@@ -164,6 +163,7 @@ public partial class ObjectSelection : BaseSelection
   }
   public void ZoopRight(string offset)
   {
+    if (!BasePrefab) return;
     if (Objects.Count > 1 && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
     if (ZoopsX < 0)
     {
@@ -179,6 +179,7 @@ public partial class ObjectSelection : BaseSelection
   }
   public void ZoopLeft(string offset)
   {
+    if (!BasePrefab) return;
     if (Objects.Count > 1 && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
     if (ZoopsX > 0)
     {
@@ -194,6 +195,7 @@ public partial class ObjectSelection : BaseSelection
   }
   public void ZoopUp(string offset)
   {
+    if (!BasePrefab) return;
     if (Objects.Count > 1 && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
     if (ZoopsY < 0)
     {
@@ -209,6 +211,7 @@ public partial class ObjectSelection : BaseSelection
   }
   public void ZoopDown(string offset)
   {
+    if (!BasePrefab) return;
     if (Objects.Count > 1 && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
     if (ZoopsY > 0)
     {
@@ -224,6 +227,7 @@ public partial class ObjectSelection : BaseSelection
   }
   public void ZoopForward(string offset)
   {
+    if (!BasePrefab) return;
     if (Objects.Count > 1 && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
     if (ZoopsZ < 0)
     {
@@ -239,6 +243,7 @@ public partial class ObjectSelection : BaseSelection
   }
   public void ZoopBackward(string offset)
   {
+    if (!BasePrefab) return;
     if (Objects.Count > 1 && ZoopsX == 0 && ZoopsY == 0 && ZoopsZ == 0) return;
     if (ZoopsZ > 0)
     {

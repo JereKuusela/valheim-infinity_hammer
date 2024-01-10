@@ -85,8 +85,11 @@ public class ConfigWrapper
   }
   private readonly Dictionary<string, Action<Terminal, string>> SettingHandlers = [];
   private readonly List<Action> Binders = [];
+  private bool BindsDone = false;
   public void Bind()
   {
+    if (BindsDone) return;
+    BindsDone = true;
     foreach (var binder in Binders)
       binder();
   }
@@ -104,8 +107,13 @@ public class ConfigWrapper
     if (key.Modifiers.Count() > 0) keys += "," + string.Join(",", key.Modifiers);
     return keys;
   }
-  private static void UpdateKey(KeyboardShortcut key, string command, string mode = "")
+  private void UpdateKey(KeyboardShortcut key, string command, string mode = "")
   {
+    if (!Chat.instance)
+    {
+      BindsDone = false;
+      return;
+    }
     if (key.MainKey == KeyCode.None) return;
     var keys = GetKeys(key);
     if (mode != "")
@@ -122,8 +130,13 @@ public class ConfigWrapper
     Binders.Add(() => UpdateKey(setting.Value, command, mode));
     SettingHandlers.Add(key, (Terminal terminal, string value) => SetKey(terminal, setting, name, value));
   }
-  private static void UpdateWheelKey(KeyboardShortcut key, string command, string mode = "")
+  private void UpdateWheelKey(KeyboardShortcut key, string command, string mode = "")
   {
+    if (!Chat.instance)
+    {
+      BindsDone = false;
+      return;
+    }
     // Dirty hack to allow command specific binds to work without a modifier key.
     // This should be ok since they only affect Infinity Hammer related actions.
     if (key.MainKey == KeyCode.None && (mode == "" || mode == "build")) return;

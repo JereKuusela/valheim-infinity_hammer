@@ -1,3 +1,8 @@
+- v1.45
+  - Fixes error when changing key binds on the main menu.
+  - Fixes compatibility issue with Plant Easily mod.
+  - Other minor fixes.
+
 - v1.44
   - Tools split to Infinity Tools mod.
   - Adds mandatory requirement of Server Devcommands mod.
