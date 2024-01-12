@@ -53,8 +53,9 @@ public class HammerSaveCommand
       bp.Name = Localization.instance.Localize(piece.m_name);
       bp.Description = piece.m_description;
     }
+    if (Selection.Get() is not ObjectSelection selection) return bp;
     var objects = GetObjects(obj);
-    if (objects.Count() == 1)
+    if (selection.Objects.Count() == 1)
     {
       AddSingleObject(bp, obj, saveData);
       // Snap points are sort of useful for single objects.

@@ -28,7 +28,9 @@ public class HammerScaleCommand
         return;
       }
       var direction = args.Length > 2 ? args[2] : "";
-      Scale(args[1], direction, action(Scaling.Get()));
+      var scale = Scaling.Get();
+      Scale(args[1], direction, action(scale));
+      selection.SetScale(scale.Vec3);
       Scaling.Print(args.Context);
     });
   }
@@ -49,7 +51,9 @@ public class HammerScaleCommand
         HammerHelper.Message(args.Context, "Selected object doesn't support scaling.");
         return;
       }
-      selection.SetScale(Parse.Scale(Parse.Split(args[1])) * Parse.Direction(args.Args, 2));
+      var scale = Scaling.Get();
+      scale.SetScale(Parse.Scale(Parse.Split(args[1])) * Parse.Direction(args.Args, 2));
+      selection.SetScale(scale.Vec3);
       Scaling.Print(args.Context);
     });
   }

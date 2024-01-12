@@ -89,9 +89,7 @@ public static class HammerHelper
     if (Configuration.DisableMessages) return;
     Helper.AddMessage(instance, message, true);
   }
-  ///<summary>Initializing the copy as inactive is the best way to avoid any script errors. ZNet stuff also won't run.</summary>
-  public static GameObject SafeInstantiate(ZNetView view) => SafeInstantiate(view, null);
-  public static GameObject SafeInstantiate(ZNetView view, GameObject? parent)
+  public static GameObject SafeInstantiate(ZNetView view, GameObject parent)
   {
     var hash = view.GetZDO() == null ? view.GetPrefabName().GetStableHashCode() : view.GetZDO().GetPrefab();
     var originalPrefab = ZNetScene.instance.GetPrefab(hash);
@@ -100,13 +98,8 @@ public static class HammerHelper
     // Some data changes can remove all colliders from the obj, so fallback to the original prefab if colliders can't be reseted.
     var obj = colliders.Length == originalColliders.Length ? view.gameObject : originalPrefab;
 
-    var wear = obj.GetComponent<WearNTear>();
-    var highlight = wear && wear.m_oldMaterials != null;
-    if (highlight)
-      wear.ResetHighlight();
-    var ret = parent == null ? SafeInstantiate(obj) : SafeInstantiate(obj, parent.transform);
-    if (highlight)
-      wear.Highlight();
+    var ret = SafeInstantiate(obj, parent.transform);
+
     if (colliders.Length == originalColliders.Length)
     {
       colliders = ret.GetComponentsInChildren<Collider>();
@@ -118,10 +111,12 @@ public static class HammerHelper
     }
     return ret;
   }
-  public static GameObject SafeInstantiate(string name, GameObject parent)
+  public static GameObject ChildInstantiate(ZNetView view, GameObject parent)
   {
-    var obj = ZNetScene.instance.GetPrefab(name) ?? throw new InvalidOperationException($"Missing object {name}.");
-    return SafeInstantiate(obj, parent.transform);
+    var obj = view.gameObject;
+    var ret = UnityEngine.Object.Instantiate(obj, parent.transform);
+    CleanObject(ret);
+    return ret;
   }
   ///<summary>Initializing the copy as inactive is the best way to avoid any script errors. ZNet stuff also won't run.</summary>
   public static GameObject SafeInstantiateLocation(ZoneSystem.ZoneLocation location, int? seed)
@@ -140,18 +135,14 @@ public static class HammerHelper
   }
   private static GameObject SafeInstantiate(GameObject obj)
   {
-    obj.SetActive(false);
     var ret = UnityEngine.Object.Instantiate(obj);
     CleanObject(ret);
-    obj.SetActive(true);
     return ret;
   }
   private static GameObject SafeInstantiate(GameObject obj, Transform parent)
   {
-    obj.SetActive(false);
     var ret = UnityEngine.Object.Instantiate(obj, parent);
     CleanObject(ret);
-    obj.SetActive(true);
     return ret;
   }
   public static bool IsSnapPoint(GameObject obj) => obj && obj.CompareTag("snappoint");
@@ -168,7 +159,8 @@ public static class HammerHelper
   ///<summary>Removes scripts that try to run (for example placement needs only the model and Piece component).</summary>
   public static void CleanObject(GameObject obj)
   {
-    if (!obj || !Configuration.Enabled) return;
+    if (obj.TryGetComponent<WearNTear>(out var wear) && wear.m_oldMaterials != null)
+      wear.ResetHighlight();
     // Creature behavior.
     if (obj.TryGetComponent<Character>(out var character)) character.enabled = false;
     UnityEngine.Object.Destroy(obj.GetComponent<CharacterDrop>());

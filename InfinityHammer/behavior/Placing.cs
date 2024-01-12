@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
 using HarmonyLib;
@@ -7,7 +6,6 @@ using Service;
 using UnityEngine;
 // Code related to adding objects.
 namespace InfinityHammer;
-
 
 [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
 public class PlacePiece
@@ -107,23 +105,6 @@ public class UnlockBuildDistance
   public static void Postfix(Player __instance, float __state)
   {
     __instance.m_maxPlaceDistance = __state;
-  }
-}
-
-[HarmonyPatch(typeof(Player), nameof(Player.SetupPlacementGhost))]
-public class SetupPlacementGhost
-{
-  public static void Postfix(Player __instance)
-  {
-    if (!__instance.m_placementGhost) return;
-    // When copying an existing object, the copy is inactive.
-    // So the ghost must be manually activated while disabling ZNet stuff.
-    if (__instance.m_placementGhost && !__instance.m_placementGhost.activeSelf)
-    {
-      ZNetView.m_forceDisableInit = true;
-      __instance.m_placementGhost.SetActive(true);
-      ZNetView.m_forceDisableInit = false;
-    }
   }
 }
 

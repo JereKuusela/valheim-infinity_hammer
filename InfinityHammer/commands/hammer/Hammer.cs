@@ -124,7 +124,7 @@ public class HammerSelect
           views = [hovered];
       }
       HammerHelper.Init();
-      ObjectSelection selection = views.Length == 1 ? new(views[0], pars.Pick) : new(views, pars.Pick);
+      ObjectSelection selection = views.Length == 1 ? new(views[0], pars.Pick, pars.Scale) : new(views, pars.Pick, pars.Scale);
       ZDOData extraData = new();
       if (pars.Health.HasValue)
       {
@@ -159,7 +159,7 @@ public class HammerSelect
       if (pars.Text != null)
         extraData.Set(Hash.Text, pars.Text);
       selection.UpdateZDOs(extraData);
-      selection.Postprocess(pars.Scale);
+      selection.Postprocess();
       var ghost = Selection.CreateGhost(selection);
       if (pars.Freeze) Position.Freeze(views.Length > 0 ? views[0].transform.position : Helper.GetPlayer().transform.position);
       if (pars.Pick)

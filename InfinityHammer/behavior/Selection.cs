@@ -27,6 +27,15 @@ public static partial class Selection
     selection.Destroy();
     Selections.Remove(HammerHelper.GetTool());
   }
+  public static void Destroy()
+  {
+    foreach (var selection in Selections.Values)
+    {
+      selection.Deactivate();
+      selection.Destroy();
+    }
+    Selections.Clear();
+  }
   public static GameObject CreateGhost(BaseSelection selection)
   {
     Clear();
@@ -118,4 +127,15 @@ public class GetSelectedPiece
 public class SelectionActivate
 {
   static void Postfix() => Selection.Get().Activate();
+}
+
+
+[HarmonyPatch(typeof(Player), nameof(Player.OnDestroy))]
+public class PlayerOnDestroy
+{
+  static void Prefix(Player __instance)
+  {
+    if (__instance == Player.m_localPlayer)
+      Selection.Destroy();
+  }
 }

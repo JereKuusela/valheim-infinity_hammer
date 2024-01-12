@@ -106,30 +106,24 @@ public partial class ObjectSelection : BaseSelection
   private void AddChildX(string offset)
   {
     UpdateOffsetX(offset);
-    ZNetView.m_forceDisableInit = true;
     for (var y = 0; Math.Abs(y) <= Math.Abs(ZoopsY); y += Sign(ZoopsY))
       for (var z = 0; Math.Abs(z) <= Math.Abs(ZoopsZ); z += Sign(ZoopsZ))
         AddChildSub(new(ZoopsX, y, z));
-    ZNetView.m_forceDisableInit = false;
   }
   private void AddChildY(string offset)
   {
     UpdateOffsetY(offset);
-    ZNetView.m_forceDisableInit = true;
     for (var x = 0; Math.Abs(x) <= Math.Abs(ZoopsX); x += Sign(ZoopsX))
       for (var z = 0; Math.Abs(z) <= Math.Abs(ZoopsZ); z += Sign(ZoopsZ))
         AddChildSub(new(x, ZoopsY, z));
-    ZNetView.m_forceDisableInit = false;
   }
 
   private void AddChildZ(string offset)
   {
     UpdateOffsetZ(offset);
-    ZNetView.m_forceDisableInit = true;
     for (var x = 0; Math.Abs(x) <= Math.Abs(ZoopsX); x += Sign(ZoopsX))
       for (var y = 0; Math.Abs(y) <= Math.Abs(ZoopsY); y += Sign(ZoopsY))
         AddChildSub(new(x, y, ZoopsZ));
-    ZNetView.m_forceDisableInit = false;
   }
   private Vector3 GetOffset(Vector3Int index)
   {
@@ -139,6 +133,7 @@ public partial class ObjectSelection : BaseSelection
     offset.z *= index.z;
     return offset;
   }
+  private GameObject BasePrefab => Objects.Count == 1 ? SelectedPrefab : Zoops[new(0, 0)];
   private void UpdateOffsetX(string offset)
   {
     var size = HammerHelper.ParseSize(BasePrefab, offset);
