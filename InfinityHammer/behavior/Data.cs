@@ -22,7 +22,9 @@ public class DataHelper
     ZNetView.m_initZDO.m_prefab = hash;
     if (view.m_syncInitialScale)
       ZNetView.m_initZDO.Set(ZDOVars.s_scaleHash, scale);
-    ZNetView.m_initZDO.DataRevision = 1;
+    ZNetView.m_initZDO.DataRevision = 0;
+    // This is needed to trigger the ZDO sync.
+    ZNetView.m_initZDO.IncreaseDataRevision();
   }
   public static void Clear()
   {

@@ -22,6 +22,9 @@ public class FakeZDO(ZDO zdo)
     zdo.Distant = Source.Distant;
     zdo.Persistent = Source.Persistent;
     Data.Copy(zdo);
+    zdo.DataRevision = 0;
+    // This is needed to trigger the ZDO sync.
+    zdo.IncreaseDataRevision();
     return zdo;
   }
 }

@@ -49,6 +49,6 @@ public class ValheimRAFT
       });
     }
   }
-  public static bool IsRaft(string name) => name == "MBRaft";
-  public static bool IsInRaft(ZNetView view) => IsRaft(view.GetPrefabName()) || view.GetZDO().GetZDOID(RaftParent) != ZDOID.None;
+  private static readonly int RaftName = "MBRaft".GetStableHashCode();
+  public static bool IsRaft(int hash) => hash == RaftName;
 }

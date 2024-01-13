@@ -8,20 +8,32 @@ namespace InfinityHammer;
 
 public class LocationSelection : BaseSelection
 {
+  // Unity doesn't run scripts for inactive objects.
+  // So an inactive object is used to store the selected object.
+  // This mimics the ZNetScene.m_namedPrefabs behavior.
+  private readonly GameObject Wrapper;
   private readonly SelectedObject Object;
+  public override void Destroy()
+  {
+    base.Destroy();
+    UnityEngine.Object.Destroy(Wrapper);
+  }
+
 
   public LocationSelection(ZoneSystem.ZoneLocation location, int seed)
   {
     if (location == null) throw new InvalidOperationException("Location not found.");
     if (!location.m_prefab) throw new InvalidOperationException("Invalid location");
-    SelectedPrefab = HammerHelper.SafeInstantiateLocation(location, Hammer.AllLocationsObjects ? null : seed);
-    HammerHelper.EnsurePiece(SelectedPrefab);
+
+    Wrapper = new GameObject();
+    Wrapper.SetActive(false);
+    SelectedPrefab = HammerHelper.SafeInstantiateLocation(location, Hammer.AllLocationsObjects ? null : seed, Wrapper);
+
     ZDOData data = new();
     var hash = location.m_prefabName.GetStableHashCode();
     data.Set(Hash.Location, hash);
     data.Set(Hash.Seed, seed);
     Object = new(hash, false, data);
-    Helper.GetPlayer().SetupPlacementGhost();
   }
   public override ZDOData GetData(int index = 0) => Object.Data;
   public override int GetPrefab(int index = 0) => Object.Prefab;

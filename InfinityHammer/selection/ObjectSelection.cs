@@ -24,9 +24,9 @@ public partial class ObjectSelection : BaseSelection
 
   public ObjectSelection(ZNetView view, bool singleUse, Vector3? scale)
   {
+    if (view.GetComponent<Player>()) throw new InvalidOperationException("Players are not valid objects.");
     Wrapper = new GameObject();
     Wrapper.SetActive(false);
-    if (view.GetComponent<Player>()) throw new InvalidOperationException("Players are not valid objects.");
 
     var zdo = view.GetZDO();
     var prefabHash = zdo == null ? view.GetPrefabName().GetStableHashCode() : zdo.GetPrefab();
@@ -35,7 +35,6 @@ public partial class ObjectSelection : BaseSelection
     SingleUse = singleUse;
     SelectedPrefab = HammerHelper.SafeInstantiate(view, Wrapper);
     SelectedPrefab.transform.position = Vector3.zero;
-    HammerHelper.EnsurePiece(SelectedPrefab);
     Objects.Add(new(prefabHash, view.m_syncInitialScale, data));
     if (zdo != null)
       PlaceRotation.Set(SelectedPrefab);
@@ -391,12 +390,12 @@ public partial class ObjectSelection : BaseSelection
     for (var i = 0; i < children.Count; i++)
     {
       var ghostChild = children[i];
-      var name = Utils.GetPrefabName(ghostChild);
-      if (ValheimRAFT.IsRaft(name)) continue;
-      var prefab = ZNetScene.instance.GetPrefab(name);
+      var hash = GetPrefab(i);
+      if (ValheimRAFT.IsRaft(hash)) continue;
+      var prefab = ZNetScene.instance.GetPrefab(hash);
       if (prefab)
       {
-        DataHelper.Init(name, ghostChild.transform, GetData(i));
+        DataHelper.Init(hash, ghostChild.transform, GetData(i));
         var childObj = UnityEngine.Object.Instantiate(prefab, ghostChild.transform.position, ghostChild.transform.rotation);
         PostProcessPlaced(childObj);
       }

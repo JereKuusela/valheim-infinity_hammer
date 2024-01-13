@@ -118,8 +118,7 @@ public static class HammerHelper
     CleanObject(ret);
     return ret;
   }
-  ///<summary>Initializing the copy as inactive is the best way to avoid any script errors. ZNet stuff also won't run.</summary>
-  public static GameObject SafeInstantiateLocation(ZoneSystem.ZoneLocation location, int? seed)
+  public static GameObject SafeInstantiateLocation(ZoneSystem.ZoneLocation location, int? seed, GameObject parent)
   {
     foreach (var view in location.m_netViews)
       view.gameObject.SetActive(true);
@@ -131,18 +130,13 @@ public static class HammerHelper
         random.Randomize();
       UnityEngine.Random.state = state;
     }
-    return SafeInstantiate(location.m_prefab);
-  }
-  private static GameObject SafeInstantiate(GameObject obj)
-  {
-    var ret = UnityEngine.Object.Instantiate(obj);
-    CleanObject(ret);
-    return ret;
+    return SafeInstantiate(location.m_prefab, parent.transform);
   }
   private static GameObject SafeInstantiate(GameObject obj, Transform parent)
   {
     var ret = UnityEngine.Object.Instantiate(obj, parent);
     CleanObject(ret);
+    EnsurePiece(ret);
     return ret;
   }
   public static bool IsSnapPoint(GameObject obj) => obj && obj.CompareTag("snappoint");
@@ -161,36 +155,38 @@ public static class HammerHelper
   {
     if (obj.TryGetComponent<WearNTear>(out var wear) && wear.m_oldMaterials != null)
       wear.ResetHighlight();
-    // Creature behavior.
-    if (obj.TryGetComponent<Character>(out var character)) character.enabled = false;
-    UnityEngine.Object.Destroy(obj.GetComponent<CharacterDrop>());
-    UnityEngine.Object.Destroy(obj.GetComponent<MonsterAI>());
-    UnityEngine.Object.Destroy(obj.GetComponent<AnimalAI>());
-    UnityEngine.Object.Destroy(obj.GetComponent<BaseAI>());
-    UnityEngine.Object.Destroy(obj.GetComponent<Tameable>());
-    UnityEngine.Object.Destroy(obj.GetComponent<Procreation>());
-    UnityEngine.Object.Destroy(obj.GetComponent<Growup>());
-    UnityEngine.Object.Destroy(obj.GetComponent<FootStep>());
-    UnityEngine.Object.Destroy(obj.GetComponent<RandomFlyingBird>());
-    UnityEngine.Object.Destroy(obj.GetComponent<Fish>());
-    UnityEngine.Object.Destroy(obj.GetComponentInChildren<CharacterAnimEvent>());
-    // Destructible behavior.
-    UnityEngine.Object.Destroy(obj.GetComponent<TreeLog>());
-    UnityEngine.Object.Destroy(obj.GetComponent<TreeBase>());
-    UnityEngine.Object.Destroy(obj.GetComponent<MineRock>());
-    UnityEngine.Object.Destroy(obj.GetComponent<Windmill>());
-    UnityEngine.Object.Destroy(obj.GetComponent<SpawnArea>());
-    UnityEngine.Object.Destroy(obj.GetComponent<CreatureSpawner>());
-    UnityEngine.Object.Destroy(obj.GetComponent<TombStone>());
-    UnityEngine.Object.Destroy(obj.GetComponent<MineRock5>());
-    UnityEngine.Object.Destroy(obj.GetComponent<MineRock>());
-    // Other
-    UnityEngine.Object.Destroy(obj.GetComponent<HoverText>());
-    UnityEngine.Object.Destroy(obj.GetComponent<StaticPhysics>());
-    UnityEngine.Object.Destroy(obj.GetComponent<Aoe>());
-    UnityEngine.Object.Destroy(obj.GetComponent<DungeonGenerator>());
-    UnityEngine.Object.Destroy(obj.GetComponentInChildren<MusicLocation>());
-    UnityEngine.Object.Destroy(obj.GetComponentInChildren<SpawnArea>());
+
+    DisableComponents<Character>(obj);
+    DisableComponents<MonsterAI>(obj);
+    DisableComponents<AnimalAI>(obj);
+    DisableComponents<BaseAI>(obj);
+    DisableComponents<Tameable>(obj);
+    DisableComponents<Procreation>(obj);
+    DisableComponents<Growup>(obj);
+    DisableComponents<FootStep>(obj);
+    DisableComponents<RandomFlyingBird>(obj);
+    DisableComponents<Fish>(obj);
+    DisableComponents<CharacterAnimEvent>(obj);
+    DisableComponents<TreeLog>(obj);
+    DisableComponents<TreeBase>(obj);
+    DisableComponents<Windmill>(obj);
+    DisableComponents<SpawnArea>(obj);
+    DisableComponents<CreatureSpawner>(obj);
+    DisableComponents<TombStone>(obj);
+    DisableComponents<MineRock5>(obj);
+    DisableComponents<MineRock>(obj);
+    DisableComponents<HoverText>(obj);
+    DisableComponents<StaticPhysics>(obj);
+    DisableComponents<Aoe>(obj);
+    DisableComponents<DungeonGenerator>(obj);
+    DisableComponents<MusicLocation>(obj);
+    DisableComponents<SpawnArea>(obj);
+
+  }
+  private static void DisableComponents<T>(GameObject obj) where T : MonoBehaviour
+  {
+    foreach (MonoBehaviour component in obj.GetComponentsInChildren<T>())
+      component.enabled = false;
   }
   public static bool IsBuildPiece(GameObject obj)
       => Player.m_localPlayer.m_buildPieces.m_pieces.Any(piece => Utils.GetPrefabName(obj) == Utils.GetPrefabName(piece));

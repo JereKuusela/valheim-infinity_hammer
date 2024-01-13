@@ -1,3 +1,7 @@
+- v1.47
+  - Fixes location placing.
+  - Fixes data not always being synced on servers.
+
 - v1.46
   - Fixes error with blueprints after relogging.
   - Fixes error when selecting hammer after relogging.
