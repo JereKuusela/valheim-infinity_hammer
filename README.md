@@ -200,6 +200,8 @@ Stacking is similar to zooping but instantly places the objects:
 
 The amount determines how many objects are placed. This can be fine-tuned by giving a range.
 
+If nothing is selected, stacking is applied to the hovered piece.
+
 Note: Choosing the correction direction can be difficult when rotating the selection. But you can easily try things by reverting the changes with `undo`.
 
 Examples:

@@ -1,3 +1,9 @@
+- v1.48
+  - Adds support for the command `hammer_stack` to work on the hovered piece.
+  - Fixes structure highlight showing when picking up objects.
+  - Fixes error when using the pick up feature.
+  - Fixes the command `hammer_stack`.
+
 - v1.47
   - Fixes location placing.
   - Fixes data not always being synced on servers.

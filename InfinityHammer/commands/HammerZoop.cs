@@ -133,7 +133,7 @@ public partial class ObjectSelection : BaseSelection
     offset.z *= index.z;
     return offset;
   }
-  private GameObject BasePrefab => Objects.Count == 1 ? SelectedPrefab : Zoops[new(0, 0)];
+  private GameObject BasePrefab => Zoops.Count > 0 ? Zoops.First().Value : SelectedPrefab;
   private void UpdateOffsetX(string offset)
   {
     var size = HammerHelper.ParseSize(BasePrefab, offset);

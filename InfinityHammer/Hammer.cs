@@ -23,6 +23,7 @@ public static class Hammer
 
     if (!player.EquipItem(item))
       throw new InvalidOperationException($"Unable to equip the hammer.");
+    Clear();
   }
 
   public static bool Is(ItemDrop.ItemData item) => item != null && item.m_shared.m_buildPieces != null;
@@ -40,7 +41,13 @@ public static class Hammer
     if (item == null) return "";
     return Utils.GetPrefabName(item.m_dropPrefab).ToLower();
   }
-  public static void SelectRepair() => Player.m_localPlayer?.SetSelectedPiece(new Vector2Int(0, 0));
+  public static void Clear()
+  {
+    Selection.Clear();
+    var player = Helper.GetPlayer();
+    player.SetSelectedPiece(new Vector2Int(0, 0));
+    player.SetupPlacementGhost();
+  }
   public static void Place()
   {
     var player = Player.m_localPlayer;

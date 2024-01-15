@@ -1,4 +1,5 @@
 using ServerDevcommands;
+using UnityEngine;
 
 namespace InfinityHammer;
 public class HammerRepairCommand
@@ -9,7 +10,9 @@ public class HammerRepairCommand
     Helper.Command("hammer_repair", "Selects the repair tool.", (args) =>
     {
       HammerHelper.Init();
-      Helper.GetPlayer().SetupPlacementGhost();
+      var player = Helper.GetPlayer();
+      player.SetSelectedPiece(new Vector2Int(0, 0));
+      player.SetupPlacementGhost();
     });
   }
 }

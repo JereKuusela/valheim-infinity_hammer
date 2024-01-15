@@ -13,7 +13,7 @@ public class SelectedObject(int prefab, bool scalable, ZDOData data)
   public bool Scalable = scalable;
 }
 
-public static partial class Selection
+public static class Selection
 {
   public static BaseSelection BaseSelection = new();
   public static Dictionary<string, BaseSelection> Selections = [];
@@ -103,9 +103,22 @@ public class SetItemHack
   }
 }
 
-// This is invasive but simplifies the mod when normal selection can be handle the same way.
+// This is invasive but simplifies the mod when normal selection can be handled the same way.
 [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetSelected))]
 public class PieceTableSetSelected
+{
+  static void Prefix() => Selection.Clear();
+  static void Postfix(PieceTable __instance)
+  {
+    var index = __instance.GetSelectedIndex();
+    var piece = __instance.GetPiece((int)__instance.m_selectedCategory, index);
+    if (piece && piece.GetComponent<ZNetView>())
+      Selection.CreateGhost(new ObjectSelection(piece, false));
+  }
+}
+// This is invasive but simplifies the mod when normal selection can be handled the same way.
+[HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetCategory))]
+public class PieceTableSetCategory
 {
   static void Prefix() => Selection.Clear();
   static void Postfix(PieceTable __instance)

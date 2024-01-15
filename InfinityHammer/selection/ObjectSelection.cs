@@ -355,7 +355,8 @@ public partial class ObjectSelection : BaseSelection
     if (Objects.Count == 1)
     {
       var name = Utils.GetPrefabName(obj);
-      DataHelper.Init(name, obj.transform, GetData(0));
+      var tr = HammerHelper.GetPlacementGhost().transform;
+      DataHelper.Init(name, tr, GetData(0));
       return ZNetScene.instance.GetPrefab(name);
     }
     var dummy = new GameObject

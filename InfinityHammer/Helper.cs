@@ -114,6 +114,7 @@ public static class HammerHelper
   public static GameObject ChildInstantiate(ZNetView view, GameObject parent)
   {
     var obj = view.gameObject;
+    ResetHighlight(obj);
     var ret = UnityEngine.Object.Instantiate(obj, parent.transform);
     CleanObject(ret);
     return ret;
@@ -134,6 +135,7 @@ public static class HammerHelper
   }
   private static GameObject SafeInstantiate(GameObject obj, Transform parent)
   {
+    ResetHighlight(obj);
     var ret = UnityEngine.Object.Instantiate(obj, parent);
     CleanObject(ret);
     EnsurePiece(ret);
@@ -150,12 +152,15 @@ public static class HammerHelper
     }
     return children;
   }
-  ///<summary>Removes scripts that try to run (for example placement needs only the model and Piece component).</summary>
-  public static void CleanObject(GameObject obj)
+  private static void ResetHighlight(GameObject obj)
   {
-    if (obj.TryGetComponent<WearNTear>(out var wear) && wear.m_oldMaterials != null)
+    // Must be done for the original because m_oldMaterials is not copied.
+    if (obj.TryGetComponent<WearNTear>(out var wear))
       wear.ResetHighlight();
-
+  }
+  ///<summary>Removes scripts that try to run (for example placement needs only the model and Piece component).</summary>
+  private static void CleanObject(GameObject obj)
+  {
     DisableComponents<Character>(obj);
     DisableComponents<MonsterAI>(obj);
     DisableComponents<AnimalAI>(obj);
@@ -216,7 +221,6 @@ public static class HammerHelper
   {
     EnabledCheck();
     Hammer.Equip();
-    Hammer.SelectRepair();
   }
 
   public static int CountActiveChildren(GameObject obj)
