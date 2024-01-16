@@ -68,7 +68,7 @@ public class HammerRotateCommand
     {
       if (args.Length < 2) return;
       var player = Helper.GetPlayer();
-      if (args.TryParameterInt(1) > 0)
+      if (Parse.Direction(args.Args, 1) > 0)
         PlaceRotation.RotateY(-22.5f);
       else
         PlaceRotation.RotateY(22.5f);

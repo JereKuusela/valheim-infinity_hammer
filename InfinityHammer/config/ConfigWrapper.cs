@@ -114,7 +114,6 @@ public class ConfigWrapper
       BindsDone = false;
       return;
     }
-    if (key.MainKey == KeyCode.None) return;
     var keys = GetKeys(key);
     if (mode != "")
       keys += $",{mode}";
@@ -137,13 +136,10 @@ public class ConfigWrapper
       BindsDone = false;
       return;
     }
-    // Dirty hack to allow command specific binds to work without a modifier key.
-    // This should be ok since they only affect Infinity Hammer related actions.
-    if (key.MainKey == KeyCode.None && (mode == "" || mode == "build")) return;
     List<string> keys = ["wheel"];
-    if (key.MainKey != KeyCode.None)
-      keys.Add(key.MainKey.ToString().ToLower());
-    keys.AddRange(key.Modifiers.Select(x => x.ToString().ToLower()));
+    // Dirty hack to allow command binds to work without a modifier key.
+    if (key.MainKey != KeyCode.None || mode != "command")
+      keys.Add(GetKeys(key));
     if (mode != "")
       keys.Add(mode.ToLower());
     var bind = $"rebind {string.Join(",", keys)} {command}";

@@ -320,6 +320,8 @@ Some commonly used features have pre-made key binds in the configuration. Intern
 
 If you don't wish to use this system you can set all binds to none and make your own bindings with the `bind` command.
 
+Some mouse wheel binds can't be unbound. In this case, set them some unused key combination.
+
 ## Building
 
 Hammer configuration applies to all building, including the standard structures selected from the build menu.

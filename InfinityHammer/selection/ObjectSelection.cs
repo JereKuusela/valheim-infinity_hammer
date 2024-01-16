@@ -322,10 +322,10 @@ public partial class ObjectSelection : BaseSelection
     Dictionary<int, int> counts = Objects.GroupBy(obj => obj.Prefab).ToDictionary(kvp => kvp.Key, kvp => kvp.Count());
     var topKeys = counts.OrderBy(kvp => kvp.Value).Reverse().ToArray();
     if (topKeys.Length <= 5)
-      piece.m_description += "\n" + string.Join("\n", topKeys.Select(kvp => $"{ZNetScene.instance.GetPrefab(kvp.Key).name}: {kvp.Value}"));
+      piece.m_description = string.Join("\n", topKeys.Select(kvp => $"{ZNetScene.instance.GetPrefab(kvp.Key).name}: {kvp.Value}"));
     else
     {
-      piece.m_description += "\n" + string.Join("\n", topKeys.Take(4).Select(kvp => $"{ZNetScene.instance.GetPrefab(kvp.Key).name}: {kvp.Value}"));
+      piece.m_description = string.Join("\n", topKeys.Take(4).Select(kvp => $"{ZNetScene.instance.GetPrefab(kvp.Key).name}: {kvp.Value}"));
       piece.m_description += $"\n{topKeys.Length - 4} other types: {topKeys.Skip(4).Sum(kvp => kvp.Value)}";
     }
   }
@@ -411,7 +411,7 @@ public partial class ObjectSelection : BaseSelection
   {
     if (Objects.Count == 1)
       ToMulti();
-    var obj = HammerHelper.SafeInstantiate(view, SelectedPrefab);
+    var obj = HammerHelper.ChildInstantiate(view, SelectedPrefab);
     obj.transform.rotation = view.transform.rotation;
     obj.transform.localPosition = pos;
     if (Configuration.AllSnapPoints) AddSnapPoints(obj, Configuration.AllSnapPoints);
@@ -425,13 +425,12 @@ public partial class ObjectSelection : BaseSelection
     SelectedPrefab.transform.SetParent(Wrapper.transform);
     SelectedPrefab.transform.position = obj.transform.position;
     SelectedPrefab.transform.rotation = obj.transform.rotation;
-    obj.transform.parent = SelectedPrefab.transform;
+    obj.transform.SetParent(SelectedPrefab.transform);
     obj.transform.localScale = Vector3.one;
     AddSnapPoints(obj, Configuration.AllSnapPoints);
     if (obj.TryGetComponent<Piece>(out var piece))
     {
-      var name2 = Utils.GetPrefabName(obj);
-      var prefab = ZNetScene.instance.GetPrefab(name2);
+      var prefab = ZNetScene.instance.GetPrefab(Objects[0].Prefab);
       if (prefab && !prefab.GetComponent<Piece>())
         UnityEngine.Object.Destroy(piece);
     }
@@ -440,6 +439,8 @@ public partial class ObjectSelection : BaseSelection
   {
     if (Objects.Count == 1)
       return;
+    // Must be deactivated so that destroy doesn't activate it.
+    obj.SetActive(false);
     UnityEngine.Object.Destroy(obj);
     Objects.RemoveAt(Objects.Count - 1);
     if (Objects.Count == 1)
@@ -449,7 +450,10 @@ public partial class ObjectSelection : BaseSelection
   {
     var obj = SelectedPrefab.transform.GetChild(0).gameObject;
     HammerHelper.EnsurePiece(obj);
-    obj.transform.parent = null;
+    // Must transfer parent directly to prevent self-activation.
+    obj.transform.SetParent(Wrapper.transform);
+    // Must be deactivated so that destroy doesn't activate it.
+    SelectedPrefab.SetActive(false);
     UnityEngine.Object.Destroy(SelectedPrefab);
     SelectedPrefab = obj;
     Objects = Objects.Take(1).ToList();
