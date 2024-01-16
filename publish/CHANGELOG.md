@@ -1,3 +1,7 @@
+- v1.49
+  - Fixes multiselection not having snap points.
+  - Fixes errors when multiselecting a single object.
+
 - v1.48
   - Adds support for the command `hammer_stack` to work on the hovered piece.
   - Fixes structure highlight showing when picking up objects.

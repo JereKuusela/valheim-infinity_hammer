@@ -79,8 +79,9 @@ public partial class ObjectSelection : BaseSelection
       SetExtraInfo(obj, "", data);
       Objects.Add(new(view.GetZDO().GetPrefab(), view.m_syncInitialScale, data));
       if (view == views.First() || Configuration.AllSnapPoints)
-        AddSnapPoints(obj);
+        AddSnapPoints(obj, Configuration.AllSnapPoints);
     }
+    SelectedPrefab.transform.position = Vector3.zero;
     CountObjects();
     PlaceRotation.Set(SelectedPrefab);
     Scaling.Set(SelectedPrefab);
@@ -126,23 +127,24 @@ public partial class ObjectSelection : BaseSelection
     // Might be good to have a proper loading for single item blueprints, but this works for now.
     if (Objects.Count == 1)
       ToSingle();
+    int counter = 0;
     foreach (var position in bp.SnapPoints)
-      CreateSnapPoint(position);
+      CreateSnapPoint(position, $"Snap {++counter}");
 
     piece.m_clipEverything = HammerHelper.CountSnapPoints(SelectedPrefab) == 0;
     Scaling.Set(SelectedPrefab);
   }
-  private void CreateSnapPoint(Vector3 pos)
+  private void CreateSnapPoint(Vector3 pos, string name)
   {
     GameObject snapObj = new()
     {
-      name = "_snappoint",
+      name = name,
       layer = LayerMask.NameToLayer("piece"),
       tag = "snappoint",
     };
     snapObj.SetActive(false);
     snapObj.transform.parent = SelectedPrefab.transform;
-    snapObj.transform.localPosition = pos;
+    snapObj.transform.position = pos;
   }
   public void Mirror()
   {
@@ -172,7 +174,7 @@ public partial class ObjectSelection : BaseSelection
     {
       Postprocess(SelectedPrefab, GetData());
       if (HammerHelper.CountSnapPoints(SelectedPrefab) == 0)
-        CreateSnapPoint(Vector3.zero);
+        CreateSnapPoint(Vector3.zero, "Center");
     }
     else
     {
@@ -327,12 +329,13 @@ public partial class ObjectSelection : BaseSelection
       piece.m_description += $"\n{topKeys.Length - 4} other types: {topKeys.Skip(4).Sum(kvp => kvp.Value)}";
     }
   }
-  private void AddSnapPoints(GameObject obj)
+  private void AddSnapPoints(GameObject obj, bool addObjName)
   {
+    var baseName = addObjName ? $"{Utils.GetPrefabName(obj)} " : "";
     foreach (Transform tr in obj.transform)
     {
       if (!tr || !HammerHelper.IsSnapPoint(tr.gameObject)) continue;
-      CreateSnapPoint(tr.position);
+      CreateSnapPoint(tr.position, $"{baseName}{tr.name}");
     }
   }
   public override ZDOData GetData(int index = 0)
@@ -411,7 +414,7 @@ public partial class ObjectSelection : BaseSelection
     var obj = HammerHelper.SafeInstantiate(view, SelectedPrefab);
     obj.transform.rotation = view.transform.rotation;
     obj.transform.localPosition = pos;
-    if (Configuration.AllSnapPoints) AddSnapPoints(obj);
+    if (Configuration.AllSnapPoints) AddSnapPoints(obj, Configuration.AllSnapPoints);
     Objects.Add(new SelectedObject(Objects[0].Prefab, Objects[0].Scalable, Objects[0].Data));
     return obj;
   }
@@ -419,14 +422,12 @@ public partial class ObjectSelection : BaseSelection
   {
     var obj = SelectedPrefab;
     SelectedPrefab = new GameObject();
-    // Prevents children from disappearing.
-    SelectedPrefab.SetActive(false);
+    SelectedPrefab.transform.SetParent(Wrapper.transform);
     SelectedPrefab.transform.position = obj.transform.position;
     SelectedPrefab.transform.rotation = obj.transform.rotation;
     obj.transform.parent = SelectedPrefab.transform;
     obj.transform.localScale = Vector3.one;
-    obj.SetActive(true);
-    AddSnapPoints(obj);
+    AddSnapPoints(obj, Configuration.AllSnapPoints);
     if (obj.TryGetComponent<Piece>(out var piece))
     {
       var name2 = Utils.GetPrefabName(obj);
@@ -439,8 +440,6 @@ public partial class ObjectSelection : BaseSelection
   {
     if (Objects.Count == 1)
       return;
-    obj.SetActive(false);
-    obj.transform.parent = null;
     UnityEngine.Object.Destroy(obj);
     Objects.RemoveAt(Objects.Count - 1);
     if (Objects.Count == 1)
@@ -449,7 +448,6 @@ public partial class ObjectSelection : BaseSelection
   private void ToSingle()
   {
     var obj = SelectedPrefab.transform.GetChild(0).gameObject;
-    obj.SetActive(false);
     HammerHelper.EnsurePiece(obj);
     obj.transform.parent = null;
     UnityEngine.Object.Destroy(SelectedPrefab);
