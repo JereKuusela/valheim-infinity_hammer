@@ -64,4 +64,9 @@ public class LocationSelection : BaseSelection
     CustomizeSpawnLocation.AllViews = false;
     Undo.StopTracking();
   }
+  public override void Activate()
+  {
+    base.Activate();
+    Hammer.SelectEmpty();
+  }
 }

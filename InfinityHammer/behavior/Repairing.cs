@@ -14,21 +14,7 @@ public class Repair
   {
     var character = obj.GetComponent<Character>();
     if (!character) return false;
-    obj.ClaimOwnership();
-    var zdo = obj.GetZDO();
-    var currentHealth = zdo.GetFloat(ZDOVars.s_health, character.GetMaxHealth());
-    var maxHealth = Configuration.OverwriteHealth > 0f ? Configuration.OverwriteHealth : character.GetMaxHealth();
-    var newHealth = Configuration.OverwriteHealth > 0f ? Configuration.OverwriteHealth * 1.000001f : character.GetMaxHealth();
-    zdo.Set(ZDOVars.s_maxHealth, maxHealth);
-    var heal = newHealth - currentHealth;
-    if (heal != 0f)
-    {
-      // Max health resets on awake if health is equal to max.
-      zdo.Set(ZDOVars.s_health, newHealth);
-      DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, character.GetTopPoint(), Mathf.Abs(heal));
-      return true;
-    }
-    return false;
+    return RepairShared(obj, character.GetMaxHealth());
   }
   private static bool RepairPlayer(ZNetView obj)
   {
@@ -41,7 +27,6 @@ public class Repair
   }
   public static bool RepairStructure(ZNetView obj)
   {
-    obj.ClaimOwnership();
     var wearNTear = obj.GetComponent<WearNTear>();
     if (!wearNTear || Time.time - wearNTear.m_lastRepair < 1f) return false;
     var result = RepairShared(obj, wearNTear.m_health);
@@ -101,11 +86,14 @@ public class Repair
   private static bool RepairShared(ZNetView obj, float maxHealth)
   {
     obj.ClaimOwnership();
-    var zdo = obj.GetZDO();
-    var max = Configuration.OverwriteHealth > 0f ? Configuration.OverwriteHealth : maxHealth;
-    var heal = max - zdo.GetFloat("health", maxHealth);
-    if (heal == 0f) return false;
-    zdo.Set("health", max);
+    var changed = CustomHealth.SetHealth(obj);
+    if (!changed) return false;
+    var heal = float.PositiveInfinity;
+    if (Configuration.Invulnerability == InvulnerabilityMode.Off)
+    {
+      var max = Configuration.OverwriteHealth;
+      heal = max - obj.GetZDO().GetFloat(ZDOVars.s_health, maxHealth);
+    }
     DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, obj.transform.position, Mathf.Abs(heal));
     return true;
   }
@@ -221,7 +209,8 @@ public class AdvancedRepair
 {
   public static bool Prefix(WearNTear __instance, ref bool __result)
   {
-    if (!Repair.IsRepairing || !Configuration.Enabled || !__instance.m_nview || Configuration.OverwriteHealth == 0f) return true;
+    var customHealth = Configuration.OverwriteHealth > 0f || Configuration.Invulnerability != InvulnerabilityMode.Off;
+    if (!Repair.IsRepairing || !Configuration.Enabled || !__instance.m_nview || !customHealth) return true;
     __result = Repair.RepairStructure(__instance.m_nview);
     return false;
   }

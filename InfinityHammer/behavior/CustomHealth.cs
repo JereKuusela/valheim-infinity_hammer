@@ -3,69 +3,97 @@ namespace InfinityHammer;
 public class CustomHealth
 {
 
-  public static void SetHealth(ZNetView obj)
+  public static bool SetHealth(ZNetView obj)
   {
     var zdo = obj.GetZDO();
-    if (Configuration.Invulnerability == InvulnerabilityMode.Off)
-      SetCustomHealth(obj, zdo);
+    if (Configuration.Invulnerability == InvulnerabilityMode.Off || Configuration.Invulnerability == InvulnerabilityMode.Legacy)
+      return SetCustomHealth(obj, zdo);
     else
-      SetInfiniteHealth(obj, zdo);
+      return SetInfiniteHealth(obj, zdo);
 
   }
-  private static void SetCustomHealth(ZNetView obj, ZDO zdo)
+  private static bool SetCustomHealth(ZNetView obj, ZDO zdo)
   {
-    var value = Configuration.OverwriteHealth;
-    if (value <= 0f) return;
+    var changed = false;
+    var value = Configuration.Invulnerability == InvulnerabilityMode.Legacy ? 1E30f : Configuration.OverwriteHealth;
+    if (value <= 0f) return false;
     if (obj.GetComponent<Character>())
     {
+      changed |= zdo.GetFloat(ZDOVars.s_maxHealth) != value;
       zdo.Set(ZDOVars.s_maxHealth, value);
       // Creatures setup max health if current health equals max health.
       zdo.Set(ZDOVars.s_health, value * 1.000001f);
     }
     if (obj.GetComponent<Destructible>() || obj.GetComponent<TreeBase>() || obj.GetComponent<TreeLog>())
+    {
+      changed |= zdo.GetFloat(ZDOVars.s_health) != value;
       zdo.Set(ZDOVars.s_health, value);
+    }
     if (obj.TryGetComponent<MineRock5>(out var mineRock))
     {
-      foreach (var area in mineRock.m_hitAreas) area.m_health = value;
+      foreach (var area in mineRock.m_hitAreas)
+      {
+        changed |= area.m_health != value;
+        area.m_health = value;
+      };
       mineRock.SaveHealth();
     }
     if (obj.TryGetComponent<WearNTear>(out var wear))
     {
+      changed |= zdo.GetFloat(ZDOVars.s_health) != value;
       zdo.Set(ZDOVars.s_health, value);
       wear.m_healthPercentage = value / wear.m_health;
       wear.SetHealthVisual(wear.m_healthPercentage, false);
     }
+    return changed;
   }
-  private static void SetInfiniteHealth(ZNetView obj, ZDO zdo)
-  {
+  private static readonly int HashFields = "HasFields".GetStableHashCode();
+  private static readonly int HashFieldsDestructible = "HasFieldsDestructible".GetStableHashCode();
+  private static readonly int HashFieldsMineRock5 = "HasFieldsMineRock5".GetStableHashCode();
+  private static readonly int HashFieldsTreeBase = "HasFieldsTreeBase".GetStableHashCode();
+  private static readonly int HashFieldsTreeLog = "HasFieldsTreeLog".GetStableHashCode();
+  private static readonly int HashToolTierDestructible = "Destructible.m_minToolTier".GetStableHashCode();
+  private static readonly int HashToolTierMineRock5 = "MineRock5.m_minToolTier".GetStableHashCode();
+  private static readonly int HashToolTierTreeBase = "TreeBase.m_minToolTier".GetStableHashCode();
+  private static readonly int HashToolTierTreeLog = "TreeLog.m_minToolTier".GetStableHashCode();
+  private static readonly int HashFieldsWearNTear = "HasFieldsWearNTear".GetStableHashCode();
+  private static readonly int HashMaxHealth = "WearNTear.m_health".GetStableHashCode();
 
+
+  private static bool SetInfiniteHealth(ZNetView obj, ZDO zdo)
+  {
+    var changed = false;
     // Destructibles, mine rocks and trees have tool tier which can be used for invulnerability.
     if (obj.GetComponent<Destructible>())
     {
-      zdo.Set("HasFields", true);
-      zdo.Set("HasFieldsDestructible", true);
-      zdo.Set("Destructible.m_minToolTier", int.MaxValue / 2);
+      changed |= zdo.GetInt(HashToolTierDestructible) != int.MaxValue / 2;
+      zdo.Set(HashFields, true);
+      zdo.Set(HashFieldsDestructible, true);
+      zdo.Set(HashToolTierDestructible, int.MaxValue / 2);
       obj.LoadFields();
     }
     if (obj.GetComponent<MineRock5>())
     {
-      zdo.Set("HasFields", true);
-      zdo.Set("HasFieldsMineRock5", true);
-      zdo.Set("MineRock5.m_minToolTier", int.MaxValue / 2);
+      changed |= zdo.GetInt(HashToolTierMineRock5) != int.MaxValue / 2;
+      zdo.Set(HashFields, true);
+      zdo.Set(HashFieldsMineRock5, true);
+      zdo.Set(HashToolTierMineRock5, int.MaxValue / 2);
       obj.LoadFields();
     }
     if (obj.GetComponent<TreeBase>())
     {
-      zdo.Set("HasFields", true);
-      zdo.Set("HasFieldsTreeBase", true);
-      zdo.Set("TreeBase.m_minToolTier", int.MaxValue / 2);
+      changed |= zdo.GetInt(HashToolTierTreeBase) != int.MaxValue / 2;
+      zdo.Set(HashFields, true);
+      zdo.Set(HashFieldsTreeBase, true);
+      zdo.Set(HashToolTierTreeBase, int.MaxValue / 2);
       obj.LoadFields();
     }
     if (obj.GetComponent<TreeLog>())
     {
-      zdo.Set("HasFields", true);
-      zdo.Set("HasFieldsTreeLog", true);
-      zdo.Set("TreeLog.m_minToolTier", int.MaxValue / 2);
+      changed |= zdo.GetInt(HashToolTierTreeLog) != int.MaxValue / 2;
+      zdo.Set(HashFields, true);
+      zdo.Set(HashFieldsTreeLog, true);
+      zdo.Set(HashToolTierTreeLog, int.MaxValue / 2);
       obj.LoadFields();
     }
     if (obj.TryGetComponent<WearNTear>(out var wear))
@@ -78,9 +106,10 @@ public class CustomHealth
         maxHealth = -2f;
       if (Configuration.Invulnerability == InvulnerabilityMode.Damaged)
         maxHealth = -4f;
-      zdo.Set("HasFields", true);
-      zdo.Set("HasFieldsWearNTear", true);
-      zdo.Set("WearNTear.m_health", maxHealth);
+      changed |= zdo.GetFloat(HashMaxHealth) != maxHealth;
+      zdo.Set(HashFields, true);
+      zdo.Set(HashFieldsWearNTear, true);
+      zdo.Set(HashMaxHealth, maxHealth);
       obj.LoadFields();
       wear.m_healthPercentage = -1 / maxHealth;
       wear.SetHealthVisual(wear.m_healthPercentage, false);
@@ -89,8 +118,10 @@ public class CustomHealth
     // Creatures are automatically killed if less than zero health.
     if (obj.GetComponent<Character>())
     {
+      changed |= zdo.GetFloat(ZDOVars.s_maxHealth) != 1E30f;
       zdo.Set(ZDOVars.s_health, 1E30f * 1.000001f);
       zdo.Set(ZDOVars.s_maxHealth, 1E30f);
     }
+    return changed;
   }
 }

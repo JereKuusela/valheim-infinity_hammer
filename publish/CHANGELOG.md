@@ -1,3 +1,9 @@
+- v1.50
+  - Adds a new value "Legacy" to the setting "Set invulnerability".
+  - Fixes repairing not working with the setting "Set invulnerability".
+  - Fixes changing build tab with Q/E not selecting the new object.
+  - Fixes build menu showing old selection when selecting existing objects.
+
 - v1.49
   - Fixes multiselection not having snap points.
   - Fixes errors when multiselecting a single object.

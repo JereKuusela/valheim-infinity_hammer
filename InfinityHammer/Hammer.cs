@@ -56,6 +56,24 @@ public static class Hammer
     player.m_lastToolUseTime = 0f;
     player.UpdatePlacement(true, 0f);
   }
+  public static void SelectEmpty()
+  {
+    var build = Helper.GetPlayer().m_buildPieces;
+    if (build)
+      build.m_selectedPiece[(int)build.m_selectedCategory] = new Vector2Int(-1, -1);
+  }
+  public static void SelectRepair()
+  {
+    var build = Helper.GetPlayer().m_buildPieces;
+    if (build)
+      build.m_selectedPiece[(int)build.m_selectedCategory] = new Vector2Int(0, 0);
+  }
+  public static void SelectRepairIfEmpty()
+  {
+    var build = Helper.GetPlayer().m_buildPieces;
+    if (build && build.m_selectedPiece[(int)build.m_selectedCategory].x == -1)
+      build.m_selectedPiece[(int)build.m_selectedCategory] = new Vector2Int(0, 0);
+  }
 
   ///<summary>Restores durability and stamina to counter the usage.</summary>
   public static void PostProcessTool(Player obj)

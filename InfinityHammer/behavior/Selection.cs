@@ -129,6 +129,30 @@ public class PieceTableSetCategory
       Selection.CreateGhost(new ObjectSelection(piece, false));
   }
 }
+[HarmonyPatch(typeof(PieceTable), nameof(PieceTable.PrevCategory))]
+public class PieceTablePrevCategory
+{
+  static void Prefix() => Selection.Clear();
+  static void Postfix(PieceTable __instance)
+  {
+    var index = __instance.GetSelectedIndex();
+    var piece = __instance.GetPiece((int)__instance.m_selectedCategory, index);
+    if (piece && piece.GetComponent<ZNetView>())
+      Selection.CreateGhost(new ObjectSelection(piece, false));
+  }
+}
+[HarmonyPatch(typeof(PieceTable), nameof(PieceTable.NextCategory))]
+public class PieceTableNextCategory
+{
+  static void Prefix() => Selection.Clear();
+  static void Postfix(PieceTable __instance)
+  {
+    var index = __instance.GetSelectedIndex();
+    var piece = __instance.GetPiece((int)__instance.m_selectedCategory, index);
+    if (piece && piece.GetComponent<ZNetView>())
+      Selection.CreateGhost(new ObjectSelection(piece, false));
+  }
+}
 ///<summary>Overrides the piece selection.</summary>
 [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.GetSelectedPiece))]
 public class GetSelectedPiece

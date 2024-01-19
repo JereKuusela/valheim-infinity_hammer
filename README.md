@@ -289,6 +289,7 @@ Following powers are available with `hammer_config` command:
   - Creatures get very high health which makes them immune to damage.
   - Destructibles, mine rocks and trees get very high tool tier which makes them immune to damage.
   - Structures get negative health which prevents them from taking any damage.
+  - Legacy option sets a very high health instead of above changes.
 - Show command values (default: `false`, key: `show_command_values`): Always show the command on tool descriptions.
 - Snap points for all objects (default: `false`, key: `snap_points_for_all_objects`):If enabled, multi selection creates snap points for every object.
 - Unfreeze on select (default `true`, key: `unfreeze_on_select`): Removes the placement freeze when selecting a new object.
