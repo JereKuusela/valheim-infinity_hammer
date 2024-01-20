@@ -3,6 +3,7 @@
   - Fixes repairing not working with the setting "Set invulnerability".
   - Fixes changing build tab with Q/E not selecting the new object.
   - Fixes build menu showing old selection when selecting existing objects.
+  - Fixes copying not always copying the rotation (for example active furnaces).
 
 - v1.49
   - Fixes multiselection not having snap points.

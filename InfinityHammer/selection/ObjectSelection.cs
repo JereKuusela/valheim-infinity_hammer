@@ -21,7 +21,7 @@ public partial class ObjectSelection : BaseSelection
     base.Destroy();
     UnityEngine.Object.Destroy(Wrapper);
   }
-  private bool FromBuildMenu = false;
+  private readonly bool FromBuildMenu = false;
 
   public ObjectSelection(ZNetView view, bool singleUse, Vector3? scale)
   {
@@ -38,7 +38,7 @@ public partial class ObjectSelection : BaseSelection
     SelectedPrefab.transform.position = Vector3.zero;
     Objects.Add(new(prefabHash, view.m_syncInitialScale, data));
     if (zdo != null)
-      PlaceRotation.Set(SelectedPrefab);
+      PlaceRotation.Set(view.gameObject);
     // Reset for zoop bounds check.
     SelectedPrefab.transform.rotation = Quaternion.identity;
     if (scale.HasValue)
