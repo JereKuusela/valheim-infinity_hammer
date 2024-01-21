@@ -91,25 +91,16 @@ public static class HammerHelper
   }
   public static GameObject SafeInstantiate(ZNetView view, GameObject parent)
   {
-    var hash = view.GetZDO() == null ? view.GetPrefabName().GetStableHashCode() : view.GetZDO().GetPrefab();
-    var originalPrefab = ZNetScene.instance.GetPrefab(hash);
+    var obj = view.gameObject;
+    // Some data changes can remove all colliders from the obj, so fallback to the original prefab if needed.
     var colliders = view.GetComponentsInChildren<Collider>();
-    var originalColliders = originalPrefab.GetComponentsInChildren<Collider>();
-    // Some data changes can remove all colliders from the obj, so fallback to the original prefab if colliders can't be reseted.
-    var obj = colliders.Length == originalColliders.Length ? view.gameObject : originalPrefab;
-
-    var ret = SafeInstantiate(obj, parent.transform);
-
-    if (colliders.Length == originalColliders.Length)
+    var activeColliders = colliders.Where(collider => collider.enabled && !collider.isTrigger).ToArray();
+    if (activeColliders.Length == 0)
     {
-      colliders = ret.GetComponentsInChildren<Collider>();
-      for (var i = 0; i < colliders.Length; i++)
-      {
-        colliders[i].enabled = originalColliders[i].enabled;
-        colliders[i].isTrigger = originalColliders[i].isTrigger;
-      }
+      var hash = view.GetZDO() == null ? view.GetPrefabName().GetStableHashCode() : view.GetZDO().GetPrefab();
+      obj = ZNetScene.instance.GetPrefab(hash);
     }
-    return ret;
+    return SafeInstantiate(obj, view.transform.rotation, parent.transform);
   }
   public static GameObject ChildInstantiate(ZNetView view, GameObject parent)
   {
@@ -131,12 +122,13 @@ public static class HammerHelper
         random.Randomize();
       UnityEngine.Random.state = state;
     }
-    return SafeInstantiate(location.m_prefab, parent.transform);
+    return SafeInstantiate(location.m_prefab, location.m_prefab.transform.rotation, parent.transform);
   }
-  private static GameObject SafeInstantiate(GameObject obj, Transform parent)
+  // Rot is needed if the object is reseted with the original.
+  private static GameObject SafeInstantiate(GameObject obj, Quaternion rot, Transform parent)
   {
     ResetHighlight(obj);
-    var ret = UnityEngine.Object.Instantiate(obj, parent);
+    var ret = UnityEngine.Object.Instantiate(obj, Vector3.zero, rot, parent);
     CleanObject(ret);
     EnsurePiece(ret);
     return ret;

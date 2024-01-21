@@ -38,7 +38,7 @@ public partial class ObjectSelection : BaseSelection
     SelectedPrefab.transform.position = Vector3.zero;
     Objects.Add(new(prefabHash, view.m_syncInitialScale, data));
     if (zdo != null)
-      PlaceRotation.Set(view.gameObject);
+      PlaceRotation.Set(SelectedPrefab);
     // Reset for zoop bounds check.
     SelectedPrefab.transform.rotation = Quaternion.identity;
     if (scale.HasValue)
