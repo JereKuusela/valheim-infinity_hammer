@@ -107,6 +107,7 @@ public partial class ObjectSelection : BaseSelection
       piece.m_description = "Center: " + bp.CenterPiece;
     foreach (var item in bp.Objects)
     {
+      if (Configuration.UseBlueprintChance && item.Chance != 1f && UnityEngine.Random.value > item.Chance) continue;
       try
       {
         var prefab = ZNetScene.instance.GetPrefab(item.Prefab);

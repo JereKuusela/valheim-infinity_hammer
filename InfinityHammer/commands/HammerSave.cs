@@ -51,7 +51,6 @@ public class HammerSaveCommand
     if (piece)
     {
       bp.Name = Localization.instance.Localize(piece.m_name);
-      bp.Description = piece.m_description;
     }
     if (Selection.Get() is not ObjectSelection selection) return bp;
     var objects = GetObjects(obj);
@@ -100,18 +99,28 @@ public class HammerSaveCommand
   }
   private static void AddSingleObject(Blueprint bp, GameObject obj, bool saveData)
   {
-    var data = saveData ? Selection.Get().GetData() : null;
+    var name = Utils.GetPrefabName(obj);
+    var save = saveData || Configuration.SavedObjectData.Contains(name.ToLowerInvariant());
+    var data = save ? Selection.Get().GetData() : null;
     var info = data == null ? "" : GetExtraInfo(obj, data);
-    bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), Vector3.zero, Quaternion.identity, obj.transform.localScale, info, data?.Save()));
+    bp.Objects.Add(new BlueprintObject(name, Vector3.zero, Quaternion.identity, obj.transform.localScale, info, data?.Save(), 1f));
   }
   private static void AddObject(Blueprint bp, GameObject obj, bool saveData, int index = 0)
   {
-    var data = saveData ? Selection.Get().GetData(index) : null;
+    var name = Utils.GetPrefabName(obj);
+    var save = saveData || Configuration.SavedObjectData.Contains(name.ToLowerInvariant());
+    var data = save ? Selection.Get().GetData(index) : null;
     var info = data == null ? "" : GetExtraInfo(obj, data);
-    bp.Objects.Add(new BlueprintObject(Utils.GetPrefabName(obj), obj.transform.localPosition, obj.transform.localRotation, obj.transform.localScale, info, data?.Save()));
+    bp.Objects.Add(new BlueprintObject(name, obj.transform.localPosition, obj.transform.localRotation, obj.transform.localScale, info, data?.Save(), 1f));
   }
   private static string[] GetPlanBuildFile(Blueprint bp)
   {
+    if (Configuration.SimplerBlueprints)
+      return [
+      $"#Center:{bp.CenterPiece}",
+      $"#Pieces",
+      .. bp.Objects.Select(GetPlanBuildObject),
+    ];
     return [
       $"#Name:{bp.Name}",
       $"#Creator:{bp.Creator}",

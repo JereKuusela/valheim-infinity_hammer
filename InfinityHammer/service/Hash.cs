@@ -2,6 +2,7 @@ namespace Service;
 
 public static class Hash
 {
+  public static int BuildingSkillLevel = "BuildingSkill Level".GetStableHashCode();
   public static int OverrideItems = "override_items".GetStableHashCode();
   public static int AddedDefaultItems = "addedDefaultItems".GetStableHashCode();
   public static int Items = "items".GetStableHashCode();

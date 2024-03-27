@@ -2,13 +2,14 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 namespace InfinityHammer;
-public class BlueprintObject(string name, Vector3 pos, Quaternion rot, Vector3 scale, string info, ZPackage? data)
+public class BlueprintObject(string name, Vector3 pos, Quaternion rot, Vector3 scale, string info, ZPackage? data, float chance)
 {
   public string Prefab = name;
   public Vector3 Pos = pos;
   public Quaternion Rot = rot.normalized;
   public ZPackage? Data = data;
   public Vector3 Scale = scale;
+  public float Chance = chance;
   public string ExtraInfo = info;
 }
 public class Blueprint

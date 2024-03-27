@@ -4,9 +4,9 @@ Bend the rules of building! Copy any object, make structures indestructible, rem
 
 Install on the admin client (modding [guide](https://youtu.be/L9ljm2eKLrk)).
 
-Install also [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/) to enable key binds and use this on a server (as an admin).
+Install [Server Devcommands](https://valheim.thunderstore.io/package/JereKuusela/Server_devcommands/).
 
-Install also [World Edit Commands](https://valheim.thunderstore.io/package/JereKuusela/World_Edit_Commands/) for terrain tools.
+For terrain tools, install [Infinity Tools](https://valheim.thunderstore.io/package/JereKuusela/Infinity_Tools/).
 
 ## Usage
 

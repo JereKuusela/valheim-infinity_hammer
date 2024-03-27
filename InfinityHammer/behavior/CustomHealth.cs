@@ -1,3 +1,5 @@
+using Service;
+
 namespace InfinityHammer;
 
 public class CustomHealth
@@ -42,6 +44,7 @@ public class CustomHealth
     {
       changed |= zdo.GetFloat(ZDOVars.s_health) != value;
       zdo.Set(ZDOVars.s_health, value);
+      zdo.RemoveFloat(Hash.BuildingSkillLevel);
       wear.m_healthPercentage = value / wear.m_health;
       wear.SetHealthVisual(wear.m_healthPercentage, false);
     }
@@ -110,6 +113,7 @@ public class CustomHealth
       zdo.Set(HashFields, true);
       zdo.Set(HashFieldsWearNTear, true);
       zdo.Set(HashMaxHealth, maxHealth);
+      zdo.RemoveFloat(Hash.BuildingSkillLevel);
       obj.LoadFields();
       wear.m_healthPercentage = -1 / maxHealth;
       wear.SetHealthVisual(wear.m_healthPercentage, false);

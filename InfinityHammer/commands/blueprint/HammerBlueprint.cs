@@ -90,7 +90,8 @@ public class HammerBlueprintCommand
     var scaleY = InvariantFloat(split, 11, 1f);
     var scaleZ = InvariantFloat(split, 12, 1f);
     var data = split.Length > 13 ? split[13] : "";
-    return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), new(scaleX, scaleY, scaleZ), info, Deserialize(data));
+    var chance = InvariantFloat(split, 14, 1f);
+    return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), new(scaleX, scaleY, scaleZ), info, Deserialize(data), chance);
   }
   public static ZPackage? Deserialize(string data) => data == "" ? null : new(data);
   private static Vector3 GetPlanBuildSnapPoint(string row)
@@ -120,7 +121,8 @@ public class HammerBlueprintCommand
     var posY = InvariantFloat(split, 6);
     var posZ = InvariantFloat(split, 7);
     var data = split.Length > 8 ? split[8] : "";
-    return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), Vector3.one, "", Deserialize(data));
+    var chance = InvariantFloat(split, 9, 1f);
+    return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), Vector3.one, "", Deserialize(data), chance);
   }
   private static float InvariantFloat(string[] row, int index, float defaultValue = 0f)
   {
