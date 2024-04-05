@@ -60,7 +60,6 @@ public class InfinityHammer : BaseUnityPlugin
     if (!File.Exists(Config.ConfigFilePath)) return;
     try
     {
-      Log.LogDebug("ReadConfigValues called");
       Config.Reload();
     }
     catch

@@ -131,6 +131,7 @@ public static class HammerHelper
     var ret = UnityEngine.Object.Instantiate(obj, Vector3.zero, rot, parent);
     CleanObject(ret);
     EnsurePiece(ret);
+    ret.name = obj.name;
     return ret;
   }
   public static bool IsSnapPoint(GameObject obj) => obj && obj.CompareTag("snappoint");

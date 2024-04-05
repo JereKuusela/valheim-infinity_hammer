@@ -55,6 +55,7 @@ public partial class ObjectSelection : BaseSelection
     var view = piece.GetComponent<ZNetView>();
     var prefabHash = view.GetPrefabName().GetStableHashCode();
     SelectedPrefab = UnityEngine.Object.Instantiate(view.gameObject, Wrapper.transform);
+    SelectedPrefab.name = view.name;
 
     SingleUse = singleUse;
     Objects.Add(new(prefabHash, view.m_syncInitialScale, new()));
