@@ -194,10 +194,10 @@ public partial class ObjectSelection : BaseSelection
   private void Postprocess(GameObject obj, ZDOData? zdo)
   {
     if (zdo == null) return;
-    SetLevel(obj, zdo.GetInt(Hash.Level, -1));
+    SetLevel(obj, zdo.GetInt(ZDOVars.s_level, -1));
     SetGrowth(obj, zdo.GetInt(Hash.Growth, -1));
     SetWear(obj, zdo.GetInt(Hash.Wear, -1));
-    SetText(obj, zdo.GetString(Hash.Text, ""));
+    SetText(obj, zdo.GetString(ZDOVars.s_text, ""));
   }
 
   private static void SetLevel(GameObject obj, int level)
@@ -252,18 +252,18 @@ public partial class ObjectSelection : BaseSelection
     if (obj.TryGetComponent<Sign>(out var sign))
     {
       if (extraInfo == "")
-        extraInfo = data.GetString(Hash.Text, extraInfo);
+        extraInfo = data.GetString(ZDOVars.s_text, extraInfo);
       else
-        data.Set(Hash.Text, extraInfo);
+        data.Set(ZDOVars.s_text, extraInfo);
       sign.m_textWidget.text = extraInfo;
     }
     if (obj.GetComponent<TeleportWorld>() && extraInfo != "")
     {
-      data.Set(Hash.Tag, extraInfo);
+      data.Set(ZDOVars.s_tag, extraInfo);
     }
     if (obj.GetComponent<Tameable>() && extraInfo != "")
     {
-      data.Set(Hash.TamedName, extraInfo);
+      data.Set(ZDOVars.s_tamedName, extraInfo);
     }
     if (obj.TryGetComponent<ItemStand>(out var itemStand))
     {
@@ -273,15 +273,15 @@ public partial class ObjectSelection : BaseSelection
       var quality = Parse.Int(split, 2, 1);
       if (extraInfo == "")
       {
-        name = data.GetString(Hash.Item, name);
-        variant = data.GetInt(Hash.Variant, variant);
-        quality = data.GetInt(Hash.Quality, quality);
+        name = data.GetString(ZDOVars.s_item, name);
+        variant = data.GetInt(ZDOVars.s_variant, variant);
+        quality = data.GetInt(ZDOVars.s_quality, quality);
       }
       else
       {
-        data.Set(Hash.Item, name);
-        data.Set(Hash.Variant, variant);
-        data.Set(Hash.Quality, quality);
+        data.Set(ZDOVars.s_item, name);
+        data.Set(ZDOVars.s_variant, variant);
+        data.Set(ZDOVars.s_quality, quality);
       }
       itemStand.SetVisualItem(name, variant, quality);
     }
@@ -290,9 +290,9 @@ public partial class ObjectSelection : BaseSelection
       var split = extraInfo.Split(':');
       var pose = Parse.Int(split, 0, 0);
       if (extraInfo == "")
-        pose = data.GetInt(Hash.Pose, pose);
+        pose = data.GetInt(ZDOVars.s_pose, pose);
       else
-        data.Set(Hash.Pose, pose);
+        data.Set(ZDOVars.s_pose, pose);
       armorStand.m_pose = pose;
       armorStand.m_poseAnimator.SetInteger("Pose", pose);
       SetItemHack.Hack = true;

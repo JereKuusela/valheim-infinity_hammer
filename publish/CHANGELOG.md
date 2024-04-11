@@ -1,3 +1,6 @@
+- v1.52
+  - Fixed for the new game version.
+
 - v1.51
   - Adds a new setting "Use blueprint chance" to use the object chance from blueprints.
   - Adds a new setting "Save simpler blueprints" to only save the most important data.

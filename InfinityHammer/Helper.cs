@@ -112,17 +112,25 @@ public static class HammerHelper
   }
   public static GameObject SafeInstantiateLocation(ZoneSystem.ZoneLocation location, int? seed, GameObject parent)
   {
-    foreach (var view in location.m_netViews)
+    location.m_prefab.Load();
+    ZNetView[] netViews = Utils.GetEnabledComponentsInChildren<ZNetView>(location.m_prefab.Asset);
+    RandomSpawn[] randomSpawns = Utils.GetEnabledComponentsInChildren<RandomSpawn>(location.m_prefab.Asset);
+    foreach (var view in netViews)
       view.gameObject.SetActive(true);
     if (seed.HasValue)
     {
       var state = UnityEngine.Random.state;
       UnityEngine.Random.InitState(seed.Value);
-      foreach (var random in location.m_randomSpawns)
+      foreach (var random in randomSpawns)
+      {
+        random.Prepare();
         random.Randomize();
+      }
       UnityEngine.Random.state = state;
     }
-    return SafeInstantiate(location.m_prefab, location.m_prefab.transform.rotation, parent.transform);
+    var ret = SafeInstantiate(location.m_prefab.Asset, location.m_prefab.Asset.transform.rotation, parent.transform);
+    location.m_prefab.Release();
+    return ret;
   }
   // Rot is needed if the object is reseted with the original.
   private static GameObject SafeInstantiate(GameObject obj, Quaternion rot, Transform parent)

@@ -23,17 +23,16 @@ public class LocationSelection : BaseSelection
   public LocationSelection(ZoneSystem.ZoneLocation location, int seed)
   {
     if (location == null) throw new InvalidOperationException("Location not found.");
-    if (!location.m_prefab) throw new InvalidOperationException("Invalid location");
+    if (!location.m_prefab.IsValid) throw new InvalidOperationException("Invalid location");
 
     Wrapper = new GameObject();
     Wrapper.SetActive(false);
     SelectedPrefab = HammerHelper.SafeInstantiateLocation(location, Hammer.AllLocationsObjects ? null : seed, Wrapper);
 
     ZDOData data = new();
-    var hash = location.m_prefabName.GetStableHashCode();
-    data.Set(Hash.Location, hash);
-    data.Set(Hash.Seed, seed);
-    Object = new(hash, false, data);
+    data.Set(ZDOVars.s_location, location.Hash);
+    data.Set(ZDOVars.s_seed, seed);
+    Object = new(location.Hash, false, data);
   }
   public override ZDOData GetData(int index = 0) => Object.Data;
   public override int GetPrefab(int index = 0) => Object.Prefab;
@@ -46,8 +45,8 @@ public class LocationSelection : BaseSelection
     HammerHelper.RemoveZDO(view.GetZDO());
     var data = GetData();
     if (data == null) return;
-    var prefab = data.GetInt(Hash.Location, 0);
-    var seed = data.GetInt(Hash.Seed, 0);
+    var prefab = data.GetInt(ZDOVars.s_location, 0);
+    var seed = data.GetInt(ZDOVars.s_seed, 0);
     var location = ZoneSystem.instance.GetLocation(prefab);
     var ghost = HammerHelper.GetPlacementGhost();
     var position = ghost.transform.position;

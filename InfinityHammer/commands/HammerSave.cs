@@ -15,16 +15,16 @@ public class HammerSaveCommand
   {
     var info = "";
     if (obj.GetComponent<Sign>())
-      info = data.GetString(Hash.Text, "");
+      info = data.GetString(ZDOVars.s_text, "");
     if (obj.GetComponent<TeleportWorld>())
-      info = data.GetString(Hash.Tag, "");
+      info = data.GetString(ZDOVars.s_tag, "");
     if (obj.GetComponent<Tameable>())
-      info = data.GetString(Hash.TamedName, "");
+      info = data.GetString(ZDOVars.s_tamedName, "");
 
-    if (obj.GetComponent<ItemStand>() && data.GetString(Hash.Item) != "")
+    if (obj.GetComponent<ItemStand>() && data.GetString(ZDOVars.s_item) != "")
     {
-      var item = data.GetString(Hash.Item);
-      var variant = data.GetInt(Hash.Variant);
+      var item = data.GetString(ZDOVars.s_item);
+      var variant = data.GetInt(ZDOVars.s_variant);
       if (variant != 0)
         info = $"{item}:{variant}";
       else

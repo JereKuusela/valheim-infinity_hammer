@@ -130,17 +130,17 @@ public class HammerSelect
       {
         if (selection.GetSelectedPiece().GetComponent<Character>())
         {
-          extraData.Set(Hash.Health, pars.Health.Value * 1.000001f);
-          extraData.Set(Hash.MaxHealth, pars.Health.Value);
+          extraData.Set(ZDOVars.s_health, pars.Health.Value * 1.000001f);
+          extraData.Set(ZDOVars.s_maxHealth, pars.Health.Value);
         }
-        else extraData.Set(Hash.Health, pars.Health.Value);
+        else extraData.Set(ZDOVars.s_health, pars.Health.Value);
       }
       if (pars.Level.HasValue)
-        extraData.Set(Hash.Level, pars.Level.Value);
+        extraData.Set(ZDOVars.s_level, pars.Level.Value);
       if (pars.Growth != Growth.Default)
       {
         extraData.Set(Hash.Growth, GrowthNumber(pars.Growth));
-        extraData.Set(Hash.PlantTime, DateTime.MaxValue.Ticks / 2L);
+        extraData.Set(ZDOVars.s_plantTime, DateTime.MaxValue.Ticks / 2L);
       }
       if (pars.Wear != Wear.Default)
         extraData.Set(Hash.Wear, WearNumber(pars.Wear));
@@ -157,7 +157,7 @@ public class HammerSelect
       if (!pars.Interact)
         extraData.Set(Hash.Interact, false);
       if (pars.Text != null)
-        extraData.Set(Hash.Text, pars.Text);
+        extraData.Set(ZDOVars.s_text, pars.Text);
       selection.UpdateZDOs(extraData);
       selection.Postprocess();
       var ghost = Selection.CreateGhost(selection);

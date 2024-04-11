@@ -156,12 +156,12 @@ public class ZDOData
   public ZPackage Save()
   {
     ZPackage pkg = new();
-    Vecs.Remove(Hash.Scale);
-    Vecs.Remove(Hash.SpawnPoint);
+    Vecs.Remove(ZDOVars.s_scaleHash);
+    Vecs.Remove(ZDOVars.s_spawnPoint);
     if (Strings.ContainsKey(Hash.OverrideItems))
     {
-      Ints.Remove(Hash.AddedDefaultItems);
-      Strings.Remove(Hash.Items);
+      Ints.Remove(ZDOVars.s_addedDefaultItems);
+      Strings.Remove(ZDOVars.s_items);
     }
     var num = 0;
     if (Floats.Count > 0)

@@ -109,7 +109,7 @@ public class CustomizeSpawnLocation
 {
   public static bool? RandomDamage = null;
   public static bool AllViews = false;
-  static void Customize()
+  static void Customize(ZNetView[] views)
   {
     if (RandomDamage.HasValue)
     {
@@ -117,29 +117,20 @@ public class CustomizeSpawnLocation
     }
     if (AllViews)
     {
-      var data = Selection.Get().GetData();
-      if (data != null)
-      {
-        var location = ZoneSystem.instance.GetLocation(data.GetInt(Hash.Location, 0));
-        if (location != null)
-        {
-          foreach (var view in location.m_netViews)
-            view.gameObject.SetActive(true);
-        }
-
-      }
+      foreach (var view in views)
+        view.gameObject.SetActive(true);
     }
   }
   static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
   {
     return new CodeMatcher(instructions)
           .MatchForward(
-              useEnd: false,
+              useEnd: true,
               new CodeMatch(
                   OpCodes.Stsfld,
                   AccessTools.Field(typeof(WearNTear), nameof(WearNTear.m_randomInitialDamage))))
-          .Advance(1)
-          .Insert(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate(Customize).operand))
+          .InsertAndAdvance(new CodeInstruction(OpCodes.Ldloc_0))
+          .InsertAndAdvance(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate(Customize).operand))
           .InstructionEnumeration();
   }
 }
