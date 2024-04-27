@@ -1,3 +1,7 @@
+- v1.53
+  - Fixes trees falling down during the placement selection.
+  - Fixes custom locations from Expand World Data not being able to be placed.
+
 - v1.52
   - Fixed for the new game version.
 

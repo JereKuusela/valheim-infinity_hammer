@@ -1,7 +1,6 @@
 ﻿using System.IO;
 using BepInEx;
 using BepInEx.Bootstrap;
-using BepInEx.Logging;
 using HarmonyLib;
 using Service;
 namespace InfinityHammer;
@@ -13,17 +12,16 @@ public class InfinityHammer : BaseUnityPlugin
 {
   public const string GUID = "infinity_hammer";
   public const string NAME = "Infinity Hammer";
-  public const string VERSION = "1.52";
+  public const string VERSION = "1.53";
   public static bool StructureTweaks = false;
 #nullable disable
-  public static ManualLogSource Log;
   public static ConfigWrapper Wrapper;
 #nullable enable
   public static bool ConfigExists = false;
   public void Awake()
   {
     ConfigExists = File.Exists(Config.ConfigFilePath);
-    Log = Logger;
+    Log.Init(Logger);
     new Harmony(GUID).PatchAll();
     Wrapper = new("hammer_config", Config);
     Configuration.Init(Wrapper);
@@ -64,8 +62,8 @@ public class InfinityHammer : BaseUnityPlugin
     }
     catch
     {
-      Log.LogError($"There was an issue loading your {Config.ConfigFilePath}");
-      Log.LogError("Please check your config entries for spelling and format!");
+      Log.Error($"There was an issue loading your {Config.ConfigFilePath}");
+      Log.Error("Please check your config entries for spelling and format!");
     }
   }
 

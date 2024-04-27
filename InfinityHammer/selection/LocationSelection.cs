@@ -23,7 +23,6 @@ public class LocationSelection : BaseSelection
   public LocationSelection(ZoneSystem.ZoneLocation location, int seed)
   {
     if (location == null) throw new InvalidOperationException("Location not found.");
-    if (!location.m_prefab.IsValid) throw new InvalidOperationException("Invalid location");
 
     Wrapper = new GameObject();
     Wrapper.SetActive(false);

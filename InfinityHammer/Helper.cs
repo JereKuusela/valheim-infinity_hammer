@@ -112,6 +112,13 @@ public static class HammerHelper
   }
   public static GameObject SafeInstantiateLocation(ZoneSystem.ZoneLocation location, int? seed, GameObject parent)
   {
+    if (!location.m_prefab.IsValid)
+    {
+      var obj = new GameObject();
+      EnsurePiece(obj);
+      obj.name = location.m_prefab.Name;
+      return obj;
+    }
     location.m_prefab.Load();
     ZNetView[] netViews = Utils.GetEnabledComponentsInChildren<ZNetView>(location.m_prefab.Asset);
     RandomSpawn[] randomSpawns = Utils.GetEnabledComponentsInChildren<RandomSpawn>(location.m_prefab.Asset);
@@ -162,37 +169,47 @@ public static class HammerHelper
   ///<summary>Removes scripts that try to run (for example placement needs only the model and Piece component).</summary>
   private static void CleanObject(GameObject obj)
   {
-    DisableComponents<Character>(obj);
-    DisableComponents<MonsterAI>(obj);
-    DisableComponents<AnimalAI>(obj);
-    DisableComponents<BaseAI>(obj);
-    DisableComponents<Tameable>(obj);
-    DisableComponents<Procreation>(obj);
-    DisableComponents<Growup>(obj);
     DisableComponents<FootStep>(obj);
+    DisableComponents<Growup>(obj);
     DisableComponents<RandomFlyingBird>(obj);
-    DisableComponents<Fish>(obj);
-    DisableComponents<CharacterAnimEvent>(obj);
-    DisableComponents<TreeLog>(obj);
-    DisableComponents<TreeBase>(obj);
     DisableComponents<Windmill>(obj);
-    DisableComponents<SpawnArea>(obj);
-    DisableComponents<CreatureSpawner>(obj);
-    DisableComponents<TombStone>(obj);
     DisableComponents<MineRock5>(obj);
     DisableComponents<MineRock>(obj);
-    DisableComponents<HoverText>(obj);
-    DisableComponents<StaticPhysics>(obj);
-    DisableComponents<Aoe>(obj);
-    DisableComponents<DungeonGenerator>(obj);
-    DisableComponents<MusicLocation>(obj);
-    DisableComponents<SpawnArea>(obj);
 
+    DestroyComponents<Fish>(obj);
+    DestroyComponents<CharacterAnimEvent>(obj);
+    DestroyComponents<TreeLog>(obj);
+    DestroyComponents<TreeBase>(obj);
+    DestroyComponents<CreatureSpawner>(obj);
+    DestroyComponents<TombStone>(obj);
+    DestroyComponents<Aoe>(obj);
+    DestroyComponents<DungeonGenerator>(obj);
+    DestroyComponents<MusicLocation>(obj);
+    DestroyComponents<SpawnArea>(obj);
+    DestroyComponents<Procreation>(obj);
+    DestroyComponents<StaticPhysics>(obj);
+    DestroyComponents<Tameable>(obj);
+    DestroyComponents<MonsterAI>(obj);
+    DestroyComponents<AnimalAI>(obj);
+
+    // Many things rely on Character so better just undo the Awake.
+    var c = obj.GetComponent<Character>();
+    if (c)
+      Character.s_characters.Remove(c);
   }
   private static void DisableComponents<T>(GameObject obj) where T : MonoBehaviour
   {
+    // Disable is enough to prevent Start.
     foreach (MonoBehaviour component in obj.GetComponentsInChildren<T>())
       component.enabled = false;
+  }
+  private static void DestroyComponents<T>(GameObject obj) where T : MonoBehaviour
+  {
+    // DestroyImmediate is needed to prevent Awake.
+    // However some scripts rely on each other, so it's better to disable them if possible.
+    foreach (MonoBehaviour component in obj.GetComponentsInChildren<T>())
+      UnityEngine.Object.DestroyImmediate(component);
+
   }
   public static bool IsBuildPiece(GameObject obj)
       => Player.m_localPlayer.m_buildPieces.m_pieces.Any(piece => Utils.GetPrefabName(obj) == Utils.GetPrefabName(piece));
