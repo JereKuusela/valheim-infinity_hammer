@@ -47,7 +47,7 @@ public class CharacterAwake
 }
 
 // For some reason, vanilla messes up the object name.
-[HarmonyPatch(typeof(MineRock5), nameof(MineRock5.Start))]
+[HarmonyPatch(typeof(MineRock5), nameof(MineRock5.Awake))]
 public class MineRock5_NameFix
 {
   static void Prefix(MineRock5 __instance, ref string __state)

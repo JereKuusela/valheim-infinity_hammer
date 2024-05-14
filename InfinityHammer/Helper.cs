@@ -131,7 +131,7 @@ public static class HammerHelper
       foreach (var random in randomSpawns)
       {
         random.Prepare();
-        random.Randomize();
+        random.Randomize(Vector3.zero);
       }
       UnityEngine.Random.state = state;
     }
