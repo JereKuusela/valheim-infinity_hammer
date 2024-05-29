@@ -1,3 +1,6 @@
+- v1.55
+  - Fixes compatibility issue with Marketplace NPC's mod.
+
 - v1.54
   - Fixed for the new game version.
 
@@ -22,20 +25,3 @@
   - Fixes changing build tab with Q/E not selecting the new object.
   - Fixes build menu showing old selection when selecting existing objects.
   - Fixes copying not always copying the rotation (for example active furnaces).
-
-- v1.49
-  - Fixes multiselection not having snap points.
-  - Fixes errors when multiselecting a single object.
-  - Fixes not being able to remove zoop binds.
-  - Fixes zooping creating more and more description.
-  - Fixes command rotation only working one direction.
-
-- v1.48
-  - Adds support for the command `hammer_stack` to work on the hovered piece.
-  - Fixes structure highlight showing when picking up objects.
-  - Fixes error when using the pick up feature.
-  - Fixes the command `hammer_stack`.
-
-- v1.47
-  - Fixes location placing.
-  - Fixes data not always being synced on servers.

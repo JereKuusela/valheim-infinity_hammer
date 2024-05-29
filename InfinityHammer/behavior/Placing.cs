@@ -51,31 +51,17 @@ public class PlacePiece
 [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacement))]
 public class HoldUse
 {
-  // Needed to prevent instant usage when selecting continuous command.
-  // Dirty hack but not sure how to prevent this with proper logic.
-  public static bool Selecting = true;
-  static void CheckHold()
+  // Not in use, can be removed later.
+  public static bool Selecting = false;
+
+  static void Postfix(Player __instance)
   {
-    if (!ZInput.GetButton("Attack") && !ZInput.GetButton("JoyPlace"))
-      Selecting = false;
-    if (Selecting || !Selection.Get().Continuous) return;
-    var player = Player.m_localPlayer;
-    if (ZInput.GetButton("Attack") || ZInput.GetButton("JoyPlace"))
-      player.m_placePressedTime = Time.time;
-    if (Time.time - player.m_lastToolUseTime > player.m_placeDelay / 4f)
-      player.m_lastToolUseTime = 0f;
-  }
-  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-  {
-    return new CodeMatcher(instructions)
-          .MatchForward(
-              useEnd: false,
-              new CodeMatch(
-                  OpCodes.Ldstr,
-                  "Attack"))
-          .SetAndAdvance(OpCodes.Call, Transpilers.EmitDelegate(CheckHold).operand)
-          .Insert(new CodeInstruction(OpCodes.Ldstr, "Attack"))
-          .InstructionEnumeration();
+    if (!Selection.Get().Continuous) return;
+    if (__instance.m_placePressedTime != -9999f) return;
+    if (Time.time - __instance.m_lastToolUseTime < __instance.m_placeDelay / 4f) return;
+    __instance.m_placePressedTime = Time.time;
+    __instance.m_lastToolUseTime = 0f;
+
   }
 }
 
