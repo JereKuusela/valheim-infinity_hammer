@@ -58,6 +58,12 @@ public class HoldUse
   {
     if (!Selection.Get().Continuous) return;
     if (__instance.m_placePressedTime != -9999f) return;
+    if (!ZInput.GetButton("Attack") && !ZInput.GetButton("JoyPlace"))
+    {
+      // Just something else to not trigger anymore.
+      __instance.m_placePressedTime = -9998f;
+      return;
+    }
     if (Time.time - __instance.m_lastToolUseTime < __instance.m_placeDelay / 4f) return;
     __instance.m_placePressedTime = Time.time;
     __instance.m_lastToolUseTime = 0f;

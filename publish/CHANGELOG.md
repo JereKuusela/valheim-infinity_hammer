@@ -1,3 +1,6 @@
+- v1.56
+  - Fixes continuous placement being bit too happy with being placed.
+
 - v1.55
   - Fixes compatibility issue with Marketplace NPC's mod.
 
