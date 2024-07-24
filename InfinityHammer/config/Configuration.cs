@@ -111,6 +111,7 @@ public partial class Configuration
     configDisableSelectMessages = wrapper.Bind(section, "Disable select messages", false, "Disables messages from selecting objects.");
 
     InitOther(wrapper);
+    InitTools(wrapper);
   }
 
 }
