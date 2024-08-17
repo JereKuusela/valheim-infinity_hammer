@@ -39,7 +39,7 @@ public class HammerSaveCommand
     }
     return info;
   }
-  private static Blueprint BuildBluePrint(Player player, GameObject obj, string centerPiece, bool saveData)
+  private static Blueprint BuildBluePrint(Player player, GameObject obj, string centerPiece, string snapPiece, bool saveData)
   {
     Blueprint bp = new()
     {
@@ -68,7 +68,10 @@ public class HammerSaveCommand
       var i = 0;
       foreach (var tr in objects)
       {
-        AddObject(bp, tr, saveData, i);
+        if (snapPiece != "" && Utils.GetPrefabName(tr) == snapPiece)
+          bp.SnapPoints.Add(tr.transform.localPosition);
+        else
+          AddObject(bp, tr, saveData, i);
         i += 1;
       }
     }
@@ -173,14 +176,15 @@ public class HammerSaveCommand
       if (index == 1) return ParameterInfo.ObjectIds;
       return null;
     });
-    Helper.Command("hammer_save", "[file name] [center piece] - Saves the selection to a blueprint.", (args) =>
+    Helper.Command("hammer_save", "[file name] [center piece] [snap piece] - Saves the selection to a blueprint.", (args) =>
     {
       HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
       var player = Helper.GetPlayer();
       var ghost = HammerHelper.GetPlacementGhost();
-      var center = args.Length > 2 ? args[2] : "";
-      var bp = BuildBluePrint(player, ghost, center, Configuration.SaveBlueprintData);
+      var centerPiece = args.Length > 2 ? args[2] : Configuration.BlueprintCenterPiece;
+      var snapPiece = args.Length > 3 ? args[3] : Configuration.BlueprintSnapPiece;
+      var bp = BuildBluePrint(player, ghost, centerPiece, snapPiece, Configuration.SaveBlueprintData);
       var lines = GetPlanBuildFile(bp);
       var name = Path.GetFileNameWithoutExtension(args[1]) + ".blueprint";
       var path = Path.Combine(Configuration.SaveBlueprintsToProfile ? Configuration.BlueprintLocalFolder : Configuration.BlueprintGlobalFolder, name);

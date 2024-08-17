@@ -19,7 +19,7 @@ public class Blueprint
   public string Creator = "";
   public Vector3 Coordinates = Vector3.zero;
   public Vector3 Rotation = Vector3.zero;
-  public string CenterPiece = Configuration.DefaultCenterPiece;
+  public string CenterPiece = Configuration.BlueprintCenterPiece;
   public List<BlueprintObject> Objects = [];
   public List<Vector3> SnapPoints = [];
   public float Radius = 0f;

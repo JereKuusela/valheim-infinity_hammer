@@ -55,18 +55,7 @@ public partial class Configuration
   public static float RemoveArea => Enabled ? Parse.Float(configRemoveArea.Value) : 0f;
   public static ConfigEntry<string> configRange;
   public static float Range => IsCheats ? Parse.Float(configRange.Value) : 0f;
-  public static ConfigEntry<bool> configSaveBlueprintData;
-  public static bool SaveBlueprintData => configSaveBlueprintData.Value;
-  public static ConfigEntry<bool> configSaveSimplerBlueprints;
-  public static bool SimplerBlueprints => configSaveSimplerBlueprints.Value;
-  public static ConfigEntry<bool> configUseBlueprintChance;
-  public static bool UseBlueprintChance => configUseBlueprintChance.Value;
-  public static ConfigEntry<string> configSavedObjectData;
-  public static HashSet<string> SavedObjectData = [];
-  private static void UpdateSavedObjectData()
-  {
-    SavedObjectData = ParseHashList(configSavedObjectData.Value);
-  }
+
 
   public static ConfigWrapper Wrapper;
 
@@ -96,12 +85,6 @@ public partial class Configuration
     configUnfreezeOnUnequip = wrapper.Bind(section, "Unfreeze on unequip", true, "Removes the placement freeze when unequipping the hammer.");
     configAllSnapPoints = wrapper.Bind(section, "Snap points for all objects", false, "If enabled, multi selection creates snap points for every object.");
     configIgnoreOtherRestrictions = wrapper.Bind(section, "Ignore other restrictions", true, "Ignores any other restrictions (material, biome, etc.)");
-    configSaveBlueprintData = wrapper.Bind(section, "Save data to blueprints", true, "If enabled, object data values are saved to blueprints.");
-    configSaveSimplerBlueprints = wrapper.Bind(section, "Save simpler blueprints", false, "If enabled, only mandatory information is saved.");
-    configSavedObjectData = wrapper.Bind(section, "Save object data blueprints", "", "Object ids that save extra data if save data is disabled.");
-    configSavedObjectData.SettingChanged += (s, e) => UpdateSavedObjectData();
-    configUseBlueprintChance = wrapper.Bind(section, "Use blueprint chance", false, "If enabled, chance field is checked from the blueprint.");
-    UpdateSavedObjectData();
     InitVisuals(wrapper);
     InitBinds(wrapper);
     section = "4. Messages";
@@ -112,6 +95,7 @@ public partial class Configuration
 
     InitOther(wrapper);
     InitTools(wrapper);
+    InitBlueprint(wrapper);
   }
 
 }

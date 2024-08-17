@@ -12,14 +12,7 @@ namespace InfinityHammer;
 public partial class Configuration
 {
 #nullable disable
-  public static ConfigEntry<string> configDefaultCenterPiece;
-  public static string DefaultCenterPiece => configDefaultCenterPiece.Value;
-  public static ConfigEntry<string> configBlueprintFolder;
-  public static string BlueprintGlobalFolder => Path.Combine("BepInEx", "config", configBlueprintFolder.Value);
-  public static string BlueprintLocalFolder => Path.Combine(Paths.ConfigPath, configBlueprintFolder.Value);
 
-  public static ConfigEntry<bool> configSaveBlueprintsToProfile;
-  public static bool SaveBlueprintsToProfile => configSaveBlueprintsToProfile.Value;
   public static ConfigEntry<string> configIgnoredRemoveIds;
   public static string[] RemoveIds = [];
   public static ConfigEntry<string> configIgnoredIds;
@@ -62,7 +55,7 @@ public partial class Configuration
 
   private static void InitOther(ConfigWrapper wrapper)
   {
-    var section = "5. Other";
+    var section = "7. Other";
     configEnabled = wrapper.Bind(section, "Enabled", true, "Whether this mod is enabled at all.");
     configDimensions = wrapper.Bind(section, "Dimensions", "", "Object dimensions.");
     configDimensions.SettingChanged += (s, e) => UpdateDimensions();
@@ -89,8 +82,5 @@ public partial class Configuration
     configMirrorFlip = wrapper.Bind(section, "Mirror flip", "woodwall", "Object ids that get flipped instead of rotated when mirrored.");
     configMirrorFlip.SettingChanged += (s, e) => UpdateMirrorFlip();
     UpdateMirrorFlip();
-    configBlueprintFolder = wrapper.Bind(section, "Blueprint folder", "PlanBuild", "Folder relative to the config folder.");
-    configSaveBlueprintsToProfile = wrapper.Bind(section, "Save blueprints to profile", false, "If enabled, blueprints are saved to the profile folder instead of base Valheim folder.");
-    configDefaultCenterPiece = wrapper.Bind(section, "Blueprint center piece", "piece_bpcenterpoint", "Default center piece for blueprints.");
   }
 }
