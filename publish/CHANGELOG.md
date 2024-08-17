@@ -1,3 +1,6 @@
+- v1.57
+  - Fixes escaping with "" not working on tool commands.
+
 - v1.56
   - Fixes continuous placement being bit too happy with being placed.
 

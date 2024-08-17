@@ -19,7 +19,7 @@ public class ToolImportCommand
     Helper.ArgsCheck(args, 2, "Missing the equipment.");
     Helper.ArgsCheck(args, 3, "Missing the tool data.");
     var equipment = args[1];
-    var data = string.Join(" ", args.Args, 2, args.Length - 2);
+    var data = HammerHelper.GetArgs("tool_import " + equipment, args);
     var result = ToolManager.Import(equipment, data);
     HammerHelper.Message(args.Context, $"Imported tool {result.name} to {equipment}.");
   }

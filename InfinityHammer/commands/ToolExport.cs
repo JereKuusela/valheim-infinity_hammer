@@ -15,7 +15,7 @@ public class ToolExportCommand
   protected static void Execute(Terminal.ConsoleEventArgs args)
   {
     Helper.ArgsCheck(args, 2, "Missing the tool name.");
-    var tool = string.Join(" ", args.Args, 1, args.Length - 1);
+    var tool = HammerHelper.GetArgs("tool_export", args);
     var equipment = Hammer.Get();
     var result = ToolManager.Export(equipment, tool);
     if (string.IsNullOrEmpty(result))

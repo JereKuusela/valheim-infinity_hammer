@@ -333,7 +333,7 @@ Object scaling only works for some objects (mostly trees and rocks). This is res
 
 If "Overwrite health" is enabled, objects have a specified health (including creatures). For minerocks, the health is applied to the individual parts.
 
-Setting a very high health (like "1E30") can be used to make object indestructible because the damage taken is rounded down to zero. This also prevents structures collapsing from lack of support. However this will increase network traffic because of constant health updates. Recommended to use the "Set invulnerability" setting instead.
+Setting a very high health (like "1E30") can be used to make object indestructible because the damage taken is rounded down to zero. This also prevents structures collapsing from lack of support. However this will increase network traffic because of constant health updates. Recommended to use the "Set invulnerability" setting instead which doesn't have this issue.
 
 For creatures, the max health resets when the area is reloaded if the current health equals the max health. For this reason, the current health is set slightly higher than the max health.
 

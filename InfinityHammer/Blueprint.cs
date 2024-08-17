@@ -35,8 +35,6 @@ public class Blueprint
       y = Mathf.Min(y, obj.Pos.y);
       bounds.Encapsulate(obj.Pos);
     }
-    // Slightly towards the ground to prevent gaps.
-    y += 0.05f;
 
     Vector3 center = new(bounds.center.x, y, bounds.center.z);
     foreach (var obj in Objects)

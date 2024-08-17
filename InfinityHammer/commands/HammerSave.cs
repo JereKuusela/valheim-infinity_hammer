@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -5,6 +6,7 @@ using System.Linq;
 using ServerDevcommands;
 using Service;
 using UnityEngine;
+using UnityEngine.Rendering;
 namespace InfinityHammer;
 
 
@@ -23,8 +25,8 @@ public class HammerSaveCommand
 
     if (obj.GetComponent<ItemStand>() && data.GetString(ZDOVars.s_item) != "")
     {
-      var item = data.GetString(ZDOVars.s_item);
       var variant = data.GetInt(ZDOVars.s_variant);
+      var item = data.GetString(ZDOVars.s_item);
       if (variant != 0)
         info = $"{item}:{variant}";
       else
@@ -74,12 +76,174 @@ public class HammerSaveCommand
           AddObject(bp, tr, saveData, i);
         i += 1;
       }
+      if (snapPiece == "all" || snapPiece == "auto")
+      {
+        foreach (var tr in objects)
+        {
+          for (int c = 0; c < tr.transform.childCount; c++)
+          {
+            Transform child = tr.transform.GetChild(c);
+            if (child.CompareTag("snappoint"))
+              bp.SnapPoints.Add(tr.transform.localPosition + child.transform.position - tr.transform.position);
+          }
+        }
+      }
     }
     var offset = bp.Center(centerPiece);
+    if (snapPiece == "auto" && bp.SnapPoints.Count > 0)
+      AutoSnap(bp);
     bp.Coordinates = player.m_placementGhost.transform.position - offset;
     return bp;
   }
 
+  private static void AutoSnap(Blueprint bp)
+  {
+    float minLeft = float.MaxValue;
+    float minRight = float.MinValue;
+    float minFront = float.MaxValue;
+    float minBack = float.MinValue;
+    float minTop = float.MaxValue;
+    float minBottom = float.MinValue;
+    float left = 0;
+    float right = 0;
+    float front = 0;
+    float back = 0;
+    float top = 0;
+    float bottom = 0;
+    List<Vector3> lefts = [];
+    List<Vector3> rights = [];
+    List<Vector3> fronts = [];
+    List<Vector3> backs = [];
+    List<Vector3> tops = [];
+    List<Vector3> bottoms = [];
+    foreach (var pos in bp.SnapPoints)
+    {
+      if (Helper.Approx(pos.x, left))
+      {
+        if (Helper.Approx(pos.sqrMagnitude, minLeft))
+        {
+          lefts.Add(pos);
+        }
+        else if (pos.sqrMagnitude < minLeft)
+        {
+          minLeft = pos.sqrMagnitude;
+          lefts = [pos];
+        }
+      }
+      else if (pos.x < left)
+      {
+        left = pos.x;
+        minLeft = pos.sqrMagnitude;
+        lefts = [pos];
+      }
+
+      if (Helper.Approx(pos.x, right))
+      {
+        if (Helper.Approx(pos.sqrMagnitude, minRight))
+        {
+          rights.Add(pos);
+        }
+        else if (pos.sqrMagnitude < minRight)
+        {
+          minRight = pos.sqrMagnitude;
+          rights = [pos];
+        }
+      }
+      else if (pos.x > right)
+      {
+        right = pos.x;
+        minRight = pos.sqrMagnitude;
+        rights = [pos];
+      }
+
+      if (Helper.Approx(pos.z, front))
+      {
+        if (Helper.Approx(pos.sqrMagnitude, minFront))
+        {
+          fronts.Add(pos);
+        }
+        else if (pos.sqrMagnitude < minFront)
+        {
+          minFront = pos.sqrMagnitude;
+          fronts = [pos];
+        }
+      }
+      else if (pos.z < front)
+      {
+        front = pos.z;
+        minFront = pos.sqrMagnitude;
+        fronts = [pos];
+      }
+
+      if (Helper.Approx(pos.z, back))
+      {
+        if (Helper.Approx(pos.sqrMagnitude, minBack))
+        {
+          backs.Add(pos);
+        }
+        else if (pos.sqrMagnitude < minBack)
+        {
+          minBack = pos.sqrMagnitude;
+          backs = [pos];
+        }
+      }
+      else if (pos.z > back)
+      {
+        back = pos.z;
+        minBack = pos.sqrMagnitude;
+        backs = [pos];
+      }
+
+      if (Helper.Approx(pos.y, top))
+      {
+        if (Helper.Approx(pos.sqrMagnitude, minTop))
+        {
+          tops.Add(pos);
+        }
+        else if (pos.sqrMagnitude < minTop)
+        {
+          minTop = pos.sqrMagnitude;
+          tops = [pos];
+        }
+      }
+      else if (pos.y > top)
+      {
+        top = pos.y;
+        minTop = pos.sqrMagnitude;
+        tops = [pos];
+      }
+
+      if (Helper.Approx(pos.y, bottom))
+      {
+        if (Helper.Approx(pos.sqrMagnitude, minBottom))
+        {
+          bottoms.Add(pos);
+        }
+        else if (pos.sqrMagnitude < minBottom)
+        {
+          minBottom = pos.sqrMagnitude;
+          bottoms = [pos];
+        }
+      }
+      else if (pos.y < bottom)
+      {
+        bottom = pos.y;
+        minBottom = pos.sqrMagnitude;
+        bottoms = [pos];
+      }
+
+
+    }
+    List<Vector3> all = [.. lefts, .. rights, .. fronts, .. backs, .. tops, .. bottoms];
+    List<Vector3> unique = [];
+    // Very inefficient but not many snap points.
+    foreach (var pos in all)
+    {
+      if (unique.Any(p => Helper.Approx(p.x, pos.x) && Helper.Approx(p.y, pos.y) && Helper.Approx(p.z, pos.z))) continue;
+      unique.Add(pos);
+    }
+    bp.SnapPoints = unique;
+  }
   private static List<GameObject> GetObjects(GameObject obj)
   {
     List<GameObject> objects = [];
@@ -173,25 +337,65 @@ public class HammerSaveCommand
     AutoComplete.Register("hammer_save", (int index) =>
     {
       if (index == 0) return ParameterInfo.Create("File name.");
-      if (index == 1) return ParameterInfo.ObjectIds;
-      return null;
+      return ["c", "center", "d", "data", "p", "profile", "s", "snap"];
+    }, new() {
+      { "c", (int index) => ParameterInfo.ObjectIds },
+      { "center", (int index) => ParameterInfo.ObjectIds },
+      { "d", (int index) => ["true", "false"] },
+      { "data", (int index) => ["true", "false"] },
+      { "p", (int index) => ["true", "false"] },
+      { "profile", (int index) => ["true", "false"] },
+      { "s", (int index) => ["auto", "all", ..ParameterInfo.ObjectIds] },
+      { "snap", (int index) => ["auto", "all", ..ParameterInfo.ObjectIds] },
     });
-    Helper.Command("hammer_save", "[file name] [center piece] [snap piece] - Saves the selection to a blueprint.", (args) =>
+    Helper.Command("hammer_save", "[file name] [center=piece] [snap=piece] [data=true/false] [profile=true/false] - Saves the selection to a blueprint.", (args) =>
     {
       HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
       var player = Helper.GetPlayer();
       var ghost = HammerHelper.GetPlacementGhost();
-      var centerPiece = args.Length > 2 ? args[2] : Configuration.BlueprintCenterPiece;
-      var snapPiece = args.Length > 3 ? args[3] : Configuration.BlueprintSnapPiece;
-      var bp = BuildBluePrint(player, ghost, centerPiece, snapPiece, Configuration.SaveBlueprintData);
+      HammerSavePars pars = new(args);
+      var bp = BuildBluePrint(player, ghost, pars.CenterPiece, pars.SnapPiece, pars.SaveData);
       var lines = GetPlanBuildFile(bp);
       var name = Path.GetFileNameWithoutExtension(args[1]) + ".blueprint";
-      var path = Path.Combine(Configuration.SaveBlueprintsToProfile ? Configuration.BlueprintLocalFolder : Configuration.BlueprintGlobalFolder, name);
+      var path = Path.Combine(pars.Profile ? Configuration.BlueprintLocalFolder : Configuration.BlueprintGlobalFolder, name);
       Directory.CreateDirectory(Path.GetDirectoryName(path));
       File.WriteAllLines(path, lines);
       args.Context.AddString($"Blueprint saved to {path.Replace("\\", "\\\\")} (pos: {HammerHelper.PrintXZY(bp.Coordinates)} rot: {HammerHelper.PrintYXZ(bp.Rotation)}).");
       Selection.CreateGhost(new ObjectSelection(args.Context, bp, Vector3.one));
     });
+  }
+}
+
+public class HammerSavePars
+{
+  public string CenterPiece = Configuration.BlueprintCenterPiece;
+  public string SnapPiece = Configuration.BlueprintSnapPiece;
+  public bool SaveData = Configuration.SaveBlueprintData;
+  public bool Profile = Configuration.SaveBlueprintsToProfile;
+
+  public HammerSavePars(Terminal.ConsoleEventArgs args)
+  {
+    var pars = args.Args.Skip(2).ToArray();
+    int index = 0;
+    foreach (var par in pars)
+    {
+      var split = par.Split('=');
+      if (split.Length < 2)
+      {
+        // Legacy support.
+        if (index == 0) CenterPiece = par;
+        if (index == 1) SnapPiece = par;
+        continue;
+      }
+      if (split[0] == "center" || split[0] == "c")
+        CenterPiece = split[1];
+      if (split[0] == "snap" || split[0] == "s")
+        SnapPiece = split[1];
+      if (split[0] == "data" || split[0] == "d")
+        SaveData = split[1] == "true";
+      if (split[0] == "profile" || split[0] == "p")
+        Profile = split[1] == "true";
+    }
   }
 }

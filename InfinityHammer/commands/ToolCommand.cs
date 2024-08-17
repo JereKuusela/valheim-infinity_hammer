@@ -16,7 +16,7 @@ public class ToolCommand
     Helper.ArgsCheck(args, 2, "Missing the tool name.");
     if (!Hammer.HasAny())
       Hammer.Equip();
-    var toolName = string.Join(" ", args.Args, 1, args.Length - 1);
+    var toolName = HammerHelper.GetArgs("tool", args);
     if (!ToolManager.TryGetTool(Hammer.Get(), toolName, out var tool))
     {
       ToolData data = new()
@@ -27,7 +27,7 @@ public class ToolCommand
       };
       tool = new(data);
     }
-    InfinityHammer.Hammer.Clear();
+    Hammer.Clear();
     Selection.CreateGhost(new ToolSelection(tool));
     PlaceRotation.Set(Quaternion.identity);
     HammerHelper.Message(args.Context, $"Selected tool {tool.Name}.");

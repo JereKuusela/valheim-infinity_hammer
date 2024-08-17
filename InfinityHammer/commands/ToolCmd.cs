@@ -13,17 +13,18 @@ public class ToolCmdCommand
   }
   protected static void Execute(Terminal.ConsoleEventArgs args)
   {
+
     Helper.ArgsCheck(args, 2, "Missing the command.");
     if (!Hammer.HasAny())
       Hammer.Equip();
-    var toolName = string.Join(" ", args.Args, 1, args.Length - 1);
+    var command = HammerHelper.GetArgs("tool_cmd", args);
     Tool tool = new(new()
     {
       name = "Command",
-      command = toolName,
-      description = toolName,
+      command = command,
+      description = command,
     });
-    InfinityHammer.Hammer.Clear();
+    Hammer.Clear();
     Selection.CreateGhost(new ToolSelection(tool));
     PlaceRotation.Set(Quaternion.identity);
     HammerHelper.Message(args.Context, $"Selected command {tool.Name}.");

@@ -9,6 +9,7 @@ using UnityEngine;
 namespace InfinityHammer;
 public static class HammerHelper
 {
+  public static string GetArgs(string cmd, Terminal.ConsoleEventArgs args) => args.FullLine.Substring(cmd.Length + 1);
   public static string Format(float value) => value.ToString("0.###", CultureInfo.InvariantCulture);
   public static string PrintXZY(Vector3 vec) => $"{Format(vec.x)},{Format(vec.z)},{Format(vec.y)}";
   public static string PrintYXZ(Vector3 vec) => $"{Format(vec.y)},{Format(vec.x)},{Format(vec.z)}";

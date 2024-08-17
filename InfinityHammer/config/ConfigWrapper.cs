@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using BepInEx.Configuration;
+using InfinityHammer;
 using ServerDevcommands;
 using UnityEngine;
 
@@ -57,7 +58,12 @@ public class ConfigWrapper
   {
     var key = ToKey(name);
     var cmd = $"_bind_{key}";
-    Helper.Command(cmd, description, args => args.Context.TryRunCommand($"{command()} {string.Join(" ", args.Args, 1, args.Length - 1)}"));
+    Helper.Command(cmd, description, args =>
+    {
+      var cmd = command();
+      var a = HammerHelper.GetArgs(args[0], args);
+      args.Context.TryRunCommand($"{command} {a}");
+    });
 
     var configEntry = Create(group, name, value, description);
     RegisterCommand(configEntry, cmd, mode);
@@ -71,7 +77,12 @@ public class ConfigWrapper
   {
     var key = ToKey(name);
     var cmd = $"_bind_{key}";
-    Helper.Command(cmd, description, args => args.Context.TryRunCommand($"{command()} {string.Join(" ", args.Args, 1, args.Length - 1)}"));
+    Helper.Command(cmd, description, args =>
+    {
+      var cmd = command();
+      var a = HammerHelper.GetArgs(args[0], args);
+      args.Context.TryRunCommand($"{cmd} {a}");
+    });
 
     var configEntry = Create(group, name, value, description);
     RegisterWheelCommand(configEntry, cmd, mode);

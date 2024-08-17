@@ -148,7 +148,8 @@ public partial class ObjectSelection : BaseSelection
     };
     snapObj.SetActive(false);
     snapObj.transform.parent = SelectedPrefab.transform;
-    snapObj.transform.position = pos;
+    snapObj.transform.localPosition = pos;
+    snapObj.transform.localRotation = Quaternion.identity;
   }
   public void Mirror()
   {

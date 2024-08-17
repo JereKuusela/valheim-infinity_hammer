@@ -109,8 +109,8 @@ public class ToolSelection : BaseSelection
     command = command.Replace("<y>", y);
     command = command.Replace("<z>", z);
     command = command.Replace("<h>", height);
-    command = command.Replace("<ignore>", InfinityHammer.Configuration.configIgnoredIds.Value);
-    if (!InfinityHammer.Configuration.DisableMessages)
+    command = command.Replace("<ignore>", Configuration.configIgnoredIds.Value);
+    if (!Configuration.DisableMessages)
       Console.instance.AddString($"Hammering command: {command}");
     placedCommand.Command = command;
   }
