@@ -102,6 +102,26 @@ public partial class ObjectSelection : BaseSelection
   {
     var pos = GetOffset(index);
     Zoops[index] = AddObject(BasePrefab.GetComponent<ZNetView>(), pos);
+    if (Configuration.ZoopMagic == ZoopMagicMode.Mild) Center();
+    if (Configuration.ZoopMagic == ZoopMagicMode.Wild) CenterOnRandomChild();
+  }
+  private void CenterOnRandomChild()
+  {
+    var children = Snapping.GetChildren(SelectedPrefab);
+    var child = children[UnityEngine.Random.Range(0, children.Count)];
+    var shift = child.transform.localPosition;
+    foreach (Transform tr in SelectedPrefab.transform)
+      tr.position -= shift;
+  }
+  private void Center()
+  {
+    var children = Snapping.GetChildren(SelectedPrefab);
+    Bounds bounds = new();
+    foreach (var child in children)
+      bounds.Encapsulate(child.transform.position);
+    var center = bounds.center;
+    foreach (Transform tr in SelectedPrefab.transform)
+      tr.position -= center;
   }
   private void AddChildX(string offset)
   {

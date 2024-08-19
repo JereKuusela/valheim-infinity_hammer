@@ -38,6 +38,8 @@ public partial class Configuration
   public static bool NoPrimaryTarget => configNoPrimaryTarget.Value && IsCheats;
   public static ConfigEntry<bool> configNoSecondaryTarget;
   public static bool NoSecondaryTarget => configNoSecondaryTarget.Value && IsCheats;
+  public static ConfigEntry<string> configZoopMagic;
+  public static string ZoopMagic => configZoopMagic.Value;
 
   public static ConfigEntry<bool> configResetOffsetOnUnfreeze;
   public static bool ResetOffsetOnUnfreeze => configResetOffsetOnUnfreeze.Value;
@@ -76,6 +78,7 @@ public partial class Configuration
     configRepairAnything = wrapper.Bind(section, "Repair anything", false, "Allows reparing anything.");
     configOverwriteHealth = wrapper.Bind(section, "Overwrite health", "0", "Overwrites the health of built or repaired objects.");
     configInvulnerability = wrapper.Bind(section, "Set invulnerability", InvulnerabilityMode.Off, new ConfigDescription("Built objects are invulnerable.", new AcceptableValueList<string>(InvulnerabilityMode.Off, InvulnerabilityMode.On, InvulnerabilityMode.Damaged, InvulnerabilityMode.Worn, InvulnerabilityMode.Legacy)));
+    configZoopMagic = wrapper.Bind(section, "Zoop magic mode", ZoopMagicMode.Off, new ConfigDescription("Zoop magic mode.", new AcceptableValueList<string>(ZoopMagicMode.Off, ZoopMagicMode.Mild, ZoopMagicMode.Wild)));
 
     configNoCreator = wrapper.Bind(section, "No creator", false, "Reduces save data by not setting the creator id.");
     configNoPrimaryTarget = wrapper.Bind(section, "No primary target", false, "Removes the primary target status. Requires World Edit Commands mod on the server.");
@@ -114,4 +117,10 @@ public static class SnappingMode
   public const string Corners = "Corners";
   public const string Edges = "Edges";
   public const string Off = "Off";
+}
+public static class ZoopMagicMode
+{
+  public const string Off = "Off";
+  public const string Mild = "Mild";
+  public const string Wild = "Wild";
 }

@@ -1,9 +1,17 @@
 - v1.57
   - Adds a new setting "Snap points" for automatic snap point generation.
+  - Adds a new setting "Blueprint snap piece" to set which piece is used for snap points.
+  - Adds a new setting "Zoop magic mode" to do stuff.
+  - Adds a new parameter to the command "hammer_blueprint" to display the snap points.
+  - Adds a new parameter to the command "hammer_save" to override the snap piece.
+  - Adds setting toggling to the command "hammer_config".
+  - Changes the format of command "hammer_blueprint" to have named parameters.
+  - Changes the format of command "hammer_save" to have named parameters.
   - Fixes blueprint snap points not working at all.
   - Fixes escaping with "" not working on tool commands.
   - Merged Infinity Tools mod back to this mod.
   - Removes setting "Snap points for all objects" as obsolete.
+  - Reorganizes the settings.
 
 - v1.56
   - Fixes continuous placement being bit too happy with being placed.

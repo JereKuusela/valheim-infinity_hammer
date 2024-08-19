@@ -400,7 +400,7 @@ public partial class ObjectSelection : BaseSelection
     obj.transform.rotation = view.transform.rotation;
     obj.transform.localPosition = pos;
     if (Configuration.Snapping != SnappingMode.Off)
-      Snapping.RegenerateSnapPoints(view.gameObject);
+      Snapping.RegenerateSnapPoints(SelectedPrefab);
     Objects.Add(new SelectedObject(Objects[0].Prefab, Objects[0].Scalable, Objects[0].Data));
     return obj;
   }
@@ -426,6 +426,7 @@ public partial class ObjectSelection : BaseSelection
       return;
     // Must be deactivated so that destroy doesn't activate it.
     obj.SetActive(false);
+    obj.transform.SetParent(null);
     UnityEngine.Object.Destroy(obj);
     Objects.RemoveAt(Objects.Count - 1);
     if (Objects.Count == 1)

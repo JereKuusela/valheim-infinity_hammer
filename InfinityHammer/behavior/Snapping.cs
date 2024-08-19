@@ -85,7 +85,6 @@ public static class Snapping
   public static List<Vector3> GenerateSnapPoints(List<GameObject> objects)
   {
     if (objects.Count == 0) return [];
-    Center(objects);
     if (Configuration.Snapping == SnappingMode.Off)
     {
       List<Vector3> snapPoints = [];
@@ -202,36 +201,18 @@ public static class Snapping
     return UniquePoints([.. lefts, .. rights, .. fronts, .. backs, .. tops, .. bottoms]);
   }
 
-  // This should make snap point generation more reliable, otherwise the first piece position might affect it.
-  // Probably not the best place though.
-  private static void Center(List<GameObject> objects)
-  {
-    Bounds bounds = new();
-    var y = float.MaxValue;
-    Quaternion rot = Quaternion.identity;
-    foreach (var obj in objects)
-    {
-      y = Mathf.Min(y, obj.transform.localPosition.y);
-      bounds.Encapsulate(obj.transform.localPosition);
-    }
-    Vector3 center = new(bounds.center.x, y, bounds.center.z);
-
-    foreach (var obj in objects)
-    {
-      obj.transform.localPosition -= center;
-    }
-  }
-  // Not sure if euklidian distance makes sense, but can be changed based on feedback.
   private static List<Vector3> CornerSnap(List<Vector3> snapPoints)
   {
-    var corner1 = snapPoints.OrderBy(p => p.x + p.y + p.z).First();
-    var corner2 = snapPoints.OrderBy(p => p.x + p.y - p.z).First();
-    var corner3 = snapPoints.OrderBy(p => p.x - p.y + p.z).First();
-    var corner4 = snapPoints.OrderBy(p => p.x - p.y - p.z).First();
-    var corner5 = snapPoints.OrderBy(p => -p.x + p.y + p.z).First();
-    var corner6 = snapPoints.OrderBy(p => -p.x + p.y - p.z).First();
-    var corner7 = snapPoints.OrderBy(p => -p.x - p.y + p.z).First();
-    var corner8 = snapPoints.OrderBy(p => -p.x - p.y - p.z).First();
+    var center = FindCenter(snapPoints);
+    var points = snapPoints.Select(p => System.Tuple.Create(p - center, p)).ToList();
+    var corner1 = points.OrderBy(p => p.Item1.x + p.Item1.y + p.Item1.z).First().Item2;
+    var corner2 = points.OrderBy(p => p.Item1.x + p.Item1.y - p.Item1.z).First().Item2;
+    var corner3 = points.OrderBy(p => p.Item1.x - p.Item1.y + p.Item1.z).First().Item2;
+    var corner4 = points.OrderBy(p => p.Item1.x - p.Item1.y - p.Item1.z).First().Item2;
+    var corner5 = points.OrderBy(p => -p.Item1.x + p.Item1.y + p.Item1.z).First().Item2;
+    var corner6 = points.OrderBy(p => -p.Item1.x + p.Item1.y - p.Item1.z).First().Item2;
+    var corner7 = points.OrderBy(p => -p.Item1.x - p.Item1.y + p.Item1.z).First().Item2;
+    var corner8 = points.OrderBy(p => -p.Item1.x - p.Item1.y - p.Item1.z).First().Item2;
     return UniquePoints([corner1, corner2, corner3, corner4, corner5, corner6, corner7, corner8]);
   }
   // Goal is to get the farthest point on each edge. This is not perfect but should work for most cases.
