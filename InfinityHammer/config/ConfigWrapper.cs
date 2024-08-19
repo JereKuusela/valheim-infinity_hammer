@@ -61,8 +61,15 @@ public class ConfigWrapper
     Helper.Command(cmd, description, args =>
     {
       var cmd = command();
-      var a = HammerHelper.GetArgs(args[0], args);
-      args.Context.TryRunCommand($"{command} {a}");
+      if (args.Length == 1)
+      {
+        args.Context.TryRunCommand(cmd);
+      }
+      else
+      {
+        var a = HammerHelper.GetArgs(args[0], args);
+        args.Context.TryRunCommand($"{cmd} {a}");
+      }
     });
 
     var configEntry = Create(group, name, value, description);
@@ -80,8 +87,15 @@ public class ConfigWrapper
     Helper.Command(cmd, description, args =>
     {
       var cmd = command();
-      var a = HammerHelper.GetArgs(args[0], args);
-      args.Context.TryRunCommand($"{cmd} {a}");
+      if (args.Length == 1)
+      {
+        args.Context.TryRunCommand(cmd);
+      }
+      else
+      {
+        var a = HammerHelper.GetArgs(args[0], args);
+        args.Context.TryRunCommand($"{cmd} {a}");
+      }
     });
 
     var configEntry = Create(group, name, value, description);
@@ -263,6 +277,19 @@ public class ConfigWrapper
     {
       AddMessage(context, $"{name}: {setting.Value}.");
       return;
+    }
+    if (value.Contains("/"))
+    {
+      var values = value.Split('/');
+      value = values[0];
+      for (var i = 0; i < values.Length - 1; i++)
+      {
+        if (string.Equals(setting.Value?.ToString(), values[i], StringComparison.OrdinalIgnoreCase))
+        {
+          value = values[i + 1];
+          break;
+        }
+      }
     }
     setting.Value = (T)(object)value;
     AddMessage(context, $"{name} set to {value}.");

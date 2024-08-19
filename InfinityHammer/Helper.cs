@@ -150,17 +150,6 @@ public static class HammerHelper
     ret.name = obj.name;
     return ret;
   }
-  public static bool IsSnapPoint(GameObject obj) => obj && obj.CompareTag("snappoint");
-  public static List<GameObject> GetChildren(GameObject obj)
-  {
-    List<GameObject> children = [];
-    foreach (Transform tr in obj.transform)
-    {
-      if (IsSnapPoint(tr.gameObject)) continue;
-      children.Add(tr.gameObject);
-    }
-    return children;
-  }
   private static void ResetHighlight(GameObject obj)
   {
     // Must be done for the original because m_oldMaterials is not copied.
@@ -243,24 +232,6 @@ public static class HammerHelper
     Hammer.Equip();
   }
 
-  public static int CountActiveChildren(GameObject obj)
-  {
-    var count = 0;
-    foreach (Transform tr in obj.transform)
-    {
-      if (tr.gameObject.activeSelf && !IsSnapPoint(tr.gameObject)) count++;
-    }
-    return count;
-  }
-  public static int CountSnapPoints(GameObject obj)
-  {
-    var count = 0;
-    foreach (Transform tr in obj.transform)
-    {
-      if (IsSnapPoint(tr.gameObject)) count++;
-    }
-    return count;
-  }
 
   public static bool IsDown(string key)
   {

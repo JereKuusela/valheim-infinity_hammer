@@ -81,10 +81,9 @@ public partial class ObjectSelection : BaseSelection
       obj.transform.rotation = view.transform.rotation;
       SetExtraInfo(obj, "", data);
       Objects.Add(new(view.GetZDO().GetPrefab(), view.m_syncInitialScale, data));
-      if (view == views.First() || Configuration.AllSnapPoints)
-        AddSnapPoints(obj, Configuration.AllSnapPoints);
     }
     SelectedPrefab.transform.position = Vector3.zero;
+    Snapping.GenerateSnapPoints(SelectedPrefab);
     CountObjects();
     PlaceRotation.Set(SelectedPrefab);
     Scaling.Set(SelectedPrefab);
@@ -131,26 +130,16 @@ public partial class ObjectSelection : BaseSelection
     // Might be good to have a proper loading for single item blueprints, but this works for now.
     if (Objects.Count == 1)
       ToSingle();
-    int counter = 0;
-    foreach (var position in bp.SnapPoints)
-      CreateSnapPoint(position, $"Snap {++counter}");
 
-    piece.m_clipEverything = HammerHelper.CountSnapPoints(SelectedPrefab) == 0;
+    if (bp.SnapPoints.Count == 0)
+      Snapping.GenerateSnapPoints(SelectedPrefab);
+    else
+      Snapping.CreateSnapPoints(SelectedPrefab, bp.SnapPoints);
+
+    piece.m_clipEverything = Snapping.CountSnapPoints(SelectedPrefab) == 0;
     Scaling.Set(SelectedPrefab);
   }
-  private void CreateSnapPoint(Vector3 pos, string name)
-  {
-    GameObject snapObj = new()
-    {
-      name = name,
-      layer = LayerMask.NameToLayer("piece"),
-      tag = "snappoint",
-    };
-    snapObj.SetActive(false);
-    snapObj.transform.parent = SelectedPrefab.transform;
-    snapObj.transform.localPosition = pos;
-    snapObj.transform.localRotation = Quaternion.identity;
-  }
+
   public void Mirror()
   {
     var i = 0;
@@ -158,7 +147,7 @@ public partial class ObjectSelection : BaseSelection
     {
       var prefab = i < Objects.Count ? Objects[i].Prefab : 0;
       i += 1;
-      if (HammerHelper.IsSnapPoint(tr.gameObject))
+      if (Snapping.IsSnapPoint(tr.gameObject))
       {
         prefab = 0;
         i -= 1;
@@ -178,15 +167,15 @@ public partial class ObjectSelection : BaseSelection
     if (Objects.Count == 1)
     {
       Postprocess(SelectedPrefab, GetData());
-      if (HammerHelper.CountSnapPoints(SelectedPrefab) == 0)
-        CreateSnapPoint(Vector3.zero, "Center");
+      if (Snapping.CountSnapPoints(SelectedPrefab) == 0)
+        Snapping.CreateSnapPoint(SelectedPrefab, Vector3.zero, "Center");
     }
     else
     {
       var i = 0;
       foreach (Transform tr in SelectedPrefab.transform)
       {
-        if (HammerHelper.IsSnapPoint(tr.gameObject)) continue;
+        if (Snapping.IsSnapPoint(tr.gameObject)) continue;
         Postprocess(tr.gameObject, GetData(i++));
       }
     }
@@ -319,10 +308,10 @@ public partial class ObjectSelection : BaseSelection
   private void CountObjects()
   {
     if (Objects.Count < 2) return;
-    SelectedPrefab.name = $"Multiple ({HammerHelper.CountActiveChildren(SelectedPrefab)})";
+    SelectedPrefab.name = $"Multiple ({Snapping.CountActiveChildren(SelectedPrefab)})";
     var piece = SelectedPrefab.GetComponent<Piece>();
     if (!piece) piece = SelectedPrefab.AddComponent<Piece>();
-    piece.m_clipEverything = HammerHelper.CountSnapPoints(SelectedPrefab) == 0;
+    piece.m_clipEverything = Snapping.CountSnapPoints(SelectedPrefab) == 0;
     piece.m_name = SelectedPrefab.name;
     Dictionary<int, int> counts = Objects.GroupBy(obj => obj.Prefab).ToDictionary(kvp => kvp.Key, kvp => kvp.Count());
     var topKeys = counts.OrderBy(kvp => kvp.Value).Reverse().ToArray();
@@ -332,15 +321,6 @@ public partial class ObjectSelection : BaseSelection
     {
       piece.m_description = string.Join("\n", topKeys.Take(4).Select(kvp => $"{ZNetScene.instance.GetPrefab(kvp.Key).name}: {kvp.Value}"));
       piece.m_description += $"\n{topKeys.Length - 4} other types: {topKeys.Skip(4).Sum(kvp => kvp.Value)}";
-    }
-  }
-  private void AddSnapPoints(GameObject obj, bool addObjName)
-  {
-    var baseName = addObjName ? $"{Utils.GetPrefabName(obj)} " : "";
-    foreach (Transform tr in obj.transform)
-    {
-      if (!tr || !HammerHelper.IsSnapPoint(tr.gameObject)) continue;
-      CreateSnapPoint(tr.position, $"{baseName}{tr.name}");
     }
   }
   public override ZDOData GetData(int index = 0)
@@ -394,7 +374,7 @@ public partial class ObjectSelection : BaseSelection
   private void HandleMultiple(GameObject ghost)
   {
     Undo.StartTracking();
-    var children = HammerHelper.GetChildren(ghost);
+    var children = Snapping.GetChildren(ghost);
     ValheimRAFT.Handle(children);
     for (var i = 0; i < children.Count; i++)
     {
@@ -419,7 +399,8 @@ public partial class ObjectSelection : BaseSelection
     var obj = HammerHelper.ChildInstantiate(view, SelectedPrefab);
     obj.transform.rotation = view.transform.rotation;
     obj.transform.localPosition = pos;
-    if (Configuration.AllSnapPoints) AddSnapPoints(obj, Configuration.AllSnapPoints);
+    if (Configuration.Snapping != SnappingMode.Off)
+      Snapping.RegenerateSnapPoints(view.gameObject);
     Objects.Add(new SelectedObject(Objects[0].Prefab, Objects[0].Scalable, Objects[0].Data));
     return obj;
   }
@@ -432,7 +413,6 @@ public partial class ObjectSelection : BaseSelection
     SelectedPrefab.transform.rotation = obj.transform.rotation;
     obj.transform.SetParent(SelectedPrefab.transform);
     obj.transform.localScale = Vector3.one;
-    AddSnapPoints(obj, Configuration.AllSnapPoints);
     if (obj.TryGetComponent<Piece>(out var piece))
     {
       var prefab = ZNetScene.instance.GetPrefab(Objects[0].Prefab);
@@ -450,6 +430,8 @@ public partial class ObjectSelection : BaseSelection
     Objects.RemoveAt(Objects.Count - 1);
     if (Objects.Count == 1)
       ToSingle();
+    else if (Configuration.Snapping != SnappingMode.Off)
+      Snapping.RegenerateSnapPoints(SelectedPrefab);
   }
   private void ToSingle()
   {

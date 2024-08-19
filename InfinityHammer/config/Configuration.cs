@@ -43,14 +43,14 @@ public partial class Configuration
   public static bool ResetOffsetOnUnfreeze => configResetOffsetOnUnfreeze.Value;
   public static ConfigEntry<bool> configUnfreezeOnUnequip;
   public static bool UnfreezeOnUnequip => configUnfreezeOnUnequip.Value;
-  public static ConfigEntry<bool> configAllSnapPoints;
-  public static bool AllSnapPoints => configAllSnapPoints.Value;
   public static ConfigEntry<bool> configUnfreezeOnSelect;
   public static bool UnfreezeOnSelect => configUnfreezeOnSelect.Value;
   public static ConfigEntry<string> configOverwriteHealth;
   public static float OverwriteHealth => IsCheats ? Parse.Float(configOverwriteHealth.Value) : 0f;
   public static ConfigEntry<string> configInvulnerability;
   public static string Invulnerability => IsCheats ? configInvulnerability.Value : InvulnerabilityMode.Off;
+  public static ConfigEntry<string> configSnapping;
+  public static string Snapping => configSnapping.Value;
   public static ConfigEntry<string> configRemoveArea;
   public static float RemoveArea => Enabled ? Parse.Float(configRemoveArea.Value) : 0f;
   public static ConfigEntry<string> configRange;
@@ -83,7 +83,7 @@ public partial class Configuration
     configUnfreezeOnSelect = wrapper.Bind(section, "Unfreeze on select", true, "Removes the placement freeze when selecting a new object.");
     configResetOffsetOnUnfreeze = wrapper.Bind(section, "Reset offset on unfreeze", true, "Removes the placement offset when unfreezing the placement.");
     configUnfreezeOnUnequip = wrapper.Bind(section, "Unfreeze on unequip", true, "Removes the placement freeze when unequipping the hammer.");
-    configAllSnapPoints = wrapper.Bind(section, "Snap points for all objects", false, "If enabled, multi selection creates snap points for every object.");
+    configSnapping = wrapper.Bind(section, "Snap points", SnappingMode.Corners, new ConfigDescription("Automatic snap points.", new AcceptableValueList<string>(SnappingMode.Off, SnappingMode.Edges, SnappingMode.Corners, SnappingMode.All)));
     configIgnoreOtherRestrictions = wrapper.Bind(section, "Ignore other restrictions", true, "Ignores any other restrictions (material, biome, etc.)");
     InitVisuals(wrapper);
     InitBinds(wrapper);
@@ -107,4 +107,11 @@ public static class InvulnerabilityMode
   public const string Damaged = "Damaged";
   public const string Worn = "Worn";
   public const string Legacy = "Legacy";
+}
+public static class SnappingMode
+{
+  public const string All = "All";
+  public const string Corners = "Corners";
+  public const string Edges = "Edges";
+  public const string Off = "Off";
 }

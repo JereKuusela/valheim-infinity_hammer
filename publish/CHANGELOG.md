@@ -1,5 +1,9 @@
 - v1.57
+  - Adds a new setting "Snap points" for automatic snap point generation.
+  - Fixes blueprint snap points not working at all.
   - Fixes escaping with "" not working on tool commands.
+  - Merged Infinity Tools mod back to this mod.
+  - Removes setting "Snap points for all objects" as obsolete.
 
 - v1.56
   - Fixes continuous placement being bit too happy with being placed.

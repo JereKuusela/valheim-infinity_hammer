@@ -55,13 +55,13 @@ public class HammerSaveCommand
       bp.Name = Localization.instance.Localize(piece.m_name);
     }
     if (Selection.Get() is not ObjectSelection selection) return bp;
-    var objects = GetObjects(obj);
+    var objects = Snapping.GetChildren(obj);
     if (selection.Objects.Count() == 1)
     {
       AddSingleObject(bp, obj, saveData);
       // Snap points are sort of useful for single objects.
       // Since single objects should just have custom data but otherwise the original behavior.
-      var snaps = GetSnapPoints(obj);
+      var snaps = Snapping.GetSnapPoints(obj);
       foreach (var snap in snaps)
         bp.SnapPoints.Add(snap.transform.localPosition);
     }
@@ -76,194 +76,18 @@ public class HammerSaveCommand
           AddObject(bp, tr, saveData, i);
         i += 1;
       }
-      if (snapPiece == "all" || snapPiece == "auto")
+      if (snapPiece == "")
       {
-        foreach (var tr in objects)
-        {
-          for (int c = 0; c < tr.transform.childCount; c++)
-          {
-            Transform child = tr.transform.GetChild(c);
-            if (child.CompareTag("snappoint"))
-              bp.SnapPoints.Add(tr.transform.localPosition + child.transform.position - tr.transform.position);
-          }
-        }
+        var snaps = Snapping.GetSnapPoints(obj);
+        foreach (var snap in snaps)
+          bp.SnapPoints.Add(snap.transform.localPosition);
       }
     }
     var offset = bp.Center(centerPiece);
-    if (snapPiece == "auto" && bp.SnapPoints.Count > 0)
-      AutoSnap(bp);
     bp.Coordinates = player.m_placementGhost.transform.position - offset;
     return bp;
   }
 
-  private static void AutoSnap(Blueprint bp)
-  {
-    float minLeft = float.MaxValue;
-    float minRight = float.MinValue;
-    float minFront = float.MaxValue;
-    float minBack = float.MinValue;
-    float minTop = float.MaxValue;
-    float minBottom = float.MinValue;
-    float left = 0;
-    float right = 0;
-    float front = 0;
-    float back = 0;
-    float top = 0;
-    float bottom = 0;
-    List<Vector3> lefts = [];
-    List<Vector3> rights = [];
-    List<Vector3> fronts = [];
-    List<Vector3> backs = [];
-    List<Vector3> tops = [];
-    List<Vector3> bottoms = [];
-    foreach (var pos in bp.SnapPoints)
-    {
-      if (Helper.Approx(pos.x, left))
-      {
-        if (Helper.Approx(pos.sqrMagnitude, minLeft))
-        {
-          lefts.Add(pos);
-        }
-        else if (pos.sqrMagnitude < minLeft)
-        {
-          minLeft = pos.sqrMagnitude;
-          lefts = [pos];
-        }
-      }
-      else if (pos.x < left)
-      {
-        left = pos.x;
-        minLeft = pos.sqrMagnitude;
-        lefts = [pos];
-      }
-
-      if (Helper.Approx(pos.x, right))
-      {
-        if (Helper.Approx(pos.sqrMagnitude, minRight))
-        {
-          rights.Add(pos);
-        }
-        else if (pos.sqrMagnitude < minRight)
-        {
-          minRight = pos.sqrMagnitude;
-          rights = [pos];
-        }
-      }
-      else if (pos.x > right)
-      {
-        right = pos.x;
-        minRight = pos.sqrMagnitude;
-        rights = [pos];
-      }
-
-      if (Helper.Approx(pos.z, front))
-      {
-        if (Helper.Approx(pos.sqrMagnitude, minFront))
-        {
-          fronts.Add(pos);
-        }
-        else if (pos.sqrMagnitude < minFront)
-        {
-          minFront = pos.sqrMagnitude;
-          fronts = [pos];
-        }
-      }
-      else if (pos.z < front)
-      {
-        front = pos.z;
-        minFront = pos.sqrMagnitude;
-        fronts = [pos];
-      }
-
-      if (Helper.Approx(pos.z, back))
-      {
-        if (Helper.Approx(pos.sqrMagnitude, minBack))
-        {
-          backs.Add(pos);
-        }
-        else if (pos.sqrMagnitude < minBack)
-        {
-          minBack = pos.sqrMagnitude;
-          backs = [pos];
-        }
-      }
-      else if (pos.z > back)
-      {
-        back = pos.z;
-        minBack = pos.sqrMagnitude;
-        backs = [pos];
-      }
-
-      if (Helper.Approx(pos.y, top))
-      {
-        if (Helper.Approx(pos.sqrMagnitude, minTop))
-        {
-          tops.Add(pos);
-        }
-        else if (pos.sqrMagnitude < minTop)
-        {
-          minTop = pos.sqrMagnitude;
-          tops = [pos];
-        }
-      }
-      else if (pos.y > top)
-      {
-        top = pos.y;
-        minTop = pos.sqrMagnitude;
-        tops = [pos];
-      }
-
-      if (Helper.Approx(pos.y, bottom))
-      {
-        if (Helper.Approx(pos.sqrMagnitude, minBottom))
-        {
-          bottoms.Add(pos);
-        }
-        else if (pos.sqrMagnitude < minBottom)
-        {
-          minBottom = pos.sqrMagnitude;
-          bottoms = [pos];
-        }
-      }
-      else if (pos.y < bottom)
-      {
-        bottom = pos.y;
-        minBottom = pos.sqrMagnitude;
-        bottoms = [pos];
-      }
-
-
-    }
-    List<Vector3> all = [.. lefts, .. rights, .. fronts, .. backs, .. tops, .. bottoms];
-    List<Vector3> unique = [];
-    // Very inefficient but not many snap points.
-    foreach (var pos in all)
-    {
-      if (unique.Any(p => Helper.Approx(p.x, pos.x) && Helper.Approx(p.y, pos.y) && Helper.Approx(p.z, pos.z))) continue;
-      unique.Add(pos);
-    }
-    bp.SnapPoints = unique;
-  }
-  private static List<GameObject> GetObjects(GameObject obj)
-  {
-    List<GameObject> objects = [];
-    foreach (Transform tr in obj.transform)
-    {
-      if (HammerHelper.IsSnapPoint(tr.gameObject)) continue;
-      objects.Add(tr.gameObject);
-    }
-    return objects;
-  }
-  private static List<GameObject> GetSnapPoints(GameObject obj)
-  {
-    List<GameObject> objects = [];
-    foreach (Transform tr in obj.transform)
-    {
-      if (!HammerHelper.IsSnapPoint(tr.gameObject)) continue;
-      objects.Add(tr.gameObject);
-    }
-    return objects;
-  }
   private static void AddSingleObject(Blueprint bp, GameObject obj, bool saveData)
   {
     var name = Utils.GetPrefabName(obj);
@@ -345,8 +169,8 @@ public class HammerSaveCommand
       { "data", (int index) => ["true", "false"] },
       { "p", (int index) => ["true", "false"] },
       { "profile", (int index) => ["true", "false"] },
-      { "s", (int index) => ["auto", "all", ..ParameterInfo.ObjectIds] },
-      { "snap", (int index) => ["auto", "all", ..ParameterInfo.ObjectIds] },
+      { "s", (int index) => ParameterInfo.ObjectIds },
+      { "snap", (int index) => ParameterInfo.ObjectIds },
     });
     Helper.Command("hammer_save", "[file name] [center=piece] [snap=piece] [data=true/false] [profile=true/false] - Saves the selection to a blueprint.", (args) =>
     {
