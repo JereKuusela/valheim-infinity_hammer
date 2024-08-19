@@ -45,6 +45,18 @@ See [blueprints.md](blueprints.md) for more information.
 
 See [tools.md](tools.md) for more information.
 
+### Configuration
+
+There are lots of customization available. The simplest way is to install Configuration Manager mod but you can modify the setting file directly too.
+
+For advanced use, there is a command `hammer_config` which you can bind to change settings more easily.
+
+For example `bind u hammer_config tools_enabled` to toggle tools in the build menu.
+
+For example `bind u hammer_config set_invulnerability On/Off` to toggle piece invulnerability.
+
+For example `bind u hammer_config overwrite_health 0/100/1000` for different amount of health.
+
 ### Key bindings
 
 Some commonly used features have pre-made key binds in the configuration. Internally these use the `bind` command.

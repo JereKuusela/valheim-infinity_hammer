@@ -79,13 +79,13 @@ The config has keybindings for two modifier keys. These can be used in the comma
 
 Following powers are available with `hammer_config` command:
 
-- Show command values (default: `false`, key: `show_command_values`): If enabled, the actual command is always shown on tool descriptions.
-- Shape circle (default: `true`, key: `shape_circle`): If enabled, the circle shape can be used.
-- Shape ring (default: `false`, key: `shape_ring`): If enabled, the ring shape can be used.
-- Shape square (default: `true`, key: `shape_square`): If enabled, the square shape can be used.
-- Shape frame (default: `false`, key: `shape_frame`): If enabled, the frame shape can be used.
-- Shape rectangle (default: `true`, key: `shape_rectangle`): If enabled, the rectangle shape can be used.
-- Command height amount (default: `0.1`, key: `command_height_amount`): How much the height changes when zooming.
+- Show command values (default: `false`): If enabled, the actual command is always shown on tool descriptions.
+- Shape circle (default: `true`): If enabled, the circle shape can be used.
+- Shape ring (default: `false`): If enabled, the ring shape can be used.
+- Shape square (default: `true`): If enabled, the square shape can be used.
+- Shape frame (default: `false`): If enabled, the frame shape can be used.
+- Shape rectangle (default: `true``): If enabled, the rectangle shape can be used.
+- Command height amount (default: `0.1`): How much the height changes when zooming.
 
 ## Binds
 

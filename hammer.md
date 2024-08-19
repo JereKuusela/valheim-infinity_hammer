@@ -166,6 +166,8 @@ Examples:
 - `hammer_zoop_right 2*auto`: Clones the selected object while leaving a gap (equal to the object size).
 - `hammer_zoop_up 5`: Clones the selected object to 5 meters above it.
 
+Setting "Zoop magic mode" can be used to make the zooping to behave erratically. Mild version automatically centers the selection which causes next zoops being put to wrong places. Wild version centers to random piece which causes the zoops to scatter around.
+
 ### Stacking
 
 Stacking is similar to zooping but instantly places the objects:
@@ -205,39 +207,37 @@ For example you could bind command `hammer_rotate_y random;hammer_place` to buil
 
 ## Configuration
 
-Following powers are available with `hammer_config` command:
-
-- Enabled (default: `true`, key: `enabled`): If disabled, removes most features.
-- Allow in dungeons (default: `true`, key: `allow_in_dungeons`): Building is allowed in dungeons.
-- Dimensions (key: `dimensions`): Measurements for objects.
-- Disable loot (default: `false`, key: `disable_loot`): Creatures and structures won't drop loot when destroyed with the hammer.
-- Ignore no build (default: `true`, key: `ignore_no_build`): "Mystical power" no longer prevents building.
-- Ignore other restrictions (default: `true`, key: `ignore_other_restrictions`): Removes any other restrictions (for example campfires can be built on wood floors).
-- Ignore wards (default: `true`, key: `ignore_wards`): Wards no longer prevent building.
-- Ignored ids (key: `ignored_ids`): Objects ignored by this mod (ids separated by ,).
-- Ignored remove ids (key: `ignored_remove_ids`): Additional ids that are ignored when removing anything.
-- Infinite health (default: `false`, key: `infinite_health`): Sets the Overwrite health setting to 1E30.
-- No cost (default: `false`, key: `no_cost`): Removes durability, resource and stamina costs.
-- No creator (default: `false`, key: `no_creator`): Reduces save data by not setting the creator id.
-- No primary target (default: `false`, key: `no_primary_target`): Removes the primary target status.
+- Enabled (default: `true`): If disabled, removes most features.
+- Allow in dungeons (default: `true`): Building is allowed in dungeons.
+- Dimensions: Measurements for objects.
+- Disable loot (default: `false`): Creatures and structures won't drop loot when destroyed with the hammer.
+- Ignore no build (default: `true`): "Mystical power" no longer prevents building.
+- Ignore other restrictions (default: `true`): Removes any other restrictions (for example campfires can be built on wood floors).
+- Ignore wards (default: `true`): Wards no longer prevent building.
+- Ignored ids: Objects ignored by this mod (ids separated by ,).
+- Ignored remove ids: Additional ids that are ignored when removing anything.
+- Infinite health (default: `false`): Sets the Overwrite health setting to 1E30.
+- No cost (default: `false`): Removes durability, resource and stamina costs.
+- No creator (default: `false`): Reduces save data by not setting the creator id.
+- No primary target (default: `false`): Removes the primary target status.
   - Requires World Edit Commands mod on the server, otherwise the change is removed on world load.
-- No secondary target (default: `false`, key: `no_secondary_target`): Removes the secondary target status.
+- No secondary target (default: `false`): Removes the secondary target status.
   - Requires World Edit Commands mod on the server, otherwise the change is removed on world load.
-- Overwrite health (default: `0`, key: `overwrite_health`): Sets the health of built or repaired objects (0 reverts to the default max health, except for creatures).
-- Range (default: `0`, key: `range`): Range for the hammer (capped at about 50 meters).
-- Remove anything (default: `false`, key: `remove_anything`): Allows removing any object.
-- Remove area (default: `0`, key: `remove_area`): Removes same objects within the radius.
-- Repair anything (default: `false`, key: `repair_anything`): Allows healing or repairing any object.
-- Reset offset on unfreeze (default `true`, key: `reset_offset_on_unfreeze`): Removes the placement offset when unfreezing the placement.
-- Set invulnerability (default: `false`, key: `set_invulnerability`): Built objects are invulnerable.
+- Overwrite health (default: `0`): Sets the health of built or repaired objects (0 reverts to the default max health, except for creatures).
+- Range (default: `0`): Range for the hammer (capped at about 50 meters).
+- Remove anything (default: `false`): Allows removing any object.
+- Remove area (default: `0`): Removes same objects within the radius.
+- Repair anything (default: `false`): Allows healing or repairing any object.
+- Reset offset on unfreeze (default `true`): Removes the placement offset when unfreezing the placement.
+- Set invulnerability (default: `false`): Built objects are invulnerable.
   - Creatures get very high health which makes them immune to damage.
   - Destructibles, mine rocks and trees get very high tool tier which makes them immune to damage.
   - Structures get negative health which prevents them from taking any damage.
   - Legacy option sets a very high health instead of above changes.
-- Show command values (default: `false`, key: `show_command_values`): Always show the command on tool descriptions.
-- Snap points for all objects (default: `false`, key: `snap_points_for_all_objects`):If enabled, multi selection creates snap points for every object.
-- Unfreeze on select (default `true`, key: `unfreeze_on_select`): Removes the placement freeze when selecting a new object.
-- Unfreeze on unequip (defualt `true`, key: `unfreeze_on_unequip`): Removes the placement freeze when unequipping the hammer.
+- Show command values (default: `false`): Always show the command on tool descriptions.
+- Snap points for all objects (default: `false`):If enabled, multi selection creates snap points for every object.
+- Unfreeze on select (default `true`): Removes the placement freeze when selecting a new object.
+- Unfreeze on unequip (defualt `true`): Removes the placement freeze when unequipping the hammer.
 
 On servers, above features are disabled without cheat access (except visual changes and offsetting).
 
