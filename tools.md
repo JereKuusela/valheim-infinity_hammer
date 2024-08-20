@@ -50,7 +50,8 @@ Following parameters can be used in the command:
 - `<place>`: Includes the coordinate parameters for World Edit Commands.
 - `<to>`: Includes the to and size parameters for World Edit Commands.
 - `<id>`: Id of the hovered object.
-- `<ignore>`: List of ignored ids.
+- `<include>`: Ids from the setting "Tool included ids".
+- `<ignore>`: Ids from the setting "Tool ignored ids".
 - `<x>`: X coordinate.
 - `<y>`: Y coordinate.
 - `<z>`: Z coordinate.
@@ -75,17 +76,17 @@ Key codes can be used in some fields but also inside the command. For example `h
 
 The config has keybindings for two modifier keys. These can be used in the commands with a value of `<mod1>` (default value is left alt) and `<mod2>` (default value is left control). The last modifier keys is `<alt>` that is based on the base game setting (defautl value is left shift).
 
-## Configuration
-
-Following powers are available with `hammer_config` command:
+## Related configuration
 
 - Show command values (default: `false`): If enabled, the actual command is always shown on tool descriptions.
 - Shape circle (default: `true`): If enabled, the circle shape can be used.
 - Shape ring (default: `false`): If enabled, the ring shape can be used.
 - Shape square (default: `true`): If enabled, the square shape can be used.
 - Shape frame (default: `false`): If enabled, the frame shape can be used.
-- Shape rectangle (default: `true``): If enabled, the rectangle shape can be used.
+- Shape rectangle (default: `true`): If enabled, the rectangle shape can be used.
 - Command height amount (default: `0.1`): How much the height changes when zooming.
+- Tool included ids: Ids that are included in the tool commands.
+- Tool ignored ids: Ids that are ignored in the tool commands.
 
 ## Binds
 

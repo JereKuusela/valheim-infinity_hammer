@@ -49,6 +49,8 @@ public class HammerParameters
   public Wear Wear = Wear.Default;
   public Growth Growth = Growth.Default;
   public Fall Fall = Fall.Default;
+  public string[] Ignored = [];
+  public string[] Included = [];
 
   public HammerParameters(Terminal.ConsoleEventArgs args)
   {
@@ -116,7 +118,14 @@ public class HammerParameters
       if (name == "collision") Collision = Parse.Boolean(value) ?? true;
       if (name == "interact") Interact = Parse.Boolean(value) ?? true;
       if (name == "restrict") Restrict = Parse.Boolean(value) ?? true;
+      if (name == "include") Included = values;
+      if (name == "id") Included = values;
+      if (name == "ignore") Ignored = values;
     }
+    if (Ignored.Length == 0)
+      Ignored = Configuration.IgnoredIds;
+    else if (Configuration.IgnoredIds.Length > 0)
+      Ignored = [.. Ignored, .. Configuration.IgnoredIds];
     if (Radius != null && Depth != null)
       throw new InvalidOperationException($"<color=yellow>circle</color> and <color=yellow>rect</color> parameters can't be used together.");
   }

@@ -147,7 +147,7 @@ public class ChatAwake
     var sub = ServerDevcommands.Settings.Substitution;
     Console.instance.TryRunCommand($"alias tool_terrain terrain {pars}");
     Console.instance.TryRunCommand($"alias t_t tool tool_terrain");
-    Console.instance.TryRunCommand($"alias tool_object object {pars} height=<h> ignore=<ignore>");
+    Console.instance.TryRunCommand($"alias tool_object object {pars} height=<h> ignore=<ignore> id=<include>");
     Console.instance.TryRunCommand($"alias t_o tool tool_object");
     Console.instance.TryRunCommand($"alias tool_spawn spawn_object {sub} {parsSpawn}");
     Console.instance.TryRunCommand($"alias t_s tool tool_spawn");
@@ -156,7 +156,7 @@ public class ChatAwake
     // Bit pointless but kept for legacy.
     Console.instance.TryRunCommand($"alias tool_slope tool_terrain_to slope");
 
-    Console.instance.TryRunCommand($"alias tool_area hammer {pars} height=<h>");
+    Console.instance.TryRunCommand($"alias tool_area hammer {pars} height=<h> ignore=<ignore> id=<include>");
 
   }
   static void Postfix()

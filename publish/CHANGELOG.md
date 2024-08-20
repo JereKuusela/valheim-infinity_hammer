@@ -2,8 +2,11 @@
   - Adds a new setting "Snap points" for automatic snap point generation.
   - Adds a new setting "Blueprint snap piece" to set which piece is used for snap points.
   - Adds a new setting "Zoop magic mode" to do stuff.
+  - Adds a new setting "Tool ignored ids" to separate ignored ids for commands.
+  - Adds a new setting "Tool included ids" to support included ids for commands.
   - Adds a new parameter to the command "hammer_blueprint" to display the snap points.
   - Adds a new parameter to the command "hammer_save" to override the snap piece.
+  - Adds new parameters "include" and "ignore" to the command `hammer`.
   - Adds setting toggling to the command "hammer_config".
   - Changes the format of command "hammer_blueprint" to have named parameters.
   - Changes the format of command "hammer_save" to have named parameters.

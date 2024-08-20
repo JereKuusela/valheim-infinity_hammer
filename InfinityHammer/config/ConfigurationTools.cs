@@ -30,6 +30,9 @@ public partial class Configuration
   public static ConfigEntry<KeyboardShortcut> commandModifier2;
   public static ConfigEntry<string> commandHeightAmount;
 
+  public static ConfigEntry<string> configToolIncludedIds;
+  public static ConfigEntry<string> configToolIgnoredIds;
+
 #nullable enable
 
   public static string ModifierKey1()
@@ -52,6 +55,8 @@ public partial class Configuration
     configShapeRectangle = wrapper.Bind(section, "Shape rectangle", true, "Enables rectangle shape for commands.");
     configShapeSquare = wrapper.Bind(section, "Shape square", true, "Enables square shape for commands.");
     configShapeFrame = wrapper.Bind(section, "Shape frame", false, "Enables frame shape for commands.");
+    configToolIncludedIds = wrapper.Bind(section, "Tool included ids", "", "Object ids when using <include> in tools.");
+    configToolIgnoredIds = wrapper.Bind(section, "Tool ignored ids", "", "Object ids when using <ignore> in tools.");
 
     commandHeightAmount = wrapper.Bind(section, "Command height amount", "0.1", "Meters to move.");
 

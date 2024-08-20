@@ -29,6 +29,9 @@ The `hammer` command has following extra parameters which allow modifying the se
 - `stars=number`: Overrides the creature stars (level - 1).
 - `text=string`: Overrides the sign text.
 - `type=component1,component2,...`: Select only certain object types.
+- `ignore=id1,id2,...`: Ignores certain object ids.
+  - These ids are combined with the setting "Ignored ids".
+- `include=id1,id2,...`: Includes only certain object ids.
 
 For Structure Tweaks mod:
 

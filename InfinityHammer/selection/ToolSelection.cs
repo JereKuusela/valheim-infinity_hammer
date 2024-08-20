@@ -109,7 +109,8 @@ public class ToolSelection : BaseSelection
     command = command.Replace("<y>", y);
     command = command.Replace("<z>", z);
     command = command.Replace("<h>", height);
-    command = command.Replace("<ignore>", Configuration.configIgnoredIds.Value);
+    command = command.Replace("<ignore>", Configuration.configToolIgnoredIds.Value);
+    command = command.Replace("<include>", Configuration.configToolIncludedIds.Value);
     if (!Configuration.DisableMessages)
       Console.instance.AddString($"Hammering command: {command}");
     placedCommand.Command = command;

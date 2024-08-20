@@ -49,7 +49,7 @@ public class HammerSelect
   public HammerSelect()
   {
     List<string> named = [
-      "freeze", "pick", "scale", "level", "stars", "connect", "health", "type",
+      "freeze", "pick", "scale", "level", "stars", "connect", "health", "type", "include", "ignore", "id",
     ];
     if (InfinityHammer.StructureTweaks)
     {
@@ -100,6 +100,9 @@ public class HammerSelect
       { "collision", (int index) => False },
       { "interact", (int index) => False },
       { "restrict", (int index) => False },
+      { "include", (int index) => ParameterInfo.ObjectIds },
+      { "ignore", (int index) => ParameterInfo.ObjectIds },
+      { "id", (int index) => ParameterInfo.ObjectIds },
       { "type", (int index) => ParameterInfo.Components }
     });
     Helper.Command("hammer", "[object id] - Selects the object to be placed (the hovered object by default).", (args) =>
@@ -107,9 +110,9 @@ public class HammerSelect
       HammerParameters pars = new(args);
       ZNetView[] views = [];
       if (pars.Radius != null)
-        views = Selector.GetNearby([], pars.Components, Configuration.IgnoredIds, pars.Position, pars.Radius, pars.Height);
+        views = Selector.GetNearby(pars.Included, pars.Components, pars.Ignored, pars.Position, pars.Radius, pars.Height);
       else if (pars.Width != null && pars.Depth != null)
-        views = Selector.GetNearby([], pars.Components, Configuration.IgnoredIds, pars.Position, pars.Angle, pars.Width, pars.Depth, pars.Height);
+        views = Selector.GetNearby(pars.Included, pars.Components, pars.Ignored, pars.Position, pars.Angle, pars.Width, pars.Depth, pars.Height);
       else if (args.Length > 1 && !args[1].Contains("=") && !pars.Connect && !pars.Pick && !pars.Freeze)
       {
         var obj = ZNetScene.instance.GetPrefab(args[1]) ?? throw new InvalidOperationException("Object not found.");
@@ -117,12 +120,13 @@ public class HammerSelect
       }
       else
       {
-        var hovered = Selector.GetHovered(Configuration.Range, [], Configuration.IgnoredIds) ?? throw new InvalidOperationException("Nothing is being hovered.");
+        var hovered = Selector.GetHovered(Configuration.Range, pars.Included, pars.Ignored) ?? throw new InvalidOperationException("Nothing is being hovered.");
         if (pars.Connect)
-          views = Selector.GetConnected(hovered, [], Configuration.IgnoredIds);
+          views = Selector.GetConnected(hovered, pars.Included, pars.Ignored);
         else
           views = [hovered];
       }
+      if (views.Length == 0) return;
       HammerHelper.Init();
       ObjectSelection selection = views.Length == 1 ? new(views[0], pars.Pick, pars.Scale) : new(views, pars.Pick, pars.Scale);
       ZDOData extraData = new();
