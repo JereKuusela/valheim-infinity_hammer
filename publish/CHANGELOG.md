@@ -1,3 +1,6 @@
+- v1.58
+  - Changes the setting "No creator" to also remove data from X Ray Vision mod.
+
 - v1.57
   - Adds a new setting "Snap points" for automatic snap point generation.
   - Adds a new setting "Blueprint snap piece" to set which piece is used for snap points.
