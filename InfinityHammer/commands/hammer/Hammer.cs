@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using Data;
 using ServerDevcommands;
 using Service;
 using UnityEngine;
+using WorldEditCommands;
 namespace InfinityHammer;
 public class HammerSelect
 {
@@ -49,7 +50,7 @@ public class HammerSelect
   public HammerSelect()
   {
     List<string> named = [
-      "freeze", "pick", "scale", "level", "stars", "connect", "health", "type", "include", "ignore", "id",
+      "freeze", "pick", "scale", "level", "stars", "connect", "health", "type", "include", "ignore", "id", "data",
     ];
     if (InfinityHammer.StructureTweaks)
     {
@@ -103,7 +104,8 @@ public class HammerSelect
       { "include", (int index) => ParameterInfo.ObjectIds },
       { "ignore", (int index) => ParameterInfo.ObjectIds },
       { "id", (int index) => ParameterInfo.ObjectIds },
-      { "type", (int index) => ParameterInfo.Components }
+      { "type", (int index) => ParameterInfo.Components },
+      { "data", (int index) => DataLoading.DataKeys },
     });
     Helper.Command("hammer", "[object id] - Selects the object to be placed (the hovered object by default).", (args) =>
     {
@@ -128,49 +130,74 @@ public class HammerSelect
       }
       if (views.Length == 0) return;
       HammerHelper.Init();
-      ObjectSelection selection = views.Length == 1 ? new(views[0], pars.Pick, pars.Scale) : new(views, pars.Pick, pars.Scale);
-      ZDOData extraData = new();
+      DataEntry? extraData = pars.Data == null ? null : DataHelper.Get(pars.Data);
       if (pars.Health.HasValue)
       {
-        if (selection.GetSelectedPiece().GetComponent<Character>())
-        {
-          extraData.Set(ZDOVars.s_health, pars.Health.Value * 1.000001f);
-          extraData.Set(ZDOVars.s_maxHealth, pars.Health.Value);
-        }
-        else extraData.Set(ZDOVars.s_health, pars.Health.Value);
+        extraData ??= new();
+        extraData.Set(ZDOVars.s_health, pars.Health.Value);
       }
       if (pars.Level.HasValue)
+      {
+        extraData ??= new();
         extraData.Set(ZDOVars.s_level, pars.Level.Value);
+      }
       if (pars.Growth != Growth.Default)
       {
+        extraData ??= new();
         extraData.Set(Hash.Growth, GrowthNumber(pars.Growth));
         extraData.Set(ZDOVars.s_plantTime, DateTime.MaxValue.Ticks / 2L);
       }
       if (pars.Wear != Wear.Default)
+      {
+        extraData ??= new();
         extraData.Set(Hash.Wear, WearNumber(pars.Wear));
+      }
       if (pars.Fall != Fall.Default)
+      {
+        extraData ??= new();
         extraData.Set(Hash.Fall, FallNumber(pars.Fall));
+      }
       if (pars.Wear != Wear.Default)
+      {
+        extraData ??= new();
         extraData.Set(Hash.Wear, WearNumber(pars.Wear));
+      }
       if (!pars.Collision)
+      {
+        extraData ??= new();
         extraData.Set(Hash.Collision, false);
+      }
       if (!pars.Show)
+      {
+        extraData ??= new();
         extraData.Set(Hash.Render, false);
+      }
       if (!pars.Restrict)
+      {
+        extraData ??= new();
         extraData.Set(Hash.Restrict, false);
+      }
       if (!pars.Interact)
+      {
+        extraData ??= new();
         extraData.Set(Hash.Interact, false);
+      }
       if (pars.Text != null)
-        extraData.Set(ZDOVars.s_text, pars.Text);
-      selection.UpdateZDOs(extraData);
-      selection.Postprocess();
+      {
+        extraData ??= new();
+        extraData.Set(Hash.Text, pars.Text);
+      }
+      ObjectSelection selection = views.Length == 1 ? new(views[0], pars.Pick, pars.Scale, extraData) : new(views, pars.Pick, pars.Scale, extraData);
       var ghost = Selection.CreateGhost(selection);
       if (pars.Freeze) Position.Freeze(views.Length > 0 ? views[0].transform.position : Helper.GetPlayer().transform.position);
       if (pars.Pick)
       {
-        Undo.AddRemoveStep(views);
+        UndoHelper.BeginAction();
+        foreach (var view in views)
+          UndoHelper.AddRemoveAction(view.GetZDO());
         foreach (var view in views)
           HammerHelper.RemoveZDO(view.GetZDO());
+        UndoHelper.EndAction();
       }
       PrintSelected(args.Context, ghost);
     });

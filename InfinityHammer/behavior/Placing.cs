@@ -1,8 +1,7 @@
 using System.Collections.Generic;
 using System.Reflection.Emit;
+using Data;
 using HarmonyLib;
-using ServerDevcommands;
-using Service;
 using UnityEngine;
 // Code related to adding objects.
 namespace InfinityHammer;
@@ -17,7 +16,7 @@ public class PlacePiece
   static void Finalizer(bool __result)
   {
     HideEffects.Active = false;
-    DataHelper.Clear();
+    DataHelper.CleanUp();
     if (__result && Selection.Get().SingleUse)
       Hammer.Clear();
   }

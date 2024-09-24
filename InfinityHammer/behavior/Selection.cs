@@ -1,15 +1,14 @@
-using System;
 using System.Collections.Generic;
+using Data;
 using HarmonyLib;
 using ServerDevcommands;
-using Service;
 using UnityEngine;
 namespace InfinityHammer;
 
-public class SelectedObject(int prefab, bool scalable, ZDOData data)
+public class SelectedObject(int prefab, bool scalable, DataEntry? data)
 {
   public int Prefab = prefab;
-  public ZDOData Data = data;
+  public DataEntry? Data = data;
   public bool Scalable = scalable;
 }
 

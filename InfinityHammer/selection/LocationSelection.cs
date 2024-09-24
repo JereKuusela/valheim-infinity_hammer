@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
+using Data;
 using ServerDevcommands;
 using Service;
 using UnityEngine;
+using WorldEditCommands;
 
 namespace InfinityHammer;
 
@@ -28,24 +31,25 @@ public class LocationSelection : BaseSelection
     Wrapper.SetActive(false);
     SelectedPrefab = HammerHelper.SafeInstantiateLocation(location, Hammer.AllLocationsObjects ? null : seed, Wrapper);
 
-    ZDOData data = new();
+    DataEntry data = new();
     data.Set(ZDOVars.s_location, location.Hash);
     data.Set(ZDOVars.s_seed, seed);
     Object = new(location.Hash, false, data);
   }
-  public override ZDOData GetData(int index = 0) => Object.Data;
+  public override DataEntry? GetData(int index = 0) => Object.Data;
   public override int GetPrefab(int index = 0) => Object.Prefab;
   public override GameObject GetPrefab(GameObject obj) => ZoneSystem.instance.m_locationProxyPrefab;
 
   public override void AfterPlace(GameObject obj)
   {
-    Undo.StartTracking();
+    UndoHelper.BeginSubAction();
     var view = obj.GetComponent<ZNetView>();
     HammerHelper.RemoveZDO(view.GetZDO());
     var data = GetData();
     if (data == null) return;
-    var prefab = data.GetInt(ZDOVars.s_location, 0);
-    var seed = data.GetInt(ZDOVars.s_seed, 0);
+    Dictionary<string, string> pars = [];
+    if (!data.TryGetInt(pars, ZDOVars.s_location, out var prefab)) return;
+    if (!data.TryGetInt(pars, ZDOVars.s_seed, out var seed)) return;
     var location = ZoneSystem.instance.GetLocation(prefab);
     var ghost = HammerHelper.GetPlacementGhost();
     var position = ghost.transform.position;
@@ -53,14 +57,14 @@ public class LocationSelection : BaseSelection
     CustomizeSpawnLocation.AllViews = Hammer.AllLocationsObjects;
     CustomizeSpawnLocation.RandomDamage = Hammer.RandomLocationDamage;
     ZoneSystem.instance.SpawnLocation(location, seed, position, rotation, ZoneSystem.SpawnMode.Full, []);
-    foreach (var zdo in Undo.Objects)
+    foreach (var zdo in UndoHelper.GetSpawned())
     {
       if (ZNetScene.instance.m_instances.TryGetValue(zdo, out var spawned))
         PostProcessPlaced(spawned.gameObject);
     }
     CustomizeSpawnLocation.RandomDamage = null;
     CustomizeSpawnLocation.AllViews = false;
-    Undo.StopTracking();
+    UndoHelper.EndSubAction();
   }
   public override void Activate()
   {

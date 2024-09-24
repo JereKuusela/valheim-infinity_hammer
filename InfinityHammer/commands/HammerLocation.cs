@@ -18,7 +18,7 @@ public class HammerLocationCommand
       if (index == 0) return ParameterInfo.LocationIds;
       if (index == 1) return ParameterInfo.Create("Seed for the random output. 0 = random, all = enable all objects.");
       if (index == 2) return ParameterInfo.Create("Any value forces random damage on structures (disabled by default).");
-      return null;
+      return ParameterInfo.None;
     });
     Helper.Command("hammer_location", "[location id] [seed=0] [random damage] - Selects the location to be placed.", (args) =>
     {

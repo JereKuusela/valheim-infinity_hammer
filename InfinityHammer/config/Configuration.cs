@@ -57,6 +57,8 @@ public partial class Configuration
   public static float RemoveArea => Enabled ? Parse.Float(configRemoveArea.Value) : 0f;
   public static ConfigEntry<string> configRange;
   public static float Range => IsCheats ? Parse.Float(configRange.Value) : 0f;
+  public static ConfigEntry<bool> configPlaceEmptyRooms;
+  public static bool PlaceEmptyRooms => configPlaceEmptyRooms.Value;
 
 
   public static ConfigWrapper Wrapper;
@@ -88,6 +90,7 @@ public partial class Configuration
     configUnfreezeOnUnequip = wrapper.Bind(section, "Unfreeze on unequip", true, "Removes the placement freeze when unequipping the hammer.");
     configSnapping = wrapper.Bind(section, "Snap points", SnappingMode.Corners, new ConfigDescription("Automatic snap points.", new AcceptableValueList<string>(SnappingMode.Off, SnappingMode.Edges, SnappingMode.Corners, SnappingMode.All)));
     configIgnoreOtherRestrictions = wrapper.Bind(section, "Ignore other restrictions", true, "Ignores any other restrictions (material, biome, etc.)");
+    configPlaceEmptyRooms = wrapper.Bind(section, "Place empty rooms", false, "hammer_room command places rooms without their contents.");
     InitVisuals(wrapper);
     InitBinds(wrapper);
     section = "4. Messages";

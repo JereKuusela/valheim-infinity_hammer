@@ -1,9 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Data;
 using ServerDevcommands;
 using Service;
 using UnityEngine;
+using WorldEditCommands;
 
 namespace InfinityHammer;
 
@@ -23,7 +25,7 @@ public partial class ObjectSelection : BaseSelection
   }
   private readonly bool FromBuildMenu = false;
 
-  public ObjectSelection(ZNetView view, bool singleUse, Vector3? scale)
+  public ObjectSelection(ZNetView view, bool singleUse, Vector3? scale, DataEntry? extraData)
   {
     if (view.GetComponent<Player>()) throw new InvalidOperationException("Players are not valid objects.");
     Wrapper = new GameObject();
@@ -31,11 +33,12 @@ public partial class ObjectSelection : BaseSelection
 
     var zdo = view.GetZDO();
     var prefabHash = zdo == null ? view.GetPrefabName().GetStableHashCode() : zdo.GetPrefab();
-    ZDOData data = zdo == null ? new() : new(zdo);
+    DataEntry? data = zdo == null ? extraData : Data.DataHelper.Merge(new(zdo), extraData);
 
     SingleUse = singleUse;
     SelectedPrefab = HammerHelper.SafeInstantiate(view, Wrapper);
     SelectedPrefab.transform.position = Vector3.zero;
+    UpdateVisuals(SelectedPrefab, data);
     Objects.Add(new(prefabHash, view.m_syncInitialScale, data));
     if (zdo != null)
       PlaceRotation.Set(SelectedPrefab);
@@ -61,7 +64,7 @@ public partial class ObjectSelection : BaseSelection
     Objects.Add(new(prefabHash, view.m_syncInitialScale, new()));
     Scaling.Set(SelectedPrefab);
   }
-  public ObjectSelection(IEnumerable<ZNetView> views, bool singleUse, Vector3? scale)
+  public ObjectSelection(IEnumerable<ZNetView> views, bool singleUse, Vector3? scale, DataEntry? extraData)
   {
     Wrapper = new GameObject();
     Wrapper.SetActive(false);
@@ -75,11 +78,11 @@ public partial class ObjectSelection : BaseSelection
     SelectedPrefab.transform.position = views.First().transform.position;
     foreach (var view in views)
     {
-      ZDOData data = new(view.GetZDO());
+      DataEntry? data = Data.DataHelper.Merge(new(view.GetZDO()), extraData);
       var obj = HammerHelper.ChildInstantiate(view, SelectedPrefab);
       obj.transform.position = view.transform.position;
       obj.transform.rotation = view.transform.rotation;
-      SetExtraInfo(obj, "", data);
+      UpdateVisuals(obj, data);
       Objects.Add(new(view.GetZDO().GetPrefab(), view.m_syncInitialScale, data));
     }
     SelectedPrefab.transform.position = Vector3.zero;
@@ -117,10 +120,9 @@ public partial class ObjectSelection : BaseSelection
         obj.transform.localPosition = item.Pos;
         obj.transform.localRotation = item.Rot;
         obj.transform.localScale = item.Scale;
-        ZDOData data = new(item.Data);
-        SetExtraInfo(obj, item.ExtraInfo, data);
+        DataEntry? data = item.Data == null || item.Data == "" ? ReadExtraInfo(obj, item.ExtraInfo) : DataHelper.Get(item.Data);
+        UpdateVisuals(obj, data);
         Objects.Add(new SelectedObject(item.Prefab.GetStableHashCode(), view.m_syncInitialScale, data));
-
       }
       catch (Exception e)
       {
@@ -166,38 +168,12 @@ public partial class ObjectSelection : BaseSelection
   {
     if (Objects.Count == 1)
     {
-      Postprocess(SelectedPrefab, GetData());
       if (Snapping.CountSnapPoints(SelectedPrefab) == 0)
         Snapping.CreateSnapPoint(SelectedPrefab, Vector3.zero, "Center");
     }
-    else
-    {
-      var i = 0;
-      foreach (Transform tr in SelectedPrefab.transform)
-      {
-        if (Snapping.IsSnapPoint(tr.gameObject)) continue;
-        Postprocess(tr.gameObject, GetData(i++));
-      }
-    }
   }
 
-  private void Postprocess(GameObject obj, ZDOData? zdo)
-  {
-    if (zdo == null) return;
-    SetLevel(obj, zdo.GetInt(ZDOVars.s_level, -1));
-    SetGrowth(obj, zdo.GetInt(Hash.Growth, -1));
-    SetWear(obj, zdo.GetInt(Hash.Wear, -1));
-    SetText(obj, zdo.GetString(ZDOVars.s_text, ""));
-  }
 
-  private static void SetLevel(GameObject obj, int level)
-  {
-    if (level == -1) return;
-    if (obj.GetComponent<Character>() is not { } character) return;
-    if (obj.GetComponentInChildren<LevelEffects>() is not { } effect) return;
-    effect.m_character = character;
-    effect.SetupLevelVisualization(level);
-  }
   private static float Convert(int value, float defaultValue)
   {
     if (value == 0) return 0.1f;
@@ -205,21 +181,14 @@ public partial class ObjectSelection : BaseSelection
     if (value == 2) return 1f;
     return defaultValue;
   }
-  private static void SetWear(GameObject obj, int wear)
+  private static void SetWear(WearNTear wearNTear, int wear)
   {
     if (wear == -1) return;
-    if (obj.GetComponent<WearNTear>() is not { } wearNTear) return;
     wearNTear.SetHealthVisual(Convert(wear, 1f), false);
   }
-  private static void SetText(GameObject obj, string text)
-  {
-    if (obj.GetComponent<Sign>() is not { } sign) return;
-    sign.m_textWidget.text = text;
-  }
-  private static void SetGrowth(GameObject obj, int growth)
+  private static void SetGrowth(Plant plant, int growth)
   {
     if (growth == -1) return;
-    if (obj.GetComponent<Plant>() is not { } plant) return;
     var healthy = growth == 0;
     var unhealthy = growth == 1;
     var healthyGrown = growth == 2;
@@ -237,21 +206,20 @@ public partial class ObjectSelection : BaseSelection
       plant.m_unhealthy.SetActive(unhealthy || unhealthyGrown);
     }
   }
-  protected static void SetExtraInfo(GameObject obj, string extraInfo, ZDOData data)
+  protected static DataEntry? ReadExtraInfo(GameObject obj, string extraInfo)
   {
+    if (extraInfo == "") return null;
+    DataEntry data = new();
     if (obj.TryGetComponent<Sign>(out var sign))
     {
-      if (extraInfo == "")
-        extraInfo = data.GetString(ZDOVars.s_text, extraInfo);
-      else
-        data.Set(ZDOVars.s_text, extraInfo);
+      data.Set(ZDOVars.s_text, extraInfo);
       sign.m_textWidget.text = extraInfo;
     }
-    if (obj.GetComponent<TeleportWorld>() && extraInfo != "")
+    if (obj.GetComponent<TeleportWorld>())
     {
       data.Set(ZDOVars.s_tag, extraInfo);
     }
-    if (obj.GetComponent<Tameable>() && extraInfo != "")
+    if (obj.GetComponent<Tameable>())
     {
       data.Set(ZDOVars.s_tamedName, extraInfo);
     }
@@ -261,48 +229,75 @@ public partial class ObjectSelection : BaseSelection
       var name = split[0];
       var variant = Parse.Int(split, 1, 0);
       var quality = Parse.Int(split, 2, 1);
-      if (extraInfo == "")
-      {
-        name = data.GetString(ZDOVars.s_item, name);
-        variant = data.GetInt(ZDOVars.s_variant, variant);
-        quality = data.GetInt(ZDOVars.s_quality, quality);
-      }
-      else
-      {
-        data.Set(ZDOVars.s_item, name);
-        data.Set(ZDOVars.s_variant, variant);
-        data.Set(ZDOVars.s_quality, quality);
-      }
-      itemStand.SetVisualItem(name, variant, quality);
+      data.Set(ZDOVars.s_item, name);
+      data.Set(ZDOVars.s_variant, variant);
+      data.Set(ZDOVars.s_quality, quality);
     }
     if (obj.TryGetComponent<ArmorStand>(out var armorStand))
     {
       var split = extraInfo.Split(':');
       var pose = Parse.Int(split, 0, 0);
-      if (extraInfo == "")
-        pose = data.GetInt(ZDOVars.s_pose, pose);
-      else
-        data.Set(ZDOVars.s_pose, pose);
-      armorStand.m_pose = pose;
-      armorStand.m_poseAnimator.SetInteger("Pose", pose);
-      SetItemHack.Hack = true;
+      data.Set(ZDOVars.s_pose, pose);
       for (var i = 0; i < armorStand.m_slots.Count; i++)
       {
         var name = Parse.String(split, i * 2 + 2, "");
         var variant = Parse.Int(split, i * 2 + 3, 0);
-        if (extraInfo == "")
-        {
-          name = data.GetString($"{i}_item", name);
-          variant = data.GetInt($"{i}_variant", variant);
-        }
-        else
-        {
-          data.Set($"{i}_item", name);
-          data.Set($"{i}_variant", variant);
-        }
-        armorStand.SetVisualItem(i, name, variant);
+        if (name == "") continue;
+        data.Set(StringExtensionMethods.GetStableHashCode($"{i}_item"), name);
+        data.Set(StringExtensionMethods.GetStableHashCode($"{i}_variant"), variant);
+      }
+    }
+    return data;
+  }
+  protected static void UpdateVisuals(GameObject obj, DataEntry? data)
+  {
+    if (data == null) return;
+    Dictionary<string, string> pars = [];
+    if (data.TryGetString(pars, ZDOVars.s_text, out var signText) && obj.TryGetComponent<Sign>(out var sign))
+    {
+      sign.m_textWidget.text = signText;
+    }
+    if (data.TryGetString(pars, ZDOVars.s_item, out var item) && obj.TryGetComponent<ItemStand>(out var itemStand))
+    {
+      var variant = data.TryGetInt(pars, ZDOVars.s_variant, out var v) ? v : 0;
+      var quality = data.TryGetInt(pars, ZDOVars.s_quality, out var q) ? q : 1;
+      itemStand.SetVisualItem(item, variant, quality);
+    }
+    if (obj.TryGetComponent<ArmorStand>(out var armorStand))
+    {
+      armorStand.m_pose = data.TryGetInt(pars, ZDOVars.s_pose, out var pose) ? pose : 0;
+      armorStand.m_poseAnimator.SetInteger("Pose", pose);
+      SetItemHack.Hack = true;
+      for (var i = 0; i < armorStand.m_slots.Count; i++)
+      {
+        var name = data.TryGetString(pars, StringExtensionMethods.GetStableHashCode($"{i}_item"), out var s) ? s : "";
+        var variant = data.TryGetInt(pars, StringExtensionMethods.GetStableHashCode($"{i}_variant"), out var v) ? v : 0;
+        if (name != "")
+          armorStand.SetVisualItem(i, name, variant);
       }
       SetItemHack.Hack = false;
+    }
+    if (obj.TryGetComponent<Character>(out var character))
+    {
+      if (data.TryGetFloat(pars, ZDOVars.s_health, out var health))
+      {
+        data.Set(ZDOVars.s_maxHealth, health);
+        data.Set(ZDOVars.s_health, health * 1.000001f);
+      }
+      if (data.TryGetInt(pars, ZDOVars.s_level, out var level) && level > 1 && obj.TryGetComponent<LevelEffects>(out var effect))
+      {
+        effect.m_character = character;
+        effect.SetupLevelVisualization(level);
+      }
+    }
+
+    if (data.TryGetInt(pars, Hash.Wear, out var wear) && obj.TryGetComponent<WearNTear>(out var wearNTear))
+    {
+      SetWear(wearNTear, wear);
+    }
+    if (data.TryGetInt(pars, Hash.Growth, out var growth) && obj.TryGetComponent<Plant>(out var plant))
+    {
+      SetGrowth(plant, growth);
     }
   }
   private void CountObjects()
@@ -323,7 +318,7 @@ public partial class ObjectSelection : BaseSelection
       piece.m_description += $"\n{topKeys.Length - 4} other types: {topKeys.Skip(4).Sum(kvp => kvp.Value)}";
     }
   }
-  public override ZDOData GetData(int index = 0)
+  public override DataEntry? GetData(int index = 0)
   {
     if (Objects.Count <= index) throw new InvalidOperationException("Invalid index.");
     return Objects[index].Data;
@@ -334,17 +329,16 @@ public partial class ObjectSelection : BaseSelection
     return Objects[index].Prefab;
   }
   public override bool IsScalingSupported() => Objects.All(obj => obj.Scalable);
-  public void UpdateZDOs(ZDOData data)
-  {
-    Objects.ForEach(obj => obj.Data.Add(data));
-  }
   public override GameObject GetPrefab(GameObject obj)
   {
+    UndoHelper.BeginSubAction();
     if (Objects.Count == 1)
     {
       var name = Utils.GetPrefabName(obj);
       var tr = HammerHelper.GetPlacementGhost().transform;
-      DataHelper.Init(name, tr, GetData(0));
+      var zdo = DataHelper.Init(StringExtensionMethods.GetStableHashCode(name), tr, GetData(0));
+      if (zdo != null)
+        DungeonRooms.Reposition(zdo, tr);
       return ZNetScene.instance.GetPrefab(name);
     }
     var dummy = new GameObject
@@ -363,33 +357,31 @@ public partial class ObjectSelection : BaseSelection
       if (!view) return;
       view.m_body?.WakeUp();
       PostProcessPlaced(obj);
-      Undo.CreateObject(obj);
     }
     else
     {
       HandleMultiple(HammerHelper.GetPlacementGhost());
       UnityEngine.Object.Destroy(obj);
     }
+    UndoHelper.EndSubAction();
   }
   private void HandleMultiple(GameObject ghost)
   {
-    Undo.StartTracking();
     var children = Snapping.GetChildren(ghost);
-    ValheimRAFT.Handle(children);
     for (var i = 0; i < children.Count; i++)
     {
       var ghostChild = children[i];
       var hash = GetPrefab(i);
-      if (ValheimRAFT.IsRaft(hash)) continue;
       var prefab = ZNetScene.instance.GetPrefab(hash);
       if (prefab)
       {
-        DataHelper.Init(hash, ghostChild.transform, GetData(i));
+        var zdo = DataHelper.Init(hash, ghostChild.transform, GetData(i));
+        if (zdo != null)
+          DungeonRooms.Reposition(zdo, ghostChild.transform);
         var childObj = UnityEngine.Object.Instantiate(prefab, ghostChild.transform.position, ghostChild.transform.rotation);
         PostProcessPlaced(childObj);
       }
     }
-    Undo.StopTracking();
   }
 
   public GameObject AddObject(ZNetView view, Vector3 pos)

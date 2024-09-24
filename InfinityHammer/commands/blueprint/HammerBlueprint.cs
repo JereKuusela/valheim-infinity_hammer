@@ -91,9 +91,8 @@ public class HammerBlueprintCommand
     var scaleZ = InvariantFloat(split, 12, 1f);
     var data = loadData && split.Length > 13 ? split[13] : "";
     var chance = InvariantFloat(split, 14, 1f);
-    return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), new(scaleX, scaleY, scaleZ), info, Deserialize(data), chance);
+    return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), new(scaleX, scaleY, scaleZ), info, data, chance);
   }
-  public static ZPackage? Deserialize(string data) => data == "" ? null : new(data);
   private static Vector3 GetPlanBuildSnapPoint(string row)
   {
     if (row.IndexOf(',') > -1) row = row.Replace(',', '.');
@@ -122,7 +121,7 @@ public class HammerBlueprintCommand
     var posZ = InvariantFloat(split, 7);
     var data = loadData && split.Length > 8 ? split[8] : "";
     var chance = InvariantFloat(split, 9, 1f);
-    return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), Vector3.one, "", Deserialize(data), chance);
+    return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), Vector3.one, "", data, chance);
   }
   private static float InvariantFloat(string[] row, int index, float defaultValue = 0f)
   {
@@ -162,7 +161,7 @@ public class HammerBlueprintCommand
       if (pars.SnapPiece != "")
       {
         foreach (var snap in bp.SnapPoints)
-          bp.Objects.Add(new BlueprintObject(pars.SnapPiece, snap, Quaternion.identity, Vector3.one, "", null, 1f));
+          bp.Objects.Add(new BlueprintObject(pars.SnapPiece, snap, Quaternion.identity, Vector3.one, "", "", 1f));
       }
       var obj = Selection.CreateGhost(new ObjectSelection(args.Context, bp, pars.Scale));
       PrintSelected(args.Context, bp.Name);
@@ -172,7 +171,7 @@ public class HammerBlueprintCommand
     {
       if (index == 0) return GetBlueprints();
       if (index == 1) return ParameterInfo.Scale("scale", "Size of the object (if the object can be scaled).", subIndex);
-      return null;
+      return ParameterInfo.None;
     });
     Helper.Command("hammer_restore", "[blueprint file] [scale] - Restores the blueprint at its saved position.", (args) =>
     {

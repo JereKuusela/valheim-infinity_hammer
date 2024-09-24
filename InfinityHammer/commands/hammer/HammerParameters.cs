@@ -37,6 +37,7 @@ public class HammerParameters
   public bool Connect;
   public bool Freeze;
   public bool Pick;
+  public string? Data;
   public Range<float>? Radius;
   public Range<float>? Width;
   public Range<float>? Depth;
@@ -73,6 +74,8 @@ public class HammerParameters
       if (split.Length < 2) continue;
       var value = split[1].ToLower();
       var values = Parse.Split(value);
+      if (name == "data")
+        Data = split[1];
       if (name == "connect")
         Connect = HammerHelper.IsDown(value);
       if (name == "freeze")
@@ -84,7 +87,7 @@ public class HammerParameters
       if (name == "stars")
         Level = Parse.Int(value, 0) + 1;
       if (name == "text")
-        Text = value.Replace("_", " ");
+        Text = split[1].Replace("_", " ");
       if (name == "health")
         Health = Parse.Float(value);
       if (name == "from")

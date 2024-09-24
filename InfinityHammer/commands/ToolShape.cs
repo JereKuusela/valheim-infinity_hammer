@@ -11,7 +11,7 @@ public class ToolShapeCommand
       RulerShape.Rectangle.ToString(),
       RulerShape.Square.ToString(),
     ];
-    AutoComplete.Register("tool_shape", (int index, int subIndex) => index == 0 ? shapes : null);
+    AutoComplete.Register("tool_shape", (int index, int subIndex) => index == 0 ? shapes : ParameterInfo.None);
     Helper.Command("tool_shape", "[shape] - Toggles or sets the selection shape.", (args) =>
     {
       if (Selection.Get() is not ToolSelection selection) return;

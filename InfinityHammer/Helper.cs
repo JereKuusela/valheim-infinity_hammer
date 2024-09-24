@@ -111,6 +111,24 @@ public static class HammerHelper
     CleanObject(ret);
     return ret;
   }
+  public static GameObject SafeInstantiateRoom(DungeonDB.RoomData room, bool emptyRoom, GameObject parent)
+  {
+    room.m_prefab.Load();
+    ZNetView[] views = Utils.GetEnabledComponentsInChildren<ZNetView>(room.m_prefab.Asset);
+    if (emptyRoom)
+    {
+      foreach (var view in views)
+        view.gameObject.SetActive(false);
+    }
+    var ret = SafeInstantiate(room.m_prefab.Asset, room.m_prefab.Asset.transform.rotation, parent.transform);
+    if (emptyRoom)
+    {
+      foreach (var view in views)
+        view.gameObject.SetActive(true);
+    }
+    room.m_prefab.Release();
+    return ret;
+  }
   public static GameObject SafeInstantiateLocation(ZoneSystem.ZoneLocation location, int? seed, GameObject parent)
   {
     if (!location.m_prefab.IsValid)

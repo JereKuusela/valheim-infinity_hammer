@@ -2,6 +2,7 @@ using System.Linq;
 using HarmonyLib;
 using Service;
 using UnityEngine;
+using WorldEditCommands;
 // Code related to repairing objects.
 namespace InfinityHammer;
 [HarmonyPatch(typeof(Player), nameof(Player.Repair))]
@@ -141,6 +142,7 @@ public class Repair
     var hovered = Selector.GetHovered(player, range, [], [], true);
     if (hovered == null) return false;
     var obj = hovered.Obj;
+    UndoHelper.AddEditAction(obj.GetZDO());
     var repaired = RepairObject(obj, hovered.Index);
     if (!repaired) return false;
     var piece = obj.GetComponent<Piece>();
@@ -161,6 +163,7 @@ public class Repair
   }
   public static void Prefix()
   {
+    UndoHelper.BeginAction();
     HideEffects.Active = true;
     IsRepairing = true;
     Repaired = false;
@@ -174,6 +177,7 @@ public class Repair
   }
   public static void Finalizer()
   {
+    UndoHelper.EndAction();
     IsRepairing = false;
     HideEffects.Active = false;
   }

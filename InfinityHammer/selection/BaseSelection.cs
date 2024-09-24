@@ -1,3 +1,5 @@
+using System.IO;
+using Data;
 using ServerDevcommands;
 using Service;
 using UnityEngine;
@@ -16,11 +18,12 @@ public class BaseSelection
   public virtual bool TerrainGrid => false;
   public virtual bool Continuous => false;
   public virtual bool PlayerHeight => false;
+  public virtual float DungeonRoomSnapMultiplier => 1f;
   public virtual float MaxPlaceDistance(float value) => Configuration.Range > 0f ? Configuration.Range : value;
   public Piece GetSelectedPiece() => SelectedPrefab ? SelectedPrefab.GetComponent<Piece>() : null!;
   public virtual void Destroy() => Object.Destroy(SelectedPrefab);
 
-  public virtual ZDOData GetData(int index = 0) => new();
+  public virtual DataEntry? GetData(int index = 0) => null;
   public virtual int GetPrefab(int index = 0) => 0;
   public virtual bool IsScalingSupported() => false;
   public virtual GameObject GetPrefab(GameObject obj) => obj;
@@ -45,10 +48,14 @@ public class BaseSelection
     if (obj.TryGetComponent<DungeonGenerator>(out var dg))
     {
       var zdo = view.GetZDO();
-      if (zdo.GetByteArray(ZDOVars.s_roomData) == null)
+      var data = zdo.GetByteArray(ZDOVars.s_roomData);
+      var rooms = zdo.GetInt(ZDOVars.s_rooms);
+      if (rooms == 0 && data == null)
         dg.Generate(ZoneSystem.SpawnMode.Full);
     }
   }
+
+
   public virtual void Activate()
   {
     ActiveSelection?.Deactivate();

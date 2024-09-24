@@ -9,7 +9,7 @@ public class HammerMoveCommand
     AutoComplete.Register($"hammer_move_{direction}", (int index) =>
     {
       if (index == 0) return ParameterInfo.Create($"Meters towards the {direction} direction (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
-      return null;
+      return ParameterInfo.None;
     });
     Helper.Command($"hammer_move_{direction}", $"[value=auto] - Moves the placement towards the {direction} direction.", (args) =>
     {
@@ -53,7 +53,7 @@ public class HammerMoveCommand
     AutoComplete.Register("hammer_move", (int index, int subIndex) =>
     {
       if (index == 0) return ParameterInfo.FRU("Meters to move the placement", subIndex);
-      return null;
+      return ParameterInfo.None;
     });
     Helper.Command("hammer_move", "[forward,up,right] - Moves the placement.", (args) =>
     {

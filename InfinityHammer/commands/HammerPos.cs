@@ -5,7 +5,7 @@ public class HammerPosCommand
 {
   public HammerPosCommand()
   {
-    AutoComplete.Register("hammer_pos", (int index, int subIndex) => index == 0 ? ParameterInfo.XZY("Coordinates", subIndex) : index == 1 ? ParameterInfo.YXZ("Rotation", subIndex) : null);
+    AutoComplete.Register("hammer_pos", (int index, int subIndex) => index == 0 ? ParameterInfo.XZY("Coordinates", subIndex) : index == 1 ? ParameterInfo.YXZ("Rotation", subIndex) : ParameterInfo.None);
 
     Helper.Command("hammer_pos", "[posX,posZ,posY=0,0,0] [rotY,rotX,rotZ=0,0,0] - Sets the hammer position.", (args) =>
     {

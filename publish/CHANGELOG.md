@@ -1,3 +1,12 @@
+- v1.59
+  - Adds a new command `hammer_room` to add rooms to dungeons.
+  - Adds a new field `hammer data=` to load simple data entries.
+  - Adds snap points to dungeon rooms.
+  - Changes the "Remove anything" feature to remove single rooms from dungeons.
+  - Fixes picking up existing dungeons not copying the rooms.
+  - Fixes some undo issues by reworking it (now uses World Edit Commands mod).
+  - Fixes some data saving issues by reworking it (now uses World Edit Commands mod).
+
 - v1.58
   - Changes the setting "No creator" to also remove data from X Ray Vision mod.
 

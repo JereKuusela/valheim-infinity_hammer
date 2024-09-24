@@ -9,7 +9,7 @@ public class HammerGridCommand
     {
       if (index == 0) return ParameterInfo.Create("Grid precision in meters.");
       if (index == 1) return ParameterInfo.XZY("Grid center point. If not given, uses the current placement position.", subIndex);
-      return null;
+      return ParameterInfo.None;
     });
     Helper.Command("hammer_grid", " [precision] [center=current] - Restricts possible placement coordinates. Using the same command removes the restriction.", (args) =>
     {

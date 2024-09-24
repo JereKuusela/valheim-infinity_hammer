@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Data;
 using ServerDevcommands;
 using Service;
 using UnityEngine;
@@ -13,20 +14,19 @@ namespace InfinityHammer;
 public class HammerSaveCommand
 {
 
-  private static string GetExtraInfo(GameObject obj, ZDOData data)
+  private static string GetExtraInfo(GameObject obj, DataEntry data)
   {
+    Dictionary<string, string> pars = [];
     var info = "";
-    if (obj.GetComponent<Sign>())
-      info = data.GetString(ZDOVars.s_text, "");
-    if (obj.GetComponent<TeleportWorld>())
-      info = data.GetString(ZDOVars.s_tag, "");
-    if (obj.GetComponent<Tameable>())
-      info = data.GetString(ZDOVars.s_tamedName, "");
-
-    if (obj.GetComponent<ItemStand>() && data.GetString(ZDOVars.s_item) != "")
+    if (data.TryGetString(pars, ZDOVars.s_text, out var text))
+      info = text;
+    if (data.TryGetString(pars, ZDOVars.s_tamedName, out var name))
+      info = name;
+    if (data.TryGetString(pars, ZDOVars.s_tag, out var tag))
+      info = tag;
+    if (data.TryGetString(pars, ZDOVars.s_item, out var item))
     {
-      var variant = data.GetInt(ZDOVars.s_variant);
-      var item = data.GetString(ZDOVars.s_item);
+      var variant = data.TryGetInt(pars, ZDOVars.s_variant, out var v) ? v : 0;
       if (variant != 0)
         info = $"{item}:{variant}";
       else
@@ -56,9 +56,10 @@ public class HammerSaveCommand
     }
     if (Selection.Get() is not ObjectSelection selection) return bp;
     var objects = Snapping.GetChildren(obj);
+    Dictionary<string, string> pars = [];
     if (selection.Objects.Count() == 1)
     {
-      AddSingleObject(bp, obj, saveData);
+      AddSingleObject(bp, pars, obj, saveData);
       // Snap points are sort of useful for single objects.
       // Since single objects should just have custom data but otherwise the original behavior.
       var snaps = Snapping.GetSnapPoints(obj);
@@ -73,7 +74,7 @@ public class HammerSaveCommand
         if (snapPiece != "" && Utils.GetPrefabName(tr) == snapPiece)
           bp.SnapPoints.Add(tr.transform.localPosition);
         else
-          AddObject(bp, tr, saveData, i);
+          AddObject(bp, pars, tr, saveData, i);
         i += 1;
       }
       if (snapPiece == "")
@@ -88,21 +89,21 @@ public class HammerSaveCommand
     return bp;
   }
 
-  private static void AddSingleObject(Blueprint bp, GameObject obj, bool saveData)
+  private static void AddSingleObject(Blueprint bp, Dictionary<string, string> pars, GameObject obj, bool saveData)
   {
     var name = Utils.GetPrefabName(obj);
     var save = saveData || Configuration.SavedObjectData.Contains(name.ToLowerInvariant());
     var data = save ? Selection.Get().GetData() : null;
     var info = data == null ? "" : GetExtraInfo(obj, data);
-    bp.Objects.Add(new BlueprintObject(name, Vector3.zero, Quaternion.identity, obj.transform.localScale, info, data?.Save(), 1f));
+    bp.Objects.Add(new BlueprintObject(name, Vector3.zero, Quaternion.identity, obj.transform.localScale, info, data?.GetBase64(pars) ?? "", 1f));
   }
-  private static void AddObject(Blueprint bp, GameObject obj, bool saveData, int index = 0)
+  private static void AddObject(Blueprint bp, Dictionary<string, string> pars, GameObject obj, bool saveData, int index = 0)
   {
     var name = Utils.GetPrefabName(obj);
     var save = saveData || Configuration.SavedObjectData.Contains(name.ToLowerInvariant());
     var data = save ? Selection.Get().GetData(index) : null;
     var info = data == null ? "" : GetExtraInfo(obj, data);
-    bp.Objects.Add(new BlueprintObject(name, obj.transform.localPosition, obj.transform.localRotation, obj.transform.localScale, info, data?.Save(), 1f));
+    bp.Objects.Add(new BlueprintObject(name, obj.transform.localPosition, obj.transform.localRotation, obj.transform.localScale, info, data?.GetBase64(pars) ?? "", 1f));
   }
   private static string[] GetPlanBuildFile(Blueprint bp)
   {
@@ -147,12 +148,7 @@ public class HammerSaveCommand
     var scaleY = HammerHelper.Format(obj.Scale.y);
     var scaleZ = HammerHelper.Format(obj.Scale.z);
     var info = obj.ExtraInfo;
-    var data = "";
-    if (obj.Data != null)
-    {
-      data = obj.Data.GetBase64();
-      if (data == "AAAAAA==") data = "";
-    }
+    var data = obj.Data;
     return $"{name};;{posX};{posY};{posZ};{rotX};{rotY};{rotZ};{rotW};{info};{scaleX};{scaleY};{scaleZ};{data}";
   }
 

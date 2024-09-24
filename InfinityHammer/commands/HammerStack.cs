@@ -4,12 +4,13 @@ using HarmonyLib;
 using ServerDevcommands;
 using Service;
 using UnityEngine;
+using WorldEditCommands;
 namespace InfinityHammer;
 public class HammerStackCommand
 {
   private static void Execute(GameObject obj, Vector3 delta, Vector3Int min, Vector3Int max)
   {
-    Undo.StartCreating();
+    UndoHelper.BeginAction();
     var player = Helper.GetPlayer();
     var pos = obj.transform.position;
     var rot = obj.transform.rotation;
@@ -35,16 +36,16 @@ public class HammerStackCommand
     }
     OverridePlacement.OverridePosition = null;
     OverridePlacement.OverrideRotation = null;
-    Undo.FinishCreating();
+    UndoHelper.EndAction();
     // For existing objects, nothing was initially selected so makes sense to clear the selection.
     if (existingObject)
       Hammer.Clear();
   }
-  private static List<string>? AC(int index)
+  private static List<string> AC(int index)
   {
     if (index == 0) return ParameterInfo.Create("Amount of objects to be placed (number or min-max).");
     if (index == 1) return ParameterInfo.Create("Step size (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size).");
-    return null;
+    return ParameterInfo.None;
   }
   private static string Description(string direction) => $"[amount] [step=auto] - Places multiple objects towards the {direction} direction.";
   private static void Command(string name, string description, Func<Range<int>, Range<Vector3Int>> action)
@@ -76,7 +77,7 @@ public class HammerStackCommand
     {
       if (index == 0) return ParameterInfo.FRU("Amounts", subIndex);
       if (index == 1) return ParameterInfo.FRU("Step size (<color=yellow>number</color> or <color=yellow>number*auto</color> for automatic step size)", subIndex);
-      return null;
+      return ParameterInfo.None;
     });
     Helper.Command("hammer_stack", "[forward,up,right] [step=auto,auto,auto] - Places multiple objects next to each other.", (args) =>
     {
@@ -116,7 +117,7 @@ public class HammerStackCommand
       return player.m_placementGhost;
     var hovered = Selector.GetHovered(player, Configuration.Range, [], Configuration.IgnoredIds);
     if (hovered == null) return player.m_placementGhost;
-    ObjectSelection sel = new(hovered.Obj, false, null);
+    ObjectSelection sel = new(hovered.Obj, false, null, null);
     Selection.CreateGhost(sel);
     return hovered.Obj.gameObject;
   }

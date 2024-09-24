@@ -29,7 +29,7 @@ public class HammerRotateCommand
     AutoComplete.Register("hammer_rotate_x", (int index) =>
     {
       if (index == 0) return ParameterInfo.Create("Degrees to rotate. <color=yellow>step*random</color> randomly rotates within a given precision or <color=yellow>random</color> for 90/180 degrees depending on the object shape.");
-      return null;
+      return ParameterInfo.None;
     });
     new Terminal.ConsoleCommand("hammer_rotate_x", "[degrees/random/number*random] - Rotates around the X axis.", (args) =>
     {
@@ -40,7 +40,7 @@ public class HammerRotateCommand
     AutoComplete.Register("hammer_rotate_y", (int index) =>
     {
       if (index == 0) return ParameterInfo.Create("Degrees to rotate. <color=yellow>step*random</color> randomly rotates within a given precision or <color=yellow>random</color> for 90/180 degrees depending on the object shape.");
-      return null;
+      return ParameterInfo.None;
     });
     new Terminal.ConsoleCommand("hammer_rotate_y", "[degrees/random/number*random] - Rotates around the Y axis.", (args) =>
     {
@@ -51,7 +51,7 @@ public class HammerRotateCommand
     AutoComplete.Register("hammer_rotate_z", (int index) =>
     {
       if (index == 0) return ParameterInfo.Create("Degrees to rotate. <color=yellow>step*random</color> randomly rotates within a given precision or <color=yellow>random</color> for 90/180 degrees depending on the object shape.");
-      return null;
+      return ParameterInfo.None;
     });
     new Terminal.ConsoleCommand("hammer_rotate_z", "[degrees/random/number*random] - Rotates around the Z axis.", (args) =>
     {
@@ -62,7 +62,7 @@ public class HammerRotateCommand
     AutoComplete.Register("hammer_rotate", (int index) =>
    {
      if (index == 0) return ParameterInfo.Create("Direction (1 or -1) to rotate.)");
-     return null;
+     return ParameterInfo.None;
    });
     new Terminal.ConsoleCommand("hammer_rotate", "[direction] - Simulates normal rotating.", (args) =>
     {

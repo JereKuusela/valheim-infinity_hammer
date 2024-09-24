@@ -22,7 +22,7 @@ public class HammerZoomCommand
     AutoComplete.Register(name, (int index) =>
     {
       if (index == 0) return ParameterInfo.Create("Flat amount or percentage to scale.");
-      return null;
+      return ParameterInfo.None;
     });
     Helper.Command(name, $"[amount or percentage] - Zooms the {axis} axis (if the object supports it).", (args) =>
     {
@@ -47,7 +47,7 @@ public class HammerZoomCommand
     AutoComplete.Register(name, (int index, int subIndex) =>
     {
       if (index == 0) return ParameterInfo.Create("Flat amount or percentage to scale.");
-      return null;
+      return ParameterInfo.None;
     });
     Helper.Command(name, "[amount/percentage or x,z,y] - Zooms the selection (if the object supports it).", (args) =>
     {

@@ -9,12 +9,13 @@ namespace InfinityHammer;
 [BepInPlugin(GUID, NAME, VERSION)]
 [BepInDependency("com.rolopogo.gizmo.comfy", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("bruce.valheim.comfymods.gizmo", BepInDependency.DependencyFlags.SoftDependency)]
-[BepInDependency("server_devcommands", "1.76")]
+[BepInDependency("server_devcommands", "1.83")]
+[BepInDependency("world_edit_commands", "1.63")]
 public class InfinityHammer : BaseUnityPlugin
 {
   public const string GUID = "infinity_hammer";
   public const string NAME = "Infinity Hammer";
-  public const string VERSION = "1.58";
+  public const string VERSION = "1.59";
   public static bool StructureTweaks = false;
 #nullable disable
   public static ConfigWrapper Wrapper;
@@ -125,6 +126,7 @@ public class InfinityHammer : BaseUnityPlugin
     new ToolImportCommand();
     new ToolExportCommand();
     new ToolCmdCommand();
+    new HammerRoomCommand();
   }
   public void LateUpdate()
   {

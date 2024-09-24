@@ -14,7 +14,7 @@ public class HammerScaleCommand
     AutoComplete.Register(name, (int index) =>
     {
       if (index == 0) return ParameterInfo.Create("Amount.");
-      return null;
+      return ParameterInfo.None;
     });
     Helper.Command(name, $"[amount] - Sets the scale of {axis} axis (if the object supports it).", (args) =>
     {
@@ -39,7 +39,7 @@ public class HammerScaleCommand
     AutoComplete.Register(name, (int index, int subIndex) =>
     {
       if (index == 0) return ParameterInfo.XZY("Amount of scale.", subIndex);
-      return null;
+      return ParameterInfo.None;
     });
     Helper.Command(name, "[amount or x,z,y] - Sets the scale (if the object supports it).", (args) =>
     {

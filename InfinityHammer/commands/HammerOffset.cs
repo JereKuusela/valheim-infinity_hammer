@@ -9,7 +9,7 @@ public class HammerOffsetCommand
     AutoComplete.Register($"hammer_offset_{name}", (int index) =>
     {
       if (index == 0) return ParameterInfo.Create($"Meters in the {direction} direction.");
-      return null;
+      return ParameterInfo.None;
     });
     Helper.Command($"hammer_offset_{name}", $"[value=0] - Sets the {direction} offset.", (args) =>
     {
@@ -25,7 +25,7 @@ public class HammerOffsetCommand
     AutoComplete.Register("hammer_offset", (int index, int subIndex) =>
     {
       if (index == 0) return ParameterInfo.FRU("Sets the offset", subIndex);
-      return null;
+      return ParameterInfo.None;
     });
     Helper.Command("hammer_offset", "[forward,up,right=0,0,0] - Sets the offset.", (args) =>
     {

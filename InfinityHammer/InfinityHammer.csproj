@@ -63,5 +63,8 @@
     <Reference Include="ServerDevcommands.dll">
       <HintPath>..\..\Libs\ServerDevcommands.dll</HintPath>
     </Reference>
+    <Reference Include="WorldEditCommands.dll">
+      <HintPath>..\..\Libs\WorldEditCommands.dll</HintPath>
+    </Reference>
   </ItemGroup>
 </Project>
