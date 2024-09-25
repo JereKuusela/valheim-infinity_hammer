@@ -299,3 +299,9 @@ public class ReplaceMessage
     }
   }
 }
+[HarmonyPatch(typeof(MaterialMan), nameof(MaterialMan.UnregisterRenderers))]
+public class UnregisterRenderers
+{
+  // ItemStyles use this and may cause issues for armor and item stands.
+  static bool Prefix(MaterialMan __instance, GameObject gameObject) => __instance.m_blocks.ContainsKey(gameObject.GetInstanceID());
+}

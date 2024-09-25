@@ -6,6 +6,7 @@
   - Fixes picking up existing dungeons not copying the rooms.
   - Fixes some undo issues by reworking it (now uses World Edit Commands mod).
   - Fixes some data saving issues by reworking it (now uses World Edit Commands mod).
+  - Fixes error with MaterialMan.
 
 - v1.58
   - Changes the setting "No creator" to also remove data from X Ray Vision mod.
