@@ -33,7 +33,7 @@ public partial class ObjectSelection : BaseSelection
 
     var zdo = view.GetZDO();
     var prefabHash = zdo == null ? view.GetPrefabName().GetStableHashCode() : zdo.GetPrefab();
-    DataEntry? data = zdo == null ? extraData : Data.DataHelper.Merge(new(zdo), extraData);
+    DataEntry? data = zdo == null ? extraData : DataHelper.Merge(new(zdo), extraData);
 
     SingleUse = singleUse;
     SelectedPrefab = HammerHelper.SafeInstantiate(view, Wrapper);
@@ -61,7 +61,7 @@ public partial class ObjectSelection : BaseSelection
     SelectedPrefab.name = view.name;
 
     SingleUse = singleUse;
-    Objects.Add(new(prefabHash, view.m_syncInitialScale, new()));
+    Objects.Add(new(prefabHash, view.m_syncInitialScale, null));
     Scaling.Set(SelectedPrefab);
   }
   public ObjectSelection(IEnumerable<ZNetView> views, bool singleUse, Vector3? scale, DataEntry? extraData)

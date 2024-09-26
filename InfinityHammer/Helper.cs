@@ -181,9 +181,9 @@ public static class HammerHelper
     DisableComponents<Growup>(obj);
     DisableComponents<RandomFlyingBird>(obj);
     DisableComponents<Windmill>(obj);
-    DisableComponents<MineRock5>(obj);
     DisableComponents<MineRock>(obj);
 
+    DestroyComponents<MineRock5>(obj);
     DestroyComponents<Fish>(obj);
     DestroyComponents<CharacterAnimEvent>(obj);
     DestroyComponents<TreeLog>(obj);

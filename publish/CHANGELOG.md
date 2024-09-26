@@ -7,6 +7,7 @@
   - Fixes some undo issues by reworking it (now uses World Edit Commands mod).
   - Fixes some data saving issues by reworking it (now uses World Edit Commands mod).
   - Fixes error with MaterialMan.
+  - Fixes error when copying MineRock5 objects.
 
 - v1.58
   - Changes the setting "No creator" to also remove data from X Ray Vision mod.
