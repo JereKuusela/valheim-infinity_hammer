@@ -8,15 +8,24 @@ namespace InfinityHammer;
 [HarmonyPatch(typeof(Player), nameof(Player.Repair))]
 public class Repair
 {
-  public static bool IsRepairing = false;
-  public static bool Repaired = false;
-
-  private static bool RepairCharacter(ZNetView obj)
+  static void Prefix(Player __instance, ItemDrop.ItemData toolItem)
   {
-    var character = obj.GetComponent<Character>();
-    if (!character) return false;
-    return RepairShared(obj, character.GetMaxHealth());
+    HideEffects.Active = true;
+    Hammer.RemoveToolCosts(toolItem);
+    UndoHelper.BeginAction();
+    if (!Configuration.RepairAnything) return;
+    if (!__instance.InPlaceMode()) return;
+    // Normal pieces handled by the game.
+    if (__instance.GetHoveringPiece()) return;
+    RepairAnything(__instance);
   }
+  static void Finalizer(ItemDrop.ItemData toolItem)
+  {
+    UndoHelper.EndAction();
+    HideEffects.Active = false;
+    Hammer.RestoreToolCosts(toolItem);
+  }
+
   private static bool RepairPlayer(ZNetView obj)
   {
     var player = obj.GetComponent<Player>();
@@ -30,36 +39,16 @@ public class Repair
   {
     var wearNTear = obj.GetComponent<WearNTear>();
     if (!wearNTear || Time.time - wearNTear.m_lastRepair < 1f) return false;
-    var result = RepairShared(obj, wearNTear.m_health);
+    var result = RepairShared(obj);
     if (result)
     {
       wearNTear.m_lastRepair = Time.time;
-      obj.InvokeRPC(ZNetView.Everybody, "WNTHealthChanged", [obj.GetZDO().GetFloat("health", wearNTear.m_health)]);
+      obj.InvokeRPC(ZNetView.Everybody, "WNTHealthChanged", [obj.GetZDO().GetFloat(ZDOVars.s_health, wearNTear.m_health)]);
     }
     return result;
   }
-  private static bool RepairDestructible(ZNetView obj)
+  private static bool RepairMineRock(ZNetView obj, MineRock5 mineRock, int index)
   {
-    var destructible = obj.GetComponent<Destructible>();
-    if (!destructible) return false;
-    return RepairShared(obj, destructible.m_health);
-  }
-  private static bool RepairTreeBase(ZNetView obj)
-  {
-    var treeBase = obj.GetComponent<TreeBase>();
-    if (!treeBase) return false;
-    return RepairShared(obj, treeBase.m_health);
-  }
-  private static bool RepairTreeLog(ZNetView obj)
-  {
-    var treeLog = obj.GetComponent<TreeLog>();
-    if (!treeLog) return false;
-    return RepairShared(obj, treeLog.m_health);
-  }
-  private static bool RepairMineRock(ZNetView obj, int index)
-  {
-    var mineRock = obj.GetComponent<MineRock5>();
-    if (!mineRock) return false;
     var area = mineRock.GetHitArea(index);
     obj.ClaimOwnership();
     var zdo = obj.GetZDO();
@@ -84,18 +73,15 @@ public class Repair
     return false;
   }
 
-  private static bool RepairShared(ZNetView obj, float maxHealth)
+  private static bool RepairShared(ZNetView obj)
   {
     obj.ClaimOwnership();
-    var changed = CustomHealth.SetHealth(obj);
-    if (!changed) return false;
-    var heal = float.PositiveInfinity;
-    if (Configuration.Invulnerability == InvulnerabilityMode.Off)
-    {
-      var max = Configuration.OverwriteHealth;
-      heal = max - obj.GetZDO().GetFloat(ZDOVars.s_health, maxHealth);
-    }
-    DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, obj.transform.position, Mathf.Abs(heal));
+    var change = CustomHealth.SetHealth(obj);
+    if (change == 0f) return false;
+    if (change == float.PositiveInfinity || change == float.NegativeInfinity)
+      DamageText.instance.ShowText(DamageText.TextType.Heal, obj.transform.position, change);
+    else
+      DamageText.instance.ShowText(change > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, obj.transform.position, Mathf.Abs(change));
     return true;
   }
   private static bool RepairInArea(ZDO zdo, float radius)
@@ -116,24 +102,11 @@ public class Repair
   }
   private static bool RepairObject(ZNetView obj, int index)
   {
-    var repaired = false;
-    if (RepairPlayer(obj))
-      repaired = true;
     if (obj.GetComponent<Player>())
-      return repaired;
-    if (RepairStructure(obj))
-      repaired = true;
-    if (RepairCharacter(obj))
-      repaired = true;
-    if (RepairDestructible(obj))
-      repaired = true;
-    if (RepairTreeBase(obj))
-      repaired = true;
-    if (RepairTreeLog(obj))
-      repaired = true;
-    if (RepairMineRock(obj, index))
-      repaired = true;
-    return repaired;
+      return RepairPlayer(obj);
+    if (Configuration.Invulnerability == InvulnerabilityMode.Off && obj.TryGetComponent(out MineRock5 mineRock))
+      return RepairMineRock(obj, mineRock, index);
+    return RepairShared(obj);
   }
 
   private static bool RepairAnything(Player player)
@@ -156,56 +129,28 @@ public class Repair
       player.FaceLookDirection();
       player.m_zanim.SetTrigger(tool.m_shared.m_attack.m_attackAnimation);
       player.UseStamina(tool.m_shared.m_attack.m_attackStamina);
+      player.UseEitr(tool.m_shared.m_attack.m_attackEitr);
       if (tool.m_shared.m_useDurability)
         tool.m_durability -= tool.m_shared.m_useDurabilityDrain;
     }
     return true;
-  }
-  public static void Prefix()
-  {
-    UndoHelper.BeginAction();
-    HideEffects.Active = true;
-    IsRepairing = true;
-    Repaired = false;
-  }
-  public static void Postfix(Player __instance)
-  {
-    if (!__instance.InPlaceMode()) return;
-    if (!Repaired && Configuration.RepairAnything)
-      Repaired = RepairAnything(__instance);
-    if (Repaired) Hammer.PostProcessTool(__instance);
-  }
-  public static void Finalizer()
-  {
-    UndoHelper.EndAction();
-    IsRepairing = false;
-    HideEffects.Active = false;
   }
 }
 
 [HarmonyPatch(typeof(Player), nameof(Player.UpdateWearNTearHover))]
 public class UnlockRepairDistance
 {
-  public static void Prefix(Player __instance, ref float __state)
+  static void Prefix(Player __instance, ref float __state)
   {
     __state = __instance.m_maxPlaceDistance;
     if (Configuration.Range > 0f)
       __instance.m_maxPlaceDistance = Configuration.Range;
   }
-  public static void Postfix(Player __instance, float __state)
+  static void Postfix(Player __instance, float __state)
   {
     __instance.m_maxPlaceDistance = __state;
   }
 
-}
-
-[HarmonyPatch(typeof(Character), nameof(Character.UseStamina))]
-public class CheckRepair
-{
-  static void Finalizer()
-  {
-    if (Repair.IsRepairing) Repair.Repaired = true;
-  }
 }
 
 [HarmonyPatch(typeof(WearNTear), nameof(WearNTear.Repair))]
@@ -213,8 +158,11 @@ public class AdvancedRepair
 {
   public static bool Prefix(WearNTear __instance, ref bool __result)
   {
+    if (!Configuration.Enabled || !__instance.m_nview) return true;
+    var zdo = __instance.m_nview.GetZDO();
     var customHealth = Configuration.OverwriteHealth > 0f || Configuration.Invulnerability != InvulnerabilityMode.Off;
-    if (!Repair.IsRepairing || !Configuration.Enabled || !__instance.m_nview || !customHealth) return true;
+    var hasCustomHealth = zdo.GetFloat(CustomHealth.HashMaxHealth) != 0f;
+    if (!customHealth && !hasCustomHealth) return true;
     __result = Repair.RepairStructure(__instance.m_nview);
     return false;
   }

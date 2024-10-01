@@ -135,11 +135,3 @@ public class PreventCreaturerops
   public static bool Active = false;
   static bool Prefix() => !Active;
 }
-[HarmonyPatch(typeof(Player), nameof(Player.RemovePiece))]
-public class PostProcessToolOnRemove
-{
-  public static void Postfix(Player __instance, ref bool __result)
-  {
-    if (__result) Hammer.PostProcessTool(__instance);
-  }
-}

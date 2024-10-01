@@ -195,6 +195,16 @@ To place objects in a rectangle or a box, use the following command:
 
 - `hammer_stack [forward,up,right or z1-z2,y1-y2,x1-x2] [step=auto,auto,auto]`
 
+## Dungeons
+
+Existing dungeons can be copied or picked up.
+
+When remove anything is enabled, individual rooms can be removed from dungeons. When the last room is removed, the dungeon generator object is also removed.
+
+The command `hammer_room [room id] [empty_room]` allows selecting a single room. These can be added to existing dungeons.
+
+The parameter "empty_room" determines if the room is placed empty or with the default contents. If the parameter is missing, the default value comes from "Place empty rooms" setting.
+
 ## Utility
 
 Some special commands exist for advaced cases. Usually you want to bind these.
@@ -284,13 +294,11 @@ Locations (Points of Interest) can also be copied. However only static parts are
 
 ### Repairing
 
-By default, only change is that the UI shows how much damage was repaired.
+When "Repair anything" is enabled, most destructible objects can be repaired or healed. This includes creatures and players.
 
-If "Repair anything" is enabled, most destructible objects can be repaired or healed. This includes creatures and players.
+For minerocks, if the targeted part is already at full health, a random part is restored instead. This is not very practical but can be used to restore accidental changes to minerocks.
 
-For minerocks, if the targeted part is already at full health, a random part is restored instead. This is not very practical but can be used to restore  accidental changes to minerocks.
-
-If "Overwrite health" is enabled, the object is repaired or damaged to the specified health value.
+When "Overwrite health" is set, the object is repaired or damaged to the specified health value.
 
 For creatures, the maximum health value is also set. So they will keep their max health even when disabling "Overwrite health". Other objects will revert to the original max health when repaired.
 

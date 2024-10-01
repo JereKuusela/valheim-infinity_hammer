@@ -29,7 +29,7 @@ public class UnlockPlacement
     var piece = __instance.m_placementGhost.GetComponent<Piece>();
     if (Configuration.AllowInDungeons) piece.m_allowedInDungeons = true;
   }
-  public static void Postfix(Player __instance)
+  public static void Finalizer(Player __instance)
   {
     if (!__instance.m_placementGhost) return;
     if (!__instance.m_placementGhost.activeSelf) return;
@@ -46,7 +46,7 @@ public class UnlockPlacement
 [HarmonyPatch(typeof(Location), nameof(Location.IsInsideNoBuildLocation)), HarmonyPriority(Priority.Last)]
 public class IsInsideNoBuildLocation
 {
-  public static bool Postfix(bool result)
+  static bool Postfix(bool result)
   {
     if (Configuration.IgnoreNoBuild) return false;
     return result;
@@ -55,18 +55,18 @@ public class IsInsideNoBuildLocation
 [HarmonyPatch(typeof(PrivateArea), nameof(PrivateArea.CheckAccess)), HarmonyPriority(Priority.Last)]
 public class CheckAccess
 {
-  public static bool Postfix(bool result)
+  static bool Prefix(ref bool __result)
   {
-    if (Configuration.IgnoreWards) return true;
-    return result;
+    if (Configuration.IgnoreWards) __result = true;
+    return !Configuration.IgnoreWards;
   }
 }
 [HarmonyPatch(typeof(Player), nameof(Player.CheckCanRemovePiece)), HarmonyPriority(Priority.Last)]
 public class CheckCanRemovePiece
 {
-  public static bool Postfix(bool result)
+  static bool Prefix(ref bool __result)
   {
-    if (Configuration.NoCost) return true;
-    return result;
+    if (Configuration.NoCost) __result = true;
+    return !Configuration.NoCost;
   }
 }

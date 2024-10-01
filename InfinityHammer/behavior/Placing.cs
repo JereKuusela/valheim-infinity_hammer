@@ -53,6 +53,11 @@ public class HoldUse
   // Not in use, can be removed later.
   public static bool Selecting = false;
 
+  static void Prefix(Player __instance, ref ItemDrop.ItemData __state)
+  {
+    __state = __instance.GetRightItem();
+    Hammer.RemoveToolCosts(__state);
+  }
   static void Postfix(Player __instance)
   {
     if (!Selection.Get().Continuous) return;
@@ -68,16 +73,12 @@ public class HoldUse
     __instance.m_lastToolUseTime = 0f;
 
   }
-}
-
-[HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
-public class PostProcessToolOnPlace
-{
-  static void Postfix(Player __instance, ref bool __result)
+  static void Finalizer(ItemDrop.ItemData __state)
   {
-    if (__result) Hammer.PostProcessTool(__instance);
+    Hammer.RestoreToolCosts(__state);
   }
 }
+
 
 [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
 public class UnlockBuildDistance

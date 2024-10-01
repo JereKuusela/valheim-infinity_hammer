@@ -3,6 +3,7 @@
   - Adds a new field `hammer data=` to load simple data entries.
   - Adds snap points to dungeon rooms.
   - Changes the "Remove anything" feature to remove single rooms from dungeons.
+  - Fixes repairing not being able to remove invulnerability.
   - Fixes picking up existing dungeons not copying the rooms.
   - Fixes some undo issues by reworking it (now uses World Edit Commands mod).
   - Fixes some data saving issues by reworking it (now uses World Edit Commands mod).

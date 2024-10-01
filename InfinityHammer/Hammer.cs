@@ -44,15 +44,26 @@ public static class Hammer
       build.m_selectedPiece[(int)build.m_selectedCategory] = new Vector2Int(0, 0);
   }
 
-  ///<summary>Restores durability and stamina to counter the usage.</summary>
-  public static void PostProcessTool(Player obj)
+  private static bool OriginalUseDurability = false;
+  private static float OriginalUseStamina = 0f;
+  private static float OriginalUseEitr = 0f;
+
+  public static void RemoveToolCosts(ItemDrop.ItemData item)
   {
-    var item = obj.GetRightItem();
-    if (item == null) return;
-    if (Configuration.NoCost)
-      obj.UseStamina(-item.m_shared.m_attack.m_attackStamina);
-    if (Configuration.NoCost && item.m_shared.m_useDurability)
-      item.m_durability += item.m_shared.m_useDurabilityDrain;
+    if (item == null || !Configuration.NoCost) return;
+    OriginalUseDurability = item.m_shared.m_useDurability;
+    OriginalUseStamina = item.m_shared.m_attack.m_attackStamina;
+    OriginalUseEitr = item.m_shared.m_attack.m_attackEitr;
+    item.m_shared.m_useDurability = false;
+    item.m_shared.m_attack.m_attackStamina = 0f;
+    item.m_shared.m_attack.m_attackEitr = 0f;
+  }
+  public static void RestoreToolCosts(ItemDrop.ItemData item)
+  {
+    if (item == null || !Configuration.NoCost) return;
+    item.m_shared.m_useDurability = OriginalUseDurability;
+    item.m_shared.m_attack.m_attackStamina = OriginalUseStamina;
+    item.m_shared.m_attack.m_attackEitr = OriginalUseEitr;
   }
   public static bool IsHammer(string name) => ToolManager.Tools.ContainsKey(name.ToLower());
   public static bool IsHammer(GameObject obj) => obj && IsHammer(Utils.GetPrefabName(obj));
