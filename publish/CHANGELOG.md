@@ -3,15 +3,13 @@
   - Adds a new field `hammer data=` to load simple data entries.
   - Adds snap points to dungeon rooms.
   - Changes the "Remove anything" feature to remove single rooms from dungeons.
+  - Changes the setting "No creator" to also remove data from X Ray Vision mod.
   - Fixes repairing not being able to remove invulnerability.
   - Fixes picking up existing dungeons not copying the rooms.
   - Fixes some undo issues by reworking it (now uses World Edit Commands mod).
   - Fixes some data saving issues by reworking it (now uses World Edit Commands mod).
   - Fixes error with MaterialMan.
   - Fixes error when copying MineRock5 objects.
-
-- v1.58
-  - Changes the setting "No creator" to also remove data from X Ray Vision mod.
 
 - v1.57
   - Adds a new setting "Snap points" for automatic snap point generation.

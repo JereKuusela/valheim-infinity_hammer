@@ -200,6 +200,7 @@ public class ConfigWrapper
   private static string Flag(bool value) => value ? "Removed" : "Added";
   private static readonly HashSet<string> Truthies = [
     "1",
+    "t",
     "true",
     "yes",
     "on"
@@ -207,6 +208,7 @@ public class ConfigWrapper
   private static bool IsTruthy(string value) => Truthies.Contains(value);
   private static readonly HashSet<string> Falsies = [
     "0",
+    "f",
     "false",
     "no",
     "off"

@@ -216,7 +216,7 @@ public class HammerBlueprintPars
       if (split[0] == "snap" || split[0] == "s")
         SnapPiece = split[1];
       if (split[0] == "data" || split[0] == "d")
-        LoadData = split[1] == "true";
+        LoadData = Parse.BoolNull(split[1]) ?? true;
       if (split[0] == "scale" || split[0] == "sc")
         Scale = Parse.Scale(Parse.Split(split[1]));
     }

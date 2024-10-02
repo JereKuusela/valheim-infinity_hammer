@@ -5,7 +5,7 @@
   "description": "Bend the rules of building! Copy any object, make structures indestructible, remove all restrictions, destroy anything and more...",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2202",
-    "JereKuusela-Server_devcommands-1.81.0",
-    "JereKuusela-World_Edit_Commands-1.61.0"
+    "JereKuusela-Server_devcommands-1.83.0",
+    "JereKuusela-World_Edit_Commands-1.63.0"
   ]
 }

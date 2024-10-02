@@ -213,9 +213,9 @@ public class HammerSavePars
       if (split[0] == "snap" || split[0] == "s")
         SnapPiece = split[1];
       if (split[0] == "data" || split[0] == "d")
-        SaveData = split[1] == "true";
+        SaveData = Parse.BoolNull(split[1]) ?? Configuration.SaveBlueprintData;
       if (split[0] == "profile" || split[0] == "p")
-        Profile = split[1] == "true";
+        Profile = Parse.BoolNull(split[1]) ?? Configuration.SaveBlueprintsToProfile;
     }
   }
 }

@@ -25,7 +25,7 @@ public class HammerRoomCommand
       HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the room id.");
       Hammer.Equip();
-      var placeEmptyRoom = args.Length > 2 ? args[2] == "true" : Configuration.PlaceEmptyRooms;
+      var placeEmptyRoom = args.Length > 2 ? Parse.Boolean(args[2]) ?? Configuration.PlaceEmptyRooms : Configuration.PlaceEmptyRooms;
       try
       {
         var ghost = Selection.CreateGhost(new RoomSelection(args[1].GetStableHashCode(), placeEmptyRoom));
