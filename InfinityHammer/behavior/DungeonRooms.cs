@@ -168,6 +168,13 @@ public static class DungeonRooms
   [HarmonyPatch(typeof(DungeonGenerator), nameof(DungeonGenerator.OnDestroy)), HarmonyPostfix]
   static void DungeonGeneratorDestroy(DungeonGenerator __instance) => Dgs.Remove(__instance);
 
+  [HarmonyPatch(typeof(Piece), nameof(Piece.GetSnapPoints), typeof(Vector3), typeof(float), typeof(List<Transform>), typeof(List<Piece>)), HarmonyPrefix]
+  static void GetSnapPointsRadius(ref float radius)
+  {
+    var multiplier = Selection.Get().SnapMultiplier;
+    radius *= multiplier;
+  }
+
   [HarmonyPatch(typeof(Piece), nameof(Piece.GetSnapPoints), typeof(Vector3), typeof(float), typeof(List<Transform>), typeof(List<Piece>)), HarmonyPostfix]
   static void GetSnapPoints(Vector3 point, float radius, List<Transform> points)
   {

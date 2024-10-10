@@ -19,6 +19,7 @@ public class BaseSelection
   public virtual bool Continuous => false;
   public virtual bool PlayerHeight => false;
   public virtual float DungeonRoomSnapMultiplier => 1f;
+  public virtual float SnapMultiplier => 1f;
   public virtual float MaxPlaceDistance(float value) => Configuration.Range > 0f ? Configuration.Range : value;
   public Piece GetSelectedPiece() => SelectedPrefab ? SelectedPrefab.GetComponent<Piece>() : null!;
   public virtual void Destroy() => Object.Destroy(SelectedPrefab);

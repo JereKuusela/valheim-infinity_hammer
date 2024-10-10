@@ -31,10 +31,13 @@ public class ToolSelection : BaseSelection
     piece.m_icon = tool.Icon;
     piece.m_description = tool.Description;
     piece.m_clipEverything = true;
+    if (tool.SnapPiece)
+      InfinityHammer.Snapping.CreateSnapPoint(SelectedPrefab, Vector3.zero, "Snap");
     Ruler.Create(tool);
   }
 
   public override float MaxPlaceDistance(float value) => 1000f;
+  public override float SnapMultiplier => 2f;
 
   public override bool IsScalingSupported() => true;
   public override bool IsTool => true;

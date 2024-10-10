@@ -59,8 +59,11 @@ public class RemovePiece
   private static void HandleRemoved(Piece piece)
   {
     var zdo = piece.m_nview.GetZDO();
+    var pos = piece.transform.position;
+    var prefab = zdo.m_prefab;
+    var id = zdo.m_uid;
     UndoHelper.AddRemoveAction(zdo);
-    RemoveInArea(zdo, Configuration.RemoveArea);
+    RemoveInArea(id, prefab, pos, Configuration.RemoveArea);
   }
 
   private static bool RemoveAnything(Player obj)
@@ -68,8 +71,12 @@ public class RemovePiece
     var hovered = Selector.GetHovered(obj, obj.m_maxPlaceDistance, [], Configuration.RemoveIds);
     if (hovered == null) return false;
     obj.m_removeEffects.Create(hovered.Obj.transform.position, Quaternion.identity, null, 1f, -1);
+    // Must get attributes before deletion.
+    var pos = hovered.Obj.transform.position;
+    var prefab = hovered.Obj.GetZDO().m_prefab;
+    var id = hovered.Obj.GetZDO().m_uid;
     if (Remove(hovered))
-      RemoveInArea(hovered.Obj.GetZDO(), Configuration.RemoveArea);
+      RemoveInArea(id, prefab, pos, Configuration.RemoveArea);
     var tool = obj.GetRightItem();
     if (tool != null)
     {
@@ -106,17 +113,15 @@ public class RemovePiece
     HammerHelper.RemoveZDO(obj.GetZDO());
   }
 
-  private static void RemoveInArea(ZDO zdo, float radius)
+  private static void RemoveInArea(ZDOID id, int prefab, Vector3 position, float radius)
   {
     if (radius == 0f) return;
-    var position = zdo.GetPosition();
-    var prefab = zdo.m_prefab;
     var toRemove = ZNetScene.instance.m_instances.Values.Where(view =>
       view
       && view.IsValid()
       && view.GetZDO().m_prefab == prefab
       && Vector3.Distance(position, view.GetZDO().m_position) < radius
-      && view.GetZDO() != zdo
+      && view.GetZDO().m_uid != id
     ).ToArray();
     foreach (var obj in toRemove)
       Remove(obj);

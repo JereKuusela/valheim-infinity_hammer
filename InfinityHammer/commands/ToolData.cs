@@ -28,6 +28,8 @@ public class ToolData
   public string targetEdge = "false";
   [DefaultValue("false")]
   public string snapGround = "false";
+  [DefaultValue("false")]
+  public string snapPiece = "false";
   [DefaultValue("")]
   public string playerHeight = "";
   [DefaultValue("false")]
@@ -65,6 +67,8 @@ public class Tool
   public bool Highlight => highlight == "true" || HammerHelper.IsDown(ReplaceKeys(highlight));
   private readonly string terrainGrid;
   public bool TerrainGrid => terrainGrid == "true" || HammerHelper.IsDown(ReplaceKeys(terrainGrid));
+  private readonly string snapPiece;
+  public bool SnapPiece => snapPiece == "true" || HammerHelper.IsDown(ReplaceKeys(snapPiece));
   public bool Instant;
   public int? TabIndex;
   public int? Index;
@@ -94,6 +98,7 @@ public class Tool
     playerHeight = data.playerHeight;
     highlight = data.highlight;
     terrainGrid = data.terrainGrid;
+    snapPiece = data.snapPiece;
     TabIndex = data.tabIndex;
     targetEdge = data.targetEdge;
     Index = data.index;

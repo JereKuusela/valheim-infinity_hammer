@@ -108,8 +108,11 @@ public partial class ObjectSelection : BaseSelection
     piece.m_description = bp.Description;
     if (piece.m_description == "")
       piece.m_description = "Center: " + bp.CenterPiece;
+    var centerPieceExists = false;
     foreach (var item in bp.Objects)
     {
+      if (item.Prefab == bp.CenterPiece)
+        centerPieceExists = true;
       if (Configuration.UseBlueprintChance && item.Chance != 1f && UnityEngine.Random.value > item.Chance) continue;
       try
       {
@@ -133,10 +136,14 @@ public partial class ObjectSelection : BaseSelection
     if (Objects.Count == 1)
       ToSingle();
 
-    if (bp.SnapPoints.Count == 0)
-      Snapping.GenerateSnapPoints(SelectedPrefab);
-    else
-      Snapping.CreateSnapPoints(SelectedPrefab, bp.SnapPoints);
+    // Snapping not needed when the user is using a specific center point.
+    if (!centerPieceExists)
+    {
+      if (bp.SnapPoints.Count == 0)
+        Snapping.GenerateSnapPoints(SelectedPrefab);
+      else
+        Snapping.CreateSnapPoints(SelectedPrefab, bp.SnapPoints);
+    }
 
     piece.m_clipEverything = Snapping.CountSnapPoints(SelectedPrefab) == 0;
     Scaling.Set(SelectedPrefab);

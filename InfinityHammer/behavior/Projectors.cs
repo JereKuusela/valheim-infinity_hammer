@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using InfinityHammer;
 using UnityEngine;
 namespace InfinityTools;
 
@@ -21,10 +20,14 @@ public abstract class BaseRuler : MonoBehaviour
   public static bool SnapToGround = true;
   public bool Visible = true;
 
+  private GameObject? Center;
+
   public void OnDestroy()
   {
     foreach (GameObject obj in Segments) Destroy(obj);
     foreach (GameObject obj in OffsetSegments) Destroy(obj);
+    Destroy(Center);
+    Center = null;
     Segments.Clear();
     OffsetSegments.Clear();
   }
@@ -50,6 +53,12 @@ public abstract class BaseRuler : MonoBehaviour
     if (Segments.Count == count) return;
     foreach (GameObject obj in Segments) Destroy(obj);
     Segments.Clear();
+    Destroy(Center);
+    if (count == 0) return;
+    Center = Instantiate(BasePrefab, transform);
+    Center.transform.localPosition = Vector3.zero;
+    Center.transform.localRotation = Quaternion.identity;
+    Center.transform.localScale = new(0.1f, 0.1f, 0.1f);
     for (int i = 0; i < count; i++)
       Segments.Add(Instantiate(BasePrefab, transform));
   }

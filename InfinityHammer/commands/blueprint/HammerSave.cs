@@ -111,7 +111,7 @@ public class HammerSaveCommand
       return [
       $"#Center:{bp.CenterPiece}",
       $"#Pieces",
-      .. bp.Objects.Select(GetPlanBuildObject),
+      .. bp.Objects.OrderBy(o => o.Prefab).Select(GetPlanBuildObject),
     ];
     return [
       $"#Name:{bp.Name}",
@@ -124,7 +124,7 @@ public class HammerSaveCommand
       $"#SnapPoints",
       .. bp.SnapPoints.Select(GetPlanBuildSnapPoint),
       $"#Pieces",
-      .. bp.Objects.Select(GetPlanBuildObject),
+      .. bp.Objects.OrderBy(o => o.Prefab).Select(GetPlanBuildObject),
     ];
   }
   private static string GetPlanBuildSnapPoint(Vector3 pos)

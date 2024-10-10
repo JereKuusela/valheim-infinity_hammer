@@ -1,4 +1,12 @@
-- v1.59
+- v1.60
+  - Adds a new field `snapPiece` to tools to allow snapping to piece snap points.
+  - Adds a center point to tool selection.
+  - Adds sorting by piece name to saved blueprint files.
+  - Fixes structure buff from Building mod being incorrectly removed even without custom health setting.
+  - Fixes area remove not working.
+  - Removes snapping from blueprints that use center piece.
+
+- v1.5
   - Adds a new command `hammer_room` to add rooms to dungeons.
   - Adds a new field `hammer data=` to load simple data entries.
   - Adds snap points to dungeon rooms.

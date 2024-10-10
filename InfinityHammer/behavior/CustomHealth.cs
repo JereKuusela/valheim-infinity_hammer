@@ -107,7 +107,6 @@ public class CustomHealth
       wear.m_health = ZNetScene.instance.GetPrefab(zdo.GetPrefab()).GetComponent<WearNTear>().m_health;
       zdo.RemoveFloat(HashMaxHealth);
     }
-    zdo.RemoveFloat(Hash.BuildingSkillLevel);
     UpdateVisual(zdo, wear);
     return maxHealth < 0f ? float.NegativeInfinity : wear.m_health - prev;
   }
