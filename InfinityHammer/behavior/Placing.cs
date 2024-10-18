@@ -13,11 +13,11 @@ public class PlacePiece
   {
     HideEffects.Active = true;
   }
-  static void Finalizer(bool __result)
+  static void Finalizer()
   {
     HideEffects.Active = false;
     DataHelper.CleanUp();
-    if (__result && Selection.Get().SingleUse)
+    if (Selection.Get().SingleUse)
       Hammer.Clear();
   }
   // Parameter is the selected piece which doesn't have the correct transformation.

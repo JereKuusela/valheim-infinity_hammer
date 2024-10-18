@@ -110,7 +110,7 @@ public class PieceTableSetSelected
   static void Postfix(PieceTable __instance)
   {
     var index = __instance.GetSelectedIndex();
-    var piece = __instance.GetPiece((int)__instance.m_selectedCategory, index);
+    var piece = __instance.GetPiece(__instance.m_selectedCategory, index);
     if (piece && piece.GetComponent<ZNetView>())
       Selection.CreateGhost(new ObjectSelection(piece, false));
   }
@@ -123,7 +123,7 @@ public class PieceTableSetCategory
   static void Postfix(PieceTable __instance)
   {
     var index = __instance.GetSelectedIndex();
-    var piece = __instance.GetPiece((int)__instance.m_selectedCategory, index);
+    var piece = __instance.GetPiece(__instance.m_selectedCategory, index);
     if (piece && piece.GetComponent<ZNetView>())
       Selection.CreateGhost(new ObjectSelection(piece, false));
   }
@@ -135,7 +135,7 @@ public class PieceTablePrevCategory
   static void Postfix(PieceTable __instance)
   {
     var index = __instance.GetSelectedIndex();
-    var piece = __instance.GetPiece((int)__instance.m_selectedCategory, index);
+    var piece = __instance.GetPiece(__instance.m_selectedCategory, index);
     if (piece && piece.GetComponent<ZNetView>())
       Selection.CreateGhost(new ObjectSelection(piece, false));
   }
@@ -147,7 +147,7 @@ public class PieceTableNextCategory
   static void Postfix(PieceTable __instance)
   {
     var index = __instance.GetSelectedIndex();
-    var piece = __instance.GetPiece((int)__instance.m_selectedCategory, index);
+    var piece = __instance.GetPiece(__instance.m_selectedCategory, index);
     if (piece && piece.GetComponent<ZNetView>())
       Selection.CreateGhost(new ObjectSelection(piece, false));
   }

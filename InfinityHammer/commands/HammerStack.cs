@@ -28,14 +28,10 @@ public class HammerStackCommand
           position += rot * Vector3.right * x * delta.x;
           position += rot * Vector3.up * y * delta.y;
           position += rot * Vector3.forward * z * delta.z;
-          OverridePlacement.OverridePosition = position;
-          OverridePlacement.OverrideRotation = rot;
-          player.PlacePiece(piece);
+          player.PlacePiece(piece, position, rot, true);
         }
       }
     }
-    OverridePlacement.OverridePosition = null;
-    OverridePlacement.OverrideRotation = null;
     UndoHelper.EndAction();
     // For existing objects, nothing was initially selected so makes sense to clear the selection.
     if (existingObject)
@@ -120,19 +116,5 @@ public class HammerStackCommand
     ObjectSelection sel = new(hovered.Obj, false, null, null);
     Selection.CreateGhost(sel);
     return hovered.Obj.gameObject;
-  }
-}
-
-[HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
-public class OverridePlacement
-{
-  public static Vector3? OverridePosition = null;
-  public static Quaternion? OverrideRotation = null;
-  static bool Prefix(Player __instance)
-  {
-    if (!__instance.m_placementGhost) return true;
-    if (OverridePosition.HasValue) __instance.m_placementGhost.transform.position = OverridePosition.Value;
-    if (OverrideRotation.HasValue) __instance.m_placementGhost.transform.rotation = OverrideRotation.Value;
-    return !OverridePosition.HasValue && !OverrideRotation.HasValue;
   }
 }

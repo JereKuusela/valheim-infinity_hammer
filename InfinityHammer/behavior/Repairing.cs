@@ -76,7 +76,7 @@ public class Repair
   private static bool RepairShared(ZNetView obj)
   {
     obj.ClaimOwnership();
-    var change = CustomHealth.SetHealth(obj);
+    var change = CustomHealth.SetHealth(obj, true);
     if (change == 0f) return false;
     if (change == float.PositiveInfinity || change == float.NegativeInfinity)
       DamageText.instance.ShowText(DamageText.TextType.Heal, obj.transform.position, change);

@@ -140,7 +140,7 @@ public class Tool
   }
   private static string ReplaceKeys(string text)
   {
-    var alt = ZInput.instance.GetButtonDef("AltPlace").m_key.ToString().ToLowerInvariant();
+    var alt = ZInput.instance.GetButtonDef("AltPlace").Name.ToString().ToLowerInvariant();
     return text.Replace(ToolManager.CmdMod1, Configuration.ModifierKey1()).Replace(ToolManager.CmdMod2, Configuration.ModifierKey2()).Replace(ToolManager.CmdAlt, alt);
   }
   private static string Plain(string[] commands)

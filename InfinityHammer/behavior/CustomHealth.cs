@@ -16,19 +16,20 @@ public class CustomHealth
   private static readonly int HashFieldsWearNTear = "HasFieldsWearNTear".GetStableHashCode();
   public static readonly int HashMaxHealth = "WearNTear.m_health".GetStableHashCode();
 
-  public static float SetHealth(ZNetView obj)
+  public static float SetHealth(ZNetView obj, bool isRepair)
   {
     var zdo = obj.GetZDO();
     if (Configuration.Invulnerability == InvulnerabilityMode.Off && Configuration.OverwriteHealth == 0f)
-      return SetDefaultHealth(obj, zdo);
+      return SetDefaultHealth(obj, zdo, isRepair);
     else if (Configuration.Invulnerability == InvulnerabilityMode.Off || Configuration.Invulnerability == InvulnerabilityMode.Legacy)
       return SetCustomHealth(obj, zdo);
     else
       return SetInfiniteHealth(obj, zdo);
 
   }
-  private static float SetDefaultHealth(ZNetView obj, ZDO zdo)
+  private static float SetDefaultHealth(ZNetView obj, ZDO zdo, bool isRepair)
   {
+    if (!isRepair) return 0f;
     var change = 0f;
     if (obj.TryGetComponent(out Character character))
       change += SetDefaultHealth(zdo, character);
