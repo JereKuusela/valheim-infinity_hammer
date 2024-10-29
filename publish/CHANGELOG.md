@@ -1,3 +1,6 @@
+- v1.61
+  - Fixed for the new game version.
+
 - v1.60
   - Adds a new field `snapPiece` to tools to allow snapping to piece snap points.
   - Adds a center point to tool selection.
@@ -6,7 +9,7 @@
   - Fixes area remove not working.
   - Removes snapping from blueprints that use center piece.
 
-- v1.5
+- v1.58
   - Adds a new command `hammer_room` to add rooms to dungeons.
   - Adds a new field `hammer data=` to load simple data entries.
   - Adds snap points to dungeon rooms.
