@@ -1,3 +1,7 @@
+- v1.63
+  - Adds support for placing pieces without colliders (for example Bog Witch candle).
+  - Fixes hoe not working.
+
 - v1.62
   - Fixed for the new game version.
 

@@ -58,11 +58,11 @@ public class RunBuildMenuCommands
       if (tool.Instant) Console.instance.TryRunCommand(tool.Command);
       else
       {
-        InfinityHammer.HoldUse.Selecting = true;
+        HoldUse.Selecting = true;
         Console.instance.TryRunCommand($"tool {tool.Name}");
         var pieces = __instance.m_buildPieces;
         // Must be set directly because SetSelected triggers object selection.
-        pieces.m_selectedPiece[(int)pieces.m_selectedCategory] = p;
+        pieces.m_selectedPiece[(int)pieces.GetSelectedCategory()] = p;
       }
       return false;
     }

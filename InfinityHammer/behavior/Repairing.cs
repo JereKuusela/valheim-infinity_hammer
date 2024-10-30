@@ -43,7 +43,7 @@ public class Repair
     if (result)
     {
       wearNTear.m_lastRepair = Time.time;
-      obj.InvokeRPC(ZNetView.Everybody, "WNTHealthChanged", [obj.GetZDO().GetFloat(ZDOVars.s_health, wearNTear.m_health)]);
+      obj.InvokeRPC(ZNetView.Everybody, "RPC_HealthChanged", [obj.GetZDO().GetFloat(ZDOVars.s_health, wearNTear.m_health)]);
     }
     return result;
   }

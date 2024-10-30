@@ -225,7 +225,16 @@ public static class HammerHelper
   ///<summary>Placement requires the Piece component.</summary>
   public static void EnsurePiece(GameObject obj)
   {
-    if (obj.GetComponent<Piece>()) return;
+    if (obj.GetComponent<Piece>())
+    {
+      // Some unobtainable objects have Piece but no colliders, making them impossible to place.
+      var colliders = obj.GetComponentsInChildren<Collider>().Where(collider => collider.enabled && !collider.isTrigger).ToArray();
+      if (colliders.Length == 0)
+      {
+        obj.GetComponent<Piece>().m_clipEverything = true;
+      }
+      return;
+    }
     var piece = obj.AddComponent<Piece>();
     var proxy = obj.GetComponent<LocationProxy>();
     if (proxy && proxy.m_instance)

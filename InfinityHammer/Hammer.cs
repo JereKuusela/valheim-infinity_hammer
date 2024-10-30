@@ -29,19 +29,19 @@ public static class Hammer
   {
     var build = Helper.GetPlayer().m_buildPieces;
     if (build)
-      build.m_selectedPiece[(int)build.m_selectedCategory] = new Vector2Int(-1, -1);
+      build.m_selectedPiece[(int)build.GetSelectedCategory()] = new Vector2Int(-1, -1);
   }
   public static void SelectRepair()
   {
     var build = Helper.GetPlayer().m_buildPieces;
     if (build)
-      build.m_selectedPiece[(int)build.m_selectedCategory] = new Vector2Int(0, 0);
+      build.m_selectedPiece[(int)build.GetSelectedCategory()] = new Vector2Int(0, 0);
   }
   public static void SelectRepairIfEmpty()
   {
     var build = Helper.GetPlayer().m_buildPieces;
-    if (build && build.m_selectedPiece[(int)build.m_selectedCategory].x == -1)
-      build.m_selectedPiece[(int)build.m_selectedCategory] = new Vector2Int(0, 0);
+    if (build && build.m_selectedPiece[(int)build.GetSelectedCategory()].x == -1)
+      build.m_selectedPiece[(int)build.GetSelectedCategory()] = new Vector2Int(0, 0);
   }
 
   private static bool OriginalUseDurability = false;
