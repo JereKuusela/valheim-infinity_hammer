@@ -22,6 +22,8 @@ public partial class ObjectSelection : BaseSelection
   {
     base.Destroy();
     UnityEngine.Object.Destroy(Wrapper);
+    Objects.Clear();
+    SelectedPrefab = null;
   }
   private readonly bool FromBuildMenu = false;
 
@@ -47,6 +49,9 @@ public partial class ObjectSelection : BaseSelection
     if (scale.HasValue)
       SelectedPrefab.transform.localScale = scale.Value;
     Scaling.Set(SelectedPrefab);
+    var hasSnaps = Snapping.GetSnapPoints(SelectedPrefab).Count > 0;
+    if (Configuration.Snapping != SnappingMode.Off && !hasSnaps)
+      Snapping.BuildSnaps(SelectedPrefab);
   }
   // This is for compatibility. Many mods don't expect a cleaned up ghost.
   // So when selecting from the build menu, the ghost doesn't have to be cleaned up.
@@ -78,7 +83,7 @@ public partial class ObjectSelection : BaseSelection
     SelectedPrefab.transform.position = views.First().transform.position;
     foreach (var view in views)
     {
-      DataEntry? data = Data.DataHelper.Merge(new(view.GetZDO()), extraData);
+      DataEntry? data = DataHelper.Merge(new(view.GetZDO()), extraData);
       var obj = HammerHelper.ChildInstantiate(view, SelectedPrefab);
       obj.transform.position = view.transform.position;
       obj.transform.rotation = view.transform.rotation;

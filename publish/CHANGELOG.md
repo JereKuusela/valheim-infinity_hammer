@@ -1,3 +1,9 @@
+- v1.64
+  - Fixes error when removing other objects than regular build pieces.
+  - Fixes remove anything not making feasts removable with the hammer.
+  - Fixes `hammer_measure` giving error about birds (not measuring them anymore).
+  - Fixes `hammer_measure` not working with feasts.
+
 - v1.63
   - Adds support for placing pieces without colliders (for example Bog Witch candle).
   - Fixes hoe not working.

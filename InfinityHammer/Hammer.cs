@@ -47,7 +47,23 @@ public static class Hammer
   private static bool OriginalUseDurability = false;
   private static float OriginalUseStamina = 0f;
   private static float OriginalUseEitr = 0f;
+  private static bool OriginalCanRemoveFeasts = false;
+  private static bool OriginalCanRemovePieces = false;
 
+  public static void AddRemoveAnything(ItemDrop.ItemData item)
+  {
+    if (item == null || !Configuration.RemoveAnything || !item.m_shared.m_buildPieces) return;
+    OriginalCanRemoveFeasts = item.m_shared.m_buildPieces.m_canRemoveFeasts;
+    OriginalCanRemovePieces = item.m_shared.m_buildPieces.m_canRemovePieces;
+    item.m_shared.m_buildPieces.m_canRemoveFeasts = true;
+    item.m_shared.m_buildPieces.m_canRemovePieces = true;
+  }
+  public static void RestoreRemoveAnything(ItemDrop.ItemData item)
+  {
+    if (item == null || !Configuration.RemoveAnything || !item.m_shared.m_buildPieces) return;
+    item.m_shared.m_buildPieces.m_canRemoveFeasts = OriginalCanRemoveFeasts;
+    item.m_shared.m_buildPieces.m_canRemovePieces = OriginalCanRemovePieces;
+  }
   public static void RemoveToolCosts(ItemDrop.ItemData item)
   {
     if (item == null || !Configuration.NoCost) return;

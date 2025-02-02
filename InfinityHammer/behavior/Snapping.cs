@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using ServerDevcommands;
+using Service;
 using UnityEngine;
 
 namespace InfinityHammer;
@@ -80,6 +81,22 @@ public static class Snapping
     {
       if (IsSnapPoint(tr)) Object.Destroy(tr.gameObject);
     }
+  }
+  public static void BuildSnaps(GameObject obj)
+  {
+    if (!Configuration.Dimensions.TryGetValue(Utils.GetPrefabName(obj).ToLower(), out var extends))
+      return;
+    var size = extends / 2;
+    var useEdges = Configuration.Snapping == SnappingMode.Edges || Configuration.Snapping == SnappingMode.All;
+    // Assume origin point at bottom center.
+    List<Vector3> edges = useEdges ? [new(size.x, size.y, 0), new(-size.x, size.y, 0), new(0, extends.y, 0), new(0, 0, 0), new(0, size.y, size.z), new(0, size.y, -size.z)] : [];
+    var useCorners = Configuration.Snapping == SnappingMode.Corners || Configuration.Snapping == SnappingMode.All;
+    if (size.x < 0.5f) size.x = 0.0f;
+    if (size.y < 0.5f) size.y = 0.0f;
+    if (size.z < 0.5f) size.z = 0.0f;
+    List<Vector3> corners = useCorners ? [new(size.x, 0, size.z), new(size.x, 0, -size.z), new(size.x, extends.y, size.z), new(size.x, extends.y, -size.z), new(-size.x, 0, size.z), new(-size.x, 0, -size.z), new(-size.x, extends.y, size.z), new(-size.x, extends.y, -size.z)] : [];
+    List<Vector3> points = UniquePoints([.. edges, .. corners]);
+    CreateSnapPoints(obj.gameObject, points);
   }
   public static void GenerateSnapPoints(GameObject obj) => CreateSnapPoints(obj, GenerateSnapPoints(GetChildren(obj)));
   public static List<Vector3> GenerateSnapPoints(List<GameObject> objects)

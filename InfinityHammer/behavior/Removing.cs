@@ -128,6 +128,16 @@ public class RemovePiece
   }
 }
 
+[HarmonyPatch(typeof(WearNTear), nameof(WearNTear.Remove))]
+public class Remove
+{
+  static void Prefix(WearNTear __instance)
+  {
+    if (!__instance.m_nview.IsValid()) return;
+    UndoHelper.AddRemoveAction(__instance.m_nview.GetZDO());
+  }
+}
+
 [HarmonyPatch(typeof(Piece), nameof(Piece.DropResources))]
 public class PreventPieceDrops
 {

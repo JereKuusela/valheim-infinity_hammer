@@ -64,6 +64,20 @@ public class HoldUse
   {
     __state = __instance.GetRightItem();
     Hammer.RemoveToolCosts(__state);
+    Hammer.AddRemoveAnything(__state);
+  }
+  static Transform RemoveFailSafe(Piece piece) => piece == null ? Player.m_localPlayer.transform : piece.transform;
+  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+  {
+    return new CodeMatcher(instructions)
+          .MatchForward(
+              useEnd: false,
+              new CodeMatch(
+                  OpCodes.Ldfld,
+                  AccessTools.Field(typeof(ItemDrop.ItemData.SharedData), nameof(ItemDrop.ItemData.SharedData.m_destroyEffect))))
+          .Advance(2)
+          .Set(OpCodes.Call, AccessTools.Method(typeof(HoldUse), nameof(RemoveFailSafe)))
+          .InstructionEnumeration();
   }
   static void Postfix(Player __instance)
   {
@@ -83,6 +97,7 @@ public class HoldUse
   static void Finalizer(ItemDrop.ItemData __state)
   {
     Hammer.RestoreToolCosts(__state);
+    Hammer.RestoreRemoveAnything(__state);
   }
 }
 

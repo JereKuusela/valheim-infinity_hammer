@@ -8,10 +8,9 @@ namespace InfinityHammer;
 [HarmonyPatch(typeof(Player), nameof(Player.Repair))]
 public class Repair
 {
-  static void Prefix(Player __instance, ItemDrop.ItemData toolItem)
+  static void Prefix(Player __instance)
   {
     HideEffects.Active = true;
-    Hammer.RemoveToolCosts(toolItem);
     UndoHelper.BeginAction();
     if (!Configuration.RepairAnything) return;
     if (!__instance.InPlaceMode()) return;
@@ -19,11 +18,10 @@ public class Repair
     if (__instance.GetHoveringPiece()) return;
     RepairAnything(__instance);
   }
-  static void Finalizer(ItemDrop.ItemData toolItem)
+  static void Finalizer()
   {
     UndoHelper.EndAction();
     HideEffects.Active = false;
-    Hammer.RestoreToolCosts(toolItem);
   }
 
   private static bool RepairPlayer(ZNetView obj)
