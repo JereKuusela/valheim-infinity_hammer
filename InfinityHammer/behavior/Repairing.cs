@@ -45,6 +45,32 @@ public class Repair
     }
     return result;
   }
+  private static bool RepairMineRock(ZNetView obj, MineRock mineRock, int index)
+  {
+    var area = mineRock.GetHitArea(index);
+    obj.ClaimOwnership();
+    var zdo = obj.GetZDO();
+    var max = Configuration.OverwriteHealth > 0f ? Configuration.OverwriteHealth : mineRock.m_health;
+    var hash = ("Health" + index).GetStableHashCode();
+    var heal = max - zdo.GetFloat(hash, mineRock.GetHealth());
+    if (heal != 0f)
+    {
+      zdo.RemoveFloat(hash);
+      DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, area.bounds.center, Mathf.Abs(heal));
+      return true;
+    }
+    for (var i = 0; i < mineRock.m_hitAreas.Length; i++)
+    {
+      hash = ("Health" + i).GetStableHashCode();
+      if (zdo.GetFloat(hash, 1f) <= 0f)
+      {
+        zdo.RemoveFloat(hash);
+        DamageText.instance.ShowText(DamageText.TextType.Heal, mineRock.m_hitAreas[i].bounds.center, max);
+        return true;
+      }
+    }
+    return false;
+  }
   private static bool RepairMineRock(ZNetView obj, MineRock5 mineRock, int index)
   {
     var area = mineRock.GetHitArea(index);
@@ -102,7 +128,9 @@ public class Repair
   {
     if (obj.GetComponent<Player>())
       return RepairPlayer(obj);
-    if (Configuration.Invulnerability == InvulnerabilityMode.Off && obj.TryGetComponent(out MineRock5 mineRock))
+    if (Configuration.Invulnerability == InvulnerabilityMode.Off && obj.TryGetComponent(out MineRock5 mineRock5))
+      return RepairMineRock(obj, mineRock5, index);
+    if (Configuration.Invulnerability == InvulnerabilityMode.Off && obj.TryGetComponent(out MineRock mineRock))
       return RepairMineRock(obj, mineRock, index);
     return RepairShared(obj);
   }
