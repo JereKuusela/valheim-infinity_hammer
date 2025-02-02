@@ -6,10 +6,12 @@ public class CustomHealth
 {
   private static readonly int HashFields = "HasFields".GetStableHashCode();
   private static readonly int HashFieldsDestructible = "HasFieldsDestructible".GetStableHashCode();
+  private static readonly int HashFieldsMineRock = "HasFieldsMineRock".GetStableHashCode();
   private static readonly int HashFieldsMineRock5 = "HasFieldsMineRock5".GetStableHashCode();
   private static readonly int HashFieldsTreeBase = "HasFieldsTreeBase".GetStableHashCode();
   private static readonly int HashFieldsTreeLog = "HasFieldsTreeLog".GetStableHashCode();
   private static readonly int HashToolTierDestructible = "Destructible.m_minToolTier".GetStableHashCode();
+  private static readonly int HashToolTierMineRock = "MineRock.m_minToolTier".GetStableHashCode();
   private static readonly int HashToolTierMineRock5 = "MineRock5.m_minToolTier".GetStableHashCode();
   private static readonly int HashToolTierTreeBase = "TreeBase.m_minToolTier".GetStableHashCode();
   private static readonly int HashToolTierTreeLog = "TreeLog.m_minToolTier".GetStableHashCode();
@@ -39,8 +41,10 @@ public class CustomHealth
       change += SetDefaultHealth(zdo, treeBase);
     if (obj.TryGetComponent(out TreeLog treeLog))
       change += SetDefaultHealth(zdo, treeLog);
-    if (obj.TryGetComponent(out MineRock5 mineRock))
+    if (obj.TryGetComponent(out MineRock mineRock))
       change += SetDefaultHealth(zdo, mineRock);
+    if (obj.TryGetComponent(out MineRock5 mineRock5))
+      change += SetDefaultHealth(zdo, mineRock5);
     if (obj.TryGetComponent(out WearNTear wear))
       change += SetDefaultHealth(zdo, wear);
     return change;
@@ -80,6 +84,18 @@ public class CustomHealth
       return float.NegativeInfinity;
     }
     return treeLog.m_health - prev;
+  }
+  private static float SetDefaultHealth(ZDO zdo, MineRock mineRock)
+  {
+    var prev = zdo.GetFloat(ZDOVars.s_health, mineRock.m_health);
+    zdo.RemoveFloat(ZDOVars.s_health);
+    if (zdo.GetInt(HashToolTierMineRock, -1) > -1)
+    {
+      zdo.RemoveInt(HashToolTierMineRock);
+      mineRock.m_minToolTier = ZNetScene.instance.GetPrefab(zdo.GetPrefab()).GetComponent<MineRock>()?.m_minToolTier ?? 0;
+      return float.NegativeInfinity;
+    }
+    return mineRock.m_health - prev;
   }
   private static float SetDefaultHealth(ZDO zdo, MineRock5 mineRock)
   {
@@ -133,8 +149,10 @@ public class CustomHealth
       change += SetCustomHealth(zdo, treeBase, value);
     if (obj.TryGetComponent(out TreeLog treeLog))
       change += SetCustomHealth(zdo, treeLog, value);
-    if (obj.TryGetComponent(out MineRock5 mineRock))
+    if (obj.TryGetComponent(out MineRock mineRock))
       change += SetCustomHealth(zdo, mineRock, value);
+    if (obj.TryGetComponent(out MineRock5 mineRock5))
+      change += SetCustomHealth(zdo, mineRock5, value);
     if (obj.TryGetComponent(out WearNTear wear))
       change += SetCustomHealth(zdo, wear, value);
     return change;
@@ -174,6 +192,18 @@ public class CustomHealth
       return float.NegativeInfinity;
     }
     return health - prev;
+  }
+  private static float SetCustomHealth(ZDO zdo, MineRock mineRock, float health)
+  {
+    var change = zdo.GetFloat(ZDOVars.s_health, mineRock.m_health);
+    zdo.Set(ZDOVars.s_health, health);
+    if (zdo.GetInt(HashToolTierMineRock, -1) > -1)
+    {
+      zdo.RemoveInt(HashToolTierMineRock);
+      mineRock.m_minToolTier = ZNetScene.instance.GetPrefab(zdo.GetPrefab()).GetComponent<MineRock>()?.m_minToolTier ?? 0;
+      return float.NegativeInfinity;
+    }
+    return change;
   }
   private static float SetCustomHealth(ZDO zdo, MineRock5 mineRock, float health)
   {
@@ -227,8 +257,10 @@ public class CustomHealth
       changed |= SetInfiniteHealth(zdo, treeBase);
     if (obj.TryGetComponent(out TreeLog treeLog))
       changed |= SetInfiniteHealth(zdo, treeLog);
-    if (obj.TryGetComponent(out MineRock5 mineRock))
+    if (obj.TryGetComponent(out MineRock mineRock))
       changed |= SetInfiniteHealth(zdo, mineRock);
+    if (obj.TryGetComponent(out MineRock5 mineRock5))
+      changed |= SetInfiniteHealth(zdo, mineRock5);
     if (obj.TryGetComponent(out WearNTear wear))
       changed |= SetInfiniteHealth(zdo, wear);
     return changed ? float.PositiveInfinity : 0f;
@@ -262,6 +294,16 @@ public class CustomHealth
     zdo.Set(HashFieldsTreeLog, true);
     zdo.Set(HashToolTierTreeLog, int.MaxValue / 2);
     treeLog.m_minToolTier = int.MaxValue / 2;
+    return changed;
+  }
+  private static bool SetInfiniteHealth(ZDO zdo, MineRock mineRock)
+  {
+    var changed = zdo.GetInt(HashToolTierMineRock) != int.MaxValue / 2;
+    zdo.RemoveFloat(ZDOVars.s_health);
+    zdo.Set(HashFields, true);
+    zdo.Set(HashFieldsMineRock, true);
+    zdo.Set(HashToolTierMineRock, int.MaxValue / 2);
+    WorldEditCommands.Actions.Refresh(zdo); // to force update
     return changed;
   }
   private static bool SetInfiniteHealth(ZDO zdo, MineRock5 mineRock)
