@@ -1,4 +1,5 @@
 using System.Runtime.Remoting.Messaging;
+using TMPro;
 
 namespace InfinityHammer;
 
@@ -82,11 +83,11 @@ public class CustomHealth
     mineRock.m_health = original.m_health;
 
     zdo.RemoveFloat(HashHealthMineRock);
-    RemoveCurrentHealth(mineRock, zdo);
+    var repair = RemoveCurrentHealth(mineRock, zdo);
 
     if (RemoveToolTier(mineRock, zdo))
       return float.NegativeInfinity;
-    return change;
+    return change != 0f ? change : repair;
   }
   private static float SetDefaultHealth(ZDO zdo, MineRock5 mineRock)
   {
@@ -96,7 +97,6 @@ public class CustomHealth
       change += mineRock.m_health - area.m_health;
       area.m_health = mineRock.m_health;
     }
-    ;
     mineRock.SaveHealth();
     if (RemoveToolTier(mineRock, zdo))
       return float.NegativeInfinity;
@@ -171,15 +171,16 @@ public class CustomHealth
   }
   private static float SetCustomHealth(ZDO zdo, MineRock mineRock, float health)
   {
-    var change = health - mineRock.m_health;
     zdo.Set(HashFields, true);
     zdo.Set(HashFieldsMineRock, true);
     // To avoid bloating data, update the default health.
     zdo.Set(HashHealthMineRock, health);
-    RemoveCurrentHealth(mineRock, zdo);
+    var change = health - mineRock.m_health;
+    mineRock.m_health = health;
+    var repair = RemoveCurrentHealth(mineRock, zdo);
     if (RemoveToolTier(mineRock, zdo))
       return float.NegativeInfinity;
-    return change;
+    return change != 0f ? change : repair;
   }
   private static float SetCustomHealth(ZDO zdo, MineRock5 mineRock, float health)
   {
@@ -275,12 +276,12 @@ public class CustomHealth
   {
     var changed = zdo.GetInt(HashToolTierMineRock) != int.MaxValue / 2;
     zdo.RemoveFloat(HashHealthMineRock);
-    RemoveCurrentHealth(mineRock, zdo);
+    var change = RemoveCurrentHealth(mineRock, zdo);
     mineRock.m_minToolTier = int.MaxValue / 2;
     zdo.Set(HashFields, true);
     zdo.Set(HashFieldsMineRock, true);
     zdo.Set(HashToolTierMineRock, int.MaxValue / 2);
-    return changed;
+    return changed || change != 0f;
   }
   private static bool SetInfiniteHealth(ZDO zdo, MineRock5 mineRock)
   {
@@ -290,7 +291,10 @@ public class CustomHealth
     zdo.Set(HashToolTierMineRock5, int.MaxValue / 2);
     mineRock.m_minToolTier = int.MaxValue / 2;
     foreach (var area in mineRock.m_hitAreas)
-      area.m_health = mineRock.m_health;
+    {
+      if (area.m_health <= 0f) continue;
+      area.m_health = int.MaxValue / 2;
+    }
     mineRock.SaveHealth();
     return changed;
   }
@@ -330,16 +334,19 @@ public class CustomHealth
     wear.SetHealthVisual(wear.m_healthPercentage, false);
   }
 
-  private static void RemoveCurrentHealth(MineRock mineRock, ZDO zdo)
+  private static float RemoveCurrentHealth(MineRock mineRock, ZDO zdo)
   {
-
+    var change = 0f;
     for (var i = 0; i < mineRock.m_hitAreas.Length; i++)
     {
       var hash = "Health" + i.ToString();
+      var health = zdo.GetFloat(hash);
       // Check to not restore removed pieces.
-      if (zdo.GetFloat(hash) <= 0f) continue;
-      zdo.RemoveFloat("Health" + i.ToString());
+      if (health <= 0f) continue;
+      change += mineRock.m_health - health;
+      zdo.RemoveFloat(hash);
     }
+    return change;
   }
   private static bool RemoveToolTier(MineRock5 obj, ZDO zdo)
   {

@@ -47,65 +47,64 @@ public class Repair
   }
   private static bool RepairMineRock(ZNetView obj, MineRock mineRock, int index)
   {
-    var area = mineRock.GetHitArea(index);
-    obj.ClaimOwnership();
     var zdo = obj.GetZDO();
-    var max = Configuration.OverwriteHealth > 0f ? Configuration.OverwriteHealth : mineRock.m_health;
-    var hash = ("Health" + index).GetStableHashCode();
-    var heal = max - zdo.GetFloat(hash, mineRock.GetHealth());
-    if (heal != 0f)
-    {
-      zdo.RemoveFloat(hash);
-      DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, area.bounds.center, Mathf.Abs(heal));
-      return true;
-    }
+    var targetArea = mineRock.GetHitArea(index)?.bounds.center ?? Player.m_localPlayer.transform.position;
+    int? missing = null;
+    float minDistance = float.MaxValue;
     for (var i = 0; i < mineRock.m_hitAreas.Length; i++)
     {
-      hash = ("Health" + i).GetStableHashCode();
-      if (zdo.GetFloat(hash, 1f) <= 0f)
+      var hash = ("Health" + i).GetStableHashCode();
+      if (zdo.GetFloat(hash, 1f) > 0f) continue;
+      var distance = Vector3.Distance(mineRock.m_hitAreas[i].bounds.center, targetArea);
+      if (distance < minDistance)
       {
-        zdo.RemoveFloat(hash);
-        DamageText.instance.ShowText(DamageText.TextType.Heal, mineRock.m_hitAreas[i].bounds.center, max);
-        return true;
+        missing = i;
+        minDistance = distance;
       }
+    }
+    if (missing != null)
+    {
+      var hash = ("Health" + missing).GetStableHashCode();
+      zdo.RemoveFloat(hash);
+      DamageText.instance.ShowText(DamageText.TextType.Heal, mineRock.m_hitAreas[missing.Value].bounds.center, GetMaxHealth(mineRock.m_health));
+      mineRock.UpdateVisability();
+      return true;
     }
     return false;
   }
-  private static bool RepairMineRock(ZNetView obj, MineRock5 mineRock, int index)
+  private static bool RepairMineRock(MineRock5 mineRock, int index)
   {
-    var area = mineRock.GetHitArea(index);
-    obj.ClaimOwnership();
-    var zdo = obj.GetZDO();
+    var targetArea = mineRock.GetHitArea(index)?.m_collider.bounds.center ?? Player.m_localPlayer.transform.position;
     var max = Configuration.OverwriteHealth > 0f ? Configuration.OverwriteHealth : mineRock.m_health;
-    var heal = max - area.m_health;
-    if (heal != 0f)
+    MineRock5.HitArea? missing = null;
+    float minDistance = float.MaxValue;
+    foreach (var area in mineRock.m_hitAreas)
     {
-      area.m_health = max;
-      mineRock.SaveHealth();
-      DamageText.instance.ShowText(heal > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, area.m_collider.bounds.center, Mathf.Abs(heal));
-      return true;
+      if (area.m_health > 0f) continue;
+      var distance = Vector3.Distance(area.m_collider.bounds.center, targetArea);
+      if (distance < minDistance)
+      {
+        missing = area;
+        minDistance = distance;
+      }
     }
-    var missing = mineRock.m_hitAreas.Find(area => area.m_health <= 0f);
     if (missing != null)
     {
       missing.m_health = max;
       mineRock.SaveHealth();
       mineRock.UpdateMesh();
-      DamageText.instance.ShowText(DamageText.TextType.Heal, missing.m_collider.bounds.center, max);
+      DamageText.instance.ShowText(DamageText.TextType.Heal, missing.m_collider.bounds.center, GetMaxHealth(mineRock.m_health));
       return true;
     }
     return false;
   }
-
+  private static float GetMaxHealth(float defaultValue) => Configuration.Invulnerability == InvulnerabilityMode.Off ? Configuration.OverwriteHealth == 0f ? defaultValue : Configuration.OverwriteHealth : float.PositiveInfinity;
   private static bool RepairShared(ZNetView obj)
   {
     obj.ClaimOwnership();
     var change = CustomHealth.SetHealth(obj, true);
     if (change == 0f) return false;
-    if (change == float.PositiveInfinity || change == float.NegativeInfinity)
-      DamageText.instance.ShowText(DamageText.TextType.Heal, obj.transform.position, change);
-    else
-      DamageText.instance.ShowText(change > 0 ? DamageText.TextType.Heal : DamageText.TextType.Weak, obj.transform.position, Mathf.Abs(change));
+    DamageText.instance.ShowText(DamageText.TextType.Heal, obj.transform.position, change);
     return true;
   }
   private static bool RepairInArea(ZDO zdo, float radius)
@@ -128,11 +127,13 @@ public class Repair
   {
     if (obj.GetComponent<Player>())
       return RepairPlayer(obj);
-    if (Configuration.Invulnerability == InvulnerabilityMode.Off && obj.TryGetComponent(out MineRock5 mineRock5))
-      return RepairMineRock(obj, mineRock5, index);
-    if (Configuration.Invulnerability == InvulnerabilityMode.Off && obj.TryGetComponent(out MineRock mineRock))
+    if (RepairShared(obj))
+      return true;
+    if (obj.TryGetComponent(out MineRock5 mineRock5))
+      return RepairMineRock(mineRock5, index);
+    if (obj.TryGetComponent(out MineRock mineRock))
       return RepairMineRock(obj, mineRock, index);
-    return RepairShared(obj);
+    return false;
   }
 
   private static bool RepairAnything(Player player)
