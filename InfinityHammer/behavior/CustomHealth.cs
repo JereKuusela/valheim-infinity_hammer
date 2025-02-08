@@ -336,6 +336,7 @@ public class CustomHealth
 
   private static float RemoveCurrentHealth(MineRock mineRock, ZDO zdo)
   {
+    if (mineRock.m_hitAreas == null) return 0f;
     var change = 0f;
     for (var i = 0; i < mineRock.m_hitAreas.Length; i++)
     {

@@ -1,5 +1,5 @@
 - v1.64
-  - Adds support for repairing MineRock objects.
+  - Adds support for repairing MineRock objects, thanks Haloa!
   - Improves repairing of MineRock5 objects.
   - Fixes error when removing other objects than regular build pieces.
   - Fixes remove anything not making feasts removable with the hammer.
