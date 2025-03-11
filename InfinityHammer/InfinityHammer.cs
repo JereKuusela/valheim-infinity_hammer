@@ -106,6 +106,7 @@ public class InfinityHammer : BaseUnityPlugin
     new HammerSelect();
     new HammerLocationCommand();
     new HammerBlueprintCommand();
+    new HammerBlueprintCommandJson();
     new HammerMoveCommand();
     new HammerOffsetCommand();
     new HammerPlaceCommand();
@@ -117,6 +118,7 @@ public class InfinityHammer : BaseUnityPlugin
     new HammerFreezeCommand();
     new HammerGridCommand();
     new HammerSaveCommand();
+    new HammerSaveCommandJson();
     new HammerMirrorCommand();
     new HammerZoopCommand();
     new HammerMeasureCommand();

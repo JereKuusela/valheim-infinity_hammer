@@ -15,6 +15,9 @@
     <Reference Include="BepInEx.dll">
       <HintPath>..\..\Libs\BepinEx.dll</HintPath>
     </Reference>
+    <Reference Include="System.Runtime.Serialization.Json">
+      <HintPath>C:\Users\Seelenquell\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\Facades\System.Runtime.Serialization.Json.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.dll">
       <HintPath>..\..\Libs\UnityEngine.dll</HintPath>
     </Reference>
