@@ -1,22 +1,227 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 //using System.Text.Json;
 using UnityEngine;
 using Data;
 
 namespace InfinityHammer;
-
-public class BlueprintObjectJson : BlueprintObject
+enum BlueprintObjectFlags
 {
-    public BlueprintObjectJson(string name, Vector3 pos, Quaternion rot,
-        Vector3 scale,
-        string info, string data, float chance) : base(name, pos, rot, scale,
-        info, data, chance) { }
+    Interactable = 1 << 31,
+    Hoverable = 1 << 30,
+    HoverMenu = 1 << 29,
+    HoverMenuExtened = 1 << 28,
+    TextReceiver = 1 << 27,
+    Destructible = 1 << 26,
+    PieceMarker = 1 << 25,
+    WarterInteractable = 1 << 24,
+    IDooDadControler = 1 << 23,
+    Projectile = 1 << 22,
+    
+    
+    
+    Misc = 0,
+    Crafting = 1,
+    BuildingWorkbench = 2,
+    BuildingStonecutter = 3,
+    Furniture = 4,
+    Feasts = 5,
+    Food = 6,
+    Meads = 7,
 }
 
-public class BlueprintJson : Blueprint
+[Serializable]
+public class BlueprintObjectJson(
+    string name,
+    Vector3 pos,
+    Quaternion rot,
+    Vector3 scale,
+    string info,
+    string data,
+    float chance) : IBlueprintObject
 {
+    public int flags = 0;
+    public string prefab = name;
+    public Vector3 pos = pos;
+    public Quaternion rot = rot.normalized;
+    public string data = data;
+    public Vector3 scale = scale;
+    public float chance = chance;
+    public string extraInfo = info;
+
+    public virtual string Prefab
+    {
+        get => prefab;
+        set => prefab = value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    public virtual Vector3 Pos
+    {
+        get => pos;
+        set => pos = value;
+    }
+
+    public virtual Quaternion Rot
+    {
+        get => rot;
+        set => rot = value;
+    }
+
+    public virtual string Data
+    {
+        get => data;
+        set => data = value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    public virtual Vector3 Scale
+    {
+        get => scale;
+        set => scale = value;
+    }
+
+    public virtual float Chance
+    {
+        get => chance;
+        set => chance = value;
+    }
+
+    public virtual string ExtraInfo
+    {
+        get => extraInfo;
+        set => extraInfo =
+            value ?? throw new ArgumentNullException(nameof(value));
+    }
+}
+[Serializable]
+public class BlueprintHeader
+{
+    public string Name = "";
+    public string Creator = "";
+    public string Description = "";
+    public string CenterPiece = "";
+    public Vector3 Coordinates;
+    public Vector3 Rotation;
+    public List<Vector3> SnapPoints = [];
+    public string Category = "InfinityHammer";
+    public float Radius = 0f;
+};
+[Serializable]
+public class BlueprintJson : IBlueprint
+{
+    public BlueprintHeader header;
+    public List<BlueprintObjectJson> Objects = [];
+
+   public BlueprintJson()
+    {
+        header = new BlueprintHeader();
+    }
+
+    public virtual string Name
+    {
+        get => header.Name;
+        set => header.Name =
+            value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    public virtual string Description
+    {
+        get => header.Description;
+        set => header.Description =
+            value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    public virtual string Creator
+    {
+        get => header.Creator;
+        set => header.Creator =
+            value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    public virtual Vector3 Coordinates
+    {
+        get => header.Coordinates;
+        set => header.Coordinates = value;
+    }
+
+    public virtual Vector3 Rotation
+    {
+        get => header.Rotation;
+        set => header.Rotation = value;
+    }
+
+    public virtual string CenterPiece
+    {
+        get => header.CenterPiece;
+        set => header.CenterPiece =
+            value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    /*public virtual List<IBlueprintObject> Objects
+    {
+        get => objects;
+        set => objects =
+            value ?? throw new ArgumentNullException(nameof(value));
+    }*/
+
+    public virtual List<Vector3> SnapPoints
+    {
+        get => header.SnapPoints;
+        set => header.SnapPoints =
+            value ?? throw new ArgumentNullException(nameof(value));
+    }
+
+    public virtual float Radius
+    {
+        get => header.Radius;
+        set =>  header.Radius = value;
+    }
+
+
+  
+    public Vector3 Center(string centerPiece)
+    {
+        if (centerPiece != "")
+            CenterPiece = centerPiece;
+        Bounds bounds = new();
+        var y = float.MaxValue;
+        Quaternion rot = Quaternion.identity;
+        foreach (var obj in Objects)
+        {
+            y = Mathf.Min(y, obj.Pos.y);
+            bounds.Encapsulate(obj.Pos);
+        }
+
+        Vector3 center = new(bounds.center.x, y, bounds.center.z);
+        foreach (var obj in Objects)
+        {
+            if (obj.Prefab == CenterPiece)
+            {
+                center = obj.Pos;
+                rot = Quaternion.Inverse(obj.Rot);
+                break;
+            }
+        }
+
+        Radius = Utils.LengthXZ(bounds.extents);
+        foreach (var obj in Objects)
+            obj.Pos -= center;
+        SnapPoints = SnapPoints.Select(p => p - center).ToList();
+        if (rot != Quaternion.identity)
+        {
+            foreach (var obj in Objects)
+            {
+                obj.Pos = rot * obj.Pos;
+                obj.Rot = rot * obj.Rot;
+            }
+
+            SnapPoints = SnapPoints.Select(p => rot * p).ToList();
+        }
+
+        return center;
+    }
+
     private static string GetExtraInfo(GameObject obj, DataEntry data)
     {
         Dictionary<string, string> pars = [];
@@ -78,38 +283,8 @@ public class BlueprintJson : Blueprint
             obj.transform.localPosition, obj.transform.localRotation,
             obj.transform.localScale, info, data?.GetBase64(pars) ?? "", 1f));
     }
-    private static string GetPlanBuildObject(BlueprintObject obj)
-    {
-        if (obj is BlueprintObjectJson derived)
-        {
-            return GetPlanBuildObject(derived);
-        }
-        else
-        {
-            throw new InvalidCastException
-                ($"Downcasting von Typ {obj.GetType()} zu {typeof(BlueprintObjectJson)} fehlgeschlagen.");
-        }
-    }
 
-    private static string GetPlanBuildObject(BlueprintObjectJson obj)
-    {
-        var name = obj.Prefab;
-        var posX = HammerHelper.Format(obj.Pos.x);
-        var posY = HammerHelper.Format(obj.Pos.y);
-        var posZ = HammerHelper.Format(obj.Pos.z);
-        var rotX = HammerHelper.Format(obj.Rot.x);
-        var rotY = HammerHelper.Format(obj.Rot.y);
-        var rotZ = HammerHelper.Format(obj.Rot.z);
-        var rotW = HammerHelper.Format(obj.Rot.w);
-        var scaleX = HammerHelper.Format(obj.Scale.x);
-        var scaleY = HammerHelper.Format(obj.Scale.y);
-        var scaleZ = HammerHelper.Format(obj.Scale.z);
-        var info = obj.ExtraInfo;
-        var data = obj.Data;
-        return
-            $"{name};;{posX};{posY};{posZ};{rotX};{rotY};{rotZ};{rotW};{info};{scaleX};{scaleY};{scaleZ};{data}";
-    }
-    private static string GetJsonObject(BlueprintObject obj)
+    private static string GetJsonObject(IBlueprintObject obj)
     {
         if (obj is BlueprintObjectJson derived)
         {
@@ -121,19 +296,19 @@ public class BlueprintJson : Blueprint
             // throw new InvalidCastException                ($"Downcasting von Typ {obj.GetType()} zu {typeof(BlueprintObjectJson)} fehlgeschlagen.");
         }
     }
+
     private static string GetJsonObject(BlueprintObjectJson obj)
     {
         try
         {
             //return JsonSerializer.Serialize(obj);
-            return "";
+            return JsonUtility.ToJson(obj) + ",";
         }
         catch (Exception e)
         {
             System.Console.WriteLine(e);
             return "";
         }
-        
     }
 
     private static string GetPlanBuildSnapPoint(Vector3 pos)
@@ -152,21 +327,15 @@ public class BlueprintJson : Blueprint
                 $"#Center:{this.CenterPiece}",
                 $"#Pieces",
                 .. this.Objects.OrderBy(o => o.Prefab)
-                    .Select(GetPlanBuildObject),
+                    .Select(GetJsonObject),
             ];
         return
         [
-            $"#Name:{this.Name}",
-            $"#Creator:{this.Creator}",
-            $"#Description:{this.Description}",
-            $"#Category:InfinityHammer",
-            $"#Center:{this.CenterPiece}",
-            $"#Coordinates:{HammerHelper.PrintXZY(this.Coordinates)}",
-            $"#Rotation:{HammerHelper.PrintYXZ(this.Rotation)}",
-            $"#SnapPoints",
-            .. this.SnapPoints.Select(GetPlanBuildSnapPoint),
-            $"#Pieces",
-            .. this.Objects.OrderBy(o => o.Prefab).Select(GetPlanBuildObject),
+            $"{{\"Header\":",
+            $"{JsonUtility.ToJson(this.header)},",
+            $"\"Objects\": [", 
+            string.Join(",\n", this.Objects.Select(JsonUtility.ToJson)),
+            $"]}}"
         ];
     }
 }

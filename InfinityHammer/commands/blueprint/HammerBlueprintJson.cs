@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Runtime.Remoting.Messaging;
 using ServerDevcommands;
 using UnityEngine;
 
@@ -64,72 +65,56 @@ public class HammerBlueprintCommandJson
     private static BlueprintJson GetPlanBuild(BlueprintJson bp, string[] rows,
         bool loadData)
     {
-        var piece = true;
-        foreach (var row in rows)
+        var piece = false;
+
+        for (int i = 0; i < rows.Length;i++)
         {
-            if (row.StartsWith("#name:", StringComparison.OrdinalIgnoreCase))
-                bp.Name = row.Split(':')[1];
-            else if (row.StartsWith("#description:",
-                         StringComparison.OrdinalIgnoreCase))
-                bp.Description = row.Split(':')[1];
-            else if (row.StartsWith("#center:",
-                         StringComparison.OrdinalIgnoreCase))
-                bp.CenterPiece = row.Split(':')[1];
-            else if (row.StartsWith("#coordinates:",
-                         StringComparison.OrdinalIgnoreCase))
-                bp.Coordinates = Parse.VectorXZY(row.Split(':')[1]);
-            else if (row.StartsWith("#rotation:",
-                         StringComparison.OrdinalIgnoreCase))
-                bp.Rotation = Parse.VectorXZY(row.Split(':')[1]);
-            else if (row.StartsWith("#snappoints",
-                         StringComparison.OrdinalIgnoreCase))
+            if (rows[i].StartsWith("]",
+                    StringComparison.OrdinalIgnoreCase) && piece)
+            {
                 piece = false;
-            else if (row.StartsWith("#pieces",
-                         StringComparison.OrdinalIgnoreCase))
-                piece = true;
-            else if (row.StartsWith("#", StringComparison.Ordinal))
-                continue;
+            }
             else if (piece)
-                bp.Objects.Add(GetPlanBuildObject(row, loadData));
-            else
-                bp.SnapPoints.Add(GetPlanBuildSnapPoint(row));
+            {
+                var str = rows[i].TrimEnd(','); // remove comma at end if any
+                try
+                {
+                    bp.Objects.Add(
+                        JsonUtility.FromJson<BlueprintObjectJson>(str));
+                }
+                catch (Exception e)
+                {
+                    System.Console.WriteLine(e);
+                    System.Console.WriteLine("error while parsing: piece: " +
+                                             str + "");
+                }
+            }
+            else if (rows[i].StartsWith("{\"Header\":",
+                         StringComparison.OrdinalIgnoreCase))
+            {
+                try
+                {
+                    i++;
+                    bp.header = JsonUtility.FromJson<BlueprintHeader>(rows[i].TrimEnd(','));
+                }
+                catch (Exception e)
+                {
+                    System.Console.WriteLine(e);
+                    System.Console.WriteLine("error while parsing: header: " +
+                                             rows[i] + "");
+                }
+            }
+            else if (rows[i].StartsWith("\"Objects\":",
+                         StringComparison.OrdinalIgnoreCase))
+            {
+                piece = true;
+            }
         }
 
         return bp;
     }
 
-    private static BlueprintObject GetPlanBuildObject(string row, bool loadData)
-    {
-        if (row.IndexOf(',') > -1) row = row.Replace(',', '.');
-        var split = row.Split(';');
-        var name = split[0];
-        var posX = InvariantFloat(split, 2);
-        var posY = InvariantFloat(split, 3);
-        var posZ = InvariantFloat(split, 4);
-        var rotX = InvariantFloat(split, 5);
-        var rotY = InvariantFloat(split, 6);
-        var rotZ = InvariantFloat(split, 7);
-        var rotW = InvariantFloat(split, 8);
-        var info = split.Length > 9 ? split[9] : "";
-        var scaleX = InvariantFloat(split, 10, 1f);
-        var scaleY = InvariantFloat(split, 11, 1f);
-        var scaleZ = InvariantFloat(split, 12, 1f);
-        var data = loadData && split.Length > 13 ? split[13] : "";
-        var chance = InvariantFloat(split, 14, 1f);
-        return new BlueprintObject(name, new(posX, posY, posZ),
-            new(rotX, rotY, rotZ, rotW), new(scaleX, scaleY, scaleZ), info,
-            data, chance);
-    }
-
-    private static Vector3 GetPlanBuildSnapPoint(string row)
-    {
-        if (row.IndexOf(',') > -1) row = row.Replace(',', '.');
-        var split = row.Split(';');
-        var x = InvariantFloat(split, 0);
-        var y = InvariantFloat(split, 1);
-        var z = InvariantFloat(split, 2);
-        return new Vector3(x, y, z);
-    }
+    
 
     private static BlueprintJson GetBuildShare(BlueprintJson bp, string[] rows,
         bool loadData)
@@ -139,7 +124,7 @@ public class HammerBlueprintCommandJson
         return bp;
     }
 
-    private static BlueprintObject GetBuildShareObject(string row,
+    private static BlueprintObjectJson GetBuildShareObject(string row,
         bool loadData)
     {
         if (row.IndexOf(',') > -1) row = row.Replace(',', '.');
@@ -154,7 +139,7 @@ public class HammerBlueprintCommandJson
         var posZ = InvariantFloat(split, 7);
         var data = loadData && split.Length > 8 ? split[8] : "";
         var chance = InvariantFloat(split, 9, 1f);
-        return new BlueprintObject(name, new(posX, posY, posZ),
+        return new BlueprintObjectJson(name, new(posX, posY, posZ),
             new(rotX, rotY, rotZ, rotW), Vector3.one, "", data, chance);
     }
 
@@ -169,7 +154,8 @@ public class HammerBlueprintCommandJson
 
     public HammerBlueprintCommandJson()
     {
-        AutoComplete.Register("hammer_blueprint_json", (int index, int subIndex) =>
+        AutoComplete.Register("hammer_blueprint_json",
+            (int index, int subIndex) =>
             {
                 if (index == 0) return GetBlueprints();
                 return ["c", "center", "d", "data", "sc", "scale", "s", "snap"];
@@ -209,7 +195,8 @@ public class HammerBlueprintCommandJson
                 if (pars.SnapPiece != "")
                 {
                     foreach (var snap in bp.SnapPoints)
-                        bp.Objects.Add(new BlueprintObject(pars.SnapPiece, snap,
+                        bp.Objects.Add(new BlueprintObjectJson(pars.SnapPiece,
+                            snap,
                             Quaternion.identity, Vector3.one, "", "", 1f));
                 }
 
@@ -248,39 +235,5 @@ public class HammerBlueprintCommandJson
                 PlaceRotation.Set(Quaternion.Euler(bp.Rotation));
                 PrintSelected(args.Context, bp.Name);
             });
-    }
-}
-
-public class HammerBlueprintParsJson
-{
-    public string CenterPiece = "";
-    public string SnapPiece = "";
-    public bool LoadData = true;
-    public Vector3 Scale = Vector3.one;
-
-    public HammerBlueprintParsJson(Terminal.ConsoleEventArgs args)
-    {
-        var pars = args.Args.Skip(2).ToArray();
-        int index = 0;
-        foreach (var par in pars)
-        {
-            var split = par.Split('=');
-            if (split.Length < 2)
-            {
-                // Legacy support.
-                if (index == 0) CenterPiece = par;
-                if (index == 1) Scale = Parse.Scale(Parse.Split(par));
-                continue;
-            }
-
-            if (split[0] == "center" || split[0] == "c")
-                CenterPiece = split[1];
-            if (split[0] == "snap" || split[0] == "s")
-                SnapPiece = split[1];
-            if (split[0] == "data" || split[0] == "d")
-                LoadData = Parse.BoolNull(split[1]) ?? true;
-            if (split[0] == "scale" || split[0] == "sc")
-                Scale = Parse.Scale(Parse.Split(split[1]));
-        }
     }
 }
