@@ -9,6 +9,8 @@ using UnityEngine;
 
 namespace InfinityHammer;
 #pragma warning disable IDE0046
+
+
 public class HammerBlueprintCommandJson
 {
     private static void PrintSelected(Terminal terminal, string name)
@@ -119,7 +121,7 @@ public class HammerBlueprintCommandJson
     private static BlueprintJson GetBuildShare(BlueprintJson bp, string[] rows,
         bool loadData)
     {
-        bp.Objects = rows.Select(r => GetBuildShareObject(r, loadData))
+        bp.Objects = rows.Select(r => GetBuildShareObject(r, loadData) as IBlueprintObject)
             .ToList();
         return bp;
     }

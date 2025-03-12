@@ -7,6 +7,7 @@ using UnityEngine;
 using Data;
 
 namespace InfinityHammer;
+
 enum BlueprintObjectFlags
 {
     Interactable = 1 << 31,
@@ -19,9 +20,25 @@ enum BlueprintObjectFlags
     WarterInteractable = 1 << 24,
     IDooDadControler = 1 << 23,
     Projectile = 1 << 22,
+
+    Compfort =
+        1 << 21, // for the option to exclude compfort pieces from static pieces (which do nothing)
+    Cultivated =
+        1 << 20, // for player grown pieces which need cultivated ground (vegtables basically) 
+    StaticDestroyableTerrain = 1 << 19, // Objects like trees and rocks 
+    HoverableResourceNode = 1 << 18, // for copper, tin and so on
+    BuildPiecePlayer = 1 << 17, // for pieces buildable by the player with the hammer
+    BuildPiece = 1 << 16, // for all build piece even spawn only like the dverger probs
+    IndistructiblePiece =
+        1 << 15, // for pieces which can't be destroyed' like runestones or dverger deminster
+    FoodPiece = 1 << 12, // food placed with the serving tray
+    ContainerPiece = 1 << 11, // for containers like the chest
+    ObjectHolder = 1 << 10, // for pieces like armor stands and item stands
     
     
-    
+    // piece categories from Valheim Piece.cs PieceCategory.
+// Uses the last 4 bits but leave the last 8 open for future additions
+
     Misc = 0,
     Crafting = 1,
     BuildingWorkbench = 2,
@@ -51,49 +68,18 @@ public class BlueprintObjectJson(
     public float chance = chance;
     public string extraInfo = info;
 
-    public virtual string Prefab
-    {
-        get => prefab;
-        set => prefab = value ?? throw new ArgumentNullException(nameof(value));
-    }
-
-    public virtual Vector3 Pos
-    {
-        get => pos;
-        set => pos = value;
-    }
-
-    public virtual Quaternion Rot
-    {
-        get => rot;
-        set => rot = value;
-    }
-
-    public virtual string Data
-    {
-        get => data;
-        set => data = value ?? throw new ArgumentNullException(nameof(value));
-    }
-
-    public virtual Vector3 Scale
-    {
-        get => scale;
-        set => scale = value;
-    }
-
-    public virtual float Chance
-    {
-        get => chance;
-        set => chance = value;
-    }
-
-    public virtual string ExtraInfo
-    {
-        get => extraInfo;
-        set => extraInfo =
-            value ?? throw new ArgumentNullException(nameof(value));
-    }
+    public virtual string Prefab { get => prefab; set => prefab = value; }
+    public virtual Vector3 Pos { get => pos; set => pos = value; }
+    public virtual Quaternion Rot { get => rot; set => rot = value; }
+    public virtual string Data { get => data; set => data = value; }
+    public virtual Vector3 Scale { get => scale; set => scale = value; }
+    public virtual float Chance { get => chance; set => chance = value; }
+    public virtual string ExtraInfo { get => extraInfo; set => extraInfo = value; }
 }
+
+public class BlueprintObjectHealth // stub for adding health value if not (usual) max health
+{ }
+
 [Serializable]
 public class BlueprintHeader
 {
@@ -104,82 +90,41 @@ public class BlueprintHeader
     public Vector3 Coordinates;
     public Vector3 Rotation;
     public List<Vector3> SnapPoints = [];
-    public string Category = "InfinityHammer";
+    public string Category = "InfinityHammer.Json";
     public float Radius = 0f;
 };
+
 [Serializable]
 public class BlueprintJson : IBlueprint
 {
     public BlueprintHeader header;
-    public List<BlueprintObjectJson> Objects = [];
-
-   public BlueprintJson()
-    {
-        header = new BlueprintHeader();
-    }
-
-    public virtual string Name
-    {
-        get => header.Name;
-        set => header.Name =
-            value ?? throw new ArgumentNullException(nameof(value));
-    }
-
+    public List<IBlueprintObject> objects = [];
+    public BlueprintJson() { header = new BlueprintHeader(); }
+    public virtual string Name { get => header.Name; set => header.Name = value; }
     public virtual string Description
     {
         get => header.Description;
-        set => header.Description =
-            value ?? throw new ArgumentNullException(nameof(value));
+        set => header.Description = value;
     }
-
-    public virtual string Creator
-    {
-        get => header.Creator;
-        set => header.Creator =
-            value ?? throw new ArgumentNullException(nameof(value));
-    }
-
+    public virtual string Creator { get => header.Creator; set => header.Creator = value; }
     public virtual Vector3 Coordinates
     {
         get => header.Coordinates;
         set => header.Coordinates = value;
     }
-
-    public virtual Vector3 Rotation
-    {
-        get => header.Rotation;
-        set => header.Rotation = value;
-    }
-
+    public virtual Vector3 Rotation { get => header.Rotation; set => header.Rotation = value; }
     public virtual string CenterPiece
     {
         get => header.CenterPiece;
-        set => header.CenterPiece =
-            value ?? throw new ArgumentNullException(nameof(value));
+        set => header.CenterPiece = value;
     }
-
-    /*public virtual List<IBlueprintObject> Objects
-    {
-        get => objects;
-        set => objects =
-            value ?? throw new ArgumentNullException(nameof(value));
-    }*/
-
+    public virtual List<IBlueprintObject> Objects { get => objects; set => objects = value; }
     public virtual List<Vector3> SnapPoints
     {
         get => header.SnapPoints;
-        set => header.SnapPoints =
-            value ?? throw new ArgumentNullException(nameof(value));
+        set => header.SnapPoints = value;
     }
-
-    public virtual float Radius
-    {
-        get => header.Radius;
-        set =>  header.Radius = value;
-    }
-
-
-  
+    public virtual float Radius { get => header.Radius; set => header.Radius = value; }
     public Vector3 Center(string centerPiece)
     {
         if (centerPiece != "")
@@ -333,7 +278,7 @@ public class BlueprintJson : IBlueprint
         [
             $"{{\"Header\":",
             $"{JsonUtility.ToJson(this.header)},",
-            $"\"Objects\": [", 
+            $"\"Objects\": [",
             string.Join(",\n", this.Objects.Select(JsonUtility.ToJson)),
             $"]}}"
         ];

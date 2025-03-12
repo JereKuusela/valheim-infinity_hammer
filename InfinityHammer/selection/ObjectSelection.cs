@@ -112,7 +112,7 @@ public partial class ObjectSelection : BaseSelection
         Scaling.Set(SelectedPrefab);
     }
 
-   public ObjectSelection(Terminal terminal, IBlueprint bp, Vector3 scale)
+    public ObjectSelection(Terminal terminal, IBlueprint bp, Vector3 scale)
     {
         Wrapper = new GameObject();
         Wrapper.SetActive(false);
@@ -129,72 +129,36 @@ public partial class ObjectSelection : BaseSelection
         if (piece.m_description == "")
             piece.m_description = "Center: " + bp.CenterPiece;
         var centerPieceExists = false;
-        if (bp is Blueprint)
+
+        foreach (var item in bp.Objects)
         {
-            foreach (var item in (bp as Blueprint).Objects)
+            if (item.Prefab == bp.CenterPiece)
+                centerPieceExists = true;
+            if (Configuration.UseBlueprintChance && item.Chance != 1f &&
+                UnityEngine.Random.value > item.Chance) continue;
+            try
             {
-                if (item.Prefab == bp.CenterPiece)
-                    centerPieceExists = true;
-                if (Configuration.UseBlueprintChance && item.Chance != 1f &&
-                    UnityEngine.Random.value > item.Chance) continue;
-                try
-                {
-                    var prefab = ZNetScene.instance.GetPrefab(item.Prefab);
-                    if (!prefab)
-                        throw new InvalidOperationException(
-                            $"Prefab {item.Prefab} not found.");
-                    var view = prefab.GetComponent<ZNetView>();
-                    var obj =
-                        HammerHelper.ChildInstantiate(view, SelectedPrefab);
-                    obj.transform.localPosition = item.Pos;
-                    obj.transform.localRotation = item.Rot;
-                    obj.transform.localScale = item.Scale;
-                    DataEntry? data = item.Data == null || item.Data == ""
-                        ? ReadExtraInfo(obj, item.ExtraInfo)
-                        : DataHelper.Get(item.Data);
-                    UpdateVisuals(obj, data);
-                    Objects.Add(new SelectedObject(
-                        item.Prefab.GetStableHashCode(),
-                        view.m_syncInitialScale, data));
-                }
-                catch (Exception e)
-                {
-                    HammerHelper.Message(terminal, $"Warning: {e.Message}");
-                }
+                var prefab = ZNetScene.instance.GetPrefab(item.Prefab);
+                if (!prefab)
+                    throw new InvalidOperationException(
+                        $"Prefab {item.Prefab} not found.");
+                var view = prefab.GetComponent<ZNetView>();
+                var obj =
+                    HammerHelper.ChildInstantiate(view, SelectedPrefab);
+                obj.transform.localPosition = item.Pos;
+                obj.transform.localRotation = item.Rot;
+                obj.transform.localScale = item.Scale;
+                DataEntry? data = item.Data == null || item.Data == ""
+                    ? ReadExtraInfo(obj, item.ExtraInfo)
+                    : DataHelper.Get(item.Data);
+                UpdateVisuals(obj, data);
+                Objects.Add(new SelectedObject(
+                    item.Prefab.GetStableHashCode(),
+                    view.m_syncInitialScale, data));
             }
-        }
-        else if (bp is BlueprintJson)
-        {
-            foreach (var item in (bp as BlueprintJson).Objects)
+            catch (Exception e)
             {
-                if (item.Prefab == bp.CenterPiece)
-                    centerPieceExists = true;
-                if (Configuration.UseBlueprintChance && item.Chance != 1f &&
-                    UnityEngine.Random.value > item.Chance) continue;
-                try
-                {
-                    var prefab = ZNetScene.instance.GetPrefab(item.Prefab);
-                    if (!prefab)
-                        throw new InvalidOperationException(
-                            $"Prefab {item.Prefab} not found.");
-                    var view = prefab.GetComponent<ZNetView>();
-                    var obj =
-                        HammerHelper.ChildInstantiate(view, SelectedPrefab);
-                    obj.transform.localPosition = item.Pos;
-                    obj.transform.localRotation = item.Rot;
-                    obj.transform.localScale = item.Scale;
-                    DataEntry? data = item.Data == null || item.Data == ""
-                        ? ReadExtraInfo(obj, item.ExtraInfo)
-                        : DataHelper.Get(item.Data);
-                    UpdateVisuals(obj, data);
-                    Objects.Add(new SelectedObject(
-                        item.Prefab.GetStableHashCode(),
-                        view.m_syncInitialScale, data));
-                }
-                catch (Exception e)
-                {
-                    HammerHelper.Message(terminal, $"Warning: {e.Message}");
-                }
+                HammerHelper.Message(terminal, $"Warning: {e.Message}");
             }
         }
 

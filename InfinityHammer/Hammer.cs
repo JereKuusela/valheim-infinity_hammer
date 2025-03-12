@@ -5,6 +5,7 @@ using ServerDevcommands;
 using UnityEngine;
 namespace InfinityHammer;
 
+
 public static class Hammer
 {
   public static bool AllLocationsObjects = false;
