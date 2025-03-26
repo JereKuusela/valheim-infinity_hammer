@@ -4,6 +4,7 @@ using System.Linq;
 using InfinityHammer;
 using ServerDevcommands;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 namespace InfinityTools;
 
@@ -49,26 +50,26 @@ public class Tool
   public string Name;
   public string Command;
   private readonly string description;
-  public string Description => ReplaceKeys(description);
+  public string Description => DisplayKeys(description);
   private readonly string iconName;
   private Sprite? icon;
   // Lazy load needed because the sprites are not instantly available.
   public Sprite? Icon => icon ??= HammerHelper.FindSprite(iconName);
   private readonly string continuous;
-  public bool Continuous => continuous == "true" || HammerHelper.IsDown(ReplaceKeys(continuous));
+  public bool Continuous => continuous == "true" || HammerHelper.IsDown(continuous);
   public float? InitialHeight;
   public float? InitialSize;
   public string InitialShape;
   private readonly string snapGround;
-  public bool SnapGround => snapGround == "true" || HammerHelper.IsDown(ReplaceKeys(snapGround));
+  public bool SnapGround => snapGround == "true" || HammerHelper.IsDown(snapGround);
   private readonly string playerHeight;
-  public bool PlayerHeight => playerHeight == "true" || HammerHelper.IsDown(ReplaceKeys(playerHeight));
+  public bool PlayerHeight => playerHeight == "true" || HammerHelper.IsDown(playerHeight);
   private readonly string highlight;
-  public bool Highlight => highlight == "true" || HammerHelper.IsDown(ReplaceKeys(highlight));
+  public bool Highlight => highlight == "true" || HammerHelper.IsDown(highlight);
   private readonly string terrainGrid;
-  public bool TerrainGrid => terrainGrid == "true" || HammerHelper.IsDown(ReplaceKeys(terrainGrid));
+  public bool TerrainGrid => terrainGrid == "true" || HammerHelper.IsDown(terrainGrid);
   private readonly string snapPiece;
-  public bool SnapPiece => snapPiece == "true" || HammerHelper.IsDown(ReplaceKeys(snapPiece));
+  public bool SnapPiece => snapPiece == "true" || HammerHelper.IsDown(snapPiece);
   public bool Instant;
   public int? TabIndex;
   public int? Index;
@@ -82,7 +83,7 @@ public class Tool
   public bool Height;
   public bool RotateWithPlayer;
   private readonly string targetEdge;
-  public bool IsTargetEdge => targetEdge == "true" || HammerHelper.IsDown(ReplaceKeys(targetEdge));
+  public bool IsTargetEdge => targetEdge == "true" || HammerHelper.IsDown(targetEdge);
   public bool IsId;
   public Tool(ToolData data)
   {
@@ -138,10 +139,16 @@ public class Tool
         Height = true;
     }
   }
-  private static string ReplaceKeys(string text)
+  private static string DisplayKeys(string text)
   {
-    var alt = ZInput.instance.GetButtonDef("AltPlace").Name.ToString().ToLowerInvariant();
-    return text.Replace(ToolManager.CmdMod1, Configuration.ModifierKey1()).Replace(ToolManager.CmdMod2, Configuration.ModifierKey2()).Replace(ToolManager.CmdAlt, alt);
+    var def = ZInput.instance.GetButtonDef("AltPlace");
+    InputBinding left = def.ButtonAction.bindings.FirstOrDefault();
+    var str = "";
+    if (left != null)
+    {
+      str = ZInput.instance.MapKeyFromPath(left.effectivePath).ToLowerInvariant();
+    }
+    return text.Replace(ToolManager.CmdMod1, Configuration.ModifierKey1()).Replace(ToolManager.CmdMod2, Configuration.ModifierKey2()).Replace(ToolManager.CmdAlt, str);
   }
   private static string Plain(string[] commands)
   {
