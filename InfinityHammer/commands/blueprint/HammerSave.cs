@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using Argo.Blueprint;
 using Data;
 using ServerDevcommands;
 using Service;
@@ -14,7 +15,7 @@ namespace InfinityHammer;
 public class HammerSaveCommand
 {
 
-  private static string GetExtraInfo(GameObject obj, DataEntry data)
+  private static string GetExtraInfo(GameObject? obj, DataEntry data)
   {
     Dictionary<string, string> pars = [];
     var info = "";
@@ -41,28 +42,28 @@ public class HammerSaveCommand
     }
     return info;
   }
-  private static Blueprint BuildBluePrint(Player player, GameObject obj, string centerPiece, string snapPiece, bool saveData)
+  private Blueprint BuildBluePrint(Player player, GameObject? placementGhost, string centerPiece, string snapPiece, bool saveData)
   {
     Blueprint bp = new()
     {
-      Name = Utils.GetPrefabName(obj),
+      Name = Utils.GetPrefabName(placementGhost),
       Creator = player.GetPlayerName(),
-      Rotation = HammerHelper.GetPlacementGhost().transform.rotation.eulerAngles,
+      Rotation = placementGhost?.transform.rotation.eulerAngles ?? Vector3.zero,
     };
-    var piece = obj.GetComponent<Piece>();
+    var piece = placementGhost.GetComponent<Piece>();
     if (piece)
     {
       bp.Name = Localization.instance.Localize(piece.m_name);
     }
     if (Selection.Get() is not ObjectSelection selection) return bp;
-    var objects = Snapping.GetChildren(obj);
+    var objects = Snapping.GetChildren(placementGhost);
     Dictionary<string, string> pars = [];
     if (selection.Objects.Count() == 1)
     {
-      AddSingleObject(bp, pars, obj, saveData);
+      AddSingleObject(bp, pars, placementGhost, saveData);
       // Snap points are sort of useful for single objects.
       // Since single objects should just have custom data but otherwise the original behavior.
-      var snaps = Snapping.GetSnapPoints(obj);
+      var snaps = Snapping.GetSnapPoints(placementGhost);
       foreach (var snap in snaps)
         bp.SnapPoints.Add(snap.transform.localPosition);
     }
@@ -79,7 +80,7 @@ public class HammerSaveCommand
       }
       if (snapPiece == "")
       {
-        var snaps = Snapping.GetSnapPoints(obj);
+        var snaps = Snapping.GetSnapPoints(placementGhost);
         foreach (var snap in snaps)
           bp.SnapPoints.Add(snap.transform.localPosition);
       }
@@ -89,7 +90,7 @@ public class HammerSaveCommand
     return bp;
   }
 
-  private static void AddSingleObject(Blueprint bp, Dictionary<string, string> pars, GameObject obj, bool saveData)
+  private static void AddSingleObject(Blueprint bp, Dictionary<string, string> pars, GameObject? obj, bool saveData)
   {
     var name = Utils.GetPrefabName(obj);
     var save = saveData || Configuration.SavedObjectData.Contains(name.ToLowerInvariant());
@@ -97,7 +98,7 @@ public class HammerSaveCommand
     var info = data == null ? "" : GetExtraInfo(obj, data);
     bp.Objects.Add(new BlueprintObject(name, Vector3.zero, Quaternion.identity, obj.transform.localScale, info, data?.GetBase64(pars) ?? "", 1f));
   }
-  private static void AddObject(Blueprint bp, Dictionary<string, string> pars, GameObject obj, bool saveData, int index = 0)
+  private static void AddObject(Blueprint bp, Dictionary<string, string> pars, GameObject? obj, bool saveData, int index = 0)
   {
     var name = Utils.GetPrefabName(obj);
     var save = saveData || Configuration.SavedObjectData.Contains(name.ToLowerInvariant());

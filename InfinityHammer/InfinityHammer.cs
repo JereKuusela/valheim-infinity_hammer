@@ -129,6 +129,7 @@ public class InfinityHammer : BaseUnityPlugin
     new ToolExportCommand();
     new ToolCmdCommand();
     new HammerRoomCommand();
+    new ArgoExportPrefabData();
   }
   public void LateUpdate()
   {

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Data;
+using Argo.Blueprint;
 using ServerDevcommands;
 using Service;
 using UnityEngine;
@@ -129,10 +130,14 @@ public partial class ObjectSelection : BaseSelection
         if (piece.m_description == "")
             piece.m_description = "Center: " + bp.CenterPiece;
         var centerPieceExists = false;
-
-        foreach (var item in bp.Objects)
+        if (bp is Blueprint)
         {
-            if (item.Prefab == bp.CenterPiece)
+            var bp_ = (Blueprint)bp;
+        
+
+        foreach (var item in bp_.Objects)
+        {
+            if (item.Prefab == bp_.CenterPiece)
                 centerPieceExists = true;
             if (Configuration.UseBlueprintChance && item.Chance != 1f &&
                 UnityEngine.Random.value > item.Chance) continue;
@@ -148,9 +153,12 @@ public partial class ObjectSelection : BaseSelection
                 obj.transform.localPosition = item.Pos;
                 obj.transform.localRotation = item.Rot;
                 obj.transform.localScale = item.Scale;
-                DataEntry? data = item.Data == null || item.Data == ""
-                    ? ReadExtraInfo(obj, item.ExtraInfo)
-                    : DataHelper.Get(item.Data);
+                DataEntry? data = null;
+                  data = item.Data == null || item.Data == ""
+                        ? ReadExtraInfo(obj, item.ExtraInfo)
+                        : DataHelper.Get(item.Data);
+                
+
                 UpdateVisuals(obj, data);
                 Objects.Add(new SelectedObject(
                     item.Prefab.GetStableHashCode(),
@@ -160,8 +168,10 @@ public partial class ObjectSelection : BaseSelection
             {
                 HammerHelper.Message(terminal, $"Warning: {e.Message}");
             }
+        }} else if (bp is BlueprintJson)
+        {
+            var bp_ = (BlueprintJson)bp;
         }
-
 
         // Might be good to have a proper loading for single item blueprints, but this works for now.
         if (Objects.Count == 1)
@@ -464,7 +474,7 @@ public partial class ObjectSelection : BaseSelection
         UndoHelper.EndSubAction();
     }
 
-    private void HandleMultiple(GameObject ghost)
+    private void HandleMultiple(GameObject? ghost)
     {
         var children = Snapping.GetChildren(ghost);
         for (var i = 0; i < children.Count; i++)

@@ -1,20 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Argo.Blueprint;
 using UnityEngine;
 
 namespace InfinityHammer;
 
-public interface IBlueprintObject
-{
-    string Prefab { get; set; }
-    Vector3 Pos { get; set; }
-    Quaternion Rot { get; set; }
-    string Data { get; set; }
-    Vector3 Scale { get; set; }
-    float Chance { get; set; }
-    string ExtraInfo { get; set; }
-}
 
 [Serializable]
 public class BlueprintObject(
@@ -43,19 +34,6 @@ public class BlueprintObject(
     public virtual string ExtraInfo { get => extraInfo; set => extraInfo = value; }
 }
 
-public interface IBlueprint
-{
-    string Name { get; set; }
-    string Description { get; set; }
-    string Creator { get; set; }
-    Vector3 Coordinates { get; set; }
-    Vector3 Rotation { get; set; }
-    string CenterPiece { get; set; }
-    List<Vector3> SnapPoints { get; set; }
-    float Radius { get; set; }
-    Vector3 Center(string centerPiece);
-    List<IBlueprintObject> Objects { get; set; }
-}
 
 public class Blueprint : IBlueprint
 {
@@ -67,7 +45,7 @@ public class Blueprint : IBlueprint
     public virtual string CenterPiece { get => centerPiece; set => centerPiece = value; }
     public virtual List<Vector3> SnapPoints { get => snapPoints; set => snapPoints = value; }
     public virtual float Radius { get => radius; set => radius = value; }
-    public virtual List<IBlueprintObject> Objects { get => objects; set => objects = value; }
+    public virtual List<BlueprintObject> Objects { get => objects; set => objects = value; }
 
 
     public string name = "";
@@ -76,7 +54,7 @@ public class Blueprint : IBlueprint
     public Vector3 coordinates = Vector3.zero;
     public Vector3 rotation = Vector3.zero;
     public string centerPiece = Configuration.BlueprintCenterPiece;
-    public List<IBlueprintObject> objects = [];
+    public List<BlueprintObject> objects = [];
     public List<Vector3> snapPoints = [];
     public float radius = 0f;
 

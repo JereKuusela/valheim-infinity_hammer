@@ -1,22 +1,30 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net4.8</TargetFramework>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>preview</LangVersion>
     <nullable>enable</nullable>
+    <RunPostBuildEvent>Always</RunPostBuildEvent>
   </PropertyGroup>
   <Target Name="CopyDLL" AfterTargets="Build">
     <Copy
       SourceFiles="$(TargetDir)$(ProjectName).dll"
       DestinationFolder="$(ProjectDir)\..\..\Libs" />
+  
+
     <Message Text="Copied to Libs folder." Importance="High" />
   </Target>
+  <Target Name="PostBuild" AfterTargets="CopyDLL">
+    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(SolutionDir)\copy-dlls.ps1&quot;"/>
+  </Target>
+
   <ItemGroup>
+    <Reference Include="Argo">
+      <HintPath>..\..\Libs\Argo.dll</HintPath>
+    </Reference>
     <Reference Include="BepInEx.dll">
       <HintPath>..\..\Libs\BepinEx.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Runtime.Serialization.Json">
-      <HintPath>C:\Users\Seelenquell\.nuget\packages\microsoft.netframework.referenceassemblies.net48\1.0.3\build\.NETFramework\v4.8\Facades\System.Runtime.Serialization.Json.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.dll">
       <HintPath>..\..\Libs\UnityEngine.dll</HintPath>
@@ -73,4 +81,8 @@
       <HintPath>..\..\Libs\WorldEditCommands.dll</HintPath>
     </Reference>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Argo\Argo.csproj" />
+  </ItemGroup>  
+  
 </Project>

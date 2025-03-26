@@ -4,7 +4,7 @@ using UnityEngine;
 namespace InfinityHammer;
 public class HammerMoveCommand
 {
-  private static void Command(string direction, Action<Terminal.ConsoleEventArgs, GameObject> action)
+  private static void Command(string direction, Action<Terminal.ConsoleEventArgs, GameObject?> action)
   {
     AutoComplete.Register($"hammer_move_{direction}", (int index) =>
     {

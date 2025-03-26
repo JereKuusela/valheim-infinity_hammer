@@ -8,7 +8,7 @@ using WorldEditCommands;
 namespace InfinityHammer;
 public class HammerStackCommand
 {
-  private static void Execute(GameObject obj, Vector3 delta, Vector3Int min, Vector3Int max)
+  private static void Execute(GameObject? obj, Vector3 delta, Vector3Int min, Vector3Int max)
   {
     UndoHelper.BeginAction();
     var player = Helper.GetPlayer();
@@ -106,7 +106,7 @@ public class HammerStackCommand
       return new(0, Parse.Int(split[0]));
     return Parse.IntRange(value);
   }
-  private static GameObject SelectTarget()
+  private static GameObject? SelectTarget()
   {
     var player = Helper.GetPlayer();
     if (player.m_placementGhost && player.m_placementGhost.TryGetComponent<Piece>(out var piece) && !piece.m_repairPiece)

@@ -1,0 +1,16 @@
+﻿<Weavers xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="FodyWeavers.xsd">
+  <Costura>
+    <IncludeAssemblies>
+      System.Text.Json
+      System.Memory
+      System.Buffers
+      System.Numerics.Vectors
+      System.Runtime.CompilerServices.Unsafe
+      Microsoft.Bcl.AsyncInterfaces
+      System.IO.Pipelines
+      System.Text.Encodings.Web
+      System.Threading.Tasks.Extensions 
+      System.ValueTuple
+    </IncludeAssemblies>
+  </Costura>
+</Weavers>

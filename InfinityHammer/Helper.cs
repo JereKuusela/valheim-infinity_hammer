@@ -13,7 +13,7 @@ public static class HammerHelper
   public static string Format(float value) => value.ToString("0.###", CultureInfo.InvariantCulture);
   public static string PrintXZY(Vector3 vec) => $"{Format(vec.x)},{Format(vec.z)},{Format(vec.y)}";
   public static string PrintYXZ(Vector3 vec) => $"{Format(vec.y)},{Format(vec.x)},{Format(vec.z)}";
-  public static GameObject GetPlacementGhost()
+  public static GameObject? GetPlacementGhost()
   {
     var player = Helper.GetPlayer();
     if (!player.m_placementGhost) throw new InvalidOperationException("Not currently placing anything.");
@@ -37,7 +37,7 @@ public static class HammerHelper
   }
 
   ///<summary>Parses a size which can be a constant number or based on the ghost size.</summary>
-  public static Vector3 ParseSize(GameObject ghost, string value)
+  public static Vector3 ParseSize(GameObject? ghost, string value)
   {
     var multiplier = Parse.Multiplier(value);
     var size = Vector3.one;
@@ -50,14 +50,14 @@ public static class HammerHelper
     return multiplier * size;
   }
   ///<summary>Parses a size which can be a constant number or based on the ghost size.</summary>
-  public static Vector3 TryParseSize(GameObject ghost, string[] args, int index, string defaltValue = "auto")
+  public static Vector3 TryParseSize(GameObject? ghost, string[] args, int index, string defaltValue = "auto")
   {
     var value = defaltValue;
     if (args.Length > index) value = args[index];
     return ParseSize(ghost, value);
   }
   ///<summary>Parses a size which can be a constant number or based on the ghost size.</summary>
-  public static Vector3 TryParseSizesZYX(GameObject ghost, string[] args, int index, string defaltValue = "auto")
+  public static Vector3 TryParseSizesZYX(GameObject? ghost, string[] args, int index, string defaltValue = "auto")
   {
     var value = defaltValue;
     if (args.Length > index) value = args[index];
@@ -182,8 +182,8 @@ public static class HammerHelper
     DisableComponents<RandomFlyingBird>(obj);
     DisableComponents<Windmill>(obj);
     DisableComponents<MineRock>(obj);
-
-    DestroyComponents<MineRock5>(obj);
+    DisableComponents<MineRock5>(obj); // changed to disable, some ppl like digging caves :)
+    // DestroyComponents<MineRock5>(obj);
     DestroyComponents<Fish>(obj);
     DestroyComponents<CharacterAnimEvent>(obj);
     DestroyComponents<TreeLog>(obj);

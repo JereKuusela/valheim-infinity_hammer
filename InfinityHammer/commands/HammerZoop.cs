@@ -107,7 +107,8 @@ public partial class ObjectSelection : BaseSelection
   }
   private void CenterOnRandomChild()
   {
-    var children = Snapping.GetChildren(SelectedPrefab);
+    var children = 
+      Snapping.GetChildren(SelectedPrefab);
     var child = children[UnityEngine.Random.Range(0, children.Count)];
     var shift = child.transform.localPosition;
     foreach (Transform tr in SelectedPrefab.transform)
@@ -153,7 +154,7 @@ public partial class ObjectSelection : BaseSelection
     offset.z *= index.z;
     return offset;
   }
-  private GameObject BasePrefab => Zoops.Count > 0 ? Zoops.First().Value : SelectedPrefab;
+  private GameObject? BasePrefab => Zoops.Count > 0 ? Zoops.First().Value : SelectedPrefab;
   private void UpdateOffsetX(string offset)
   {
     var size = HammerHelper.ParseSize(BasePrefab, offset);

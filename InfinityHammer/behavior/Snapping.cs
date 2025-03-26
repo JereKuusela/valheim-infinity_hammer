@@ -12,9 +12,9 @@ public static class Snapping
 {
   public static bool IsSnapPoint(GameObject obj) => obj && obj.CompareTag("snappoint");
   public static bool IsSnapPoint(Transform tr) => IsSnapPoint(tr.gameObject);
-  public static List<GameObject> GetChildren(GameObject obj)
+  public static List<GameObject?> GetChildren(GameObject? obj)
   {
-    List<GameObject> children = [];
+    List<GameObject?> children = [];
     foreach (Transform tr in obj.transform)
     {
       if (IsSnapPoint(tr)) continue;
@@ -22,7 +22,7 @@ public static class Snapping
     }
     return children;
   }
-  public static List<GameObject> GetSnapPoints(GameObject obj)
+  public static List<GameObject> GetSnapPoints(GameObject? obj)
   {
     List<GameObject> snapPoints = [];
     foreach (Transform tr in obj.transform)
@@ -50,7 +50,7 @@ public static class Snapping
     return count;
   }
 
-  public static void CreateSnapPoint(GameObject parent, Vector3 pos, string name)
+  public static void CreateSnapPoint(GameObject? parent, Vector3 pos, string name)
   {
     GameObject snapObj = new()
     {
@@ -63,19 +63,19 @@ public static class Snapping
     snapObj.transform.localPosition = pos;
     snapObj.transform.localRotation = Quaternion.identity;
   }
-  public static void CreateSnapPoints(GameObject obj, List<Vector3> points)
+  public static void CreateSnapPoints(GameObject? obj, List<Vector3> points)
   {
     int counter = 0;
     foreach (var point in points)
       CreateSnapPoint(obj, point, $"Snap {++counter}");
   }
 
-  public static void RegenerateSnapPoints(GameObject obj)
+  public static void RegenerateSnapPoints(GameObject? obj)
   {
     RemoveSnapPoints(obj);
     GenerateSnapPoints(obj);
   }
-  public static void RemoveSnapPoints(GameObject obj)
+  public static void RemoveSnapPoints(GameObject? obj)
   {
     foreach (Transform tr in obj.transform)
     {
@@ -98,8 +98,8 @@ public static class Snapping
     List<Vector3> points = UniquePoints([.. edges, .. corners]);
     CreateSnapPoints(obj.gameObject, points);
   }
-  public static void GenerateSnapPoints(GameObject obj) => CreateSnapPoints(obj, GenerateSnapPoints(GetChildren(obj)));
-  public static List<Vector3> GenerateSnapPoints(List<GameObject> objects)
+  public static void GenerateSnapPoints(GameObject? obj) => CreateSnapPoints(obj, GenerateSnapPoints(GetChildren(obj)));
+  public static List<Vector3> GenerateSnapPoints(List<GameObject?> objects)
   {
     if (objects.Count == 0) return [];
     if (Configuration.Snapping == SnappingMode.Off)
@@ -115,7 +115,7 @@ public static class Snapping
     return points;
   }
 
-  private static List<Vector3> SearchSnapPoints(List<GameObject> objects)
+  private static List<Vector3> SearchSnapPoints(List<GameObject?> objects)
   {
     List<Vector3> snapPoints = [];
     foreach (var child in objects)
@@ -125,7 +125,7 @@ public static class Snapping
     }
     return snapPoints;
   }
-  private static void GetSnapPoints(GameObject obj, List<Vector3> snapPoints)
+  private static void GetSnapPoints(GameObject? obj, List<Vector3> snapPoints)
   {
     for (int c = 0; c < obj.transform.childCount; c++)
     {

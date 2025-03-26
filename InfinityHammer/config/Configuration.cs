@@ -59,9 +59,72 @@ public partial class Configuration
   public static float Range => IsCheats ? Parse.Float(configRange.Value) : 0f;
   public static ConfigEntry<bool> configPlaceEmptyRooms;
   public static bool PlaceEmptyRooms => configPlaceEmptyRooms.Value;
+  
+  public static ConfigEntry<bool> configBlueprintNoChestContent;
+  public static bool BlueprintNoChestContent => configBlueprintNoChestContent.Value;
 
+  public static ConfigEntry<bool> configBlueprintNoFuel;
+  public static bool BlueprintNoFuel => configBlueprintNoFuel.Value;
 
-  public static ConfigWrapper Wrapper;
+  public static ConfigEntry<bool> configBlueprintItemHolderReduceData;
+  public static bool BlueprintItemHolderReduceData => configBlueprintItemHolderReduceData.Value;
+  
+  
+ 
+ /*
+ public static ConfigEntry<string> configEnableBuildPlayer;
+ public static ConfigEntry<string> configEnableBuildPiece;
+ public static ConfigEntry<string> configEnablePlaceable;
+ public static ConfigEntry<string> configEnableCompfort;
+ public static ConfigEntry<string> configEnableLightSource;
+ public static ConfigEntry<string> configEnableHoverable;
+ public static ConfigEntry<string> configEnableTextReceiver;
+ public static ConfigEntry<string> configEnableInteractable;
+ public static ConfigEntry<string> configEnableObjectHolder;
+ public static ConfigEntry<string> configEnableContainerPiece;
+ public static ConfigEntry<string> configEnableCraftingStation;
+ public static ConfigEntry<string> configEnableFuel;
+ public static ConfigEntry<string> configEnablePickable;
+ public static ConfigEntry<string> configEnableCultivated;
+ public static ConfigEntry<string> configEnableDestroyableTerrain;
+ public static ConfigEntry<string> configEnableFractured;
+ public static ConfigEntry<string> configEnableHoverableResourceNode;
+ public static ConfigEntry<string> configEnableNonStatic;
+ public static ConfigEntry<string> configEnableCreature;
+ public static ConfigEntry<string> configEnableTameable;
+ public static ConfigEntry<string> configEnableVehicle;
+ public static ConfigEntry<string> configEnableAnimated;
+ public static ConfigEntry<string> configEnableSpecialInterface;
+ public static ConfigEntry<string> configEnableIndestructible;
+ public static ConfigEntry<string> configEnableCustomNotVanilla;
+ public static string  EnableBuildPlayer => configEnableBuildPlayer.Value;
+ public static string    EnableBuildPiece => configEnableBuildPiece.Value;
+ public static string  EnablePlaceable => configEnablePlaceable.Value;
+ public static string    EnableCompfort => configEnableCompfort.Value;
+ public static string  EnableLightSource => configEnableLightSource.Value;
+ public static string    EnableHoverable => configEnableHoverable.Value;
+ public static string  EnableTextReceiver => configEnableTextReceiver.Value;
+ public static string    EnableInteractable => configEnableInteractable.Value;
+ public static string  EnableObjectHolder => configEnableObjectHolder.Value;
+ public static string    EnableContainerPiece => configEnableContainerPiece.Value;
+ public static string  EnableCraftingStation => configEnableCraftingStation.Value;
+ public static string    EnableFuel => configEnableFuel.Value;
+ public static string  EnablePickable => configEnablePickable.Value;
+ public static string    EnableCultivated => configEnableCultivated.Value;
+ public static string  EnableDestroyableTerrain => configEnableDestroyableTerrain.Value;
+ public static string    EnableFractured => configEnableFractured.Value;
+ public static string  EnableHoverableResourceNode => configEnableHoverableResourceNode.Value;
+ public static string    EnableNonStatic => configEnableNonStatic.Value;
+ public static string  EnableCreature => configEnableCreature.Value;
+ public static string    EnableTameable => configEnableTameable.Value;
+ public static string  EnableVehicle => configEnableVehicle.Value;
+ public static string    EnableAnimated => configEnableAnimated.Value;
+ public static string  EnableSpecialInterface => configEnableSpecialInterface.Value;
+ public static string    EnableIndestructible => configEnableIndestructible.Value;
+ public static string  EnableCustomNotVanilla => configEnableCustomNotVanilla.Value;
+ */
+
+ public static ConfigWrapper Wrapper;
 
 #nullable enable
 
@@ -98,7 +161,39 @@ public partial class Configuration
     configDisableOffsetMessages = wrapper.Bind(section, "Disable offset messages", false, "Disables messages from changing placement offset.");
     configDisableScaleMessages = wrapper.Bind(section, "Disable scale messages", false, "Disables messages from changing the scale.");
     configDisableSelectMessages = wrapper.Bind(section, "Disable select messages", false, "Disables messages from selecting objects.");
-
+    section = "8. Json Blueprint Tests";
+    configBlueprintNoChestContent = wrapper.Bind(section, "Disable Chest Content Save", false, "Doesnt Save chest contents when saving blueprints.");
+    configBlueprintNoFuel  = wrapper.Bind(section, "Disable Fuel Save", false, "Doesnt Save the content of ItemHolders when saving blueprints.");
+    configBlueprintItemHolderReduceData = wrapper.Bind(section, "Reduced ItemHolder Data", false, "Does nothing atm.");
+      
+    /*configEnableBuildPlayer = wrapper.Bind(section,  "Enable BuildPlayer",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude BuildPlayer Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableBuildPiece = wrapper.Bind(section,  "Enable BuildPiece",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude BuildPiece Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnablePlaceable = wrapper.Bind(section,  "Enable Placeable",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude Placeable Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableCompfort = wrapper.Bind(section,  "Enable Compfort",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude Compfort Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableLightSource = wrapper.Bind(section,  "Enable LightSource",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude LightSource Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableHoverable = wrapper.Bind(section,  "Enable Hoverable",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude Hoverable Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableTextReceiver = wrapper.Bind(section,  "Enable TextReceiver",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude TextReceiver Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableInteractable = wrapper.Bind(section,  "Enable Interactable",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude Interactable Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableObjectHolder = wrapper.Bind(section,  "Enable ObjectHolder",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude ObjectHolder Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableContainerPiece = wrapper.Bind(section,  "Enable ContainerPiece",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude ContainerPiece Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableCraftingStation = wrapper.Bind(section,  "Enable CraftingStation",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude CraftingStation Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableFuel = wrapper.Bind(section,  "Enable Fuel",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude Fuel Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnablePickable = wrapper.Bind(section,  "Enable Pickable",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude Pickable Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableCultivated = wrapper.Bind(section,  "Enable Cultivated",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude Cultivated Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableDestroyableTerrain = wrapper.Bind(section,  "Enable DestroyableTerrain",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude DestroyableTerrain Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableFractured = wrapper.Bind(section,  "Enable Fractured",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude Fractured Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableHoverableResourceNode = wrapper.Bind(section,  "Enable HoverableResourceNode",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude HoverableResourceNode Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableNonStatic = wrapper.Bind(section,  "Enable NonStatic",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude NonStatic Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableCreature = wrapper.Bind(section,  "Enable Creature",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude Creature Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableTameable = wrapper.Bind(section,  "Enable Tameable",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude Tameable Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableVehicle = wrapper.Bind(section,  "Enable Vehicle",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude Vehicle Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableAnimated = wrapper.Bind(section,  "Enable Animated",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude Animated Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableSpecialInterface = wrapper.Bind(section,  "Enable SpecialInterface",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude SpecialInterface Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableIndestructible = wrapper.Bind(section,  "Enable Indestructible",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude Indestructible Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    configEnableCustomNotVanilla = wrapper.Bind(section,  "Enable CustomNotVanilla",CategorySettingsStrings.Include,  new ConfigDescription("Includes, excludes or forces to exclude CustomNotVanilla Pieces", new AcceptableValueList<string>(CategorySettingsStrings.Include, CategorySettingsStrings.Exclude,CategorySettingsStrings.ForceExclude)));   
+    */
+    
+      
     InitOther(wrapper);
     InitTools(wrapper);
     InitBlueprint(wrapper);
