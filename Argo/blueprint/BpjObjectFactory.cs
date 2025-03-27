@@ -1,16 +1,28 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using Argo.DataAnalysis;
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace Argo.Blueprint
 {
-    public struct BPListObject(
-        string prefab_, GameObject obj_)
+    public struct BPListObject
     {
-        public string     prefab = prefab_;
-        public GameObject obj    = obj_;
+        public string     prefab;
+        public GameObject obj;
+        public BpjZVars   zvars;
+        public BPListObject(
+            string prefab_, GameObject obj_) {
+            prefab=prefab_;
+            obj   =obj_;
+            zvars =new BpjZVars();
+        }
+        public BPListObject(string prefab_, GameObject obj_, BpjZVars zvars_) {
+            prefab=prefab_;
+            obj   =obj_;
+            zvars =zvars_;
+        }
     }
 
     public class BpjObjectFactory : MonoBehaviour
@@ -21,8 +33,8 @@ namespace Argo.Blueprint
             BlueprintJson? bp_, GameObject? parent_
         )
         {
-            internal BlueprintJson? bp     = bp_;
-            internal GameObject?    parent = parent_;
+            internal BlueprintJson? bp    =bp_;
+            internal GameObject?    parent=parent_;
         }
 
         internal LifeTimeExtender? m_LifeTimeExtender;
@@ -39,15 +51,14 @@ namespace Argo.Blueprint
         /// todo add listener count and call automatically if all listeners did complete
         /// todo extend description
         internal bool ExtendLifeTime() {
-            if (m_LifeTimeExtender == null)
-            {
+            if (m_LifeTimeExtender == null) {
                 m_LifeTimeExtender
-                    = new LifeTimeExtender(Blueprint, Parent);
+                    =new LifeTimeExtender( Blueprint, Parent );
                 return true;
             }
 
             throw new InvalidOperationException(
-                "ExtendLifeTime object already exists");
+                "ExtendLifeTime object already exists" );
         }
         /// <summary>
         /// 
@@ -55,55 +66,54 @@ namespace Argo.Blueprint
         /// <returns></returns>
         /// <exception cref="InvalidOperationException"></exception>
         internal bool UnExtendLifeTime() {
-            if (m_LifeTimeExtender != null)
-            {
-                m_LifeTimeExtender = null;
+            if (m_LifeTimeExtender != null) {
+                m_LifeTimeExtender=null;
                 return true;
             }
 
             throw new InvalidOperationException(
-                "ExtendLifeTime object allready removed");
+                "ExtendLifeTime object allready removed" );
         }
-        private                  int        last_yield       = 0;
-        [SerializeField] private UnityEvent onExportComplete = new UnityEvent();
+        private                  int        last_yield      =0;
+        [SerializeField] private UnityEvent onExportComplete=new UnityEvent();
 
         /// A member variable within the `BlueprintObjectFac` class that determines the number of iterations
         /// between yielding during large operations. Useful for preventing frame drops in Unity by allowing
         /// time for other operations to run in between intensive processing loops.
-        internal readonly int yield_steps = 5000;
+        internal readonly int yield_steps=5000;
 
         /// <summary>
         /// Attatches a function which is called when the export coroutine is finished
         /// </summary>
         /// <param name="_onCoroutineComplete"></param>
         public void AddExportListener(UnityAction _onCoroutineComplete) {
-            onExportComplete.AddListener(_onCoroutineComplete);
+            onExportComplete.AddListener( _onCoroutineComplete );
         }
 
         private WeakReference<GameObject> m_Parent
-            = new WeakReference<GameObject>(null!);
+            =new WeakReference<GameObject>( null! );
         internal GameObject? Parent {
-            get => m_Parent.TryGetTarget(out var parent) ? parent : null;
+            get => m_Parent.TryGetTarget( out var parent ) ? parent : null;
         }
-        internal GameObject SetParent { set => m_Parent.SetTarget(value); }
-        
+        internal GameObject SetParent { set => m_Parent.SetTarget( value ); }
+
         private WeakReference<BlueprintJson> m_Blueprint
-            = new WeakReference<BlueprintJson>(null!);
-        
-        internal BlueprintJson SetBlueprint {            set => m_Blueprint.SetTarget(value);        }
+            =new WeakReference<BlueprintJson>( null! );
+
+        internal BlueprintJson SetBlueprint { set => m_Blueprint.SetTarget( value ); }
         internal BlueprintJson? Blueprint {
-            get => m_Blueprint.TryGetTarget(out var blueprint)
+            get => m_Blueprint.TryGetTarget( out var blueprint )
                 ? blueprint
                 : null;
         }
 
         public static (GameObject, BpjObjectFactory) MakeInstance(
             BlueprintJson bp) {
-            var gameObject_ = new GameObject();
-            BpjObjectFactory instance =
+            var gameObject_=new GameObject();
+            BpjObjectFactory instance=
                 gameObject_.AddComponent<BpjObjectFactory>();
-            instance.SetParent    = gameObject_;
-            instance.SetBlueprint = bp;
+            instance.SetParent   =gameObject_;
+            instance.SetBlueprint=bp;
             return (gameObject_, instance);
         }
 
@@ -114,27 +124,26 @@ namespace Argo.Blueprint
         /// <param name="obj"></param>
         /// <returns></returns>
         public BPOFlags GetFlags(GameObject obj) {
-            var components = obj.GetComponents<Component>();
+            var components=obj.GetComponents<Component>();
 
             // todo first check for buildpieces, trees and rocks which are usually the majority of objects.
-            BPOFlags flags = 0;
-            foreach (var component in components)
-            {
-                if (component is Interactable) flags |= BPOFlags.Interactable;
+            BPOFlags flags=0;
+            foreach (var component in components) {
+                if (component is Interactable) flags|=BPOFlags.Interactable;
                 if ((component is Hoverable)     ||
                     (component is IHasHoverMenu) ||
                     (component is IHasHoverMenuExtended))
-                    flags |= BPOFlags.Hoverable;
-                if (component is TextReceiver) flags |= BPOFlags.TextReceiver;
+                    flags|=BPOFlags.Hoverable;
+                if (component is TextReceiver) flags|=BPOFlags.TextReceiver;
                 if (component is IDestructible)
-                    flags |= BPOFlags.DestroyableTerrain;
+                    flags|=BPOFlags.DestroyableTerrain;
 
                 // only boat-helm & saddle
                 if ((component is IDoodadController)  |
                     (component is IPieceMarker)       |
                     (component is IWaterInteractable) |
                     (component is IProjectile))
-                    flags |=
+                    flags|=
                         BPOFlags
                            .SpecialInterface; // only character floating fish
             }
@@ -144,77 +153,74 @@ namespace Argo.Blueprint
 
         internal void BuildBluePrintCoroutine() {
             BlueprintJson blueprint
-                = Blueprint ?? throw new ArgumentException("bp is null");
-            if (blueprint.Objects.Count == 1)
-            {
-                BuildBluePrintSingle(GetPlacementPos(blueprint));
+                =Blueprint ?? throw new ArgumentException( "bp is null" );
+            if (blueprint.Objects.Count == 1) {
+                BuildBluePrintSingle( GetPlacementPos( blueprint ) );
                 return;
             }
-            StartCoroutine(BuildBluePrint());
+            StartCoroutine( BuildBluePrint() );
         }
 
         internal Vector3 GetPlacementPos(BlueprintJson blueprint) {
             return blueprint.player.m_placementGhost.transform.position;
         }
         internal void BuildBluePrintSingle(Vector3 placement_pos) {
-            System.Diagnostics.Debug.WriteLine("AddSingleObject");
+            System.Diagnostics.Debug.WriteLine( "AddSingleObject" );
 
             // todo instead of calling Export Objects just call the stuff here for a
             // todo   single object.
             ExportObjects();
 
             if (Blueprint == null) return;
-            BlueprintJson        blueprint  = Blueprint!;
-            BpjObject? bpjObject  = blueprint.objects[0];
-            var                  gameObject = blueprint.GameObjects[0].obj;
+            BlueprintJson blueprint =Blueprint!;
+            BpjObject?    bpjObject =blueprint.objects[0];
+            var           gameObject=blueprint.GameObjects[0].obj;
             if (bpjObject == null) return;
             if (!gameObject) return;
-            if (blueprint.Objects.Count > 0)
-            {
-                bpjObject.Pos = Vector3.zero;
-                bpjObject.Rot = Quaternion.identity;
+            if (blueprint.Objects.Count > 0) {
+                bpjObject.Pos=Vector3.zero;
+                bpjObject.Rot=Quaternion.identity;
                 bpjObject.Scale
-                    = gameObject.transform.localScale;
+                    =gameObject.transform.localScale;
             }
-            bpjObject.Chance = 1f;
+            bpjObject.Chance=1f;
 
-            var snaps = Util.GetSnapPoints(gameObject);
+            var snaps=Util.GetSnapPoints( gameObject );
             foreach (var snap in snaps)
-                blueprint.SnapPoints.Add(snap.transform
-                                             .localPosition);
+                blueprint.SnapPoints.Add( snap.transform
+                                              .localPosition );
 
-            var offset = blueprint.Center(blueprint.CenterPiece);
+            var offset=blueprint.Center( blueprint.CenterPiece );
             blueprint.Coordinates
-                = placement_pos - offset;
+                =placement_pos - offset;
             onExportComplete.Invoke();
         }
         private IEnumerator BuildBluePrint() {
             ExtendLifeTime();
 
             BlueprintJson blueprint
-                = Blueprint ?? throw new ArgumentException("bp is null");
+                =Blueprint ?? throw new ArgumentException( "bp is null" );
             Vector3 placement_pos
-                = blueprint.player.m_placementGhost.transform.position;
+                =blueprint.player.m_placementGhost.transform.position;
             // todo add chase for single object
 
-            yield return StartCoroutine(ExportObjects());
+            yield return StartCoroutine( ExportObjects() );
 
-            var bp_ob = blueprint.Objects ??
-                throw new ArgumentException("objects is null");
+            var bp_ob=blueprint.Objects ??
+                throw new ArgumentException( "objects is null" );
 
 // todo look at infinityhammer, this might add every snapppoint from every piece
-            if (blueprint.snapPiece == "")
-            {
+            if (blueprint.snapPiece == "") {
                 var snaps
-                    = blueprint.selection?.GetSnapPoints() ?? new List<GameObject>();
+                    =blueprint.selection?.GetSnapPoints() ?? new List<GameObject>();
                 foreach (var snap in snaps)
-                    blueprint.SnapPoints.Add(snap.transform
-                                                 .localPosition);
+                    blueprint.SnapPoints.Add( snap.transform
+                                                  .localPosition );
             }
 
-            var offset = blueprint.Center(blueprint.CenterPiece);
+            var offset=blueprint.Center( blueprint.CenterPiece );
             blueprint.Coordinates
-                = placement_pos - offset;
+                =placement_pos - offset;
 
             onExportComplete.Invoke();
             UnExtendLifeTime();
@@ -222,46 +228,45 @@ namespace Argo.Blueprint
         }
 
 #if DEBUG
-        private void DebugAddObjects(BpjFetcher     fetcher,
-                                     ExportIterator iterator) {
-            var g_obj = iterator.g_obj;
-            var prefab =  ArgoWrappers.GetPrefabName(g_obj) == ""
-                ? iterator.Prefab
-                : ArgoWrappers.GetPrefabName(g_obj);
+        private void DebugAddObjects(
+            BpjFetcher     fetcher,
+            ExportIterator iterator) {
+            try {
+                var g_obj=iterator.g_obj;
+                var prefab=ArgoWrappers.GetPrefabName( g_obj ) == ""
+                    ? iterator.Prefab
+                    : ArgoWrappers.GetPrefabName( g_obj );
 
-            if (!fetcher
-                   .IsKnown()) // dump infos to if prefab is not in register
-            {
-                var components = g_obj.GetComponents<Component>() ??
-                    new Component[0];
-                var text = "Prefab " + prefab +
-                    " not in register, components: ";
-                foreach (var component in components)
+                if (!fetcher
+                       .IsKnown()) // dump infos to if prefab is not in register
                 {
-                    text += component.GetType().Name + " ";
-                }
+                    var components=g_obj.GetComponents<Component>() ??
+                        new Component[0];
+                    var text="Prefab " + prefab +
+                        " not in register, components: ";
+                    foreach (var component in components) { text+=component.GetType().Name + " "; }
 
-                System.Diagnostics.Debug.WriteLine(text);
-            }
+                    System.Diagnostics.Debug.WriteLine( text );
+                }
 
 // test if pieces are correctly tagged as buildpieces
-            if (g_obj.TryGetComponent<Piece>(
-                    out _)) //todo seems buildpieces are not pieces?
-            {
-                if ((fetcher.m_Flags &
-                        BPOFlags.BuildPiece) == 0)
+                if (g_obj.TryGetComponent<Piece>(
+                        out _ )) //todo seems buildpieces are not pieces?
                 {
-                    System.Diagnostics.Debug.WriteLine("Prefab " + prefab +
-                        " not tagged as buildpiece");
+                    if ((fetcher.m_Flags &
+                            BPOFlags.BuildPiece) == 0) {
+                        System.Diagnostics.Debug.WriteLine( "Prefab " + prefab +
+                            " not tagged as buildpiece" );
+                    }
+                } else {
+                    if ((fetcher.m_Flags &
+                            BPOFlags.BuildPiece) != 0) {
+                        System.Diagnostics.Debug.WriteLine( "Prefab " + prefab +
+                            " is incorrectly tagged as buildpiece" );
+                    }
                 }
-            } else
-            {
-                if ((fetcher.m_Flags &
-                        BPOFlags.BuildPiece) != 0)
-                {
-                    System.Diagnostics.Debug.WriteLine("Prefab " + prefab +
-                        " is incorrectly tagged as buildpiece");
-                }
+            } catch (Exception e) {
+                System.Diagnostics.Debug.WriteLine( "DebugAddObjects: " + e );
             }
         }
 #endif
@@ -269,17 +274,14 @@ namespace Argo.Blueprint
             // todo
         }
         internal void AddSnapPoints(ExportIterator iterator) {
-            var prefab = iterator.Prefab;
-            do
-            {
-                var bp = Blueprint!;
-                try
-                {
-                    bp.SnapPoints.Add(iterator.g_obj.transform
-                                              .localPosition);
+            var prefab=iterator.Prefab;
+            do {
+                var bp=Blueprint!;
+                try {
+                    bp.SnapPoints.Add( iterator.g_obj.transform
+                                               .localPosition );
                     iterator++;
-                } catch (Exception)
-                {
+                } catch (Exception) {
                     iterator++; // avoid ifinite loop in case of error
                     throw;
                 }
@@ -300,54 +302,59 @@ namespace Argo.Blueprint
             }*/
 
             // m_bp.TryGetTarget(out var bp);
-            BlueprintJson  bp       = Blueprint!;
-            ExportIterator iterator = new ExportIterator(bp);
+            BlueprintJson  bp      =Blueprint!;
+            ExportIterator iterator=new ExportIterator( bp );
             BpjFetcher     fetcher;
 
-            while (iterator)
-            {
-                var prefab = iterator.Prefab;
+            while (iterator) {
+                var prefab=iterator.Prefab;
 
                 // todo add option to ignore certain pieces
                 // especially if pieces are marked as custom pieces
                 // todo maybe move fetcher access to outer loop
-                if ((bp.snapPiece != "") && (iterator.Prefab == bp.snapPiece))
-                {
-                    AddSnapPoints(iterator);
-                } else if (bp.ingoredPieces.Contains(iterator.Prefab))
-                {
+                if ((bp.snapPiece != "") && (iterator.Prefab == bp.snapPiece)) {
+                    AddSnapPoints( iterator );
+                } else if (bp.ingoredPieces.Contains( iterator.Prefab )) {
                     // sadly there is no upper_bound in net, to lazy to write one myself
-                    do
-                    {
-                        iterator++;
-                    } while (iterator &&
-                             iterator.Prefab == prefab);
-                } else
-                {
-                    fetcher = bp.bpoRegister.Get(prefab);
+                    do { iterator++; } while (iterator &&
+                                              iterator.Prefab == prefab);
+                } else {
+                    if (prefab == null) {
+                        System.Diagnostics.Debug.WriteLine( "prefab is null" );
+                        //continue;
+                        prefab="";
+                    }
+                    try {
+                        fetcher=bp.bpoRegister.Get( prefab );
+                    } catch (Exception e) {
+                        System.Diagnostics.Debug.WriteLine( "prefab is null" );
+                        fetcher=bp.bpoRegister.m_default;
+                    }
 #if DEBUG
-                    DebugAddObjects(fetcher, iterator);
+                       DebugAddObjects(fetcher, iterator);
 #endif
 // runs the provided custom function within the loop        
-
-                    fetcher.ExportBefore(prefab, bp.bpoRegister);
-
-                    string prefab_next;
-                    do
-                    {
+                    try {
+                        fetcher.ExportBefore( prefab, bp.bpoRegister );
+                    } catch (Exception e) {
+                        System.Diagnostics.Debug.WriteLine( "ExportWorker1: " + e );
+                    }
+                    do {
                         // todo maybe run Before here and rename Loop/Worker to after and rename the
                         // todo     function "Before" before loop to init
-
-                        // runs the provided custom function within the loop
-                        var bpo = fetcher.ExportWorker(iterator, true);
-                        bp.Add(bpo);
-                        iterator++;
-
-                        if ((iterator.Index - last_yield) >= yield_steps)
-                        {
-                            last_yield = iterator.Index;
-                            System.Console.WriteLine(iterator.Index +
-                                " BlueprintObjects generated");
+                        try {
+                            // runs the provided custom function within the loop
+                            var bpo=fetcher.ExportWorker( iterator, true );
+                            bp.Add( bpo );
+                            iterator++;
+                        } catch (Exception e) {
+                            System.Diagnostics.Debug.WriteLine( "ExportWorker2: " + e );
+                            iterator++;
+                        }
+                        if ((iterator.Index - last_yield) >= yield_steps) {
+                            last_yield=iterator.Index;
+                            System.Console.WriteLine( iterator.Index +
+                                " BlueprintObjects generated" );
 
                             yield return null;
                         }
@@ -370,53 +377,44 @@ namespace Argo.Blueprint
         private IEnumerator ImportObjects() { return null; }
 
         private IEnumerator ToGameObjects() {
-            BlueprintJson  bp       = Blueprint!;
-            ImportIterator iterator = new ImportIterator(bp);
+            BlueprintJson  bp      =Blueprint!;
+            ImportIterator iterator=new ImportIterator( bp );
             BpjFetcher     fetcher;
 
-            while (iterator)
-            {
-                var prefab = iterator.Prefab;
+            while (iterator) {
+                var prefab=iterator.Prefab;
 
                 // todo add option to ignore certain pieces
                 // especially if pieces are marked as custom pieces
                 // todo maybe move fetcher access to outer loop
-                if ((bp.snapPiece != "") && (iterator.Prefab == bp.snapPiece))
-                {
-                    AddSnapPoints(iterator);
-                } else if (bp.ingoredPieces.Contains(iterator.Prefab))
-                {
+                if ((bp.snapPiece != "") && (iterator.Prefab == bp.snapPiece)) {
+                    AddSnapPoints( iterator );
+                } else if (bp.ingoredPieces.Contains( iterator.Prefab )) {
                     // sadly there is no upper_bound in net, to lazy to write one myself
-                    do
-                    {
-                        iterator++;
-                    } while (iterator &&
-                             iterator.Prefab == prefab);
-                } else
-                {
-                    fetcher = bp.bpoRegister.Get(prefab);
+                    do { iterator++; } while (iterator &&
+                                              iterator.Prefab == prefab);
+                } else {
+                    fetcher=bp.bpoRegister.Get( prefab );
 #if DEBUG
                     // todo DebugAddObjects(fetcher, iterator);
 #endif
 // runs the provided custom function within the loop        
 
-                    fetcher.ImportBefore(prefab, bp.bpoRegister);
+                    fetcher.ImportBefore( prefab, bp.bpoRegister );
 
-                    do
-                    {
+                    do {
                         // todo maybe run Before here and rename Loop/Worker to after and rename the
                         // todo     function "Before" before loop to init
 
                         // runs the provided custom function within the loop
-                        var bpo = fetcher.ImportWorker(iterator, true);
-                        bp.Add(bpo);
+                        var bpo=fetcher.ImportWorker( iterator, true );
+                        bp.Add( bpo );
                         iterator++;
 
-                        if ((iterator.Index - last_yield) >= yield_steps)
-                        {
-                            last_yield = iterator.Index;
-                            System.Console.WriteLine(iterator.Index +
-                                " BlueprintObjects generated");
+                        if ((iterator.Index - last_yield) >= yield_steps) {
+                            last_yield=iterator.Index;
+                            System.Console.WriteLine( iterator.Index +
+                                " BlueprintObjects generated" );
 
                             yield return null;
                         }
@@ -431,28 +429,28 @@ namespace Argo.Blueprint
 
     {
         public ImportIterator(BlueprintJson bp) {
-            m_lines = bp.Lines;
-            idx     = 0;
+            m_lines=bp.Lines;
+            idx    =0;
         }
         internal List<BlueprintJson.BpjLine> m_lines;
-        internal int                        idx;
+        internal int                         idx;
 
         public static ImportIterator operator ++(ImportIterator it)
             => (it.idx++, it).Item2;
         public static implicit operator bool(ImportIterator it)
             => (it.idx < it.Count);
-        public BlueprintJson.BpjLine BpjLine    { get => m_lines[idx]; }
-        public int                  Index     { get => idx; }
-        public int                  Count     { get => m_lines.Count; }
-        public bool                 HasNext() { return (idx < Count); }
-        public string               Prefab    { get => m_lines[idx].prefab; }
+        public BlueprintJson.BpjLine BpjLine   { get => m_lines[idx]; }
+        public int                   Index     { get => idx; }
+        public int                   Count     { get => m_lines.Count; }
+        public bool                  HasNext() { return (idx < Count); }
+        public string                Prefab    { get => m_lines[idx].prefab; }
     }
 
     public struct ExportIterator
     {
         public ExportIterator(BlueprintJson bp) {
-            idx      = 0;
-            m_GOList = bp.GameObjects;
+            idx     =0;
+            m_GOList=bp.GameObjects;
         }
         internal int idx;
 
@@ -463,11 +461,13 @@ namespace Argo.Blueprint
         public static implicit operator bool(ExportIterator it)
             => (it.idx < it.Count);
 
-        internal List<BPListObject> GObjects  { get => m_GOList; }
-        public   GameObject         g_obj     { get => m_GOList[idx].obj; }
-        public   int                Index     { get => idx; }
-        public   int                Count     { get => m_GOList.Count; }
-        internal bool               HasNext() { return (idx < Count); }
-        public   string             Prefab    { get => m_GOList[idx].prefab; }
+        internal List<BPListObject> GObjects { get => m_GOList; }
+        public   GameObject         g_obj    { get => m_GOList[idx].obj; }
+        public   BpjZVars           z_vars   { get => m_GOList[idx].zvars; }
+
+        public   int    Index     { get => idx; }
+        public   int    Count     { get => m_GOList.Count; }
+        internal bool   HasNext() { return (idx < Count); }
+        public   string Prefab    { get => m_GOList[idx].prefab; }
     }
 }

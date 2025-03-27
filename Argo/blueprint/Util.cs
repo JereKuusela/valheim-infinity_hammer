@@ -30,7 +30,7 @@ public class Util
     }
 
     public static string GetPrefabName(GameObject? obj) {
-        return obj.name.Split(new[] { ' ', '(' }, 2)[0];
+        return obj?.name.Split(new[] { ' ', '(' }, 2)[0] ?? "";
     }
 
     public static GameObject? CreateDummy(string prefab) {

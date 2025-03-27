@@ -1,7 +1,8 @@
-﻿namespace Argo.blueprint.Util;
+﻿using UnityEngine;
+
+namespace Argo.blueprint.Util;
 
 using System;
-using System.Numerics; // Vector3 hier definiert, oder UnityEngine, falls in Unity.
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -11,9 +12,9 @@ public class Vec3JsonConverter : JsonConverter<Vector3>
     public override void Write(Utf8JsonWriter writer, Vector3 vec, JsonSerializerOptions options)
     {
         writer.WriteStartArray();
-        writer.WriteNumberValue(vec.X);
-        writer.WriteNumberValue(vec.Y);
-        writer.WriteNumberValue(vec.Z);
+        writer.WriteNumberValue(vec.x);
+        writer.WriteNumberValue(vec.y);
+        writer.WriteNumberValue(vec.z);
         writer.WriteEndArray();
     }
 
@@ -25,11 +26,11 @@ public class Vec3JsonConverter : JsonConverter<Vector3>
 
         Vector3 vec = new();
         reader.Read();
-        vec.X = reader.GetSingle();
+        vec.x = reader.GetSingle();
         reader.Read();
-        vec.Y = reader.GetSingle();
+        vec.y = reader.GetSingle();
         reader.Read();
-        vec.Z = reader.GetSingle();
+        vec.z = reader.GetSingle();
 
         reader.Read(); // EndArray
 
@@ -42,12 +43,13 @@ public class Vec3JsonConverter : JsonConverter<Vector3>
 public class QuatJsonConverter : JsonConverter<Quaternion>
 {
     // Schreiben des Vector3 als Array [x,y,z]
-    public override void Write(Utf8JsonWriter writer, Quaternion vec, JsonSerializerOptions options)
+    public override void Write(Utf8JsonWriter writer, Quaternion quat, JsonSerializerOptions options)
     {
         writer.WriteStartArray();
-        writer.WriteNumberValue(vec.X);
-        writer.WriteNumberValue(vec.Y);
-        writer.WriteNumberValue(vec.Z);
+        writer.WriteNumberValue(quat.x);
+        writer.WriteNumberValue(quat.y);
+        writer.WriteNumberValue(quat.z);
+        writer.WriteNumberValue(quat.w);
         writer.WriteEndArray();
     }
 
@@ -59,13 +61,13 @@ public class QuatJsonConverter : JsonConverter<Quaternion>
 
         Quaternion quat = new();
         reader.Read();
-        quat.X = reader.GetSingle();
+        quat.x = reader.GetSingle();
         reader.Read();
-        quat.Y = reader.GetSingle();
+        quat.y = reader.GetSingle();
         reader.Read();
-        quat.Z = reader.GetSingle();
+        quat.z = reader.GetSingle();
         reader.Read();
-        quat.W = reader.GetSingle();
+        quat.w = reader.GetSingle();
         reader.Read(); // EndArray
 
         if (reader.TokenType != JsonTokenType.EndArray)

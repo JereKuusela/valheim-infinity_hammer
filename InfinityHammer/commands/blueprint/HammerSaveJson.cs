@@ -47,16 +47,19 @@ public class HammerSaveCommandJson
                             : Configuration.BlueprintGlobalFolder, name);
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
                 //    File.Create(path);
-                SelectedObjects selectedObjects
-                    = new SelectedObjects(placementGhost);
-                var bp = new BlueprintJson(player, selectedObjects,
-                    pars.CenterPiece,
-                    pars.SnapPiece, pars.SaveData);
+                
+                   
+               
 
                 if (Selection.Get() is not ObjectSelection selection)
                 {
                     throw new ArgumentException("Selection error");
+                    
                 }
+                SelectedObjects selectedObjects = new SelectedObjects(placementGhost, selection);
+                var bp = new BlueprintJson(player, selectedObjects,
+                    pars.CenterPiece,
+                    pars.SnapPiece, pars.SaveData);
                 if (selection.Objects.Count() == 0)
                 {
                     bp.BuildBluePrintSingle();

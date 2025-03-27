@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Dynamic;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Security.Policy;
@@ -10,15 +8,13 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using Argo.blueprint.Util;
-using Argo.DataAnalysis;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace Argo.Blueprint;
 
 using DOdata = ZDOExtraData;
-using static BpoZDOVars;
-using static BpoZDOVars.ZType;
+using static BpjZVars;
 
 [Flags]
 public enum BPOFlags : uint
@@ -65,540 +61,211 @@ public enum BPOFlags : uint
     Indestructible = 1 << 4,
     // piece categories from Valheim Piece.cs PieceCategory.
     // Uses the last 4 bits but leave the last 8 open for future additions
-    CustomNotVanilla = 1 << 0,
+    IsVanilla = 1 << 0, // todo add for every vanilla piece
 }
 
-public class BpoConverter : JsonConverter<BpjObject>
+public class BpjDataConverter : JsonConverter<BpjObject.TData>
 {
+    static readonly Vec3JsonConverter vec3JsonConverter = new Vec3JsonConverter();
+    static readonly QuatJsonConverter quatJsonConverter = new QuatJsonConverter();
     public override void Write(
-        Utf8JsonWriter        writer, BpjObject Bpo,
+        Utf8JsonWriter        writer, BpjObject.TData data,
         JsonSerializerOptions options) {
-        writer.WriteStartObject();
-        writer.WritePropertyName(Bpo.m_prefab);
-        JsonSerializer.Serialize(writer, Bpo.m_data, options);
-        if (Bpo.m_properties.Count != 0) {
-            var options1 = new JsonSerializerOptions(options);
-            options1.Converters.Add(new ZdoConverter());
-            writer.WritePropertyName("ZDOVars");
-            JsonSerializer.Serialize(writer, Bpo.m_properties.m_values.Values, options1);
+        try {
+            writer.WriteStartObject();
+            writer.WritePropertyName( "flags" );
+            writer.WriteNumberValue( (uint)(data.flags) );
+            /*writer.WritePropertyName("p");
+            JsonSerializer.Serialize(writer, (Vector3)(data.p), options);*/
+            writer.WritePropertyName( "p" );
+            vec3JsonConverter.Write( writer, data.p, options );
+            writer.WritePropertyName( "r" );
+            quatJsonConverter.Write( writer, data.r, options );
+            writer.WritePropertyName( "s" );
+            vec3JsonConverter.Write( writer, data.s, options );
+
+            /*
+            writer.WriteStartArray();
+            writer.WriteNumberValue(data.p.x);
+            writer.WriteNumberValue(data.p.y);
+            writer.WriteNumberValue(data.p.z);
+            writer.WriteEndArray();
+            writer.WritePropertyName("r");
+            writer.WriteStartArray();
+            writer.WriteNumberValue(data.r.x);
+            writer.WriteNumberValue(data.r.y);
+            writer.WriteNumberValue(data.r.z);
+            writer.WriteNumberValue(data.r.w);
+            writer.WriteEndArray();
+            writer.WritePropertyName("s");
+            writer.WriteStartArray();
+            writer.WriteNumberValue(data.s.x);
+            writer.WriteNumberValue(data.s.y);
+            writer.WriteNumberValue(data.s.z);
+            writer.WriteEndArray();*/
+            /*writer.WritePropertyName("s");
+            JsonSerializer.Serialize(writer, (Vector3)(data.s), options);
+            */
+            writer.WritePropertyName( "odds" );
+            writer.WriteNumberValue( data.odds );
+            writer.WriteEndObject();
+        } catch (Exception e) {
+            System.Console.WriteLine( "Error in Json Serializer Bpjobject " + e );
+            throw e;
         }
-        writer.WriteEndObject();
-        writer.WriteRawValue("\n", true);
+    }
+    public override BpjObject.TData Read(
+        ref Utf8JsonReader    reader, Type type,
+        JsonSerializerOptions options) {
+        reader.Read();
+        if (reader.TokenType != JsonTokenType.StartObject) throw new JsonException();
+        reader.Read();
+        BPOFlags   flags  = 0;
+        Vector3    p      = Vector3.zero;
+        Quaternion r      = Quaternion.identity;
+        Vector3    s      = Vector3.zero;
+        float      odds   = 0f;
+        while (reader.TokenType != JsonTokenType.EndObject) {
+            if (reader.TokenType != JsonTokenType.PropertyName) throw new JsonException();
+            string     p_name = reader.GetString() ?? "";
+            switch (p_name) {
+                case "flags":
+                    reader.Read();
+                    flags = (BPOFlags)reader.GetUInt32();
+                    break;
+                case "p":
+                    p= vec3JsonConverter.Read( ref reader, typeof(Vector3), options );
+                    break;
+                case "r":
+                    r = quatJsonConverter.Read( ref reader, typeof(Quaternion), options );
+                    break;
+                case "s":
+                    s = vec3JsonConverter.Read( ref reader, typeof(Vector3), options );
+                    break;
+                case "odds":
+                    reader.Read();
+                    odds = reader.GetSingle();
+                    break;
+            }
+            reader.Read();
+        }
+       return new BpjObject.TData( flags, p, r, s, odds );
+    }
+}
+
+public class BpjObjectConverter : JsonConverter<BpjObject>
+{
+    private readonly static BpjDataConverter TDataConverter = new BpjDataConverter();
+    private readonly static ZdoConverter     zdoConverter   = new ZdoConverter();
+    public override void Write(
+        Utf8JsonWriter        writer, BpjObject? Bpo,
+        JsonSerializerOptions options) {
+        if (Bpo == null) { return; }
+        try {
+            writer.WriteStartObject();
+            writer.WritePropertyName( Bpo.m_prefab );
+            /*writer.WriteStartObject();
+            writer.WritePropertyName("flags");
+            writer.WriteNumberValue((uint)(Bpo.m_data.flags));
+            /*writer.WritePropertyName("p");
+            JsonSerializer.Serialize(writer, (Vector3)(data.p), options);#1#
+            writer.WritePropertyName("p");
+            writer.WriteStartArray();
+            writer.WriteNumberValue(Bpo.m_data.p.x);
+            writer.WriteNumberValue(Bpo.m_data.p.y);
+            writer.WriteNumberValue(Bpo.m_data.p.z);
+            writer.WriteEndArray();
+            writer.WritePropertyName("r");
+            writer.WriteStartArray();
+            writer.WriteNumberValue(Bpo.m_data.r.x);
+            writer.WriteNumberValue(Bpo.m_data.r.y);
+            writer.WriteNumberValue(Bpo.m_data.r.z);
+            writer.WriteNumberValue(Bpo.m_data.r.w);
+            writer.WriteEndArray();
+            writer.WritePropertyName("s");
+            writer.WriteStartArray();
+            writer.WriteNumberValue(Bpo.m_data.s.x);
+            writer.WriteNumberValue(Bpo.m_data.s.y);
+            writer.WriteNumberValue(Bpo.m_data.s.z);
+            writer.WriteEndArray();
+            /*writer.WritePropertyName("s");
+            JsonSerializer.Serialize(writer, (Bpo.m_data.s), options);
+            #1#
+
+            writer.WritePropertyName("odds");
+            writer.WriteNumberValue(Bpo.m_data.odds);
+            writer.WriteEndObject();*/
+
+            /*writer.WritePropertyName("flags");
+            writer.WriteNumberValue((uint)(Bpo.Flags));
+            writer.WritePropertyName("p");
+            JsonSerializer.Serialize(writer, Bpo.Pos, options);
+            writer.WritePropertyName("r");
+            JsonSerializer.Serialize(writer, Bpo.Rot, options);
+            writer.WritePropertyName("s");
+            JsonSerializer.Serialize(writer, Bpo.Scale, options);
+            writer.WritePropertyName("odds");
+            writer.WriteNumberValue(Bpo.Chance);*/
+            TDataConverter.Write( writer, Bpo.m_data, options );
+            //JsonSerializer.Serialize<BpjObject.TData>(writer, Bpo.m_data, options);
+            if (Bpo.m_properties.Count != 0) {
+                writer.WritePropertyName( "ZDOVars" );
+                writer.WriteStartObject();
+                foreach (var pair in Bpo.m_properties.m_values) {
+                    zdoConverter.Write( writer, pair.Value, options );
+                }
+                writer.WriteEndObject();
+            }
+            writer.WriteEndObject();
+            writer.WriteRawValue( "\n", true );
+        } catch (Exception e) {
+            System.Console.WriteLine( "Error in Json Serializer Bpjobject " + e );
+            throw e;
+        }
     }
 
     public override BpjObject Read(
         ref Utf8JsonReader    reader, Type type,
         JsonSerializerOptions options) {
         if (reader.TokenType != JsonTokenType.StartObject)
-            throw new JsonException("Expected start of of object.");
+            throw new JsonException( "Expected start of of object." );
 
-        reader.Read();
-        string prefab = reader.GetString();
-        BpjObject.TData data
-            = JsonSerializer.Deserialize<BpjObject.TData>(ref reader, options);
-        BpjObject bpo = new BpjObject(prefab, data);
-        reader.Read();
-        if (reader.TokenType == JsonTokenType.EndObject)
-            return bpo; 
-
-        if (reader.TokenType != JsonTokenType.PropertyName) throw new JsonException();
-
-        string temp = reader.GetString() ?? "";
-        if (string.Equals(temp, "ZDOVars",
-                StringComparison.InvariantCultureIgnoreCase)) {
-
+        try {
             reader.Read();
-            if (reader.TokenType != JsonTokenType.StartObject)
-                throw new JsonException("Expected start of Object.");
+            string prefab = reader.GetString();
+            BpjObject.TData data
+                = JsonSerializer.Deserialize<BpjObject.TData>( ref reader, options );
+            BpjObject bpo = new BpjObject( prefab, data );
             reader.Read();
-            
-            var options1 = new JsonSerializerOptions(options);
-            options1.Converters.Add(new ZdoConverter());
-            
-            BpoZDOVars values = new BpoZDOVars();
-            while (reader.TokenType != JsonTokenType.EndObject) {
-              
-                ZValue v = JsonSerializer.Deserialize<ZValue>(ref reader, options1);
-                values.m_values.Add(v.name, v);
+            if (reader.TokenType == JsonTokenType.EndObject)
+                return bpo;
+
+            if (reader.TokenType != JsonTokenType.PropertyName) throw new JsonException();
+
+            string temp = reader.GetString() ?? "";
+            if (string.Equals( temp, "ZDOVars",
+                    StringComparison.InvariantCultureIgnoreCase )) {
                 reader.Read();
-            }
-            bpo.ZVars = values;
-        }
-        if (reader.TokenType != JsonTokenType.EndObject)
-            throw new JsonException("Expected end of Object.");
-        return bpo;
-    }
-}
+                if (reader.TokenType != JsonTokenType.StartObject)
+                    throw new JsonException( "Expected start of Object." );
+                reader.Read();
 
-public class ZdoConverter : JsonConverter<BpoZDOVars.ZValue>
-{
-    public override void Write(
-        Utf8JsonWriter        writer, BpoZDOVars.ZValue value,
-        JsonSerializerOptions options) {
-        writer.WritePropertyName((char)value.type + value.name);
-        switch (value.type) {
-            case Float: writer.WriteNumberValue((float)value.value); break;
-            case Vec3:
-                JsonSerializer.Serialize(writer, (Vector3)value.value, options);
-                break;
-            case Quat:
-                JsonSerializer.Serialize(writer, (Quaternion)value.value, options);
-                break;
-            case Int:       writer.WriteNumberValue((int)value.value); break;
-            case Long:      writer.WriteNumberValue((long)value.value); break;
-            case String:    writer.WriteStringValue((string)value.value); break;
-            case ByteArray: writer.WriteStringValue((string)value.value); break;
-            default:                         throw new JsonException("Unknown type");
-        }
-    }
-
-    public override BpoZDOVars.ZValue Read(
-        ref Utf8JsonReader    reader, Type type,
-        JsonSerializerOptions options) {
-        if (reader.TokenType != JsonTokenType.StartObject)
-            throw new JsonException("Expected start of of object.");
-
-        if (reader.TokenType != JsonTokenType.PropertyName) throw new JsonException();
-        string name   = reader.GetString();
-        char   prefix = name[0];
-        name = name.Substring(1);
-        reader.Read();
-        switch (prefix) {
-            case (char)Float: return new ZValue(Float, name, reader.GetSingle());
-            case (char)Vec3:
-                return new ZValue(Vec3, name,
-                    JsonSerializer.Deserialize<Vector3>(ref reader, options));
-            case (char)Quat:
-                return new ZValue(Quat, name,
-                    JsonSerializer.Deserialize<Quaternion>(ref reader, options));
-            case (char)Int:
-                return new ZValue(Int, name, reader.GetInt32());
-            case (char)Long:
-                return new ZValue(Long, name, reader.GetInt64());
-            case (char)String:
-                return new ZValue(String, name, reader.GetString() ?? "");
-            case (char)ByteArray:
-                return new ZValue(ByteArray, name, reader.GetString() ?? "");
-            default:
-                throw new JsonException("Unknown type");
-        }
-    }
-}
-
-public struct BpoZDOVars
-{
-    public enum ZType : byte
-    {
-        Float     = (byte)'f',
-        Vec3      = (byte)'v',
-        Quat      = (byte)'q',
-        Int       = (byte)'i',
-        Long      = (byte)'l',
-        String    = (byte)'s',
-        ByteArray = (byte)'b',
-        Unknown   = (byte)'u',
-        F         = (byte)'f',
-        V         = (byte)'v',
-        Q         = (byte)'q',
-        I         = (byte)'i',
-        L         = (byte)'l',
-        S         = (byte)'s',
-        B         = (byte)'b',
-    }
-
-    public struct ZValue
-    {
-        public ZType  type;
-        public string name;
-        public object value;
-        public ZValue(ZType type_, string name_, object value_) {
-            type  = type_;
-            name  = name_;
-            value = value_;
-        }
-        public ZValue(string name_, int value_) :
-            this(ZType.I, name_, value_) { }
-        public ZValue(string name_, long value_) :
-            this(ZType.L, name_, value_) { }
-        public ZValue(string name_, float value_) :
-            this(ZType.F, name_, value_) { }
-        public ZValue(string name_, string value_) :
-            this(ZType.S, name_, value_) { }
-        public ZValue(string name_, Vector3 value_) : this(ZType.V, name_,
-            value_) { }
-        public ZValue(string name_, Quaternion value_) : this(ZType.Q, name_,
-            value_) { }
-        public ZValue(string name_, byte[] value_) {
-            type = ZType.ByteArray;
-            name = name_;
-            ZPackage pkg = new ZPackage();
-            pkg.Write(value_);
-            pkg.GetBase64();
-            value = pkg.GetBase64();
-        }
-    }
-
-    // todo when saveing save with prefix f for float and so on
-    [JsonInclude] public Dictionary<string, ZValue> m_values = [];
-    public BpoZDOVars() { }
-    public BpoZDOVars(Dictionary<string, ZValue> values) { m_values = values; }
-
-    public int Count { get => m_values.Count; }
-
-    internal Dictionary<int, string> TryAddOnly<T>(
-        ZType                   type, BinarySearchDictionary<int, T>? data,
-        Dictionary<int, string> rest) {
-        if (data != null) {
-            foreach (var pair in rest) {
-                if (data.TryGetValue(pair.Key, out T value)) {
-                    rest.Remove(pair.Key);
-                    m_values[pair.Value] = new ZValue(type, pair.Value, value);
+                BpjZVars values = new BpjZVars();
+                while (reader.TokenType != JsonTokenType.EndObject) {
+                    ZValue v = zdoConverter.Read( ref reader, typeof(ZValue), options );
+                    // ZValue v = JsonSerializer.Deserialize<ZValue>(ref reader, options);
+                    values.m_values.Add( v.Name, v );
+                    reader.Read();
                 }
+                bpo.ZVars = values;
             }
+            if (reader.TokenType != JsonTokenType.EndObject)
+                throw new JsonException( "Expected end of Object." );
+            return bpo;
+        } catch (Exception e) {
+            System.Console.WriteLine( "Error in Json Serializer BpjObject" + e );
+            throw e;
         }
-        return rest;
-    }
-    internal List<int> TryAddOnly<T>(
-        ZType     type, BinarySearchDictionary<int, T>? data,
-        List<int> rest) {
-        if (data != null) {
-            foreach (var hash in rest) {
-                if (data.TryGetValue(hash, out T value)) {
-                    rest.Remove(hash);
-                    GetNameOrDefault(hash, out string name);
-                    m_values[name] = new ZValue(type, name, value);
-                }
-            }
-        }
-        return rest;
-    }
-    internal List<string> TryAddOnly<T>(
-        ZType        type, BinarySearchDictionary<int, T>? data,
-        List<string> rest) {
-        if (data != null) {
-            foreach (var name in rest) {
-                if (data.TryGetValue(name.GetStableHashCode(), out T value)) {
-                    rest.Remove(name);
-                    m_values[name] = new ZValue(type, name, value);
-                }
-            }
-        }
-        return rest;
-    }
-    public Dictionary<int, string> TryAddExcept<T>(
-        ZType                   type, BinarySearchDictionary<int, T>? data,
-        Dictionary<int, string> rest) {
-        if (data != null) {
-            ZDOInfo info      = ZDOInfo.Instance;
-            var     this_vals = this.m_values;
-
-            foreach (KeyValuePair<int, T> pair_ in data) {
-                if (rest.ContainsKey(pair_.Key))
-                    rest.Remove(pair_.Key);
-                else {
-                    GetNameOrDefault(pair_.Key, out var name_, info);
-                    this_vals[name_] = new ZValue(type, name_, pair_.Value);
-                }
-            }
-        }
-        return rest;
-    }
-    public List<string> TryAddExcept<T>(
-        ZType        type, BinarySearchDictionary<int, T>? data,
-        List<string> rest) {
-        if (data != null) {
-            ZDOInfo info      = ZDOInfo.Instance;
-            var     this_vals = this.m_values;
-            foreach (KeyValuePair<int, T> pair in data) {
-                GetNameOrDefault(pair.Key, out var name, info);
-                if (rest.Contains(name))
-                    rest.Remove(name);
-                else { this_vals[name] = new ZValue(type, name, pair.Value); }
-                return rest;
-            }
-        }
-        return rest;
-    }
-    public List<int> TryAddExcept<T>(
-        ZType     type, BinarySearchDictionary<int, T>? data,
-        List<int> rest) {
-        if (data != null) {
-            ZDOInfo info      = ZDOInfo.Instance;
-            var     this_vals = this.m_values;
-            foreach (KeyValuePair<int, T> pair_ in data) {
-                if (rest.Contains(pair_.Key))
-                    rest.Remove(pair_.Key);
-                else {
-                    GetNameOrDefault(pair_.Key, out var name_, info);
-                    this_vals[name_] = new ZValue(type, name_, pair_.Value);
-                }
-            }
-        }
-        return rest;
-    }
-    /*public List<int> AddExcept<T>(
-        VType type, BinarySearchDictionary<int, T>? data, List<string> rest) {
-        return AddExcept(type, data, // @formatter:off
-            rest.Select(x => x.GetStableHashCode()).ToList());}// @formatter:on*/
-
-    /*public Dictionary<int, string> AddFilter<T>(
-        VType type, BinarySearchDictionary<int, T>? data, List<string> rest) {
-        return AddFilter(type, data,
-            rest.Select(x => x).Aggregate(new Dictionary<int, string>(), // @formatter:off
-                (ret, x) => {ret.Add(x.GetStableHashCode(), x);return ret;}));}// @formatter:on
-                */
-
-    private List<T> TryAddOnlyHelper<T, U>(
-        ZType                           type,
-        BinarySearchDictionary<int, U>? data,
-        List<T>                         rest) {
-        return typeof(T) switch {
-            Type t when t == typeof(int)
-                => TryAddOnly(type, data, rest as List<int>) as List<T>,
-            Type t when t == typeof(string)
-                => TryAddOnly(type, data, rest as List<string>) as List<T>,
-            _ => throw new ArgumentException(
-                $"Unsupported data type: {typeof(T)}, You can only add ints or strings as keys")
-        } ?? [];
-    }
-
-    private List<T> TryAddExceptHelper<T, U>(
-        ZType                           type,
-        BinarySearchDictionary<int, U>? data,
-        List<T>                         rest) {
-        return typeof(T) switch {
-            Type t when t == typeof(int)
-                => TryAddOnly(type, data, rest as List<int>) as List<T>,
-            Type t when t == typeof(string)
-                => TryAddOnly(type, data, rest as List<string>) as List<T>,
-            _ => throw new ArgumentException(
-                $"Unsupported data type: {typeof(T)}, You can only add ints or strings as keys")
-        } ?? [];
-    }
-
-    public List<T> TryAddOnly<T>(ZDO zdo, params T[] name_arr) {
-        if (name_arr.Length <= 0) return [];
-        List<T> rest = new List<T>();
-
-        rest = TryAddOnlyHelper<T, int>(ZType.I, ZDOExtraData.s_ints[zdo.m_uid], rest);
-        if (rest.Count <= 0) return [];
-        rest = TryAddOnlyHelper<T, float>(ZType.F, ZDOExtraData.s_floats[zdo.m_uid], rest);
-        if (rest.Count <= 0) return [];
-        rest = TryAddOnlyHelper<T, long>(ZType.L, ZDOExtraData.s_longs[zdo.m_uid], rest);
-        if (rest.Count <= 0) return [];
-        rest = TryAddOnlyHelper<T, string>(ZType.S, ZDOExtraData.s_strings[zdo.m_uid], rest);
-        if (rest.Count <= 0) return [];
-        rest = TryAddOnlyHelper<T, Vector3>(ZType.V, ZDOExtraData.s_vec3[zdo.m_uid], rest);
-        if (rest.Count > 0) return [];
-        rest = TryAddOnlyHelper<T, Quaternion>(ZType.Q, ZDOExtraData.s_quats[zdo.m_uid], rest);
-        if (rest.Count <= 0) return [];
-        rest = TryAddOnlyHelper<T, byte[]>(ZType.B, ZDOExtraData.s_byteArrays[zdo.m_uid], rest);
-        return (rest as List<T>);
-    }
-
-    public List<T> TryAddExcept<T>(ZDO zdo, params T[] name_arr) {
-        if (name_arr.Length <= 0) return [];
-        List<T> rest = new List<T>();
-        rest = TryAddExceptHelper<T, int>(ZType.I, ZDOExtraData.s_ints[zdo.m_uid], rest);
-        if (rest.Count <= 0) return [];
-        rest = TryAddExceptHelper<T, float>(ZType.F, ZDOExtraData.s_floats[zdo.m_uid], rest);
-        if (rest.Count <= 0) return [];
-        rest = TryAddExceptHelper<T, long>(ZType.L, ZDOExtraData.s_longs[zdo.m_uid], rest);
-        if (rest.Count <= 0) return [];
-        rest = TryAddExceptHelper<T, string>(ZType.S, ZDOExtraData.s_strings[zdo.m_uid], rest);
-        if (rest.Count <= 0) return [];
-        rest = TryAddExceptHelper<T, Vector3>(ZType.V, ZDOExtraData.s_vec3[zdo.m_uid], rest);
-        if (rest.Count > 0) return [];
-        rest = TryAddExceptHelper<T, Quaternion>(ZType.Q, ZDOExtraData.s_quats[zdo.m_uid], rest);
-        if (rest.Count <= 0) return [];
-        rest = TryAddExceptHelper<T, byte[]>(ZType.B, ZDOExtraData.s_byteArrays[zdo.m_uid], rest);
-        return (rest as List<T>);
-    }
-
-    public List<int> TryAddOnly(ZType type, BinarySearchDictionary<int, int> data, List<int> rest) {
-        if (data != null) {
-            ZDOInfo info      = ZDOInfo.Instance;
-            var     this_vals = this.m_values;
-            foreach (var pair_ in data) {
-                if (rest.Contains(pair_.Key))
-                    rest.Remove(pair_.Key);
-                else {
-                    GetNameOrDefault(pair_.Key, out var name_, info);
-                    this_vals[name_] = new ZValue(type, name_, pair_.Value);
-                }
-            }
-        }
-        return rest;
-    }
-    public void AddPair<T>(T value, string name) {
-        if (typeof(T) == typeof(ZDO)) {
-            throw new ArgumentException("For adding from a ZDO, use TryAddFromZdo instead");
-        }
-        m_values.Add(name, new ZValue(GetVType<T>(), name, value));
-    }
-    public void AddPair<T>(T value, int hash) {
-        if (typeof(T) == typeof(ZDO)) {
-            throw new ArgumentException("For adding from a ZDO, use TryAddFromZdo instead");
-        }
-        GetNameOrDefault(hash, out var name);
-        m_values.Add(name, new ZValue(GetVType<T>(), name, value));
-    }
-
-    public List<int> TryAddOnly(ZDO zdo, params int[] hashes)
-        => TryAddOnly<int>(zdo, hashes);
-
-    public List<string> TryAddOnly(ZDO zdo, params string[] names)
-        => TryAddOnly<string>(zdo, names);
-
-    public List<int> TryAddOnly<T>(ZDO zdo, params int[] hashes)
-        => TryAddOnly<T>(GetVType<T>(), GetDict<T>(zdo), hashes.ToList());
-
-    public List<string> TryAddOnly<T>(ZDO zdo, params string[] names)
-        => TryAddOnly<T>(GetVType<T>(), GetDict<T>(zdo), names.ToList());
-
-    static Dictionary<string, ZValue> ReadFromZdo(ZDO zdo) {
-        ZDOInfo                    info   = ZDOInfo.Instance;
-        Dictionary<string, ZValue> values = new Dictionary<string, ZValue>();
-        values = readvalsnew(ZDOExtraData.s_floats[zdo.m_uid], info, values);
-        values = readvalsnew(ZDOExtraData.s_vec3[zdo.m_uid], info, values);
-        values = readvalsnew(ZDOExtraData.s_quats[zdo.m_uid], info, values);
-        values = readvalsnew(ZDOExtraData.s_ints[zdo.m_uid], info, values);
-        values = readvalsnew(ZDOExtraData.s_longs[zdo.m_uid], info, values);
-        values = readvalsnew(ZDOExtraData.s_strings[zdo.m_uid], info, values);
-        values = readvalsnew(ZDOExtraData.s_byteArrays[zdo.m_uid], info, values);
-        return values;
-    }
-    public static BpoZDOVars? MakeFromZdo(ZDO zdo) {
-        var values = ReadFromZdo(zdo);
-        if (values.Count > 0) { return new BpoZDOVars(values); }
-        return null;
-    }
-    public static bool GetNameOrDefault(int hash, out string name, ZDOInfo info) {
-        bool ret = info.HashToName.TryGetValue(hash, out name);
-        if (!ret) { name = "Unknown_" + hash; }
-        return ret;
-    }
-    public static bool GetNameOrDefault(int hash, out string name) {
-        ZDOInfo info = ZDOInfo.Instance;
-        return GetNameOrDefault(hash, out name, info);
-    }
-
-    public bool TryAddFromZdo<T>(ZDO zdo, int hash) {
-        GetNameOrDefault(hash, out var name);
-        if (GetDict<T>(zdo)?.TryGetValue(hash, out T value) ?? false) {
-            m_values[name] = new ZValue(GetVType<T>(), name, value);
-            return true;
-        }
-        return false;
-    }
-
-    public bool TryAddFromZdo<T>(ZDO zdo, string name) {
-        int hash = name.GetStableHashCode();
-        if (GetDict<T>(zdo)?.TryGetValue(hash, out T value) ?? false) {
-            m_values[name] = new ZValue(GetVType<T>(), name, value);
-            return true;
-        }
-        return false;
-    }
-
-    /*
-    public void InitFromJson(string json) {
-        string[] parts = json.Trim().Split(new[] { ':' }, 2);
-        if ((parts.Length > 1) && (parts[0].Contains("ZDOVars"))){
-            var matches =
-                Regex.Matches(parts[1],
-                    @"\{(.*?)\}"); // without partensis
-            foreach (Match match in matches)
-            {
-                parts = match.Value.Split(new[] { ',' }, 2);
-                var pattern = "[^a-zA-Z0-9]+"; // remove all non alphanumeric characters
-                var result  = Regex.Replace(parts[0], pattern, "").ToLowerInvariant();
-                switch (result)
-                {
-                    case ("floats"):
-                    case ("vecs"):
-                    case ("quats"):
-                    case ("ints"):
-                    case ("longs"):
-                    case ("strings"):
-                    case ("bytearrays"):
-                }
-
-
-                IndexOf
-                String.IndexOf(match.Value.Split());
-            }
-
-            ZDOInfo info = ZDOInfo.Instance;
-            ZDOID   id   = zdo.m_uid;
-            floats = readvals(ZDOExtraData.s_floats[zdo.m_uid], info, x => x);
-            vecs = readvals(ZDOExtraData.s_vec3[zdo.m_uid], info, x => {
-                return new float[3] { x.x, x.y, x.z };
-            }
-        });
-
-        quats = readvals(ZDOExtraData.s_quats[zdo.m_uid], info, x => {
-            return new float[] { x.x, x.y, x.z, x.w };
-        });
-
-        ints    = readvals(ZDOExtraData.s_ints[zdo.m_uid], info, x => x);
-        longs   = readvals(ZDOExtraData.s_longs[zdo.m_uid], info, x => x);
-        strings = readvals(ZDOExtraData.s_strings[zdo.m_uid], info, x => x);
-        bytearrays = readvals(ZDOExtraData.s_byteArrays[zdo.m_uid], info, x => {
-            ZPackage pkg = new ZPackage();
-            pkg.Write(x);
-            return pkg.GetBase64();
-        });
-    }*/
-
-    static Dictionary<string, ZValue> readvalsnew<T>(
-        BinarySearchDictionary<int, T>? import,
-        ZDOInfo                         info,
-        Dictionary<string, ZValue>      values) {
-        var type = GetVType<T>();
-        if (import != null) {
-            import.Select(x => x).Aggregate(
-                values,
-                (target, pair) => {
-                    GetNameOrDefault(pair.Key, out var name, info);
-                    T val = pair.Value;
-                    target[name] = new ZValue(type, name, val);
-                    return target;
-                }
-            );
-        }
-        return values;
-    }
-    static ZType GetVType<T>() {
-        return typeof(T) switch {
-            Type t when t == typeof(int) => ZType.I,
-            Type t when t == typeof(float) => ZType.F,
-            Type t when t == typeof(Quaternion) => ZType.Q,
-            Type t when t == typeof(Vector3) => ZType.V,
-            Type t when t == typeof(long) => ZType.L,
-            Type t when t == typeof(string) => ZType.S,
-            Type t when t == typeof(byte[]) => ZType.B,
-            _ => throw new ArgumentException($"Unsupported data type: {typeof(T)}"),
-        };
-    }
-    static BinarySearchDictionary<int, T>? GetDict<T>(ZDO zdo) {
-        return typeof(T) switch {
-            Type t when t == typeof(int) =>
-                ZDOExtraData.s_ints[zdo.m_uid] as BinarySearchDictionary<int, T>,
-            Type t when t == typeof(float) =>
-                ZDOExtraData.s_floats[zdo.m_uid] as BinarySearchDictionary<int, T>,
-            Type t when t == typeof(Quaternion) =>
-                ZDOExtraData.s_quats[zdo.m_uid] as BinarySearchDictionary<int, T>,
-            Type t when t == typeof(Vector3) =>
-                ZDOExtraData.s_vec3[zdo.m_uid] as BinarySearchDictionary<int, T>,
-            Type t when t == typeof(long) =>
-                ZDOExtraData.s_longs[zdo.m_uid] as BinarySearchDictionary<int, T>,
-            Type t when t == typeof(string) =>
-                ZDOExtraData.s_strings[zdo.m_uid] as BinarySearchDictionary<int, T>,
-            Type t when t == typeof(byte[]) => ZDOExtraData.s_byteArrays[zdo.m_uid] as
-                BinarySearchDictionary<int, T>,
-            _ => throw new ArgumentException($"Unsupported data type: {typeof(T)}")
-        } ?? [];
     }
 }
 
@@ -618,27 +285,27 @@ public class BpjObject : IBlueprintObject
 {
     [JsonIgnore] // the prefab will saved as key
     public string m_prefab = "";
-    [JsonPropertyName("Data")]    public TData      m_data;
-    [JsonPropertyName("ZDOVars")] public BpoZDOVars m_properties;
+    [JsonPropertyName( "Data" )]    public TData    m_data;
+    [JsonPropertyName( "ZDOVars" )] public BpjZVars m_properties;
 
-    public BpoZDOVars ZVars { get => m_properties; set => m_properties = value; }
+    [JsonIgnore] public BpjZVars ZVars { get => m_properties; set => m_properties = value; }
     internal BpjObject() {
         m_prefab = "";
-        m_data = new TData(0, Vector3.zero, Quaternion.identity, Vector3.one,
-            0f);
+        m_data = new TData( 0, Vector3.zero, Quaternion.identity, Vector3.one,
+            0f );
     }
-    public BpjObject(string prefab, TData data, BpoZDOVars? properties = null) {
+    public BpjObject(string prefab, TData data, BpjZVars? properties = null) {
         this.m_prefab     = prefab;
         this.m_data       = data;
-        this.m_properties = properties ?? new BpoZDOVars();
+        this.m_properties = properties ?? new BpjZVars();
     }
     public BpjObject(
         string  prefab, Vector3 pos, Quaternion rot,
         Vector3 scale,
         float   chance) {
         m_prefab     = prefab;
-        this.m_data  = new TData(0, pos, rot, scale, chance);
-        m_properties = new BpoZDOVars();
+        this.m_data  = new TData( 0, pos, rot, scale, chance );
+        m_properties = new BpjZVars();
     }
 
     public BpjObject(
@@ -647,66 +314,67 @@ public class BpjObject : IBlueprintObject
         string  info,
         string  data, float chance) {
         m_prefab     = prefab;
-        this.m_data  = new TData(0, pos, rot, scale, chance);
-        m_properties = new BpoZDOVars();
+        this.m_data  = new TData( 0, pos, rot, scale, chance );
+        m_properties = new BpjZVars();
     }
     public BpjObject(
         string   mPrefab,   GameObject? obj, bool saveData,
-        BPOFlags flags = 0, BpoZDOVars? vars = null) {
+        BPOFlags flags = 0, BpjZVars?   vars = null) {
         this.m_prefab = mPrefab;
-        this.m_data = new TData(flags,
+        this.m_data = new TData( flags,
             obj.transform.localPosition, obj.transform.localRotation,
-            obj.transform.localScale, 1f);
-        this.m_properties = vars ?? new BpoZDOVars();
+            obj.transform.localScale, 1f );
+        this.m_properties = vars ?? new BpjZVars();
     }
 
-    [Serializable]
-    public struct TData
+    public class TData
     {
-        public BPOFlags flags;
-        public float[]  p;
-        public float[]  r;
-        public float[]  s;
-        public float    odds;
+        [JsonInclude] public BPOFlags   flags;
+        [JsonInclude] public Vector3    p;
+        [JsonInclude] public Quaternion r;
+        [JsonInclude] public Vector3    s;
+        [JsonInclude] public float      odds;
 
         public TData(
             BPOFlags flags, Vector3 pos, Quaternion rot, Vector3 scale,
             float    chance) {
             var norm = rot.normalized;
             this.flags = flags;
-            this.p     = new[] { pos.x, pos.y, pos.z };
-            this.r     = new[] { norm.x, norm.y, norm.z, norm.w };
-            this.s     = new[] { scale.x, scale.y, scale.z };
+            this.p     = pos;
+            this.r     = norm;
+            this.s     = scale;
             this.odds  = chance;
         }
     }
 
     static internal string EscapeString(string s) {
         string pattern = @"[\\\""\b\f\n\r\t]";
-        return Regex.Replace(s, pattern, match => match.Value switch {
+        return Regex.Replace( s, pattern, match => match.Value switch {
             "\\" => @"\\", "\"" => @"\""", "\b" => @"\b", "\f" => @"\f",
             "\n" => @"\n",
             "\r" => @"\r", "\t" => @"\t", _ => match.Value
-        });
+        } );
     }
     static internal string UnescapeString(string input) {
         string pattern = @"\\[\\\""bfnrt]";
-        return Regex.Replace(input, pattern, match => match.Value switch {
+        return Regex.Replace( input, pattern, match => match.Value switch {
             @"\\" => "\\", @"\""" => "\"", @"\b" => "\b", @"\f" => "\f",
             @"\n" => "\n",
             @"\r" => "\r", @"\t" => "\t", _ => match.Value
-        });
+        } );
     }
 
     public string ToJson() {
         var options = new JsonSerializerOptions {
             WriteIndented = false
         };
-        options.Converters.Add(new BpoConverter());
+        /*
+        options.Converters.Add(new BpjObjectConverter());
         options.Converters.Add(new Vec3JsonConverter());
         options.Converters.Add(new QuatJsonConverter());
+        */
 
-        return JsonSerializer.Serialize(this, options);
+        return JsonSerializer.Serialize( this, options );
         /*var prefab = this.m_prefab;
         var data   = JsonUtility.ToJson(this.m_data);
         if (m_properties.Count == 0)
@@ -720,29 +388,29 @@ public class BpjObject : IBlueprintObject
         }*/
     }
     public static BlueprintJson.BpjLine Split(string line) {
-        string[] parts = line.Split(new[] { ':' }, 2);
-        string[] parts2 = parts[1].Split(new[] { "\"ext\":" },
-            StringSplitOptions.None);
-        var    prefab = parts[0].Trim('{', '"');
+        string[] parts = line.Split( new[] { ':' }, 2 );
+        string[] parts2 = parts[1].Split( new[] { "\"ext\":" },
+            StringSplitOptions.None );
+        var    prefab = parts[0].Trim( '{', '"' );
         string data_;
 
         if (parts2.Length == 1) {
             // contains no additional data 
-            data_ = parts2[0].TrimEnd('}', ',') + "}";
-            return new BlueprintJson.BpjLine(prefab, data_, []);
+            data_ = parts2[0].TrimEnd( '}', ',' ) + "}";
+            return new BlueprintJson.BpjLine( prefab, data_, [] );
         } else if (parts2.Length > 1) // todo move to import loop
         {
-            data_ = parts2[0].TrimEnd(',');
+            data_ = parts2[0].TrimEnd( ',' );
             //var matches = Regex.Matches(parts2[1], @"\{.*?\}");// with partensis 
             var matches =
-                Regex.Matches(parts2[1],
-                    @"\{(.*?)\}"); // without partensis 
+                Regex.Matches( parts2[1],
+                    @"\{(.*?)\}" ); // without partensis 
             string[] ext_ = new string[matches.Count];
             for (int i = 0; i < matches.Count; i++) { ext_[i] = matches[i].Value; }
-            return new BlueprintJson.BpjLine(prefab, data_, ext_);
+            return new BlueprintJson.BpjLine( prefab, data_, ext_ );
         }
 
-        throw new ArgumentException("incorrect format: " + line);
+        throw new ArgumentException( "incorrect format: " + line );
     }
 
 // todo remove 
@@ -750,71 +418,61 @@ public class BpjObject : IBlueprintObject
         var prefab = line.prefab;
         if (line.ext.Length == 0) {
             // contains no additional data 
-            return new BpjObject(prefab,
-                JsonUtility.FromJson<TData>(line.data));
+            return new BpjObject( prefab,
+                JsonUtility.FromJson<TData>( line.data ) );
         } // todo move to import loop
 
-        var obj = new BpjObject(prefab,
-            JsonUtility.FromJson<TData>(line.data));
+        var obj = new BpjObject( prefab,
+            JsonUtility.FromJson<TData>( line.data ) );
         foreach (var match in line.ext) {
             // todo does nothing atm
-            System.Console.WriteLine(match);
+            System.Console.WriteLine( match );
         }
         return obj;
     }
     public static BpjObject? FromJson(string line) {
-        string[] parts = line.Split(new[] { ':' }, 2);
-        string[] parts2 = parts[1].Split(new[] { "\"ext\":" },
-            StringSplitOptions.None);
+        string[] parts = line.Split( new[] { ':' }, 2 );
+        string[] parts2 = parts[1].Split( new[] { "\"ext\":" },
+            StringSplitOptions.None );
 
         try {
-            var prefab = parts[0].Trim('{', '"');
+            var prefab = parts[0].Trim( '{', '"' );
             if (parts2.Length == 1) {
                 // contains no additional data 
-                return new BpjObject(prefab,
-                    JsonUtility.FromJson<TData>(parts2[0].TrimEnd('}', ',') +
-                        "}"));
+                return new BpjObject( prefab,
+                    JsonUtility.FromJson<TData>( parts2[0].TrimEnd( '}', ',' ) +
+                        "}" ) );
             } else if (parts2.Length > 1) // todo move to import loop
             {
-                var obj = new BpjObject(prefab,
-                    JsonUtility.FromJson<TData>(parts2[0].TrimEnd(',')));
+                var obj = new BpjObject( prefab,
+                    JsonUtility.FromJson<TData>( parts2[0].TrimEnd( ',' ) ) );
                 //var matches = Regex.Matches(parts2[1], @"\{.*?\}");// with partensis 
                 var matches =
-                    Regex.Matches(parts2[1],
-                        @"\{(.*?)\}"); // without partensis 
+                    Regex.Matches( parts2[1],
+                        @"\{(.*?)\}" ); // without partensis 
 
-                foreach (Match match in matches) { System.Console.WriteLine(match.Value); }
+                foreach (Match match in matches) { System.Console.WriteLine( match.Value ); }
 
                 return obj;
             }
 
-            throw new ArgumentException("Parts2.length" +
-                parts2.Length.ToString());
+            throw new ArgumentException( "Parts2.length" +
+                parts2.Length.ToString() );
         } catch (Exception e) {
-            System.Console.WriteLine(e);
-            System.Console.WriteLine(parts[0].TrimStart('{'));
+            System.Console.WriteLine( e );
+            System.Console.WriteLine( parts[0].TrimStart( '{' ) );
         }
 
         return new BpjObject();
     }
-    public virtual string Prefab { get => m_prefab; set => m_prefab = value; }
-    public virtual Vector3 Pos {
-        get => new Vector3(m_data.p[0], m_data.p[1], m_data.p[2]);
-        set => m_data.p = [value.x, value.y, value.z];
-    }
-    public virtual Quaternion Rot {
-        get => new Quaternion(m_data.r[0], m_data.r[1], m_data.r[2],
-            m_data.r[3]);
-        set => m_data.r = [value.x, value.y, value.z, value.w];
-    }
+    [JsonIgnore] public virtual string     Prefab { get => m_prefab; set => m_prefab = value; }
+    [JsonIgnore] public virtual Vector3    Pos    { get => m_data.p; set => m_data.p = value; }
+    [JsonIgnore] public virtual Quaternion Rot    { get => m_data.r; set => m_data.r = value; }
 // todo write conversion function for other blueprint format    
-    public virtual string Data { get => ""; set { } }
-    public virtual Vector3 Scale {
-        get => new Vector3(m_data.s[0], m_data.s[1], m_data.s[2]);
-        set => m_data.s = [value.x, value.y, value.z];
-    }
+    [JsonIgnore] public virtual string  Data  { get => "";       set { } }
+    [JsonIgnore] public virtual Vector3 Scale { get => m_data.s; set => m_data.s = value; }
 // todo write conversion function for other blueprint format    
-    public virtual float    Chance    { get => m_data.odds;  set => m_data.odds = value; }
-    public virtual string   ExtraInfo { get => "";           set { } }
-    public virtual BPOFlags Flags     { get => m_data.flags; set => m_data.flags = value; }
+    [JsonIgnore] public virtual float    Chance { get => m_data.odds; set => m_data.odds = value; }
+    [JsonIgnore] public virtual string   ExtraInfo { get => ""; set { } }
+    [JsonIgnore] public virtual BPOFlags Flags { get => m_data.flags; set => m_data.flags = value; }
 }

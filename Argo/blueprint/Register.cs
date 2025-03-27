@@ -147,6 +147,7 @@ namespace Argo
                 Add(prefab, fetcher);
                 ByFlag.Add([prefab], flags);
             }
+            /*
             public static void
                 AddToDefault(string[]       prefabs,   TExportBefore? expBefore,
                              TExportWorker? expWorker, TImportBefore? impBefore,
@@ -162,6 +163,7 @@ namespace Argo
                 => Add(prefabs,
                     new CustomBpjFetcher(expBefore, expWorker, impBefore,
                         impWorker, flags));
+                        */
 
             public static BpjFetcher GetFromDefault(string prefab)
                 => GetDefault().Get(prefab);
@@ -256,7 +258,7 @@ namespace Argo
                     (BPOFlags.Animated, EnableAnimated),
                     (BPOFlags.SpecialInterface, EnableSpecialInterface),
                     (BPOFlags.Indestructible, EnableIndestructible),
-                    (BPOFlags.CustomNotVanilla, EnableCustomNotVanilla),
+                    (BPOFlags.IsVanilla, EnableCustomNotVanilla),
                 ];
             }
             public void SetCategorySettings() {
