@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Argo.blueprint.Util;
@@ -8,7 +9,9 @@ using Argo.DataAnalysis;
 using UnityEngine;
 
 namespace Argo.Blueprint;
+
 using static Argo.Blueprint.BpjZVars;
+
 public class ZdoConverter : JsonConverter<ZValue>
 {
     static readonly Vec3JsonConverter vec3JsonConverter = new Vec3JsonConverter();
@@ -17,7 +20,7 @@ public class ZdoConverter : JsonConverter<ZValue>
         Utf8JsonWriter        writer, ZValue zvar,
         JsonSerializerOptions options) {
         try {
-            var unknown  = zvar.UnknownHash;
+            var unknown = zvar.UnknownHash;
             if (unknown == true) {
                 writer.WritePropertyName( "u" + (char)zvar.Type + zvar.Name );
             } else {
@@ -26,7 +29,7 @@ public class ZdoConverter : JsonConverter<ZValue>
             switch (zvar.Type) {
                 case ZType.Float: writer.WriteNumberValue( (float)(zvar.Value) ); break;
                 case ZType.Vec3:
-                    vec3JsonConverter.Write ( writer, (Vector3)(zvar.Value), options );
+                    vec3JsonConverter.Write( writer, (Vector3)(zvar.Value), options );
                     break;
                 case ZType.Quat:
                     quatJsonConverter.Write( writer, (Quaternion)(zvar.Value), options );
@@ -35,7 +38,9 @@ public class ZdoConverter : JsonConverter<ZValue>
                 case ZType.Long:   writer.WriteNumberValue( (long)(zvar.Value) ); break;
                 case ZType.String: writer.WriteStringValue( (string)(zvar.Value) ); break;
                 case ZType.ByteArray:
-                    writer.WriteStringValue( (string)(zvar.Value) ); break;
+                    var value = Convert.ToBase64String( zvar.Value as byte[] );
+                    writer.WriteStringValue( (string)(value) );
+                    break;
                 default: throw new JsonException( "BpjZVars.ZValue has Unknown type" );
             }
         } catch (Exception e) {
@@ -48,17 +53,18 @@ public class ZdoConverter : JsonConverter<ZValue>
         ref Utf8JsonReader    reader, Type type,
         JsonSerializerOptions options) {
         try {
-            if (reader.TokenType != JsonTokenType.StartObject)
-                throw new JsonException( "Expected start of of object." );
+            if (reader.TokenType != JsonTokenType.PropertyName)
+                reader.Read();
+            if (reader.TokenType != JsonTokenType.PropertyName)
+                throw new JsonException( "Zvalue1: Expected Property Name." );
+            string name = reader.GetString() ?? throw new JsonException( "Propertyname is Empty" );
 
-            if (reader.TokenType != JsonTokenType.PropertyName) throw new JsonException();
-            string name    = reader.GetString() ?? string.Empty;
-            char   prefix  = name[0];
-            bool   unknown;
+            char prefix = name[0];
+            bool unknown;
             if (prefix == 'u') {
-                prefix = name[1];
-                name   = name.Substring( 2 );
-                unknown  = true;
+                prefix  = name[1];
+                name    = name.Substring( 2 );
+                unknown = true;
             } else {
                 name    = name.Substring( 1 );
                 unknown = false;
@@ -69,10 +75,11 @@ public class ZdoConverter : JsonConverter<ZValue>
                     return new ZValue( name, reader.GetSingle(), unknown );
                 case (char)ZType.Vec3:
                     return new ZValue( name,
-                        vec3JsonConverter.Read(ref reader, typeof(Vector3),  options ), unknown );
+                        vec3JsonConverter.Read( ref reader, typeof(Vector3), options ), unknown );
                 case (char)ZType.Quat:
                     return new ZValue( name,
-                        quatJsonConverter.Read(ref reader, typeof(Quaternion),  options ), unknown );
+                        quatJsonConverter.Read( ref reader, typeof(Quaternion), options ),
+                        unknown );
                 case (char)ZType.Int:
                     return new ZValue( name, reader.GetInt32(), unknown );
                 case (char)ZType.Long:
@@ -81,31 +88,34 @@ public class ZdoConverter : JsonConverter<ZValue>
                     return new ZValue( name,
                         reader.GetString() ?? "", unknown );
                 case (char)ZType.ByteArray:
-                    return new ZValue( name,
-                        reader.GetString() ?? "", unknown );
+                    var    str   = reader.GetString() ?? "";
+                    byte[] bytes = Convert.FromBase64String( str );
+                    return new ZValue( name, bytes
+                        , unknown );
                 default:
                     throw new JsonException( "Unknown type" );
             }
         } catch (Exception e) {
-            System.Console.WriteLine( "Error in Json Serializer BpjZVars.ZValue " + e );
-            throw;
+            System.Console.WriteLine( "Error in Json Serializer ZValue" + e );
+            System.Console.WriteLine( "TokenType:" + reader.TokenType.ToString() );
+            System.Console.WriteLine( "Bytes" + reader.BytesConsumed );
+            throw e;
         }
     }
 }
 
 public struct BpjZVars
 {
-    
     public enum ZType : byte
     {
-        Float       = (byte)'f',
-        Vec3        = (byte)'v',
-        Quat        = (byte)'q',
-        Int         = (byte)'i',
-        Long        = (byte)'l',
-        String      = (byte)'s',
-        ByteArray   = (byte)'b',
-    
+        Float     = (byte)'f',
+        Vec3      = (byte)'v',
+        Quat      = (byte)'q',
+        Int       = (byte)'i',
+        Long      = (byte)'l',
+        String    = (byte)'s',
+        ByteArray = (byte)'b',
+
         F = (byte)'f',
         V = (byte)'v',
         Q = (byte)'q',
@@ -131,33 +141,68 @@ public struct BpjZVars
     }
 
     public struct ZValue
+
     {
         [JsonIgnore]         ZType  m_type;
         [JsonIgnore]         string m_name;
         [JsonIgnore]         object m_value;
         [JsonIgnore]         bool   m_hashUnknown = false;
-        [JsonInclude] public ZType  Type  { get => m_type; set => m_type = value; }
-        [JsonInclude] public string Name  { get => m_name; set => m_name = value; }
-        [JsonInclude] public object Value { get => m_value; }
-        [JsonInclude] public bool UnknownHash { get => m_hashUnknown; }
-        public               void   SetValue(int        value_) => m_value = value_;
-        public               void   SetValue(float      value_) => m_value = value_;
-        public               void   SetValue(Quaternion value_) => m_value = value_;
-        public               void   SetValue(Vector3    value_) => m_value = value_;
-        public               void   SetValue(long       value_) => m_value = value_;
-        public               void   SetValue(byte[]     value_) => m_value = value_;
-        public               void   SetValue(string     value_) => m_value = value_;
+        [JsonInclude] public ZType  Type  { get => m_type;  set => m_type = value; }
+        [JsonInclude] public string Name  { get => m_name;  set => m_name = value; }
+        [JsonInclude] public object Value { get => m_value; set => m_value = value; }
 
-        private ZValue(ZType type_, string name_, object value_, bool unknown = false) {
-            m_type  = type_;
-            m_name  = name_;
+        [JsonInclude] public bool UnknownHash { get => m_hashUnknown; }
+        public void SetValue(int value_) {
             m_value = value_;
-            m_hashUnknown = unknown;
+            m_type  = ZType.I;
         }
-        public static ZValue Create<T>(string name_, T value, bool unknown = false) {
+        public void SetValue(long value_) {
+            m_value = value_;
+            m_type  = ZType.L;
+        }
+        public void SetValue(float value_) {
+            m_value = value_;
+            m_type  = ZType.F;
+        }
+        public void SetValue(string value_) {
+            m_value = value_;
+            m_type  = ZType.S;
+        }
+        public void SetValue(Vector3 value_) {
+            m_value = value_;
+            m_type  = ZType.V;
+        }
+        public void SetValue(Quaternion value_) {
+            m_value = value_;
+            m_type  = ZType.Q;
+        }
+        public void SetValue(byte[] value_) {
+            m_value = value_;
+            m_type  = ZType.B;
+        }
+
+        private ZValue(ZType type_, string name_, object value_, bool unknown) {
+            m_type        = type_;
+            m_name        = name_;
+            m_hashUnknown = unknown;
+            m_value       = value_;
+        }
+        public static ZValue Create<T>(string name_, T value, bool unknown) {
             if (value == null) throw new InvalidOperationException();
             if (typeof(T) == typeof(int))
-                return new ZValue( name_, (int)(object)value, unknown );
+                return new ZValue( ZType.I, name_, (int)(object)value, unknown );
+            if (typeof(T) == typeof(float))
+                return new ZValue( ZType.F, name_, (float)(object)value, unknown );
+            if (typeof(T) == typeof(Quaternion))
+                return new ZValue( ZType.Q, name_, (Quaternion)(object)value, unknown );
+            if (typeof(T) == typeof(Vector3))
+                return new ZValue( ZType.V, name_, (Vector3)(object)value, unknown );
+            if (typeof(T) == typeof(long))
+                return new ZValue( ZType.L, name_, (long)(object)value, unknown );
+            if (typeof(T) == typeof(string))
+                return new ZValue( ZType.S, name_, (string)(object)value, unknown );
+            if (typeof(T) == typeof(byte[]))
+                return new ZValue( ZType.B, name_, (byte[])(object)value, unknown );
             if (typeof(T) == typeof(float))
                 return new ZValue( name_, (float)(object)value, unknown );
             if (typeof(T) == typeof(Quaternion))
@@ -173,7 +218,7 @@ public struct BpjZVars
             throw new ArgumentException( $"Unsupported data type1: {typeof(T)}" );
         }
         public static ZValue Create<T>(int hash, T value_) {
-            var unknown  = !GetName( hash, out string name_ );
+            var unknown = !GetName( hash, out string name_ );
             if (value_ == null) throw new InvalidOperationException();
             if (typeof(T) == typeof(int))
                 return new ZValue( name_, (int)(object)value_, unknown );
@@ -203,26 +248,20 @@ public struct BpjZVars
 
             throw new ArgumentException( $"Unsupported data type2: {typeof(T)}" );
         }
-        public ZValue(string name_, int value_, bool unknown = false) :
-            this( ZType.I  ,name_, value_, unknown ) { }
-        public ZValue(string name_, long value_, bool unknown = false) :
+        public ZValue(string name_, int value_, bool unknown) :
+            this( ZType.I, name_, value_, unknown ) { }
+        public ZValue(string name_, long value_, bool unknown) :
             this( ZType.L, name_, value_, unknown ) { }
-        public ZValue(string name_, float value_, bool unknown = false) :
+        public ZValue(string name_, float value_, bool unknown) :
             this( ZType.F, name_, value_, unknown ) { }
-        public ZValue(string name_, string value_, bool unknown = false) :
+        public ZValue(string name_, string value_, bool unknown) :
             this( ZType.S, name_, value_, unknown ) { }
-        public ZValue(string name_, Vector3 value_, bool unknown = false) :
-            this( ZType.V  ,name_, value_, unknown ) { }
-        public ZValue(string name_, Quaternion value_, bool unknown = false) :
-            this( ZType.Q  ,name_, value_, unknown ) { }
-        public ZValue(string name_, byte[] value_, bool unknown = false) {
-            m_type = ZType.ByteArray;
-            m_name = name_;
-            m_hashUnknown = unknown;
-            ZPackage pkg = new ZPackage();
-            pkg.Write( value_ );
-            m_value = pkg.GetBase64();
-        }
+        public ZValue(string name_, Vector3 value_, bool unknown) :
+            this( ZType.V, name_, value_, unknown ) { }
+        public ZValue(string name_, Quaternion value_, bool unknown) :
+            this( ZType.Q, name_, value_, unknown ) { }
+        public ZValue(string name_, byte[] value_, bool unknown) :
+            this( ZType.ByteArray, name_, value_, unknown  ) { }
     }
 
     public Dictionary<string, ZValue> m_values = [];
@@ -243,7 +282,7 @@ public struct BpjZVars
             foreach (var pair in rest) {
                 if (data.TryGetValue( pair.Key, out T value )) {
                     rest.Remove( pair.Key );
-                    m_values[pair.Value] = ZValue.Create( pair.Value, value );
+                    m_values[pair.Value] = ZValue.Create( pair.Key, value );
                 }
             }
         }
@@ -268,7 +307,7 @@ public struct BpjZVars
         if (data != null) {
             foreach (var name in rest) {
                 if (data.TryGetValue( name.GetStableHashCode(), out T value )) {
-                    AddValue( ZValue.Create( name, value ) );
+                    AddValue( ZValue.Create( name, value, false ) );
                 }
             }
         }
@@ -292,7 +331,7 @@ public struct BpjZVars
         ZType        type, BinarySearchDictionary<int, T>? data,
         List<string> rest) {
         if (data != null) {
-            ZDOInfo info      = ZDOInfo.Instance;
+            ZDOInfo info = ZDOInfo.Instance;
             foreach (KeyValuePair<int, T> pair in data) {
                 bool unknown = !GetName( pair.Key, out var name, info );
                 if (rest.Contains( name ))
@@ -412,17 +451,17 @@ public struct BpjZVars
         }
         return rest;
     }
-    public void AddPair<T>(T value, string name) {
+    public void AddPair<T>(string key, T value) {
         if (typeof(T) == typeof(ZDO)) {
             throw new ArgumentException( "For adding from a ZDO, use TryAddFromZdo instead" );
         }
-        m_values.Add( name, ZValue.Create( name, value ) );
+        m_values.Add( key, ZValue.Create( key, value, true ) );
     }
-    public void AddPair<T>(T value, int hash) {
+    public void AddPair<T>(int key, T value) {
         if (typeof(T) == typeof(ZDO)) {
             throw new ArgumentException( "For adding from a ZDO, use TryAddFromZdo instead" );
         }
-        AddValue( ZValue.Create( hash, value ) );
+        AddValue( ZValue.Create( key, value ) );
     }
 
     public List<int> TryAddOnly(ZDO zdo, params int[] hashes)
@@ -476,7 +515,7 @@ public struct BpjZVars
     public bool TryAddFromZdo<T>(ZDO zdo, string name) {
         int hash = name.GetStableHashCode();
         if (GetDict<T>( zdo )?.TryGetValue( hash, out T value ) ?? false) {
-            AddValue( ZValue.Create( name, value ) );
+            AddValue( ZValue.Create( name, value, true ) );
             return true;
         }
         return false;

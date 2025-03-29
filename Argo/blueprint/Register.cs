@@ -34,7 +34,7 @@ namespace Argo
             public const string ForceExclude = "ForceExclude";
         }
 
-        public class BpjFetcherUnknown(BPOFlags[] flags_)
+        public class BpjFetcherUnknown(params BPOFlags[] flags_)
             : BpjFetcher(flags_)
         {
 #if DEBUG
@@ -50,7 +50,7 @@ namespace Argo
                 new Dictionary<string, BpjFetcher>();
             internal BpjFetcherUnknown m_default =
                 new BpjFetcherUnknown([0]);
-            internal       Configuration Configuration = new Configuration();
+         //   internal static      Configuration Configuration_ ;
             public         BpoRegisterByFlag ByFlag = new BpoRegisterByFlag();
             private static BpoRegister? DefaultInstance;
             public static BpoRegister Default {
@@ -80,9 +80,9 @@ namespace Argo
             /// call UpdatePrefabs otherwise the collection will not be up to date.
             /// todo maybe implement changecount to automatically detect changes since its kinda expensive to call update everytime
             /// </summary>
-            public SortedSet<string> ExcludedPrefabs {
-                get => ByFlag.ExcludedPrefabs;
-                internal set => ByFlag.ExcludedPrefabs = value;
+            public SortedSet<string> IgnoredPrefabs {
+                get => ByFlag.IgnoredPrefabs;
+                internal set => ByFlag.IgnoredPrefabs = value;
             }
             public bool IsIncluded(string prefab) {
                 return IncludedPrefabs.Contains(prefab);
@@ -90,8 +90,9 @@ namespace Argo
             public static BpoRegister GetDefault() {
                 if (DefaultInstance == null)
                 {
-                    DefaultInstance = new BpoRegister();
+                   DefaultInstance = new BpoRegister();
                     Configuration.AddToRegister(DefaultInstance);
+                    DefaultInstance.ByFlag.UpdatePrefabs();
                 }
 
                 return DefaultInstance;
@@ -124,26 +125,26 @@ namespace Argo
                 }
             }
             public static void AddToDefault<Fetcher>(string[] prefab,
-                BPOFlags[]                                    flags)
+              params  BPOFlags[]                                    flags)
                 where Fetcher : BpjFetcher =>
                 GetDefault().Add<Fetcher>(prefab, flags);
 
-            public void Add<Fetcher>(string[] prefabs, BPOFlags[] flags)
-                where Fetcher : BpjFetcher {
+            public void Add<T>(string[] prefabs, BPOFlags[] flags)
+                where T : BpjFetcher {
                 BpjFetcher fetcher =
-                    (Fetcher)Activator.CreateInstance(typeof(Fetcher), flags);
+                    (T)Activator.CreateInstance(typeof(T), flags);
                 Add(prefabs, fetcher);
                 ByFlag.Add(prefabs, flags);
             }
-            public static void AddToDefault<Fetcher>(string prefab,
-                BPOFlags[]                                  flags)
+            public static void AddToDefault<Fetcher>(string             prefab,
+                                                     params  BPOFlags[] flags)
                 where Fetcher : BpjFetcher
                 => GetDefault().Add<Fetcher>(prefab, flags);
 
-            public void Add<Fetcher>(string prefab, BPOFlags[] flags)
-                where Fetcher : BpjFetcher {
+            public void Add<T>(string prefab, params BPOFlags[] flags)
+                where T : BpjFetcher {
                 BpjFetcher fetcher =
-                    (Fetcher)Activator.CreateInstance(typeof(Fetcher), flags);
+                    (T)Activator.CreateInstance(typeof(T), flags);
                 Add(prefab, fetcher);
                 ByFlag.Add([prefab], flags);
             }
@@ -183,7 +184,7 @@ namespace Argo
             private SortedSet<string>[] Prefablists = new SortedSet<string>[32];
             private SortedSet<string> allPrefabs = new SortedSet<string>();
             private SortedSet<string> includedPrefabs = new SortedSet<string>();
-            private SortedSet<string> excludedPrefabs = new SortedSet<string>();
+            private SortedSet<string> _ignoredPrefabs = new SortedSet<string>();
 
             /// <summary>
             /// before Accessing AllPrefabs for the first time oder after prefabs where added or removed
@@ -208,9 +209,9 @@ namespace Argo
             /// call UpdatePrefabs otherwise the collection will not be up to date.
             /// todo maybe implement changecount to automatically detect changes since its kinda expensive to call update everytime
             /// </summary>
-            public SortedSet<string> ExcludedPrefabs {
-                get => excludedPrefabs;
-                internal set => excludedPrefabs = value;
+            public SortedSet<string> IgnoredPrefabs {
+                get => _ignoredPrefabs;
+                internal set => _ignoredPrefabs = value;
             }
 
             private CategorySettings[] categorySettings
@@ -224,7 +225,7 @@ namespace Argo
 
                 allPrefabs      = new SortedSet<string>();
                 includedPrefabs = new SortedSet<string>();
-                excludedPrefabs = new SortedSet<string>();
+                _ignoredPrefabs = new SortedSet<string>();
                 categorySettings
                     = Enumerable.Repeat(CategorySettings.Include, 32)
                                 .ToArray();
@@ -327,19 +328,19 @@ namespace Argo
             }
 
             private SortedSet<string> UpdateExcludedPrefabs() {
-                ExcludedPrefabs
+                IgnoredPrefabs
                     = new SortedSet<string>(Enumerable.Except(AllPrefabs,
                         IncludedPrefabs));
-                return ExcludedPrefabs;
+                return IgnoredPrefabs;
             }
-            private void UpdatePrefabs() {
+            public void UpdatePrefabs() {
                 UpdateAllPrefabs();
                 UpdateIncludedPrefabs();
                 UpdateExcludedPrefabs();
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            private static BPOFlags Combine(BPOFlags[] flags) {
+            private static BPOFlags Combine(params BPOFlags[] flags) {
                 BPOFlags combined = 0;
                 foreach (var flag in flags)
                 {
@@ -350,7 +351,7 @@ namespace Argo
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public SortedSet<string>[] GetAll(BPOFlags[] flags) {
+            public SortedSet<string>[] GetAll(params BPOFlags[] flags) {
                 return GetAll(Combine(flags));
             }
             private SortedSet<string> IntersectUnchecked(int[] indices) {
@@ -390,7 +391,7 @@ namespace Argo
 
                 return result;
             }
-            public SortedSet<string> Intersect(BPOFlags[] flags) {
+            public SortedSet<string> Intersect(params BPOFlags[] flags) {
                 var               indices = GetAllIndices(Combine(flags));
                 SortedSet<string> result  = new SortedSet<string>();
                 switch (indices.Length)
@@ -523,7 +524,7 @@ namespace Argo
                 }
             }
 
-            public void Add(string[] prefabs, BPOFlags[] flags) {
+            public void Add(string[] prefabs, params BPOFlags[] flags) {
                 var indices = GetAllIndices(Combine(flags));
                 foreach (var index in indices)
                 {
@@ -534,7 +535,7 @@ namespace Argo
                 }
             }
 
-            public void Remove(string[] prefabs, BPOFlags[] flags) {
+            public void Remove(string[] prefabs, params BPOFlags[] flags) {
                 var indices = GetAllIndices(Combine(flags));
                 foreach (var index in indices)
                 {

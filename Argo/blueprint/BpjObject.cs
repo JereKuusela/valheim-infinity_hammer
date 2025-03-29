@@ -1,19 +1,12 @@
 ﻿using System;
-using System.Data;
-using System.Dynamic;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
-using System.Security.Policy;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using Argo.blueprint.Util;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Argo.Blueprint;
 
-using DOdata = ZDOExtraData;
 using static BpjZVars;
 
 [Flags]
@@ -26,10 +19,11 @@ public enum BPOFlags : uint
     // todo     Component<Pickable>
     // todo    is m_targetNonPlayerBuilt != BuildPlayer? (may rename build Player Playerbuildable) 
     //	 for pieces buildable by the player with the hammer
-    BuildPlayer = 1u << 31,
+    BuildPiece = 1u << 31,
+    // BuildPiecePlayer = 1u << 30, //	 for pieces buildable by the player with the hammer
+    BuildPlayer = 1u << 30,
     //	 for all build piece even spawn only like the dverger probs
-    BuildPiece = 1 << 30,
-    Placeable  = 1 << 29, //	for pieces like food placed with the serving tray
+    Placeable = 1 << 29, //	for pieces like food placed with the serving tray
     //	 for the option to exclude compfort pieces from static pieces (which do nothing)
     Compfort    = 1 << 28,
     LightSource = 1 << 27, //	 for pieces like armor stands and item stands	
@@ -38,10 +32,17 @@ public enum BPOFlags : uint
     TextReceiver = 1 << 24, //		
     Interactable = 1 << 23, //		
 //	 for containers like the chest and things that need	have fuel
+// todo, can maybe combined with containerpiece & pickable
     ObjectHolder    = 1 << 21,
     ContainerPiece  = 1 << 20, //		
     CraftingStation = 1 << 19, //		
+    // todo, can maybe combined with Craftig station and Containerpiece
     Fuel            = 1 << 18, //	 for pieces with fuel like the furnace	
+    // todo maybe combine with placeable, if its a buildpieceplayer that means ists like
+    // placed food, if only buildpiece its like the pickable dverger lanterns and if its neither
+    // its like muhsrooms, rasperries and wild crops 
+    // wild mushrooms seem to have ZNetView, StaticPhysics and Pickable
+    // placed meads (same for dear mead) have: ZNetView, ZSyncTransform, ItemDrop, Piece, WearNTear, MaterialManNofier
     Pickable        = 1 << 17, //	 e.g for food placed with the serving tray or crops	
 //	 for player grown pieces which need cultivated ground (vegtables basically)
     Cultivated            = 1 << 15,
@@ -51,6 +52,7 @@ public enum BPOFlags : uint
     NonStatic
         = 1 << 11, //	 pieces with some sort of funktion but not direktly interactable	 like ladders and whisplights
     Creature = 1 << 10, //	 for all creatures	
+    // can maybe combined with TextReceiver and creature
     Tameable = 1 << 9, //	 for all creatures that can be tamed
     Vehicle  = 1 << 8, //	 for all vehicles
 //	 for player grown pieces which need cultivated ground (vegtables basically)
@@ -59,6 +61,8 @@ public enum BPOFlags : uint
     SpecialInterface = 1 << 5,
     //	 for interfaces Hoverable	 IHasHoverMenu & IHasHoverMenuExtended
     Indestructible = 1 << 4,
+    // todo  
+    NoCollider = 1 << 3, 
     // piece categories from Valheim Piece.cs PieceCategory.
     // Uses the last 4 bits but leave the last 8 open for future additions
     IsVanilla = 1 << 0, // todo add for every vanilla piece
@@ -75,43 +79,18 @@ public class BpjDataConverter : JsonConverter<BpjObject.TData>
             writer.WriteStartObject();
             writer.WritePropertyName( "flags" );
             writer.WriteNumberValue( (uint)(data.flags) );
-            /*writer.WritePropertyName("p");
-            JsonSerializer.Serialize(writer, (Vector3)(data.p), options);*/
             writer.WritePropertyName( "p" );
-            vec3JsonConverter.Write( writer, data.p, options );
+            vec3JsonConverter.Write( writer, data.pos, options );
             writer.WritePropertyName( "r" );
-            quatJsonConverter.Write( writer, data.r, options );
+            quatJsonConverter.Write( writer, data.rot, options );
             writer.WritePropertyName( "s" );
-            vec3JsonConverter.Write( writer, data.s, options );
-
-            /*
-            writer.WriteStartArray();
-            writer.WriteNumberValue(data.p.x);
-            writer.WriteNumberValue(data.p.y);
-            writer.WriteNumberValue(data.p.z);
-            writer.WriteEndArray();
-            writer.WritePropertyName("r");
-            writer.WriteStartArray();
-            writer.WriteNumberValue(data.r.x);
-            writer.WriteNumberValue(data.r.y);
-            writer.WriteNumberValue(data.r.z);
-            writer.WriteNumberValue(data.r.w);
-            writer.WriteEndArray();
-            writer.WritePropertyName("s");
-            writer.WriteStartArray();
-            writer.WriteNumberValue(data.s.x);
-            writer.WriteNumberValue(data.s.y);
-            writer.WriteNumberValue(data.s.z);
-            writer.WriteEndArray();*/
-            /*writer.WritePropertyName("s");
-            JsonSerializer.Serialize(writer, (Vector3)(data.s), options);
-            */
+            vec3JsonConverter.Write( writer, data.scale, options );
             writer.WritePropertyName( "odds" );
-            writer.WriteNumberValue( data.odds );
+            writer.WriteNumberValue( data.chance );
             writer.WriteEndObject();
         } catch (Exception e) {
             System.Console.WriteLine( "Error in Json Serializer Bpjobject " + e );
-            throw e;
+            throw;
         }
     }
     public override BpjObject.TData Read(
@@ -120,21 +99,21 @@ public class BpjDataConverter : JsonConverter<BpjObject.TData>
         reader.Read();
         if (reader.TokenType != JsonTokenType.StartObject) throw new JsonException();
         reader.Read();
-        BPOFlags   flags  = 0;
-        Vector3    p      = Vector3.zero;
-        Quaternion r      = Quaternion.identity;
-        Vector3    s      = Vector3.zero;
-        float      odds   = 0f;
+        BPOFlags   flags = 0;
+        Vector3    p     = Vector3.zero;
+        Quaternion r     = Quaternion.identity;
+        Vector3    s     = Vector3.zero;
+        float      odds  = 0f;
         while (reader.TokenType != JsonTokenType.EndObject) {
             if (reader.TokenType != JsonTokenType.PropertyName) throw new JsonException();
-            string     p_name = reader.GetString() ?? "";
+            string p_name = reader.GetString() ?? "";
             switch (p_name) {
                 case "flags":
                     reader.Read();
                     flags = (BPOFlags)reader.GetUInt32();
                     break;
                 case "p":
-                    p= vec3JsonConverter.Read( ref reader, typeof(Vector3), options );
+                    p = vec3JsonConverter.Read( ref reader, typeof(Vector3), options );
                     break;
                 case "r":
                     r = quatJsonConverter.Read( ref reader, typeof(Quaternion), options );
@@ -146,10 +125,12 @@ public class BpjDataConverter : JsonConverter<BpjObject.TData>
                     reader.Read();
                     odds = reader.GetSingle();
                     break;
+                default:
+                    break;
             }
             reader.Read();
         }
-       return new BpjObject.TData( flags, p, r, s, odds );
+        return new BpjObject.TData( flags, p, r, s, odds );
     }
 }
 
@@ -164,48 +145,7 @@ public class BpjObjectConverter : JsonConverter<BpjObject>
         try {
             writer.WriteStartObject();
             writer.WritePropertyName( Bpo.m_prefab );
-            /*writer.WriteStartObject();
-            writer.WritePropertyName("flags");
-            writer.WriteNumberValue((uint)(Bpo.m_data.flags));
-            /*writer.WritePropertyName("p");
-            JsonSerializer.Serialize(writer, (Vector3)(data.p), options);#1#
-            writer.WritePropertyName("p");
-            writer.WriteStartArray();
-            writer.WriteNumberValue(Bpo.m_data.p.x);
-            writer.WriteNumberValue(Bpo.m_data.p.y);
-            writer.WriteNumberValue(Bpo.m_data.p.z);
-            writer.WriteEndArray();
-            writer.WritePropertyName("r");
-            writer.WriteStartArray();
-            writer.WriteNumberValue(Bpo.m_data.r.x);
-            writer.WriteNumberValue(Bpo.m_data.r.y);
-            writer.WriteNumberValue(Bpo.m_data.r.z);
-            writer.WriteNumberValue(Bpo.m_data.r.w);
-            writer.WriteEndArray();
-            writer.WritePropertyName("s");
-            writer.WriteStartArray();
-            writer.WriteNumberValue(Bpo.m_data.s.x);
-            writer.WriteNumberValue(Bpo.m_data.s.y);
-            writer.WriteNumberValue(Bpo.m_data.s.z);
-            writer.WriteEndArray();
-            /*writer.WritePropertyName("s");
-            JsonSerializer.Serialize(writer, (Bpo.m_data.s), options);
-            #1#
 
-            writer.WritePropertyName("odds");
-            writer.WriteNumberValue(Bpo.m_data.odds);
-            writer.WriteEndObject();*/
-
-            /*writer.WritePropertyName("flags");
-            writer.WriteNumberValue((uint)(Bpo.Flags));
-            writer.WritePropertyName("p");
-            JsonSerializer.Serialize(writer, Bpo.Pos, options);
-            writer.WritePropertyName("r");
-            JsonSerializer.Serialize(writer, Bpo.Rot, options);
-            writer.WritePropertyName("s");
-            JsonSerializer.Serialize(writer, Bpo.Scale, options);
-            writer.WritePropertyName("odds");
-            writer.WriteNumberValue(Bpo.Chance);*/
             TDataConverter.Write( writer, Bpo.m_data, options );
             //JsonSerializer.Serialize<BpjObject.TData>(writer, Bpo.m_data, options);
             if (Bpo.m_properties.Count != 0) {
@@ -227,11 +167,14 @@ public class BpjObjectConverter : JsonConverter<BpjObject>
     public override BpjObject Read(
         ref Utf8JsonReader    reader, Type type,
         JsonSerializerOptions options) {
-        if (reader.TokenType != JsonTokenType.StartObject)
-            throw new JsonException( "Expected start of of object." );
-
         try {
             reader.Read();
+            if (reader.TokenType == JsonTokenType.StartObject) {
+                reader.Read();
+            }
+            if (reader.TokenType != JsonTokenType.PropertyName) {
+                throw new JsonException( "BlueprintObject3: Expected PropertyName." );
+            }
             string prefab = reader.GetString();
             BpjObject.TData data
                 = JsonSerializer.Deserialize<BpjObject.TData>( ref reader, options );
@@ -247,23 +190,28 @@ public class BpjObjectConverter : JsonConverter<BpjObject>
                     StringComparison.InvariantCultureIgnoreCase )) {
                 reader.Read();
                 if (reader.TokenType != JsonTokenType.StartObject)
-                    throw new JsonException( "Expected start of Object." );
-                reader.Read();
+                    throw new JsonException( "BlueprintObject2: Expected start of Object." );
+                
 
                 BpjZVars values = new BpjZVars();
-                while (reader.TokenType != JsonTokenType.EndObject) {
-                    ZValue v = zdoConverter.Read( ref reader, typeof(ZValue), options );
+                do {
+                  
+                    ZValue v    = zdoConverter.Read( ref reader, typeof(ZValue), options );
                     // ZValue v = JsonSerializer.Deserialize<ZValue>(ref reader, options);
                     values.m_values.Add( v.Name, v );
                     reader.Read();
-                }
+                } while (reader.TokenType != JsonTokenType.EndObject);
+                reader.Read();
                 bpo.ZVars = values;
             }
             if (reader.TokenType != JsonTokenType.EndObject)
                 throw new JsonException( "Expected end of Object." );
+            reader.Read();
             return bpo;
         } catch (Exception e) {
             System.Console.WriteLine( "Error in Json Serializer BpjObject" + e );
+            System.Console.WriteLine( "TokenType:" + reader.TokenType.ToString() );
+            System.Console.WriteLine( "Bytes" + reader.BytesConsumed );
             throw e;
         }
     }
@@ -303,9 +251,9 @@ public class BpjObject : IBlueprintObject
         string  prefab, Vector3 pos, Quaternion rot,
         Vector3 scale,
         float   chance) {
-        m_prefab     = prefab;
-        this.m_data  = new TData( 0, pos, rot, scale, chance );
-        m_properties = new BpjZVars();
+        this.m_prefab     = prefab;
+        this.m_data       = new TData( 0, pos, rot, scale, chance );
+        this.m_properties = new BpjZVars();
     }
 
     public BpjObject(
@@ -327,23 +275,23 @@ public class BpjObject : IBlueprintObject
         this.m_properties = vars ?? new BpjZVars();
     }
 
-    public class TData
+    public struct TData()
     {
-        [JsonInclude] public BPOFlags   flags;
-        [JsonInclude] public Vector3    p;
-        [JsonInclude] public Quaternion r;
-        [JsonInclude] public Vector3    s;
-        [JsonInclude] public float      odds;
+        [JsonInclude] [JsonPropertyName( "flags" )] public BPOFlags   flags;
+        [JsonInclude] [JsonPropertyName( "p" )]     public Vector3    pos;
+        [JsonInclude] [JsonPropertyName( "r" )]     public Quaternion rot;
+        [JsonInclude] [JsonPropertyName( "s" )]     public Vector3    scale;
+        [JsonInclude] [JsonPropertyName( "odds" )]  public float      chance;
 
         public TData(
-            BPOFlags flags, Vector3 pos, Quaternion rot, Vector3 scale,
-            float    chance) {
-            var norm = rot.normalized;
-            this.flags = flags;
-            this.p     = pos;
-            this.r     = norm;
-            this.s     = scale;
-            this.odds  = chance;
+            BPOFlags flags, Vector3 p, Quaternion r, Vector3 s,
+            float    chance) : this() {
+            //var norm = rot.normalized;
+            this.flags  = flags;
+            this.pos    = p;
+            this.rot    = r;
+            this.scale  = s;
+            this.chance = chance;
         }
     }
 
@@ -387,7 +335,7 @@ public class BpjObject : IBlueprintObject
             return $"{{\"{prefab}\":{data},\"ext\":{extended}}}";
         }*/
     }
-    public static BlueprintJson.BpjLine Split(string line) {
+    /*public static BlueprintJson.BpjLine Split(string line) {
         string[] parts = line.Split( new[] { ':' }, 2 );
         string[] parts2 = parts[1].Split( new[] { "\"ext\":" },
             StringSplitOptions.None );
@@ -395,29 +343,29 @@ public class BpjObject : IBlueprintObject
         string data_;
 
         if (parts2.Length == 1) {
-            // contains no additional data 
+            // contains no additional data
             data_ = parts2[0].TrimEnd( '}', ',' ) + "}";
             return new BlueprintJson.BpjLine( prefab, data_, [] );
         } else if (parts2.Length > 1) // todo move to import loop
         {
             data_ = parts2[0].TrimEnd( ',' );
-            //var matches = Regex.Matches(parts2[1], @"\{.*?\}");// with partensis 
+            //var matches = Regex.Matches(parts2[1], @"\{.*?\}");// with partensis
             var matches =
                 Regex.Matches( parts2[1],
-                    @"\{(.*?)\}" ); // without partensis 
+                    @"\{(.*?)\}" ); // without partensis
             string[] ext_ = new string[matches.Count];
             for (int i = 0; i < matches.Count; i++) { ext_[i] = matches[i].Value; }
             return new BlueprintJson.BpjLine( prefab, data_, ext_ );
         }
 
         throw new ArgumentException( "incorrect format: " + line );
-    }
+    }*/
 
 // todo remove 
-    public static BpjObject? FromJson(BlueprintJson.BpjLine line) {
+    /*public static BpjObject? FromJson(BlueprintJson.BpjLine line) {
         var prefab = line.prefab;
         if (line.ext.Length == 0) {
-            // contains no additional data 
+            // contains no additional data
             return new BpjObject( prefab,
                 JsonUtility.FromJson<TData>( line.data ) );
         } // todo move to import loop
@@ -429,8 +377,8 @@ public class BpjObject : IBlueprintObject
             System.Console.WriteLine( match );
         }
         return obj;
-    }
-    public static BpjObject? FromJson(string line) {
+    }*/
+    /*public static BpjObject? FromJson(string line) {
         string[] parts = line.Split( new[] { ':' }, 2 );
         string[] parts2 = parts[1].Split( new[] { "\"ext\":" },
             StringSplitOptions.None );
@@ -438,7 +386,7 @@ public class BpjObject : IBlueprintObject
         try {
             var prefab = parts[0].Trim( '{', '"' );
             if (parts2.Length == 1) {
-                // contains no additional data 
+                // contains no additional data
                 return new BpjObject( prefab,
                     JsonUtility.FromJson<TData>( parts2[0].TrimEnd( '}', ',' ) +
                         "}" ) );
@@ -446,10 +394,10 @@ public class BpjObject : IBlueprintObject
             {
                 var obj = new BpjObject( prefab,
                     JsonUtility.FromJson<TData>( parts2[0].TrimEnd( ',' ) ) );
-                //var matches = Regex.Matches(parts2[1], @"\{.*?\}");// with partensis 
+                //var matches = Regex.Matches(parts2[1], @"\{.*?\}");// with partensis
                 var matches =
                     Regex.Matches( parts2[1],
-                        @"\{(.*?)\}" ); // without partensis 
+                        @"\{(.*?)\}" ); // without partensis
 
                 foreach (Match match in matches) { System.Console.WriteLine( match.Value ); }
 
@@ -464,15 +412,15 @@ public class BpjObject : IBlueprintObject
         }
 
         return new BpjObject();
-    }
-    [JsonIgnore] public virtual string     Prefab { get => m_prefab; set => m_prefab = value; }
-    [JsonIgnore] public virtual Vector3    Pos    { get => m_data.p; set => m_data.p = value; }
-    [JsonIgnore] public virtual Quaternion Rot    { get => m_data.r; set => m_data.r = value; }
+    }*/
+    [JsonIgnore] public virtual string     Prefab { get => m_prefab;   set => m_prefab = value; }
+    [JsonIgnore] public virtual Vector3    Pos    { get => m_data.pos; set => m_data.pos = value; }
+    [JsonIgnore] public virtual Quaternion Rot    { get => m_data.rot; set => m_data.rot = value; }
 // todo write conversion function for other blueprint format    
-    [JsonIgnore] public virtual string  Data  { get => "";       set { } }
-    [JsonIgnore] public virtual Vector3 Scale { get => m_data.s; set => m_data.s = value; }
+    [JsonIgnore] public virtual string  Data  { get => "";           set { } }
+    [JsonIgnore] public virtual Vector3 Scale { get => m_data.scale; set => m_data.scale = value; }
 // todo write conversion function for other blueprint format    
-    [JsonIgnore] public virtual float    Chance { get => m_data.odds; set => m_data.odds = value; }
-    [JsonIgnore] public virtual string   ExtraInfo { get => ""; set { } }
+    [JsonIgnore] public virtual float Chance { get => m_data.chance; set => m_data.chance = value; }
+    [JsonIgnore] public virtual string ExtraInfo { get => ""; set { } }
     [JsonIgnore] public virtual BPOFlags Flags { get => m_data.flags; set => m_data.flags = value; }
 }

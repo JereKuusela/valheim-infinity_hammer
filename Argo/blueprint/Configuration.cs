@@ -3,209 +3,212 @@
 // todo when loading stuff write everything thats not here in a file
 using static BPOFlags;
 
-public class Configuration
+public static class Configuration
 {
-    public static void AddToRegister(BpoRegister instance) {
-        // todo maybe create default instance and determine some of the
-        // todo   flags there
-        instance.Add<FetcherStatic>
-            (BuildPiece.Static, [BuildPlayer]);
 
-        instance.Add<FetcherNameable>(BuildPiece.Nameable, [
+   
+    public static void AddToRegister(BpoRegister instance) {
+     
+   // todo maybe create default instance and determine some of the
+        // todo   flags there
+        
+        instance.Add<FetcherStatic>
+            ( BuildPiece.Static, [BuildPlayer] );
+
+        instance.Add<FetcherNameable>( BuildPiece.Nameable, [
             BuildPlayer, TextReceiver
-        ]);
-        instance.Add<FetcherStatic>(BuildPiece.Interactable, [
+        ] );
+        instance.Add<FetcherStatic>( BuildPiece.Interactable, [
             BuildPlayer, Interactable,
-        ]);
-        instance.Add<FetcherStatic>(BuildPiece.NonStatic, [
+        ] );
+        instance.Add<FetcherStatic>( BuildPiece.NonStatic, [
             BuildPlayer,
             NonStatic,
             SpecialInterface
-        ]);
-        instance.Add<FetcherStatic>(BuildPiece.Vehicle, [
+        ] );
+        instance.Add<FetcherStatic>( BuildPiece.Vehicle, [
             BuildPlayer,
             Vehicle,
             Interactable,
             Hoverable,
-        ]);
+        ] );
 
-        instance.Add<FetcherItemStand>(["itemstand", "itemstandh"], [
-            BuildPlayer,
-            LightSource,
-            ObjectHolder,
-        ]);
+        instance.Add<FetcherItemStand>( ["itemstand", "itemstandh"], [
+            BuildPlayer | LightSource | ObjectHolder
+        ] );
 
-        instance.Add<FetcherArmorStand>(["ArmorStand"],
+        instance.Add<FetcherArmorStand>( ["ArmorStand"],
         [
             BuildPlayer,
             LightSource,
             ObjectHolder,
-        ]);
+            Compfort
+        ] );
 
-        instance.Add<FetcherGuardStone>(["guard_stone",], [
+        instance.Add<FetcherGuardStone>( ["guard_stone",], [
             BuildPlayer,
             LightSource,
             Hoverable,
             SpecialInterface,
             TextReceiver,
-        ]);
+        ] );
 
-        instance.Add<FetcherStatic>(["piece_wisplure",], [
+        instance.Add<FetcherStatic>( ["piece_wisplure",], [
             BuildPlayer,
             LightSource,
             Hoverable,
-        ]);
-        instance.Add<FetcherDefault>(BuildPiece.Comfort.Static, [
+        ] );
+        instance.Add<FetcherDefault>( BuildPiece.Comfort.Static, [
             BuildPlayer,
             Compfort
-        ]);
-        instance.Add<FetcherDefault>(BuildPiece.Comfort.Interactable,
+        ] );
+        instance.Add<FetcherDefault>( BuildPiece.Comfort.Interactable,
         [
             LightSource,
             BuildPlayer,
             Compfort
-        ]);
-        instance.Add<FetcherFuel>(BuildPiece.Comfort.LightFuel, [
+        ] );
+        instance.Add<FetcherFuel>( BuildPiece.Comfort.LightFuel, [
             BuildPlayer,
             Compfort,
             LightSource,
             Fuel,
-        ]);
+        ] );
 
-        instance.Add<FetcherStatic>(BuildPiece.Workbench.Light, [
+        instance.Add<FetcherStatic>( BuildPiece.Workbench.Light, [
             BuildPlayer,
             CraftingStation,
             LightSource
-        ]);
-        instance.Add<FetcherFuel>(BuildPiece.Workbench.FuelLight, [
+        ] );
+        instance.Add<FetcherFuel>( BuildPiece.Workbench.FuelLight, [
             BuildPlayer,
             CraftingStation,
             LightSource,
             Fuel,
-        ]);
-        instance.Add<FetcherFuel>(BuildPiece.Workbench.Fuel, [
+        ] );
+        instance.Add<FetcherFuel>( BuildPiece.Workbench.Fuel, [
             BuildPlayer,
             CraftingStation,
             Fuel,
-        ]);
-        instance.Add<FetcherStatic>(BuildPiece.Workbench.Static,
+        ] );
+        instance.Add<FetcherStatic>( BuildPiece.Workbench.Static,
         [
             BuildPlayer,
             CraftingStation,
-        ]);
-        instance.Add<FetcherStatic>(BuildPiece.Workbench.Animated, [
+        ] );
+        instance.Add<FetcherStatic>( BuildPiece.Workbench.Animated, [
             BuildPlayer,
             CraftingStation,
             Animated,
-        ]);
+        ] );
 
-        instance.Add<FetcherContainer>(BuildPiece.Container.Player, [
+        instance.Add<FetcherContainer>( BuildPiece.Container.Player, [
             BuildPlayer,
             ContainerPiece
-        ]);
-        instance.Add<FetcherContainer>(BuildPiece.Container.NonPlayer, [
+        ] );
+        instance.Add<FetcherContainer>( BuildPiece.Container.NonPlayer, [
             BPOFlags.BuildPiece,
             ContainerPiece
-        ]);
-        instance.Add<FetcherFuel>(BuildPiece.Lights.Fuel, [
+        ] );
+        instance.Add<FetcherFuel>( BuildPiece.Lights.Fuel, [
             BuildPlayer,
             Fuel,
             LightSource,
-        ]);
-        instance.Add<FetcherStatic>(BuildPiece.Lights.NoFuel, [
+        ] );
+        instance.Add<FetcherStatic>( BuildPiece.Lights.NoFuel, [
             BuildPlayer,
             LightSource,
-        ]);
+        ] );
 
-        instance.Add<FetcherDefault>(pickable, [
+        instance.Add<FetcherDefault>( pickable, [
             Pickable,
             NonStatic,
-        ]);
-        instance.Add<FetcherStatic>(PieceNonPlayer.NonStatic, [
+        ] );
+        instance.Add<FetcherStatic>( PieceNonPlayer.NonStatic, [
             BuildPlayer,
             NonStatic,
-        ]);
-        instance.Add<FetcherStatic>(PieceNonPlayer.Static, [
+        ] );
+        instance.Add<FetcherStatic>( PieceNonPlayer.Static, [
             BPOFlags.BuildPiece,
-        ]);
-        instance.Add<FetcherStatic>(PieceNonPlayer.Interactable,
+        ] );
+        instance.Add<FetcherStatic>( PieceNonPlayer.Interactable,
         [
             BPOFlags.BuildPiece,
             NonStatic,
-        ]);
-        instance.Add<FetcherStatic>(PieceNonPlayer.LightSource, [
+        ] );
+        instance.Add<FetcherStatic>( PieceNonPlayer.LightSource, [
             BPOFlags.BuildPiece,
             LightSource,
-        ]);
+        ] );
 
-        instance.Add<FetcherStatic>("piece_xmastree", [
+        instance.Add<FetcherStatic>( "piece_xmastree", [
             BuildPlayer,
             LightSource,
             Compfort,
-        ]);
-        instance.Add<FetcherFuel>("piece_bathtub", [
+        ] );
+        instance.Add<FetcherFuel>( "piece_bathtub", [
             BuildPlayer,
             LightSource,
             Interactable,
             Fuel,
             Compfort,
-        ]);
+        ] );
         // todo split in struly static pieces like rocks and those who have animation like trees in wind
-        instance.Add<FetcherDefault>(Terrain.Static, [
+        instance.Add<FetcherDefault>( Terrain.Static, [
             DestroyableTerrain,
-        ]);
+        ] );
         // todo, prefabname might be the same as non fractured
-        instance.Add<FetcherFractured>(Terrain.Fractured, [
+        instance.Add<FetcherFractured>( Terrain.Fractured, [
             DestroyableTerrain,
             Fractured,
-        ]);
+        ] );
         // todo, prefabname might be the same as non fractured
-        instance.Add<FetcherFractured>(Terrain.Animated, [
+        instance.Add<FetcherFractured>( Terrain.Animated, [
             DestroyableTerrain,
             Animated,
-        ]);
-        instance.Add<FetcherFractured>(Terrain.Iteractable, [
+        ] );
+        instance.Add<FetcherFractured>( Terrain.Iteractable, [
             Interactable,
             Animated,
-        ]);
-        instance.Add<FetcherDefault>(Creatures.Enemy, [
+        ] );
+        instance.Add<FetcherDefault>( Creatures.Enemy, [
             Creature,
-        ]);
-        instance.Add<FetcherTameable>(Creatures.Tameable, [
+        ] );
+        instance.Add<FetcherTameable>( Creatures.Tameable, [
             Creature,
             Tameable,
-        ]);
-        instance.Add<FetcherDefault>(Creatures.Special, [
+        ] );
+        instance.Add<FetcherDefault>( Creatures.Special, [
             Creature,
             SpecialInterface,
-        ]);
-        instance.Add<FetcherDefault>(Creatures.Spawner, [
+        ] );
+        instance.Add<FetcherDefault>( Creatures.Spawner, [
             Creature,
             SpecialInterface,
-        ]);
-        instance.Add<FetcherDefault>(Creatures.Fish, [
+        ] );
+        instance.Add<FetcherDefault>( Creatures.Fish, [
             Creature,
             SpecialInterface,
-        ]);
-        instance.Add<FetcherStatic>(Indestructible.Static, [
+        ] );
+        instance.Add<FetcherStatic>( Indestructible.Static, [
             BPOFlags.Indestructible
-        ]);
-        instance.Add<FetcherStatic>(Indestructible.Interactable,
+        ] );
+        instance.Add<FetcherStatic>( Indestructible.Interactable,
         [
             BPOFlags.Indestructible,
             Interactable
-        ]);
-        instance.Add<FetcherDefault>("player_tombstone", [
+        ] );
+        instance.Add<FetcherDefault>( "player_tombstone", [
             BPOFlags.Indestructible,
             SpecialInterface,
             Interactable,
             ContainerPiece
-        ]);
-        instance.Add<FetcherStatic>(Indestructible.Runestones, [
+        ] );
+        instance.Add<FetcherStatic>( Indestructible.Runestones, [
             BPOFlags.Indestructible,
             SpecialInterface,
             LightSource,
-        ]);
+        ] );
     }
 
     public struct BuildPiece

@@ -205,7 +205,7 @@ public class PrefabData
                 System.Console.WriteLine("GetZdoVars1.8" + e);
                 vars.byteArrays = new List<ZdoPair>();
             }
-        } catch (Exception e)
+        } catch (Exception)
         {
             System.Console.WriteLine("GetZdoVars1.1 ZDO not valid \n");
         }

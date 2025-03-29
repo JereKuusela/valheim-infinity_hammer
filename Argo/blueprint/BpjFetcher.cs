@@ -19,16 +19,18 @@ namespace Argo.Blueprint
     /// </summary>
     public class BpjFetcher
     {
-        public static BpjFetcher? m_Default
-            =new(new BPOFlags[] { });
+        public static BpjFetcher? m_Default;
         public static BpjFetcher GetDefault() {
             if (m_Default is null) { m_Default=new BpjFetcher( new BPOFlags[] { } ); }
             return m_Default;
         }
         public static BpjFetcher Default { get => GetDefault(); }
         public        BPOFlags   m_Flags;
-        public BpjFetcher(BPOFlags[] flags_) {
-            foreach (var flag in flags_) { m_Flags|=flag; }
+        public BpjFetcher(params BPOFlags[] flags_) {
+            this.m_Flags=0;
+            foreach (var flag in flags_) {
+               this.m_Flags|=flag;
+            }
         }
 #if DEBUG
         public virtual bool IsKnown() => true;
@@ -42,9 +44,9 @@ namespace Argo.Blueprint
             ExportIterator it, bool Ext=true) {
             // todo move creation back out of class and only care about extra data
             if (Ext) {
-                return new BpjObject( it.Prefab, it.g_obj, Ext, m_Flags, it.z_vars );
+                return new BpjObject( it.Prefab, it.g_obj, Ext, this.m_Flags, it.z_vars );
             } else {
-                return new BpjObject( it.Prefab, it.g_obj, Ext, m_Flags );
+                return new BpjObject( it.Prefab, it.g_obj, Ext, this.m_Flags );
             }
         }
         public virtual bool ImportBefore(string prefab)
@@ -89,9 +91,9 @@ namespace Argo.Blueprint
             m_ImportLoop( data, ext );
     };*/
 
-    public class FetcherDefault(BPOFlags[] flags_) : BpjFetcher( flags_ ) { }
+    public class FetcherDefault(params BPOFlags[] flags_) : BpjFetcher( flags_ ) { }
 
-    public class FetcherStatic(BPOFlags[] flags_) : BpjFetcher( flags_ )
+    public class FetcherStatic(params BPOFlags[] flags_) : BpjFetcher( flags_ )
     {
         public override bool ExportBefore(
             string      prefab,
@@ -115,7 +117,7 @@ namespace Argo.Blueprint
         }
     }
 
-    public class FetcherItemStand(BPOFlags[] flags_) : BpjFetcher( flags_ )
+    public class FetcherItemStand(params BPOFlags[] flags_) : BpjFetcher( flags_ )
     {
         public override BpjObject? ExportWorker(
             ExportIterator data, bool Ext) {
@@ -126,10 +128,10 @@ namespace Argo.Blueprint
                         out var itemStand ))) {
                     // adding vas, Count > 0 zero means the var was not found and we skipp the rest 
                     if (itemStand.m_name != "") {
-                        bp_obj.ZVars.AddPair<string>( itemStand.m_visualName, ZDOVars.s_item );
+                        bp_obj.ZVars.AddPair<string>( ZDOVars.s_item, itemStand.m_visualName );
                         if (itemStand.m_visualVariant != 0) {
-                            bp_obj.ZVars.AddPair<int>( itemStand.m_visualVariant,
-                                ZDOVars.s_variant );
+                            bp_obj.ZVars.AddPair<int>(ZDOVars.s_variant, itemStand.m_visualVariant
+                                 );
                         }
                     }
                 }
@@ -142,8 +144,13 @@ namespace Argo.Blueprint
         }
     }
 
-    public class FetcherArmorStand(BPOFlags[] flags_) : BpjFetcher( flags_ )
+    public class FetcherArmorStand : BpjFetcher
     {
+        public FetcherArmorStand(params BPOFlags[] flags) : base( flags ) {
+            foreach (var flag in flags) {
+            this.m_Flags|=flag;
+            }
+        }
         public override BpjObject? ExportWorker(
             ExportIterator data, bool Ext) {
             var bp_obj=base.ExportWorker( data, Ext );
@@ -151,19 +158,18 @@ namespace Argo.Blueprint
                 for (int i=0; i < armorStand.m_slots.Count; i++) {
                     var itemname=armorStand.m_slots[i].m_item.m_shared.m_name;
                     if (itemname != "") {
-                        bp_obj.ZVars.AddPair( itemname, i + "_item" );
-                        bp_obj.ZVars.AddPair( armorStand.m_slots[i].m_visualVariant,
-                            i + "_variant" );
+                        bp_obj.ZVars.AddPair(i + "_item", itemname  );
+                        bp_obj.ZVars.AddPair(i + "_variant", armorStand.m_slots[i].m_visualVariant
+                             );
                     }
                 }
-                bp_obj.ZVars.AddPair( armorStand.m_pose,
-                    ZDOVars.s_pose );
+                bp_obj.ZVars.AddPair(ZDOVars.s_pose, armorStand.m_pose);
             }
             return bp_obj;
         }
     }
 
-    public class FetcherGuardStone(BPOFlags[] flags_) : BpjFetcher( flags_ )
+    public class FetcherGuardStone(params BPOFlags[] flags_) : BpjFetcher( flags_ )
     {
         public override BpjObject? ExportWorker(
             ExportIterator data, bool Ext) {
@@ -173,7 +179,7 @@ namespace Argo.Blueprint
         }
     }
 
-    public class FetcherFuel(BPOFlags[] flags_) : BpjFetcher( flags_ )
+    public class FetcherFuel(params BPOFlags[] flags_) : BpjFetcher( flags_ )
     {
         public override BpjObject? ExportWorker(
             ExportIterator data, bool Ext) {
@@ -183,7 +189,7 @@ namespace Argo.Blueprint
         }
     }
 
-    public class FetcherContainer(BPOFlags[] flags_) : BpjFetcher( flags_ )
+    public class FetcherContainer(params BPOFlags[] flags_) : BpjFetcher( flags_ )
     {
         public override BpjObject? ExportWorker(
             ExportIterator data, bool Ext) {
@@ -193,7 +199,7 @@ namespace Argo.Blueprint
         }
     }
 
-    public class FetcherFractured(BPOFlags[] flags_) : BpjFetcher( flags_ )
+    public class FetcherFractured(params BPOFlags[] flags_) : BpjFetcher( flags_ )
     {
         public override BpjObject? ExportWorker(
             ExportIterator data, bool Ext) {
@@ -203,7 +209,7 @@ namespace Argo.Blueprint
         }
     }
 
-    public class FetcherTameable(BPOFlags[] flags_) : BpjFetcher( flags_ )
+    public class FetcherTameable(params BPOFlags[] flags_) : BpjFetcher( flags_ )
     {
         public override BpjObject? ExportWorker(
             ExportIterator data, bool Ext) {
@@ -211,14 +217,14 @@ namespace Argo.Blueprint
             if ((!Ext) && (bp_obj != null) &&
                 (data.g_obj.TryGetComponent( out Tameable tameable ))) {
                 if (data.z_vars.TryGetValue<string>( ZDOVars.s_tamedName, out var name )) {
-                    bp_obj.ZVars.AddPair<string>( name, ZDOVars.s_tamedName );
+                    bp_obj.ZVars.AddPair<string>(ZDOVars.s_tamedName, name  );
                 }
             }
             return bp_obj;
         }
     }
 
-    public class FetcherNameable(BPOFlags[] flags_) : BpjFetcher( flags_ )
+    public class FetcherNameable(params BPOFlags[] flags_) : BpjFetcher( flags_ )
     {
         public override BpjObject? ExportWorker(
             ExportIterator data, bool Ext) {

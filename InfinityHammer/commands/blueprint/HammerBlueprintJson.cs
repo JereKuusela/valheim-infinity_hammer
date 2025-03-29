@@ -62,26 +62,28 @@ public class HammerBlueprintCommandJson
                            .Replace(" ", "_").Replace(".blueprint", "") == name)
                    ?? throw new InvalidOperationException(
                        "Blueprint not found.");
-        var rows = File.ReadAllLines(path);
-        var split = path.Split(new[] { '.' });
+        var split  = path.Split( '.' );
         var maxidx = split.Length - 1;
         if (split.Length >= 2)
         {
             var extension1 = split[maxidx - 1] ?? "";
             var extension2 = split[maxidx] ?? "";
             System.Diagnostics.Debug.WriteLine("Json file found:" + path);
-            BlueprintJson bp = new BlueprintJson (player, name, rows) ;
+            BlueprintJson? bp;// = BlueprintJson.ReadFromFile(path, loadData) ;
                 //new(n) { Name = name }; // todo
             if ((extension1 == "blueprint") && (extension2 == "json"))
-            {
-                return GetPlanBuild(bp, rows, loadData);
+            { 
+                bp   = BlueprintJson.ReadFromFile(path, loadData) ;
+                /*var           rows = File.ReadAllLines(path);
+                return GetPlanBuild(bp, rows, loadData);*/
+                return bp;
             }
         }
 
         throw new InvalidOperationException("Unknown file format.");
     }
 
-    private static BlueprintJson GetPlanBuild(BlueprintJson bp, string[] rows,
+    /*private static BlueprintJson GetPlanBuild(BlueprintJson bp, string[] rows,
         bool loadData)
     {
         // todo replace this fun by factory stuff
@@ -143,8 +145,9 @@ public class HammerBlueprintCommandJson
                 GetBuildShareObject(r, loadData) as BpjObject)
             .ToList();
         return bp;
-    }
+    }*/
 
+    /*
     private static BpjObject GetBuildShareObject(string row,
         bool loadData)
     {
@@ -163,7 +166,9 @@ public class HammerBlueprintCommandJson
         return new BpjObject(name, new(posX, posY, posZ),
             new(rotX, rotY, rotZ, rotW), Vector3.one, chance);
     }
+    */
 
+    /*
     private static float InvariantFloat(string[] row, int index,
         float defaultValue = 0f)
     {
@@ -172,6 +177,7 @@ public class HammerBlueprintCommandJson
         if (string.IsNullOrEmpty(s)) return defaultValue;
         return float.Parse(s, NumberStyles.Any, NumberFormatInfo.InvariantInfo);
     }
+    */
 
     public HammerBlueprintCommandJson()
     {
