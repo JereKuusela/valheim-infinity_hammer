@@ -1,4 +1,5 @@
 - v1.65
+  - Fixed for the new game version.
   - Fixes alternative placement key not working.
 
 - v1.64
