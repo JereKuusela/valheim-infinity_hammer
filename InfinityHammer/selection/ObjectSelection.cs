@@ -142,8 +142,14 @@ public partial class ObjectSelection : BaseSelection
                 obj.transform.localPosition = item.Pos;
                 obj.transform.localRotation = item.Rot;
                 obj.transform.localScale    = item.Scale;
-                if (item.m_properties.Count > 0) {
-                    DataEntry data = InfExtraData.ToDataEntry( item.ZVars );
+                if (item.m_extraData.Count > 0) {
+                    DataEntry data;
+                    if (item.ZVars is ExtraDataArgo adata) {
+                        // todo maybe make an interface for conversion
+                        data = adata.ToDataEntry(  );
+                    } else {
+                       throw new ArgumentException( $"Unknown extra data type {item.ZVars.GetType().Name}" );
+                    }
                     // data = 
                     //       ? ReadExtraInfo(obj, item.ExtraInfo)
                     //       : DataHelper.Get(item.Data);

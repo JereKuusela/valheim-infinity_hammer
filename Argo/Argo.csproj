@@ -23,6 +23,7 @@
         <Reference Include="BepInEx.Preloader" Condition="!@(Reference->AnyHaveMetadataValue('Identity', 'BepInEx.Preloader'))">
           <HintPath>..\..\Libs\BepInEx.Preloader.dll</HintPath>
         </Reference>
+        <Reference Include="Microsoft.CSharp" />
         <Reference Include="UnityEngine.dll" Condition="!@(Reference->AnyHaveMetadataValue('Identity', 'UnityEngine.dll'))">
             <HintPath>..\..\Libs\UnityEngine.dll</HintPath>
         </Reference>
@@ -81,6 +82,10 @@
         <PrivateAssets>all</PrivateAssets>
         <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       </PackageReference>
+      <PackageReference Include="System.Collections.Immutable" Version="9.0.3" />
       <PackageReference Include="System.Text.Json" Version="9.0.3" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="Blueprint\BlueprintObject\" />
     </ItemGroup>
        </Project>

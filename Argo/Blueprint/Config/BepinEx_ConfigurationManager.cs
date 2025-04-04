@@ -5,16 +5,18 @@ using BepInEx.Bootstrap;
 using System.Linq;
 using UnityEngine;
 using System.IO;
+using Argo.Zdo;
 using BepInEx;
 using HarmonyLib;
 
 namespace Argo.Blueprint;
+
 [BepInPlugin(GUID, NAME, VERSION)]
 public class Argonaut : BaseUnityPlugin
 {
-    public const  string GUID = "Argonaut";
-    public const  string NAME = "Argo";
-    public const  string VERSION = "0.1.0";
+    public const  string              GUID    = "Argonaut";
+    public const  string              NAME    = "Argo";
+    public const  string              VERSION = "0.1.0";
     public static ConfigEntry<string> configEnableBuildPlayer;
     public static ConfigEntry<string> configEnableBuildPiece;
     public static ConfigEntry<string> configEnablePlaceable;
@@ -40,12 +42,14 @@ public class Argonaut : BaseUnityPlugin
     public static ConfigEntry<string> configEnableSpecialInterface;
     public static ConfigEntry<string> configEnableIndestructible;
     public static ConfigEntry<string> configEnableCustomNotVanilla;
-    public static string EnableBuildPlayer => configEnableBuildPlayer.Value;
-    public static string EnableBuildPiece => configEnableBuildPiece.Value;
-    public static string EnablePlaceable => configEnablePlaceable.Value;
-    public static string EnableCompfort => configEnableCompfort.Value;
-    public static string EnableLightSource => configEnableLightSource.Value;
-    public static string EnableHoverable => configEnableHoverable.Value;
+    public static ConfigEntry<string> configSaveData;
+
+    public static string EnableBuildPlayer  => configEnableBuildPlayer.Value;
+    public static string EnableBuildPiece   => configEnableBuildPiece.Value;
+    public static string EnablePlaceable    => configEnablePlaceable.Value;
+    public static string EnableCompfort     => configEnableCompfort.Value;
+    public static string EnableLightSource  => configEnableLightSource.Value;
+    public static string EnableHoverable    => configEnableHoverable.Value;
     public static string EnableTextReceiver => configEnableTextReceiver.Value;
     public static string EnableInteractable => configEnableInteractable.Value;
     public static string EnableObjectHolder => configEnableObjectHolder.Value;
@@ -73,23 +77,33 @@ public class Argonaut : BaseUnityPlugin
     public static string EnableCustomNotVanilla
         => configEnableCustomNotVanilla.Value;
 
+    public static string SaveData => configSaveData.Value;
+
     private static ConfigFile? ConfigFile;
     public void Awake() {
-        if (ConfigFile == null)
-        {
+        if (ConfigFile == null) {
             ConfigFile = Config;
         }
         Init(ConfigFile);
     }
-    public static ConfigEntry<T> Bind<T>(ConfigFile config, string group, string name, T value,
-                                         ConfigDescription description) {
-        
+    public static ConfigEntry<T> Bind<T>(
+        ConfigFile        config, string group, string name, T value,
+        ConfigDescription description) {
         ConfigEntry<T> configEntry
             = config.Bind<T>(group, name, value, description);
-       return configEntry;
+        return configEntry;
     }
     public static void Init(ConfigFile config) {
-        string section = "8. Json Blueprint Tests";
+        string section = "Save Settings";
+        configSaveData = Bind(config, section, "Enable BuildPlayer",
+            "NoSteamData",
+            new ConfigDescription(
+                "Includes, excludes or forces to exclude BuildPlayer Pieces",
+                new AcceptableValueList<string>(
+                    ExtraDataConfig.AllowedValues
+                )));
+
+        section = "Json Blueprint Categories";
 
         configEnableBuildPlayer = Bind(config, section, "Enable BuildPlayer",
             CategorySettingsStrings.Include,

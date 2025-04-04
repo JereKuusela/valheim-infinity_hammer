@@ -3,31 +3,32 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using Argo.DataAnalysis;
+using Argo.Zdo;
 using UnityEngine;
 using UnityEngine.Events;
 
 namespace Argo.Blueprint
 {
-    public struct BPListObject
+    public struct SelectionObject
     {
         public string     prefab;
         public GameObject obj;
-        public BpjZVars   zvars;
-        public BPListObject(
+        public AExtraData   zvars;
+        public SelectionObject(
             string prefab_, GameObject obj_) {
             prefab = prefab_;
             obj    = obj_;
-            zvars  = new BpjZVars();
+            zvars  = new ExtraDataArgo();
         }
-        public BPListObject(string prefab_, GameObject obj_, BpjZVars zvars_) {
+        public SelectionObject(string prefab_, GameObject obj_, AExtraData zvars_) {
             prefab = prefab_;
             obj    = obj_;
             zvars  = zvars_;
         }
-        public BPListObject(string prefab_) {
+        public SelectionObject(string prefab_) {
             prefab = prefab_;
             obj    = null;
-            zvars  = new BpjZVars();
+            zvars  = new ExtraDataArgo();
         }
     }
 
@@ -189,7 +190,7 @@ namespace Argo.Blueprint
             }
             bpjObject.Chance = 1f;
 
-            var snaps = Util.GetSnapPoints( gameObject );
+            var snaps = Utility.GetSnapPoints( gameObject );
             foreach (var snap in snaps)
                 blueprint.SnapPoints.Add( snap.transform
                                               .localPosition );
@@ -221,7 +222,7 @@ namespace Argo.Blueprint
                 throw new ArgumentException( "objects is empty" );
             }
 // todo look at infinityhammer, this might add every snapppoint from every piece
-            if (blueprint.snapPiece == "") {
+            if (blueprint.config.SnapPiece == "") {
                 var snaps
                     = blueprint.selection?.GetSnapPoints() ?? new List<GameObject>();
                 foreach (var snap in snaps)
@@ -330,13 +331,13 @@ namespace Argo.Blueprint
             while (iterator) {
                 var prefab = iterator.Prefab;
 #if DEBUG
-                fetcher = bp.bpoRegister.Get( prefab );
+                fetcher = bp.Register.Get( prefab );
                 System.Console.WriteLine( "ExportObjects, fetcher selected; " + prefab );
 #endif
                 // todo add option to ignore certain pieces
                 // especially if pieces are marked as custom pieces
                 // todo maybe move fetcher access to outer loop
-                if ((bp.snapPiece != "") && (iterator.Prefab == bp.snapPiece)) {
+                if ((bp.config.SnapPiece != "") && (iterator.Prefab == bp.config.SnapPiece)) {
                     AddSnapPoints( iterator );
                 } else if (bp.IngoredPieces.Contains( iterator.Prefab )) {
                     iterator.skipPrefab();
@@ -350,10 +351,10 @@ namespace Argo.Blueprint
                         // todo mayby get default fetcher here and only 
                         // check if an addtional fetcher is awailable, might safe a bit time 
                         // instead of getting bassically the same fetcher every time
-                        fetcher = bp.bpoRegister.Get( prefab );
+                        fetcher = bp.Register.Get( prefab );
                     } catch (Exception e) {
                         System.Diagnostics.Debug.WriteLine( "prefab is null" );
-                        fetcher = bp.bpoRegister.m_default;
+                        fetcher = bp.Register.m_default;
                     }
                     try {
 #if DEBUG
@@ -361,7 +362,7 @@ namespace Argo.Blueprint
 #endif
 // runs the provided custom function within the loop        
 
-                        fetcher.ExportBefore( prefab, bp.bpoRegister );
+                        fetcher.ExportBefore( prefab, bp.Register );
                     } catch (Exception e) {
                         System.Diagnostics.Debug.WriteLine( "ExportWorker1: " + e );
                     }
@@ -370,7 +371,7 @@ namespace Argo.Blueprint
                         // todo     function "Before" before loop to init
                         try {
                             // runs the provided custom function within the loop
-                            var bpo = fetcher.ExportWorker( iterator, true );
+                            var bpo = fetcher.ExportWorker( iterator, bp.saveData );
                             bp.Add( bpo );
                             iterator++;
                         } catch (Exception e) {
@@ -403,27 +404,27 @@ namespace Argo.Blueprint
                 // todo add option to ignore certain pieces
                 // especially if pieces are marked as custom pieces
                 // todo maybe move fetcher access to outer loop
-                if ((bp.snapPiece != "") && (iterator.Prefab == bp.snapPiece)) {
+                if ((bp.config.SnapPiece != "") && (iterator.Prefab == bp.config.SnapPiece)) {
                     AddSnapPoints( iterator );
                 } else if (bp.IngoredPieces.Contains( iterator.Prefab )) {
                     // sadly there is no upper_bound in net, to lazy to write one myself
                     do { iterator++; } while (iterator &&
                                               iterator.Prefab == prefab);
                 } else {
-                    fetcher = bp.bpoRegister.Get( prefab );
+                    fetcher = bp.Register.Get( prefab );
 #if DEBUG
                     // todo DebugAddObjects(fetcher, iterator);
 #endif
 // runs the provided custom function within the loop        
 
-                    fetcher.ImportBefore( prefab, bp.bpoRegister );
+                    fetcher.ImportBefore( prefab, bp.Register );
 
                     do {
                         // todo maybe run Before here and rename Loop/Worker to after and rename the
                         // todo     function "Before" before loop to init
 
                         // runs the provided custom function within the loop
-                        var bpo = fetcher.ImportWorker( iterator, true );
+                        var bpo = fetcher.ImportWorker( iterator, bp.saveData );
                         bp.Add( bpo );
                         iterator++;
 
@@ -465,9 +466,11 @@ namespace Argo.Blueprint
     public struct ExportIterator
     {
         internal int idx;
+        internal BlueprintJson bp;
 
-        internal List<BPListObject> m_GOList;
+        internal List<SelectionObject> m_GOList;
         public ExportIterator(BlueprintJson bp) {
+            this.bp      = bp;
             idx      = 0;
             m_GOList = bp.GameObjects;
         }
@@ -475,8 +478,8 @@ namespace Argo.Blueprint
         internal void skipPrefab() {
             string next = Prefab + " "; // simulating upper bound to find next prefab
             var pos = m_GOList.BinarySearch( idx, m_GOList.Count,
-                new BPListObject( next ),
-                Comparer<BPListObject>.Create( (a, b) =>
+                new SelectionObject( next ),
+                Comparer<SelectionObject>.Create( (a, b) =>
                     string.Compare( a.prefab, b.prefab, StringComparison.OrdinalIgnoreCase ) ) );
             idx = (pos < 0) ? ~pos : pos;
         }
@@ -485,13 +488,15 @@ namespace Argo.Blueprint
         public static implicit operator bool(ExportIterator it)
             => (it.idx < it.Count);
 
-        internal List<BPListObject> GObjects { get => m_GOList; }
+        internal List<SelectionObject> GObjects { get => m_GOList; }
         public   GameObject         g_obj    { get => m_GOList[idx].obj; }
-        public   BpjZVars           z_vars   { get => m_GOList[idx].zvars; }
+        public   AExtraData           z_vars   { get => m_GOList[idx].zvars; }
 
-        public   int    Index     { get => idx; }
-        public   int    Count     { get => m_GOList.Count; }
-        internal bool   HasNext() { return (idx < Count); }
-        public   string Prefab    { get => m_GOList[idx].prefab; }
+        public   int         Index     { get => idx; }
+        public   int         Count     { get => m_GOList.Count; }
+        internal bool        HasNext() { return (idx < Count); }
+        public   string      Prefab    { get => m_GOList[idx].prefab; }
+        public   BuilderRegister Register  { get => bp.Register; }
+        public   HashRegister Hahhes  { get => bp.Info; }
     }
 }

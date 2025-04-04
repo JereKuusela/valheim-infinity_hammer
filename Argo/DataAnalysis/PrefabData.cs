@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Argo.Blueprint;
+using Argo.Zdo;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
@@ -73,8 +74,11 @@ public class PrefabData
             ZdoVarHashs_default;
         static Data() {
             ZdoVarTypes_default
-                = ZDOInfo.Instance.Hashes.ToDictionary(key => key,
-                    key => ComponentData.ZdoVarFlag.TUnknown);
+                = HashRegister.GetDefault().m_hashes.Aggregate(
+                    new Dictionary<int, ComponentData.ZdoVarFlag>(), (target, pair) => {
+                        target.Add(pair.Key, ComponentData.ZdoVarFlag.TUnknown);
+                        return target;
+                    });
             ZdoVarHashs_default = ZdoVarFlag.GetValues(typeof(ZdoVarFlag))
                                             .Cast<ZdoVarFlag>()
                                             .ToDictionary(key => key,
@@ -104,7 +108,7 @@ public class PrefabData
                 }
                 string components
                     = $"\"Components\":[{string.Join(",", component_list)}]";
-                List<string> zdo_str_list = [];
+                /*List<string> zdo_str_list = [];
                 foreach (var pair in KnownZdoVarTypes)
                 {
                     if (pair.Value == ZdoVarFlag.TUnknown) continue;
@@ -113,14 +117,14 @@ public class PrefabData
                     var name = ZDOInfo.GetName(hash);
 
                     /*string result
-                        = $"{{\"{name}\":{JsonUtility.ToJson(pair.Value)}}}";*/
+                        = $"{{\"{name}\":{JsonUtility.ToJson(pair.Value)}}}";#1#
                     string result
                         = $"{{\"{name}\":{JsonSerializer.Serialize(pair.Value)}}}";
                     zdo_str_list.Add(result);
                 }
                 string zdo_vars
-                    = $"\"ZDOVars\":[{String.Join(",", zdo_str_list)}]";
-                string str = $"{{{components},{zdo_vars}}}";
+                    = $"\"ZDOVars\":[{String.Join(",", zdo_str_list)}]";*/
+                string str = $"{{{components}}}";
                 return str;
             } catch (Exception e)
             {
@@ -130,200 +134,8 @@ public class PrefabData
         }
     }
 
-    public ZdoVar GetZdoVars(ZDO zdo) {
-        ZdoVar vars = new();
-        try
-        {
-            var id = zdo.m_uid;
-
-            try
-            {
-                vars.floats = ZDOExtraData.s_floats[zdo.m_uid] == null
-                    ? GetZdoVars(ZDOExtraData.s_floats[zdo.m_uid],
-                        ZdoVarFlag.Tfloat)
-                    : new List<ZdoPair>();
-            } catch (Exception e)
-            {
-                System.Console.WriteLine("GetZdoVars1.2" + e);
-                vars.floats = new List<ZdoPair>();
-            }
-            try
-            {
-                vars.Vector3s = GetZdoVars(
-                    ZDOExtraData.s_vec3[zdo.m_uid] ?? null,
-                    ZdoVarFlag.TVector3);
-            } catch (Exception e)
-            {
-                System.Console.WriteLine("GetZdoVars1.3" + e);
-                vars.Vector3s = new List<ZdoPair>();
-            }
-            try
-            {
-                vars.Quaternions = GetZdoVars(
-                    ZDOExtraData.s_quats[zdo.m_uid] ?? null,
-                    ZdoVarFlag.TQuaternion);
-            } catch (Exception e)
-            {
-                System.Console.WriteLine("GetZdoVars11.4" + e);
-                vars.Quaternions = new List<ZdoPair>();
-            }
-            try
-            {
-                vars.ints = GetZdoVars(ZDOExtraData.s_ints[zdo.m_uid] ?? null,
-                    ZdoVarFlag.Tint);
-            } catch (Exception e)
-            {
-                System.Console.WriteLine("GetZdoVars1.5" + e);
-                vars.ints = new List<ZdoPair>();
-            }
-            try
-            {
-                vars.longs = GetZdoVars(ZDOExtraData.s_longs[zdo.m_uid] ?? null,
-                    ZdoVarFlag.Tlong);
-            } catch (Exception e)
-            {
-                System.Console.WriteLine("GetZdoVars1.6" + e);
-                vars.longs = new List<ZdoPair>();
-            }
-            try
-            {
-                vars.strings = GetZdoVars(
-                    ZDOExtraData.s_floats[zdo.m_uid] ?? null,
-                    ZdoVarFlag.Tstring);
-            } catch (Exception e)
-            {
-                System.Console.WriteLine("GetZdoVars1.7" + e);
-                vars.strings = new List<ZdoPair>();
-            }
-            try
-            {
-                vars.byteArrays = GetZdoVars(
-                    ZDOExtraData.s_byteArrays[zdo.m_uid],
-                    ZdoVarFlag.TbyteArray);
-            } catch (Exception e)
-            {
-                System.Console.WriteLine("GetZdoVars1.8" + e);
-                vars.byteArrays = new List<ZdoPair>();
-            }
-        } catch (Exception)
-        {
-            System.Console.WriteLine("GetZdoVars1.1 ZDO not valid \n");
-        }
-        return new ZdoVar();
-        // return vars;
-    }
-
-    public List<ZdoPair> GetZdoVars<T>(BinarySearchDictionary<int, T>? dic,
-                                       ComponentData.ZdoVarFlag        type) {
-        List<ZdoPair> list = [];
-        try
-        {
-            if (dic == null) return list;
-            foreach (var kv in dic)
-            {
-                list.Add(
-                    new ZdoPair
-                        { name = ZDOInfo.GetName(kv.Key), hash = kv.Key });
-            }
-        } catch (Exception e)
-        {
-            System.Console.WriteLine("GetZdoVars2" + e);
-        }
-        return list;
-    }
-
-    public List<ZdoPair> GetZdoVarsStr<T>(BinarySearchDictionary<int, T>? dic,
-                                          Data data,
-                                          ComponentData.ZdoVarFlag type) {
-        List<ZdoPair> list = [];
-        try
-        {
-            if (dic == null) return list;
-            foreach (var key in dic.Keys)
-            {
-                if (AllKnownZdoVarTypes.ContainsKey(key))
-                {
-                    AllKnownZdoVarTypes[key] |= type;
-                }
-                if (data.KnownZdoVarTypes.ContainsKey(key))
-                {
-                    data.KnownZdoVarTypes[key] |= type;
-                }
-
-                data.KnownZdoVarHashs[type].Add(key);
-                AllKnownZdoVarHashs[type].Add(key);
-            }
-        } catch (Exception e)
-        {
-            System.Console.WriteLine("GetZdoVars2" + e);
-        }
-        return list;
-    }
-
-    private static ZdoVarFlag
-        GetZdoType<T>(BinarySearchDictionary<int, T> zdos, Data data) {
-        try
-        {
-            switch (typeof(T))
-            {
-                case { } t when t == typeof(float):
-                    return ZdoVarFlag.Tfloat;
-                case { } t when t == typeof(Vector3):
-                    return ZdoVarFlag.TVector3;
-                case { } t when t == typeof(Quaternion):
-                    return ZdoVarFlag.TQuaternion;
-                case { } t when t == typeof(int):
-                    return ZdoVarFlag.Tint;
-                case { } t when t == typeof(long):
-                    return ZdoVarFlag.Tlong;
-                case { } t when t == typeof(byte[]):
-                    return ZdoVarFlag.TbyteArray;
-                case { } t when t == typeof(string):
-                    return ZdoVarFlag.Tstring;
-                default:
-                    return ZdoVarFlag.TUnknown;
-            }
-        } catch (Exception e)
-        {
-            System.Console.WriteLine("GetZdoType" + e);
-        }
-        return ZdoVarFlag.TUnknown;
-    }
-    public void VarsToJson(List<string> lines) {
-        try
-        {
-            List<string> known_zdo_types = [];
-            List<string> known_zdo_hashs = [];
-            lines.Add("{\"KnownZDOVars\": [");
-            // todo clear this mess up and use some lamdas or so instead of the loops
-            foreach (var pair in AllKnownZdoVarTypes)
-            {
-                if (pair.Value == ZdoVarFlag.TUnknown) continue;
-
-                lines.Add($"{{\"{ZDOInfo.GetName(pair.Key)}\":");
-                lines.Add($"{pair.Value}");
-                lines.Add($"}},");
-            }
-            lines.Add($"}},");
-            lines.Add("{\"KnownZDOVarsByType\": [");
-            foreach (var pair in AllKnownZdoVarHashs)
-            {
-                if (pair.Value.Count == 0) continue;
-                List<string> hashs = [];
-                foreach (var type in pair.Value)
-                {
-                    hashs.Add($"\"{ZDOInfo.GetName(type)}\"");
-                }
-                lines.Add($"{{\"{pair.Key.ToString()}\":");
-                lines.Add($"[\"{string.Join(",", hashs)}\"]");
-                lines.Add($"}},");
-            }
-            lines.Add($"}}");
-        } catch (Exception e)
-        {
-            System.Console.WriteLine("VarsToJson" + e);
-        }
-    }
+    
+    
 
     public List<string> ToJson() {
         try
@@ -357,7 +169,6 @@ public class PrefabData
             lines[lines.Count - 1]
                 = lines[lines.Count - 1]
                    .TrimEnd(','); // remove last comma [0..^1]
-            VarsToJson(lines);
             lines.Add(" }");
             return lines;
         } catch (Exception e)
@@ -467,16 +278,7 @@ public class PrefabData
                         {
                             obj.SetActive(true);
                             ZDO zdo  = znetView.GetZDO();
-                            var data = GetZdoVars(zdo);
-                            writer.Write($"{{\"ZDOVars\":");
-                            try
-                            {
-                                writer.Write(
-                                    JsonUtility.ToJson(data));
-                            } catch (NotSupportedException e)
-                            {
-                                continue;
-                            }
+                           
                             writer.Write($",\"Components\":[\"");
                             obj.SetActive(false);
                             List<string> components = new();

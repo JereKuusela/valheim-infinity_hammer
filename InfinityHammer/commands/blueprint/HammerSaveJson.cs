@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using Argo.Blueprint;
+using Argo.DataAnalysis;
 using Data;
 using Microsoft.Win32.SafeHandles;
 using ServerDevcommands;
@@ -57,7 +58,7 @@ public class HammerSaveCommandJson
                         = new SelectedObjects( placementGhost, selection );
                     var bp = new BlueprintJson( player.GetPlayerName(), selectedObjects,
                         placement_pos,
-                        pars.SnapPiece, pars.CenterPiece, pars.SaveData );
+                        pars );
                     if (selection.Objects.Count() == 0) {
                         bp.BuildFromSelectionSingle();
                     }
@@ -66,17 +67,17 @@ public class HammerSaveCommandJson
                         bp.BuildFromSelection();
                     }
                     // todo write write funtion
-               
-                bp.AddExportListener( (() => {
-                    bp.WriteToFile( path );
-                    args.Context.AddString(
-                        $"Json Blueprint saved to {path.Replace( "\\", "\\\\" )}" +
-                        $" (pos: {HammerHelper.PrintXZY( bp.Coordinates )} "      +
-                        $"rot: {HammerHelper.PrintYXZ( bp.Rotation )})." );
-                    Selection.CreateGhost( new ObjectSelection( args.Context,
-                        bp,
-                        Vector3.one ) );
-                }) );
+
+                    bp.AddExportListener( (() => {
+                        bp.WriteToFile( path );
+                        args.Context.AddString(
+                            $"Json Blueprint saved to {path.Replace( "\\", "\\\\" )}" +
+                            $" (pos: {HammerHelper.PrintXZY( bp.Coordinates )} "      +
+                            $"rot: {HammerHelper.PrintYXZ( bp.Rotation )})." );
+                        Selection.CreateGhost( new ObjectSelection( args.Context,
+                            bp,
+                            Vector3.one ) );
+                    }) );
                 } catch (Exception e) {
                     System.Console.WriteLine( "Error inhammer_save_json " + e );
                 }
@@ -84,14 +85,15 @@ public class HammerSaveCommandJson
     }
 }
 
-public class HammerSaveParsJson
+public class HammerSaveParsJson : BluePrintConfig
 {
-    public string CenterPiece = Configuration.BlueprintCenterPiece;
-    public string SnapPiece   = Configuration.BlueprintSnapPiece;
-    public bool   SaveData    = Configuration.SaveBlueprintData;
-    public bool   Profile     = Configuration.SaveBlueprintsToProfile;
+    public HammerSaveParsJson(Terminal.ConsoleEventArgs args, BuilderRegister? register = null, ZDOInfo? info = null) : base(register, info) {
+        CenterPiece   = Configuration.BlueprintCenterPiece;
+        SnapPiece     = Configuration.BlueprintSnapPiece;
+        SaveExtraData = Configuration.SaveBlueprintData ? SaveExtraData.All : SaveExtraData.None;
+        Profile       = Configuration.SaveBlueprintsToProfile;
+        
 
-    public HammerSaveParsJson(Terminal.ConsoleEventArgs args) {
         var pars  = args.Args.Skip( 2 ).ToArray();
         int index = 0;
         foreach (var par in pars) {
@@ -107,12 +109,15 @@ public class HammerSaveParsJson
                 CenterPiece = split[1];
             if (split[0] == "snap" || split[0] == "s")
                 SnapPiece = split[1];
-            if (split[0] == "data" || split[0] == "d")
-                SaveData = Parse.BoolNull( split[1] ) ??
-                    Configuration.SaveBlueprintData;
+            if (split[0] == "data" || split[0] == "d") {
+                bool? extradata = Parse.BoolNull( split[1] );
+                if (extradata.HasValue) {
+                    SaveExtraData = extradata.Value ? SaveExtraData.All : SaveExtraData.None;
+                }
+            }
             if (split[0] == "profile" || split[0] == "p")
-                Profile = Parse.BoolNull( split[1] ) ??
-                    Configuration.SaveBlueprintsToProfile;
+                    Profile = Parse.BoolNull( split[1] ) ??
+                        Configuration.SaveBlueprintsToProfile;
+            }
         }
     }
-}

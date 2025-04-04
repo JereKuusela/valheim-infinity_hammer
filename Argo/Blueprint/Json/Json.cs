@@ -1,28 +1,28 @@
 ﻿using System.Collections.Generic;
-using Argo.Blueprint;
+using Argo.Blueprint.Util;
 using UnityEngine;
 
-namespace Argo.blueprint.Util;
+namespace Argo.Blueprint.Json;
 
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-public class BpHeaderConverter : JsonConverter<BlueprintHeader>
+public class BpHeaderConverter : JsonConverter<BpFileHeader>
 {
     static readonly         Vec3JsonConverter           vec3JsonConverter = new Vec3JsonConverter();
-    private static          JsonConverter<BlueprintMod> ModConverter;
+    private static          JsonConverter<ModIdentifier> ModConverter;
     private static readonly JsonSerializerOptions       options;
     static BpHeaderConverter() {
         options = new JsonSerializerOptions {
             WriteIndented = false
         };
         options.Converters.Add( new Vec3JsonConverter() );
-        ModConverter = (JsonConverter<BlueprintMod>)options
-           .GetConverter( typeof(BlueprintMod) );
+        ModConverter = (JsonConverter<ModIdentifier>)options
+           .GetConverter( typeof(ModIdentifier) );
     }
     public override void Write(
-        Utf8JsonWriter        writer, BlueprintHeader header,
+        Utf8JsonWriter        writer, BpFileHeader header,
         JsonSerializerOptions options) {
         try {
             writer.WriteStartObject();
@@ -76,7 +76,7 @@ public class BpHeaderConverter : JsonConverter<BlueprintHeader>
         }
     }
 
-    public override BlueprintHeader Read(
+    public override BpFileHeader Read(
         ref Utf8JsonReader    reader, Type type,
         JsonSerializerOptions options) {
         try {
@@ -92,7 +92,7 @@ public class BpHeaderConverter : JsonConverter<BlueprintHeader>
             string             Category_    = "";
             float              Radius_      = 0f;
             string             Version_     = "";
-            List<BlueprintMod> Mods_        = [];
+            List<ModIdentifier> Mods_        = [];
             List<Vector3>      Snappoints_  = [];
             while (reader.Read()) {
                 if (reader.TokenType == JsonTokenType.EndObject)
@@ -120,7 +120,7 @@ public class BpHeaderConverter : JsonConverter<BlueprintHeader>
                         while (reader.Read()) {
                             if (reader.TokenType == JsonTokenType.EndArray)
                                 break;
-                            var mod = ModConverter.Read( ref reader, typeof(BlueprintMod),
+                            var mod = ModConverter.Read( ref reader, typeof(ModIdentifier),
                                 options );
                             // if (mod != null){
                             Mods_.Add( mod );
@@ -152,7 +152,7 @@ public class BpHeaderConverter : JsonConverter<BlueprintHeader>
                         break;
                 }
             }
-            return new BlueprintHeader {
+            return new BpFileHeader {
                 Name        = Name_,
                 Creator     = Creator_,
                 Description = Description_,

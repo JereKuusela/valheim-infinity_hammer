@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Argo.blueprint;
+using Argo.Blueprint;
 using Data;
 using UnityEngine;
 using Argo.Blueprint;
@@ -14,183 +14,165 @@ namespace InfinityHammer;
 
 using static Argo.Blueprint.BpjZVars;
 
-public class InfExtraData : AExtraData
+public class ExtrDataInf : ExtraDataArgo
 {
-    public override Dictionary<string, ZValue> import(Func<int, bool> filter) {
-        throw new NotImplementedException();
-    }
-    protected override Dictionary<T, U> GetDic<T, U>(T value) {
-        throw new NotImplementedException();
-    }
-    static U? Make<T, U>(T value) {
-        Debug.Assert( value != null, nameof(value) + " != null" );
-        if ((typeof(U) == typeof(IStringValue)) && (typeof(T) == typeof(string))) {
-            IStringValue val = new SimpleStringValue( (string)(object)value );
-            return (U)val;
-        }
-        if ((typeof(U) == typeof(IFloatValue)) && (typeof(T) == typeof(float))) {
-            IFloatValue val = new SimpleFloatValue( (float)(object)value );
-            return (U)val;
-        }
-        if ((typeof(U) == typeof(IIntValue)) && (typeof(T) == typeof(int))) {
-            IIntValue val = new SimpleIntValue( (int)(object)value );
-            return (U)val;
-        }
-        if ((typeof(U) == typeof(ILongValue)) && (typeof(T) == typeof(long))) {
-            ILongValue val = new SimpleLongValue( (long)(object)value );
-            return (U)val;
-        }
-        if ((typeof(U) == typeof(IVector3Value)) && (typeof(T) == typeof(Vector3))) {
-            IVector3Value val = new SimpleVector3Value( (Vector3)(object)value );
-            return (U)val;
-        }
-        if ((typeof(U) == typeof(IQuaternionValue)) && (typeof(T) == typeof(Quaternion))) {
-            IQuaternionValue val = new SimpleQuaternionValue( (Quaternion)(object)value );
-            return (U)val;
-        }
-        if ((typeof(U) == typeof(byte[])) && (typeof(T) == typeof(byte[]))) {
-            return (U)(object)value;
-        }
-        throw new InvalidOperationException(
-            $"Unsupported conversion from {typeof(T)} to {typeof(U)}" );
-    }
-    static readonly Dictionary<string, string> pars = new();
-    static U? Get<T, U>(T value) {
-        if ((typeof(T) == typeof(IStringValue)) && (typeof(U) == typeof(string))) {
-            IStringValue val = (IStringValue)value;
-            string val2 = val.Get( pars );
-            return (U)(Object) val2;
-        }
-        if ((typeof(T) == typeof(IFloatValue)) && (typeof(U) == typeof(float))) {
-            IFloatValue val  = (IFloatValue)value;
-            float?      val2 = val.Get( pars );
-            return (U)(Object) val2;
-        }
-        if ((typeof(T) == typeof(IIntValue)) && (typeof(U) == typeof(int))) {
-            IIntValue val = (IIntValue)value;
-            return (U)(object)val.Get( pars );
-        }
-        if ((typeof(T) == typeof(ILongValue)) && (typeof(U) == typeof(long))) {
-            ILongValue val = (ILongValue)value;
-            return (U)(object)val.Get( pars );
-        }
-        if ((typeof(T) == typeof(IVector3Value)) && (typeof(U) == typeof(Vector3))) {
-            IVector3Value val = (IVector3Value)value;
-            return (U)(object)val.Get( pars );
-        }
-        if ((typeof(T) == typeof(IQuaternionValue)) && (typeof(U) == typeof(Quaternion))) {
-            IQuaternionValue val = (IQuaternionValue)value;
-            return (U)(object)val.Get( pars );
-        }
-        if ((typeof(T) == typeof(byte[])) && (typeof(U) == typeof(byte[]))) {
-            return (U)(object)value;
-        }
-        throw new InvalidOperationException(
-            $"Unsupported conversion from {typeof(T)} to {typeof(U)}" );
-    }
-    static Dictionary<string, U> readvals<T, U>(
-        IEnumerable<KeyValuePair<int, T>>? import,
-        ZDOInfo                            info,
-        Dictionary<string, U>              values) {
-        var type = GetVType<T>();
-        if (import != null) {
-            import.Select( x => x ).Aggregate(
-                values,
-                (target, pair) => {
-                    GetName( pair.Key, out var name, info );
-                    U? val = Get<T, U>( pair.Value );
-                    if (val != null) {
-                        target[name] = val;
-                    }
-                    return target;
-                }
-            );
-        }
-        return values;
-    }
-    static Dictionary<int, U> export<T, U>(
-        Dictionary<string, ZValue> import,
-        Func<ZType, bool>          filter) {
-        var                type   = GetVType<T>();
-        Dictionary<int, U> export = new();
-        if (import != null) {
-            export = import.Select( x => x ).Aggregate(
-                export,
-                (target, pair) => {
-                    if (filter( pair.Value.Type )) {
-                        int hash = pair.Value.Name.GetStableHashCode();
-                        U?  val  = Make<T, U>( (T)pair.Value.Value );
-                        if (val != null) {
-                            target[hash] = val;
-                        }
-                    }
-                    return target;
-                }
-            );
-        }
-        return export;
-    }
-    public static DataEntry ToDataEntry(BpjZVars zvars) {
-        var values = zvars.m_values;
-        DataEntry data = new();
-        data.Floats     = export<float, IFloatValue>( values, (x) => x == ZType.Float );
-        data.Ints       = export<int, IIntValue>( values, (x) => x == ZType.Int );
-        data.Longs      = export<long, ILongValue>( values, (x) => x == ZType.Long );
-        data.Strings    = export<string, IStringValue>( values, (x) => x == ZType.String );
-        data.Vecs       = export<Vector3, IVector3Value>( values, (x) => x == ZType.Vec3 );
-        data.Quats      = export<Quaternion, IQuaternionValue>( values, (x) => x == ZType.Quat );
-        data.ByteArrays = export<byte[], byte[]>( values, (x) => x == ZType.ByteArray );
-        return data;
-    }
-    static Dictionary<string, ZValue> import<T, U>(
-        IEnumerable<KeyValuePair<int, T>>? import,
-        Dictionary<string, ZValue>         values,
-        ZDOInfo                            info,
-        Func<int, bool>                    filter) {
-       // var type = GetVType<T>();
-        if (import != null) {
-            import.Select( x => x ).Aggregate(
-                values,
-                (target, pair) => {
-                    if (filter( pair.Key )) {
-                        bool unknown = !GetName( pair.Key, out var name, info );
-                        var   val     = Get<T, U>( pair.Value );
-                        if (val != null) {
-                            target[name] = ZValue.Create<U>( name, val, unknown );
-                        }
-                    }
-                    return target;
-                }
-            );
-        }
-        return values;
-    }
-    public static List<BpjZVars> ToZvars(
-        List<SelectedObject> selectedObjects
-    ) => ToZvars( selectedObjects, (x) => true );
-    public static List<BpjZVars> ToZvars(
-        List<SelectedObject> selectedObjects,
-        Func<int, bool>      filter) {
-        List<BpjZVars> ZVars = [];
-        ZDOInfo        info  = ZDOInfo.Instance;
+    public static readonly Dictionary<string, string> pars = new();
 
-        foreach (var selected in selectedObjects) {
-            DataEntry data = selected.Data;
-            {
-                Dictionary<string, string> pars   = new Dictionary<string, string>();
-                Dictionary<string, ZValue> values = new Dictionary<string, ZValue>();
-                values = import<IFloatValue, float>( data.Floats, values, info, filter );
-                values = import<IIntValue, int>( data.Ints, values, info, filter );
-                values = import<ILongValue, long>( data.Longs, values, info, filter );
-                values = import<IStringValue, string>( data.Strings, values, info, filter );
-                values = import<IVector3Value, Vector3>( data.Vecs, values, info, filter );
-                values = import<IQuaternionValue, Quaternion>( data.Quats, values, info,
-                    filter );
-                values = import<byte[], byte[]>( data.ByteArrays, values, info, filter );
-                ZVars.Add( new(values) );
+    public ExtrDataInf() { }
+    public ExtrDataInf(DataEntry? data) : this(data, SaveExtraDataConfig.Save) { }
+    public ExtrDataInf(DataEntry? data, SaveExtraData save) {
+        if (save != SaveExtraData.None) {
+            var set = FilterExtraData.DefaultInstance.get(save);
+            Func<int, bool> filter = (x) => {
+                if (set.Contains(x)) return false;
+                return true;
+            };
+            if (data != null) {
+                s_floats = import<IFloatValue, float, float?>(data.Floats, filter,
+                    x => x.Get(pars));
+                s_ints  = import<IIntValue, int, int?>(data.Ints, filter, x => x.Get(pars));
+                s_longs = import<ILongValue, long, long?>(data.Longs, filter, x => x.Get(pars));
+                s_strings = import<IStringValue, string, string?>(data.Strings, filter,
+                    x => x.Get(pars));
+                s_vec3s = import<IVector3Value, Vector3, Vector3?>(data.Vecs, filter,
+                    x => x.Get(pars));
+                s_quats = import<IQuaternionValue, Quaternion, Quaternion?>(data.Quats, filter,
+                    x => x.Get(pars));
+                s_byteArrays = import<byte[], byte[], byte[]?>(data.ByteArrays, filter, x => x);
             }
         }
-        return ZVars;
+    }
+
+    static Dictionary<int, U>? import<T, U, V>(
+        IEnumerable<KeyValuePair<int, T>>? import,
+        Func<int, bool>                    filter,
+        Func<T, V>                         getter) {
+        // var type = GetVType<T>();
+        if (import != null) {
+            var values = new Dictionary<int, U>();
+            import.Select(x => x).Aggregate(
+                values,
+                (target, pair) => {
+                    if (filter(pair.Key)) {
+                        var val = getter(pair.Value);
+                        if (val != null) {
+                            target[pair.Key] = (U)(object)val;
+                        }
+                    }
+                    return target;
+                }
+            );
+            if (values.Count > 0) {
+                return values;
+            }
+        }
+        return null;
+    }
+
+    
+
+    public override AExtraData Create() { return new ExtrDataInf(); }
+}
+
+public static class ExtrDataInfExt
+{
+    // todo cleanup, those methods arent needed in both classes
+    public static readonly Dictionary<string, string> pars = new();
+
+    public static Dictionary<int, U>? TodZdoVars<T, U>(this ExtraDataArgo? data) {
+        if (data == null) return null;
+        return data.s_floats?.ToDictionary(e => e.Key, e => (U)(object)e.Value);
+    }
+    public static DataEntry ToDataEntry(this ExtraDataArgo? data) {
+        DataEntry datanew = new();
+        datanew.Floats
+            = data.s_floats?.ToDictionary(e => e.Key,
+                e => (IFloatValue)new SimpleFloatValue(e.Value));
+        datanew.Ints = data.s_ints?.ToDictionary(e => e.Key,
+            e => (IIntValue)new SimpleIntValue(e.Value));
+        datanew.Longs
+            = data.s_longs?.ToDictionary(e => e.Key, e => (ILongValue)new SimpleLongValue(e.Value));
+        datanew.Strings = data.s_strings?.ToDictionary(e => e.Key,
+            e => (IStringValue)new SimpleStringValue(e.Value));
+        datanew.Vecs = data.s_vec3s?.ToDictionary(e => e.Key,
+            e => (IVector3Value)new SimpleVector3Value(e.Value));
+        datanew.Quats = data.s_quats?.ToDictionary(e => e.Key,
+            e => (IQuaternionValue)new SimpleQuaternionValue(e.Value));
+        datanew.ByteArrays = data.s_byteArrays?.ToDictionary(e => e.Key, e => e.Value);
+
+        return datanew;
+    }
+    public static DataEntry ToDataEntry(this ExtraDataValheim? data) {
+        DataEntry datanew = new();
+        datanew.Floats
+            = data.s_floats?.ToDictionary(e => e.Key,
+                e => (IFloatValue)new SimpleFloatValue(e.Value));
+        datanew.Ints = data.s_ints?.ToDictionary(e => e.Key,
+            e => (IIntValue)new SimpleIntValue(e.Value));
+        datanew.Longs
+            = data.s_longs?.ToDictionary(e => e.Key, e => (ILongValue)new SimpleLongValue(e.Value));
+        datanew.Strings = data.s_strings?.ToDictionary(e => e.Key,
+            e => (IStringValue)new SimpleStringValue(e.Value));
+        datanew.Vecs = data.s_vec3s?.ToDictionary(e => e.Key,
+            e => (IVector3Value)new SimpleVector3Value(e.Value));
+        datanew.Quats = data.s_quats?.ToDictionary(e => e.Key,
+            e => (IQuaternionValue)new SimpleQuaternionValue(e.Value));
+        datanew.ByteArrays = data.s_byteArrays?.ToDictionary(e => e.Key, e => e.Value);
+
+        return datanew;
+    }
+
+    public static ExtraDataArgo ToExtrDataArgo(this DataEntry data) =>
+        ToExtrDataArgo(data, SaveExtraDataConfig.Save);
+     public static ExtraDataArgo ToExtrDataArgo(this DataEntry data, SaveExtraData save) {
+         var newdata = new ExtraDataArgo();
+        if (save != SaveExtraData.None) {
+            var set = FilterExtraData.DefaultInstance.get(save);
+            Func<int, bool> filter = (x) => {
+                if (set.Contains(x)) return false;
+                return true;
+            };
+            if (data != null) {
+                newdata.s_floats = import<IFloatValue, float, float?>(data.Floats, filter,
+                    x => x.Get(pars));
+                newdata.s_ints  = import<IIntValue, int, int?>(data.Ints, filter, x => x.Get(pars));
+                newdata.s_longs = import<ILongValue, long, long?>(data.Longs, filter, x => x.Get(pars));
+                newdata.s_strings = import<IStringValue, string, string?>(data.Strings, filter,
+                    x => x.Get(pars));
+                newdata.s_vec3s = import<IVector3Value, Vector3, Vector3?>(data.Vecs, filter,
+                    x => x.Get(pars));
+                newdata.s_quats = import<IQuaternionValue, Quaternion, Quaternion?>(data.Quats, filter,
+                    x => x.Get(pars));
+                newdata.s_byteArrays = import<byte[], byte[], byte[]?>(data.ByteArrays, filter, x => x);
+            }
+        }
+        return newdata;
+    }
+
+    static Dictionary<int, U>? import<T, U, V>(
+        IEnumerable<KeyValuePair<int, T>>? import,
+        Func<int, bool>                    filter,
+        Func<T, V>                         getter) {
+        // var type = GetVType<T>();
+        if (import != null) {
+            var values = new Dictionary<int, U>();
+            import.Select(x => x).Aggregate(
+                values,
+                (target, pair) => {
+                    if (filter(pair.Key)) {
+                        var val = getter(pair.Value);
+                        if (val != null) {
+                            target[pair.Key] = (U)(object)val;
+                        }
+                    }
+                    return target;
+                }
+            );
+            if (values.Count > 0) {
+                return values;
+            }
+        }
+        return null;
     }
 }
 
@@ -200,22 +182,23 @@ public class SelectedObjects : SelectionBase
 
     static readonly Dictionary<string, string> pars = new();
     public SelectedObjects(GameObject? placementGhost_, ObjectSelection selection) :
-        base( Util.GetChildren( placementGhost_ ), InfExtraData.ToZvars( selection.Objects ),
-            placementGhost_.transform.position, placementGhost_.transform.rotation.eulerAngles ) {
+        base(Utility.GetChildren(placementGhost_),
+            selection.Objects.Select((x) => (AExtraData)new ExtrDataInf(x.Data)).ToList(),
+            placementGhost_?.transform.position ?? Vector3.zero, placementGhost_?.transform.rotation.eulerAngles ?? Vector3.zero) {
         m_placementGhost
-            = placementGhost_ ?? throw new ArgumentNullException( "No objects selected." );
+            = placementGhost_ ?? throw new ArgumentNullException("No objects selected.");
         var piece = placementGhost_.GetComponent<Piece>();
         try {
             if (placementGhost_) {
                 m_Name = piece
-                    ? Localization.instance.Localize( piece.m_name )
-                    : Utils.GetPrefabName( placementGhost_ );
+                    ? Localization.instance.Localize(piece.m_name)
+                    : Utils.GetPrefabName(placementGhost_);
             } else {
                 m_Name = "";
             }
         } catch (Exception e) {
             m_Name = "";
-            System.Console.WriteLine( "ArgoWrapper: Error in GetPrefabName" + e );
+            System.Console.WriteLine("ArgoWrapper: Error in GetPrefabName" + e);
         }
     }
 
@@ -224,5 +207,5 @@ public class SelectedObjects : SelectionBase
         set => m_placementGhost = value;
     }
 
-    public override List<GameObject> GetSnapPoints() => Util.GetSnapPoints( m_placementGhost );
+    public override List<GameObject> GetSnapPoints() => Utility.GetSnapPoints(m_placementGhost);
 }

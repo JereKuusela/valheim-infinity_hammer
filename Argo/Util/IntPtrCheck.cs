@@ -1,4 +1,4 @@
-﻿namespace Argo.blueprint.Util;
+﻿namespace Argo.Util;
 
 using System;
 using System.Reflection;

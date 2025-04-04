@@ -174,7 +174,7 @@ public class ComponentData
     /// <param name="componentName"></param>
     /// <param name="zDo"></param>
     /// <param name="zdoVarFlags"></param>
-       private void TestFields(FieldInfo[] fieldInfos, string componentName, ZDO zDo,
+       private void TestFields(FieldInfo[]                fieldInfos, string componentName, ZDO zDo,
                        ref Dictionary<string, ZdoVarFlag> zdoVarFlags) {
             foreach (FieldInfo fieldInfo in fieldInfos)
             {

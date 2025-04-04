@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 namespace Argo.Blueprint;
-public class Util
+public class Utility
 {
     // copied from infinityhammer
     public static bool IsSnapPoint(GameObject obj)
@@ -78,8 +78,8 @@ public class Util
         DisableComponents<RandomFlyingBird>(obj);
         DisableComponents<Windmill>(obj);
         DisableComponents<MineRock>(obj);
-
-        DestroyComponents<MineRock5>(obj);
+        DisableComponents<MineRock5>(obj);
+        
         DestroyComponents<Fish>(obj);
         DestroyComponents<CharacterAnimEvent>(obj);
         DestroyComponents<TreeLog>(obj);
@@ -114,27 +114,3 @@ public class Util
     }
 }
 
-public struct Vector3_
-{
-    public Vector3_(Vector3 v) => this.v = v;
-
-    public Vector3 v;
-    public float   x { get => v.x; set => v.x = value; }
-    public float   y { get => v.x; set => v.x = value; }
-    public float   z { get => v.x; set => v.x = value; }
-
-    public static implicit operator Vector3(Vector3_ vector) =>
-        vector.v;
-    public static implicit operator Vector3_(Vector3 vector) =>
-        new(vector);
-    public static implicit operator float[](Vector3_ vector) =>
-        new[] { vector.x, vector.y, vector.z };
-    public static implicit operator Vector3_(float[] arr) {
-        if (arr.Length >= 3)
-        {
-            return new Vector3_(new Vector3(arr[0], arr[1], arr[2]));
-        }
-
-        throw new ArgumentException("Invalid array length");
-    }
-}

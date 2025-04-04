@@ -1,29 +1,13 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-
 namespace Argo.Blueprint;
 
-/*public BlueprintJson BuildBluePrint(Player player, GameObject obj, string centerPiece,
-    string snapPiece, bool saveData)
-{
-    var fac = Setup(player, obj, centerPiece, snapPiece, saveData);
-    // todo add chase for single object
-    fac.AddObjects(snapPiece, saveData);
-    if (snapPiece == "")
-    {
-        var snaps = Snapping.GetSnapPoints(obj);
-        foreach (var snap in snaps)
-            fac.bp.SnapPoints.Add(snap.transform.localPosition);
-    }
-
-    return fac.bp;
-}*/
 public abstract class SelectionBase
 {
     private   List<GameObject?> m_Objects;
-    private   List<BpjZVars>    m_ZVars;
+    private   List<AExtraData>  m_ZVars;
     protected Vector3           m_Rotation;
     protected Vector3           m_Position;
     protected string            m_Name;
@@ -33,20 +17,20 @@ public abstract class SelectionBase
         set => m_Objects
             = value ?? throw new ArgumentNullException(nameof(value));
     }
-    public virtual List<BpjZVars> ZVars {
+    public virtual List<AExtraData> ZVars {
         get => m_ZVars;
         set => m_ZVars
             = value ?? throw new ArgumentNullException(nameof(value));
     }
-   public SelectionBase(List<GameObject?> gameObjects, Vector3 position, Vector3 rotation, string name = "") {
-       if (gameObjects.Count == 0) throw new ArgumentNullException("SelectioBase: gameObjects is empty" );
+    public SelectionBase(List<GameObject?> gameObjects, Vector3 position, Vector3 rotation, string name = "") {
+        if (gameObjects.Count == 0) throw new ArgumentNullException("SelectioBase: gameObjects is empty" );
         this.m_Objects  = gameObjects;
         this.m_ZVars    = [];
         this.m_Rotation = rotation;
         this.m_Position = position;
         this.m_Name     = name;
-   }
-    public SelectionBase(List<GameObject?> gameObjects, List<BpjZVars> zVars, Vector3 position, Vector3 rotation, string name = "") {
+    }
+    public SelectionBase(List<GameObject?> gameObjects, List<AExtraData> zVars, Vector3 position, Vector3 rotation, string name = "") {
         if (gameObjects.Count == 0) throw new ArgumentNullException("SelectioBase: gameObjects is empty" );
         this.m_Objects  = gameObjects;
         this.m_ZVars    = zVars;
@@ -61,19 +45,3 @@ public abstract class SelectionBase
     public virtual  string           Name     { get => m_Name; set => m_Name = value; }
     public abstract List<GameObject> GetSnapPoints();
 }
-
-
-
-public static class ArgoWrappers
-{ // todo
-    public static class Configuration
-    {
-        public static bool UseBlueprintChance = true;
-    }
-
-    public static string GetPrefabName(GameObject? obj)
-        => Utils.GetPrefabName(obj);
-}
-
-interface IPieceData { }
-
