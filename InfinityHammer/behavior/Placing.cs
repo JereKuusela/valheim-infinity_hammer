@@ -28,11 +28,7 @@ public class PlacePiece
     if (!Configuration.Enabled) return;
     Selection.Get().AfterPlace(obj);
   }
-  // Vanilla is missing a null check, so have to patch it. This probably breaks stuff.
-  static void OnPlaced(Piece piece)
-  {
-    if (piece) piece.OnPlaced();
-  }
+
   static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
   {
     return new CodeMatcher(instructions)
@@ -41,10 +37,6 @@ public class PlacePiece
               new CodeMatch(OpCodes.Callvirt))
           .Advance(1)
           .Insert(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate(GetPrefab).operand))
-          .MatchForward(
-              useEnd: false,
-              new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(Piece), nameof(Piece.OnPlaced))))
-          .Set(OpCodes.Call, Transpilers.EmitDelegate(OnPlaced).operand)
           .MatchForward(
               useEnd: false,
               new CodeMatch(OpCodes.Ret))

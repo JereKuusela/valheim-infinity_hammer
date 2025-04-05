@@ -262,10 +262,44 @@ public static class HammerHelper
 
   public static bool IsDown(string key)
   {
-    if (key.StartsWith("-", StringComparison.OrdinalIgnoreCase))
-      return Enum.TryParse<KeyCode>(key.Substring(1), true, out var code) && !Input.GetKey(code);
-    else
-      return Enum.TryParse<KeyCode>(key, true, out var code) && Input.GetKey(code);
+    var tag = false;
+    var checkDown = true;
+    if (key.StartsWith("-<"))
+    {
+      tag = true;
+      checkDown = false;
+      key = key.Substring(2, key.Length - 3);
+    }
+    else if (key.StartsWith("<"))
+    {
+      tag = true;
+      key = key.Substring(1, key.Length - 2);
+    }
+    else if (key.StartsWith("-"))
+    {
+      checkDown = false;
+      key = key.Substring(1, key.Length - 1);
+    }
+    if (tag)
+    {
+      if (key == "mod1")
+      {
+        key = Configuration.ModifierKey1();
+        tag = false;
+      }
+      else if (key == "mod2")
+      {
+        key = Configuration.ModifierKey2();
+        tag = false;
+      }
+      else if (key == "alt")
+      {
+        key = "AltPlace";
+      }
+    }
+    if (tag)
+      return ZInput.instance.TryGetButtonState(key, b => b.Held == checkDown);
+    return Enum.TryParse<KeyCode>(key, true, out var code) && (Input.GetKey(code) == checkDown);
   }
   private static Dictionary<string, int> PrefabNames = [];
   public static Sprite? FindSprite(string name)
