@@ -6,6 +6,7 @@ using Data;
 using UnityEngine;
 using Argo.Blueprint;
 using Argo.DataAnalysis;
+using Argo.Zdo;
 using UnityEngine.Assertions;
 using Debug = System.Diagnostics.Debug;
 using Object = System.Object;
@@ -17,12 +18,13 @@ using static Argo.Blueprint.BpjZVars;
 public class ExtrDataInf : ExtraDataArgo
 {
     public static readonly Dictionary<string, string> pars = new();
-
+    public static Config m_config { get; set; } = Config.GetCurrentConfig();
     public ExtrDataInf() { }
-    public ExtrDataInf(DataEntry? data) : this(data, SaveExtraDataConfig.Save) { }
-    public ExtrDataInf(DataEntry? data, SaveExtraData save) {
-        if (save != SaveExtraData.None) {
-            var set = FilterExtraData.DefaultInstance.get(save);
+    public ExtrDataInf(DataEntry? data) : this(data, Config.GetCurrentConfig()) { }
+    public ExtrDataInf(DataEntry? data, Config mConfig) {
+        m_config = mConfig;
+        if (mConfig.SaveMode  != SaveExtraData.None) {
+            var set = mConfig.Filter.Get();
             Func<int, bool> filter = (x) => {
                 if (set.Contains(x)) return false;
                 return true;
@@ -127,7 +129,7 @@ public static class ExtrDataInfExt
      public static ExtraDataArgo ToExtrDataArgo(this DataEntry data, SaveExtraData save) {
          var newdata = new ExtraDataArgo();
         if (save != SaveExtraData.None) {
-            var set = FilterExtraData.DefaultInstance.get(save);
+            var set =  Config.GetCurrentConfig().Filter.Get(save);
             Func<int, bool> filter = (x) => {
                 if (set.Contains(x)) return false;
                 return true;

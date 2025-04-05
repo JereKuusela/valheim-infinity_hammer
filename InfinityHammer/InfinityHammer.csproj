@@ -19,10 +19,7 @@
     <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(SolutionDir)\copy-dlls.ps1&quot;"/>
   </Target>
 
-  <ItemGroup>
-    <Reference Include="Argo">
-      <HintPath>..\..\Libs\Argo.dll</HintPath>
-    </Reference>
+  <ItemGroup>    
     <Reference Include="BepInEx.dll">
       <HintPath>..\..\Libs\BepinEx.dll</HintPath>
     </Reference>
@@ -77,12 +74,18 @@
     <Reference Include="ServerDevcommands.dll">
       <HintPath>..\..\Libs\ServerDevcommands.dll</HintPath>
     </Reference>
+    <Reference Include="Valheim-Argonaut">
+      <HintPath>..\..\Libs\Valheim-Argonaut.dll</HintPath>
+    </Reference>
     <Reference Include="WorldEditCommands.dll">
       <HintPath>..\..\Libs\WorldEditCommands.dll</HintPath>
     </Reference>
   </ItemGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Argo\Argo.csproj" />
-  </ItemGroup>  
+    <PackageReference Include="System.Collections.Immutable" Version="9.0.3" />
+  </ItemGroup>
+
+
   
 </Project>
