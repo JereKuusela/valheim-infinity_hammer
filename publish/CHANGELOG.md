@@ -1,3 +1,6 @@
+- v1.67
+  - Fixes unbound actions incorrectly triggering when mouse wheel was used.
+
 - v1.66
   - Adds a new bind "Grid Hold" to use grid while holding the key.
   - Updated for the new Server Devcommands mod bind system.

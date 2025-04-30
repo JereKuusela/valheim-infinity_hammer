@@ -158,10 +158,13 @@ public class ConfigWrapper
       BindsDone = false;
       return;
     }
-    List<string> keys = ["wheel"];
+    List<string> keys = [];
     // Dirty hack to allow command binds to work without a modifier key.
-    if (key.MainKey != KeyCode.None || mode != "command")
+    if (key.MainKey != KeyCode.None || mode == "command")
+    {
+      keys.Add("wheel");
       keys.Add(GetKeys(key));
+    }
     BindManager.UpdateBind(string.Join(",", keys), mode, command, offCommand);
   }
   private void RegisterWheelCommand(ConfigEntry<KeyboardShortcut> setting, string command, string offCommand, string mode)
