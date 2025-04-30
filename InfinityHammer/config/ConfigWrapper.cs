@@ -54,7 +54,8 @@ public class ConfigWrapper
   {
     return BindCommand(() => command, group, name, value, description, mode);
   }
-  public ConfigEntry<KeyboardShortcut> BindCommand(Func<string> command, string group, string name, KeyboardShortcut value, string description, string mode = "")
+  public ConfigEntry<KeyboardShortcut> BindCommand(Func<string> command, string group, string name, KeyboardShortcut value, string description, string mode) => BindCommand(command, group, name, value, description, "", mode);
+  public ConfigEntry<KeyboardShortcut> BindCommand(Func<string> command, string group, string name, KeyboardShortcut value, string description, string offCommand, string mode)
   {
     var key = ToKey(name);
     var cmd = $"_bind_{key}";
@@ -73,7 +74,7 @@ public class ConfigWrapper
     });
 
     var configEntry = Create(group, name, value, description);
-    RegisterCommand(configEntry, cmd, mode);
+    RegisterCommand(configEntry, cmd, offCommand, mode);
     return configEntry;
   }
   public ConfigEntry<KeyboardShortcut> BindWheelCommand(string command, string group, string name, KeyboardShortcut value, string description, string mode = "")
@@ -99,7 +100,7 @@ public class ConfigWrapper
     });
 
     var configEntry = Create(group, name, value, description);
-    RegisterWheelCommand(configEntry, cmd, mode);
+    RegisterWheelCommand(configEntry, cmd, "", mode);
     return configEntry;
   }
   public ConfigEntry<T> Bind<T>(string group, string name, T value, string description) => Bind(group, name, value, new ConfigDescription(description));
@@ -132,29 +133,25 @@ public class ConfigWrapper
     if (key.Modifiers.Count() > 0) keys += "," + string.Join(",", key.Modifiers);
     return keys;
   }
-  private void UpdateKey(KeyboardShortcut key, string command, string mode = "")
+  private void UpdateKey(KeyboardShortcut key, string command, string offCommand, string mode)
   {
     if (!Chat.instance)
     {
       BindsDone = false;
       return;
     }
-    var keys = GetKeys(key);
-    if (mode != "")
-      keys += $",{mode}";
-    var bind = $"rebind {keys} {command}";
-    Console.instance.TryRunCommand(bind);
+    BindManager.UpdateBind(GetKeys(key), mode, command, offCommand);
   }
   private string ToKey(string name) => name.ToLower().Replace(' ', '_').Replace("(", "").Replace(")", "");
-  private void RegisterCommand(ConfigEntry<KeyboardShortcut> setting, string command, string mode = "")
+  private void RegisterCommand(ConfigEntry<KeyboardShortcut> setting, string command, string offCommand, string mode)
   {
     var name = setting.Definition.Key;
     var key = ToKey(name);
-    setting.SettingChanged += (s, e) => UpdateKey(setting.Value, command, mode);
-    Binders.Add(() => UpdateKey(setting.Value, command, mode));
-    SettingHandlers.Add(key, (Terminal terminal, string value) => SetKey(terminal, setting, name, value));
+    setting.SettingChanged += (s, e) => UpdateKey(setting.Value, command, offCommand, mode);
+    Binders.Add(() => UpdateKey(setting.Value, command, offCommand, mode));
+    SettingHandlers.Add(key, (terminal, value) => SetKey(terminal, setting, name, value));
   }
-  private void UpdateWheelKey(KeyboardShortcut key, string command, string mode = "")
+  private void UpdateWheelKey(KeyboardShortcut key, string command, string offCommand, string mode)
   {
     if (!Chat.instance)
     {
@@ -165,17 +162,14 @@ public class ConfigWrapper
     // Dirty hack to allow command binds to work without a modifier key.
     if (key.MainKey != KeyCode.None || mode != "command")
       keys.Add(GetKeys(key));
-    if (mode != "")
-      keys.Add(mode.ToLower());
-    var bind = $"rebind {string.Join(",", keys)} {command}";
-    Console.instance.TryRunCommand(bind);
+    BindManager.UpdateBind(string.Join(",", keys), mode, command, offCommand);
   }
-  private void RegisterWheelCommand(ConfigEntry<KeyboardShortcut> setting, string command, string mode = "")
+  private void RegisterWheelCommand(ConfigEntry<KeyboardShortcut> setting, string command, string offCommand, string mode)
   {
     var name = setting.Definition.Key;
     var key = ToKey(name);
-    setting.SettingChanged += (s, e) => UpdateWheelKey(setting.Value, command, mode);
-    Binders.Add(() => UpdateWheelKey(setting.Value, command, mode));
+    setting.SettingChanged += (s, e) => UpdateWheelKey(setting.Value, command, offCommand, mode);
+    Binders.Add(() => UpdateWheelKey(setting.Value, command, offCommand, mode));
     SettingHandlers.Add(key, (Terminal terminal, string value) => SetKey(terminal, setting, name, value));
   }
   private void Register(ConfigEntry<KeyboardShortcut> setting)

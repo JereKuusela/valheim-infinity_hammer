@@ -1,3 +1,7 @@
+- v1.66
+  - Adds a new bind "Grid Hold" to use grid while holding the key.
+  - Updated for the new Server Devcommands mod bind system.
+
 - v1.65
   - Fixed for the new game version.
   - Fixes alternative placement key not working.
@@ -15,7 +19,4 @@
   - Fixes hoe not working.
 
 - v1.62
-  - Fixed for the new game version.
-
-- v1.61
   - Fixed for the new game version.

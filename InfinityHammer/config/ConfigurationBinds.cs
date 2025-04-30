@@ -35,6 +35,7 @@ public partial class Configuration
   public static ConfigEntry<KeyboardShortcut> undo;
   public static ConfigEntry<KeyboardShortcut> redo;
   public static ConfigEntry<KeyboardShortcut> grid;
+  public static ConfigEntry<KeyboardShortcut> gridHold;
   public static ConfigEntry<string> moveAmount;
   public static ConfigEntry<string> moveAmountLarge;
   public static ConfigEntry<string> gridPrecision;
@@ -74,6 +75,7 @@ public partial class Configuration
     pickAllFrozen = wrapper.BindCommand("hammer connect pick freeze", section, "Pick building frozen", new KeyboardShortcut(KeyCode.None), "Pick the whole building.");
     undo = wrapper.BindCommand("undo", section, "Undo", new KeyboardShortcut(KeyCode.Keypad7), "Undo actions.");
     redo = wrapper.BindCommand("redo", section, "Redo", new KeyboardShortcut(KeyCode.Keypad9), "Redo actions.");
-    grid = wrapper.BindCommand($"hammer_grid {gridPrecision.Value} 0,0,0", section, "Grid", new KeyboardShortcut(KeyCode.None), "Toggles grid.");
+    grid = wrapper.BindCommand(() => $"hammer_grid {gridPrecision.Value} 0,0,0", section, "Grid", new KeyboardShortcut(KeyCode.None), "Toggles grid.", "");
+    gridHold = wrapper.BindCommand(() => $"hammer_grid {gridPrecision.Value} 0,0,0", section, "Grid hold", new KeyboardShortcut(KeyCode.None), "Enables grid when keys are down.", "hammer_grid", "");
   }
 }
