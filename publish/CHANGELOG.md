@@ -1,3 +1,8 @@
+- v1.68
+  - Adds new syntax for tools to specify commands per key bind.
+  - Fixes key bind specific tools not working.
+  - Fixes some binds like freezing or precise placement not working for tools.
+
 - v1.67
   - Fixes unbound actions incorrectly triggering when mouse wheel was used.
 

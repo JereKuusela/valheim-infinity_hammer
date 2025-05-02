@@ -55,7 +55,7 @@ public class RunBuildMenuCommands
     if (piece && piece.TryGetComponent<BuildMenuTool>(out var menuTool) && menuTool.tool != null)
     {
       var tool = menuTool.tool;
-      if (tool.Instant) Console.instance.TryRunCommand(tool.Command);
+      if (tool.Instant) Console.instance.TryRunCommand(tool.GetCommand());
       else
       {
         HoldUse.Selecting = true;
