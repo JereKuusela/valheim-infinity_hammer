@@ -52,7 +52,6 @@ public class CommandData
 {
   public string command = "";
   public string keys = "";
-  public string bannedKeys = "";
 }
 
 public class Tool
@@ -112,7 +111,7 @@ public class Tool
     TabIndex = data.tabIndex;
     targetEdge = data.targetEdge;
     Index = data.index;
-    Commands = data.commands == null ? GetCommands(data.command) : data.commands.Select(c => new CommandValue(c.command, c.keys, c.bannedKeys)).ToList();
+    Commands = data.commands == null ? GetCommands(data.command) : data.commands.Select(c => new CommandValue(c.command, c.keys)).ToList();
     Instant = Commands.All(c => !c.Command.Contains("<") && !c.Command.Contains("hammer "));
     Instant = data.instant == null ? Instant : (bool)data.instant;
     RotateWithPlayer = true;
@@ -160,25 +159,16 @@ public class Tool
       var keysStart = cmd.IndexOf("keys=", StringComparison.Ordinal);
       if (keysStart == -1)
       {
-        Commands.Add(new CommandValue(cmd, "", ""));
+        Commands.Add(new CommandValue(cmd, ""));
         continue;
       }
       var keysEnd = cmd.IndexOf(" ", keysStart + 5, StringComparison.Ordinal);
       if (keysEnd == -1)
         keysEnd = cmd.Length;
       var keyStr = cmd.Substring(keysStart + 5, keysEnd - keysStart - 5);
-      var command = cmd.Substring(0, keysStart) + cmd.Substring(keysEnd + 1);
-      List<string> requiredKeys = [];
-      List<string> bannedKeys = [];
-      var keys = Parse.Split(keyStr);
-      foreach (var key in keys)
-      {
-        if (key.StartsWith("-"))
-          bannedKeys.Add(key.Substring(1));
-        else
-          requiredKeys.Add(key);
-      }
-      Commands.Add(new CommandValue(command, string.Join(",", requiredKeys), string.Join(",", bannedKeys)));
+      // -1 to get rid of the space before keys=
+      var command = cmd.Substring(0, keysStart - 1) + cmd.Substring(keysEnd);
+      Commands.Add(new CommandValue(command, keyStr));
     }
     return Commands;
   }
@@ -195,11 +185,11 @@ public class Tool
   }
 }
 
-public class CommandValue(string command, string keys, string bannedKeys)
+public class CommandValue(string command, string keys)
 {
   public string Command = Plain(MultiCommands.Split(ReplaceHelpers(command)));
-  public string[] Keys = Parse.Split(keys);
-  public string[] BannedKeys = Parse.Split(bannedKeys);
+  public string[] Keys = [.. Parse.Split(keys).Where(k => k[0] != '-')];
+  public string[] BannedKeys = [.. Parse.Split(keys).Where(k => k[0] == '-').Select(k => k.Substring(1))];
 
   public bool IsDown() => Keys.All(HammerHelper.IsDown) && !BannedKeys.Any(HammerHelper.IsDown);
   private static string ReplaceHelpers(string command) => command
@@ -379,7 +369,7 @@ hoe:
   icon: Carrot
   commands:
   - command: object tame <area>
-    bannedKeys: <mod1>
+    keys: -<mod1>
   - command: object wild <area>
     keys: <mod1>
 ";
