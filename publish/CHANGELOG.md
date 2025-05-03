@@ -1,3 +1,6 @@
+- v1.70
+  - Fixes continuous tools (like terrain paint) instantly triggering when selected.
+
 - v1.69
   - Fixes some olds tools not being loaded correctly.
 

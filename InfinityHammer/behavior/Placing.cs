@@ -49,8 +49,6 @@ public class PlacePiece
 [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacement))]
 public class HoldUse
 {
-  // Not in use, can be removed later.
-  public static bool Selecting = false;
 
   static void Prefix(Player __instance, ref ItemDrop.ItemData __state)
   {

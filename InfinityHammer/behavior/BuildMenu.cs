@@ -54,11 +54,12 @@ public class RunBuildMenuCommands
     var piece = __instance.GetPiece(p);
     if (piece && piece.TryGetComponent<BuildMenuTool>(out var menuTool) && menuTool.tool != null)
     {
+      // This is needed for continuous tools to not instantly trigger.
+      __instance.m_placePressedTime = -9998f;
       var tool = menuTool.tool;
       if (tool.Instant) Console.instance.TryRunCommand(tool.GetCommand());
       else
       {
-        HoldUse.Selecting = true;
         Console.instance.TryRunCommand($"tool {tool.Name}");
         var pieces = __instance.m_buildPieces;
         // Must be set directly because SetSelected triggers object selection.

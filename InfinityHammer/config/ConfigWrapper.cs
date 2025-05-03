@@ -140,7 +140,7 @@ public class ConfigWrapper
       BindsDone = false;
       return;
     }
-    BindManager.UpdateBind(GetKeys(key), mode, command, offCommand);
+    BindManager.SetTemporaryBind(GetKeys(key), mode, command, offCommand);
   }
   private string ToKey(string name) => name.ToLower().Replace(' ', '_').Replace("(", "").Replace(")", "");
   private void RegisterCommand(ConfigEntry<KeyboardShortcut> setting, string command, string offCommand, string mode)
@@ -165,7 +165,7 @@ public class ConfigWrapper
       keys.Add("wheel");
       keys.Add(GetKeys(key));
     }
-    BindManager.UpdateBind(string.Join(",", keys), mode, command, offCommand);
+    BindManager.SetTemporaryBind(string.Join(",", keys), mode, command, offCommand);
   }
   private void RegisterWheelCommand(ConfigEntry<KeyboardShortcut> setting, string command, string offCommand, string mode)
   {
