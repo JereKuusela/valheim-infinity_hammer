@@ -52,6 +52,8 @@ public partial class Configuration
   public static ConfigEntry<string> configInvulnerability;
   public static string Invulnerability => IsCheats ? configInvulnerability.Value : InvulnerabilityMode.Off;
   public static ConfigEntry<string> configSnapping;
+  public static bool PreserveWear => configPreserveWear.Value;
+  public static ConfigEntry<bool> configPreserveWear;
   public static string Snapping => configSnapping.Value;
   public static ConfigEntry<string> configRemoveArea;
   public static float RemoveArea => Enabled ? Parse.Float(configRemoveArea.Value) : 0f;
@@ -80,6 +82,7 @@ public partial class Configuration
     configRepairAnything = wrapper.Bind(section, "Repair anything", false, "Allows reparing anything.");
     configOverwriteHealth = wrapper.Bind(section, "Overwrite health", "0", "Overwrites the health of built or repaired objects.");
     configInvulnerability = wrapper.Bind(section, "Set invulnerability", InvulnerabilityMode.Off, new ConfigDescription("Built objects are invulnerable.", new AcceptableValueList<string>(InvulnerabilityMode.Off, InvulnerabilityMode.On, InvulnerabilityMode.Damaged, InvulnerabilityMode.Worn, InvulnerabilityMode.Legacy)));
+    configPreserveWear = wrapper.Bind(section, "Preserve wear levels", false, "Prevents wear level from being overriden by invulnerability");
     configZoopMagic = wrapper.Bind(section, "Zoop magic mode", ZoopMagicMode.Off, new ConfigDescription("Zoop magic mode.", new AcceptableValueList<string>(ZoopMagicMode.Off, ZoopMagicMode.Mild, ZoopMagicMode.Wild)));
 
     configNoCreator = wrapper.Bind(section, "No creator", false, "Reduces save data by not setting the creator id.");
