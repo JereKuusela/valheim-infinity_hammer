@@ -12,13 +12,12 @@ public class NoCreator()
     var zdo = view.GetZDO();
     if (Configuration.NoCreator)
     {
-      zdo.Set(ZDOVars.s_creator, 0L);
-      if (zdo.GetString(ZDOVars.s_creatorName) != "")
-        zdo.Set(ZDOVars.s_creatorName, "");
-      piece.m_creator = 0;
-      zdo.Set(XRaySteamName, "");
-      zdo.Set(XRaySteamID, "");
-      zdo.Set(XRayCreatedID, 0L);
+      zdo.RemoveLong(ZDOVars.s_creator);
+      // String doesn't have RemoveString.
+      ZDOExtraData.s_strings.Remove(zdo.m_uid, ZDOVars.s_creatorName);
+      ZDOExtraData.s_strings.Remove(zdo.m_uid, XRaySteamName);
+      ZDOExtraData.s_strings.Remove(zdo.m_uid, XRaySteamID);
+      zdo.RemoveLong(XRayCreatedID);
     }
     else
       piece.SetCreator(Game.instance.GetPlayerProfile().GetPlayerID());
