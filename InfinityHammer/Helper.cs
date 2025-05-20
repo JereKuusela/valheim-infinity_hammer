@@ -312,12 +312,20 @@ public static class HammerHelper
 
     name = name.ToLower();
     Sprite? sprite;
+    int spriteIndex = 0;
+    string[] name_parts = name.Split(',');
+    if (name_parts.Length > 1)
+    {
+      name = name_parts[0];
+      int.TryParse(name_parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out spriteIndex); 
+    }
+    
     if (PrefabNames.TryGetValue(name, out var hash))
     {
       var prefab = ZNetScene.instance.GetPrefab(hash);
       sprite = prefab?.GetComponent<Piece>()?.m_icon;
       if (sprite) return sprite;
-      sprite = prefab?.GetComponent<ItemDrop>()?.m_itemData?.m_shared?.m_icons.FirstOrDefault();
+      sprite = prefab?.GetComponent<ItemDrop>()?.m_itemData?.m_shared?.m_icons.ElementAtOrDefault(spriteIndex);
       if (sprite) return sprite;
     }
     var effect = ObjectDB.instance.m_StatusEffects.Find(se => se.name.ToLower() == name);
