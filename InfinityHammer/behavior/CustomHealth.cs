@@ -300,6 +300,7 @@ public class CustomHealth
   }
   private static bool SetInfiniteHealth(ZDO zdo, WearNTear wear)
   {
+    var currentMaxHealth = zdo.GetFloat(HashMaxHealth);
     // Structures ignore damage when below zero health.
     zdo.Set(ZDOVars.s_health, -1f);
     // Max health must be equal or less than health to prevent repair.
@@ -308,7 +309,22 @@ public class CustomHealth
       maxHealth = -2f;
     if (Configuration.Invulnerability == InvulnerabilityMode.Damaged)
       maxHealth = -4f;
-    var changed = zdo.GetFloat(HashMaxHealth) != maxHealth;
+    if (Configuration.PreserveWear && Configuration.Invulnerability != InvulnerabilityMode.Off)
+    {
+      if (currentMaxHealth < 0f) // already invulnerable, preserve current type of invulnerability
+        maxHealth = currentMaxHealth;
+      else 
+      {
+        // not invulnerable, convert to equivalent wear level
+        // but only damaged pieces, the other should respect InvulnerabilityMode
+        if (wear.GetHealthPercentage() <= 0.25f)
+          maxHealth = -4f;
+        else if (wear.GetHealthPercentage() <= 0.75f)
+          maxHealth = -2f;
+      }
+    }
+      
+    var changed = currentMaxHealth != maxHealth;
     zdo.Set(HashFields, true);
     zdo.Set(HashFieldsWearNTear, true);
     zdo.Set(HashMaxHealth, maxHealth);
