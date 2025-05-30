@@ -6,16 +6,17 @@ using HarmonyLib;
 using InfinityTools;
 using Service;
 namespace InfinityHammer;
+
 [BepInPlugin(GUID, NAME, VERSION)]
 [BepInDependency("com.rolopogo.gizmo.comfy", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("bruce.valheim.comfymods.gizmo", BepInDependency.DependencyFlags.SoftDependency)]
-[BepInDependency("server_devcommands", "1.88")]
+[BepInDependency("server_devcommands", "1.95")]
 [BepInDependency("world_edit_commands", "1.67")]
 public class InfinityHammer : BaseUnityPlugin
 {
   public const string GUID = "infinity_hammer";
   public const string NAME = "Infinity Hammer";
-  public const string VERSION = "1.65";
+  public const string VERSION = "1.72";
   public static bool StructureTweaks = false;
 #nullable disable
   public static ConfigWrapper Wrapper;

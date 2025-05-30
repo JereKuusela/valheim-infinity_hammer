@@ -242,11 +242,20 @@ For example you could bind command `hammer_rotate_y random;hammer_place` to buil
 - Remove area (default: `0`): Removes same objects within the radius.
 - Repair anything (default: `false`): Allows healing or repairing any object.
 - Reset offset on unfreeze (default `true`): Removes the placement offset when unfreezing the placement.
-- Set invulnerability (default: `false`): Built objects are invulnerable.
-  - Creatures get very high health which makes them immune to damage.
-  - Destructibles, mine rocks and trees get very high tool tier which makes them immune to damage.
-  - Structures get negative health which prevents them from taking any damage.
-  - Legacy option sets a very high health instead of above changes.
+- Set invulnerability (default: `Off`): Built objects can't take any damage.
+  - The exact mechanic depends on the object type:
+    - Creatures: Very high health causes damage to be rounded down to zero.
+    - Destructibles, mine rocks and trees: Very high tool tier makes them immune to damage.
+    - Structures: Negative health (-1) prevents them from taking any damage.
+  - Options:
+    - Off: Removes existing invulnerability.
+    - On: Enables invulnerability.
+    - Damaged: Only applies to structures. Sets -2 max health results in damaged look.
+    - Worn: Only applies to structures. Sets -4 max health that results in worn look.
+    - Legacy: Sets a very high health (1E30) for all object types.
+- Preserve wear levels" (default: `false`): Prevents wear level from being overridden by invulnerability setting.
+  - Structures that are already invulnerable will keep their wear level.
+  - Structures that are damaged will get the matching invulnerability level.
 - Show command values (default: `false`): Always show the command on tool descriptions.
 - Snap points for all objects (default: `false`):If enabled, multi selection creates snap points for every object.
 - Unfreeze on select (default `true`): Removes the placement freeze when selecting a new object.

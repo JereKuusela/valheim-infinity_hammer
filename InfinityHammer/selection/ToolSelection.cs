@@ -84,14 +84,14 @@ public class ToolSelection : BaseSelection
     var angle = ghost.rotation.eulerAngles.y.ToString(CultureInfo.InvariantCulture);
     if (TerrainGrid) angle = "0";
 
-    var command = Tool.Command;
+    var command = Tool.GetCommand();
     var multiShape = command.Contains("<r>") && (command.Contains("<w>") || command.Contains("<d>"));
     if (multiShape)
       command = RemoveUnusedShapeParameters(command, shape);
 
     if (command.Contains("<id>"))
     {
-      var hovered = Selector.GetHovered(InfinityHammer.Configuration.Range, [], InfinityHammer.Configuration.IgnoredIds);
+      var hovered = Selector.GetHovered(Configuration.Range, [], Configuration.IgnoredIds);
       if (hovered == null)
       {
         Helper.AddError(Console.instance, "Nothing is being hovered.", true);

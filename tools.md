@@ -11,6 +11,7 @@ Following fields are available:
   - Keywords `<mod1>`, `<mod2>` and `<alt>` can be used to show the modifier keys.
 - icon: Icon of the tool.
   - Valid icons are object ids, skill ids and status effect ids.
+  - Icon variants can be used by specifying the variant number. For example "icon: ShieldBanded, 2" to use the second variant.
 - command: Command to execute.
   - Various parameters can be used inject coordinates and other information to the command.
   - Use `<area>` parameter to select the place and size with the mouse.

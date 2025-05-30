@@ -6,7 +6,9 @@ using HarmonyLib;
 using ServerDevcommands;
 using Service;
 using UnityEngine;
+using UnityEngine.Animations;
 namespace InfinityHammer;
+
 public static class HammerHelper
 {
   public static string GetArgs(string cmd, Terminal.ConsoleEventArgs args) => args.FullLine.Substring(cmd.Length + 1);
@@ -312,12 +314,20 @@ public static class HammerHelper
 
     name = name.ToLower();
     Sprite? sprite;
+    int spriteIndex = 1;
+    var name_parts = Parse.Split(name);
+    if (name_parts.Length > 1)
+    {
+      name = name_parts[0];
+      spriteIndex = int.TryParse(name_parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var index) ? index : 1;
+    }
+
     if (PrefabNames.TryGetValue(name, out var hash))
     {
       var prefab = ZNetScene.instance.GetPrefab(hash);
       sprite = prefab?.GetComponent<Piece>()?.m_icon;
       if (sprite) return sprite;
-      sprite = prefab?.GetComponent<ItemDrop>()?.m_itemData?.m_shared?.m_icons.FirstOrDefault();
+      sprite = prefab?.GetComponent<ItemDrop>()?.m_itemData?.m_shared?.m_icons.ElementAtOrDefault(spriteIndex - 1);
       if (sprite) return sprite;
     }
     var effect = ObjectDB.instance.m_StatusEffects.Find(se => se.name.ToLower() == name);

@@ -1,8 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using InfinityHammer;
 using ServerDevcommands;
+using Service;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -17,6 +19,7 @@ public class ToolData
   [DefaultValue("")]
   public string icon = "";
   public string command = "";
+  public CommandData[]? commands;
   [DefaultValue("")]
   public string continuous = "";
   [DefaultValue("")]
@@ -45,10 +48,16 @@ public class ToolData
   public int? index;
 }
 
+public class CommandData
+{
+  public string command = "";
+  public string keys = "";
+}
+
 public class Tool
 {
   public string Name;
-  public string Command;
+  private List<CommandValue> Commands;
   private readonly string description;
   public string Description => DisplayKeys(description);
   private readonly string iconName;
@@ -88,7 +97,6 @@ public class Tool
   public Tool(ToolData data)
   {
     Name = data.name;
-    Command = Plain(MultiCommands.Split(ReplaceHelpers(data.command)));
     description = data.description.Replace("\\n", "\n");
     iconName = data.icon;
     continuous = data.continuous;
@@ -103,22 +111,23 @@ public class Tool
     TabIndex = data.tabIndex;
     targetEdge = data.targetEdge;
     Index = data.index;
-    Instant = !Command.Contains("<") && !Command.Contains("hammer ");
+    Commands = data.commands == null ? GetCommands(data.command) : data.commands.Select(c => new CommandValue(c.command, c.keys)).ToList();
+    Instant = Commands.All(c => !c.Command.Contains("<") && !c.Command.Contains("hammer "));
     Instant = data.instant == null ? Instant : (bool)data.instant;
-    ParseParameters(Command);
+    RotateWithPlayer = true;
+    foreach (var cmd in Commands)
+      ParseParameters(cmd.Command);
   }
-  private string ReplaceHelpers(string command) => command
-    .Replace("hoe_", "tool_")
-    .Replace("hammer_command", "")
-    .Replace("<area>", "from=<x>,<z>,<y> circle=<r>-<r2> angle=<a> rect=<w>-<w2>,<d> ignore=<ignore> id=<include>")
-    .Replace("<place>", "from=<x>,<z>,<y>")
-    .Replace("<to>", "to=<x>,<z>,<y> circle=<r>-<r2> rect=<w>-<w2>,<d>");
 
+  public string GetCommand()
+  {
+    var cmds = Commands.Where(c => c.IsDown());
+    return string.Join("; ", cmds.Select(c => c.Command));
+  }
   private void ParseParameters(string command)
   {
     var args = command.Split(' ').ToArray();
 
-    RotateWithPlayer = true;
     for (var i = 0; i < args.Length; i++)
     {
       if (args[i].Contains("<id>"))
@@ -139,6 +148,30 @@ public class Tool
         Height = true;
     }
   }
+  // keys= is legacy but has to be supported for now.
+  // Requires splitting the single command into multiple commands.
+  private List<CommandValue> GetCommands(string rawCommand)
+  {
+    var commands = rawCommand.Split(';');
+    Commands = [];
+    foreach (var cmd in commands)
+    {
+      var keysStart = cmd.IndexOf("keys=", StringComparison.Ordinal);
+      if (keysStart == -1)
+      {
+        Commands.Add(new CommandValue(cmd, ""));
+        continue;
+      }
+      var keysEnd = cmd.IndexOf(" ", keysStart + 5, StringComparison.Ordinal);
+      if (keysEnd == -1)
+        keysEnd = cmd.Length;
+      var keyStr = cmd.Substring(keysStart + 5, keysEnd - keysStart - 5);
+      // -1 to get rid of the space before keys=
+      var command = cmd.Substring(0, keysStart - 1) + cmd.Substring(keysEnd);
+      Commands.Add(new CommandValue(command, keyStr));
+    }
+    return Commands;
+  }
   private static string DisplayKeys(string text)
   {
     var def = ZInput.instance.GetButtonDef("AltPlace");
@@ -150,6 +183,22 @@ public class Tool
     }
     return text.Replace(ToolManager.CmdMod1, Configuration.ModifierKey1()).Replace(ToolManager.CmdMod2, Configuration.ModifierKey2()).Replace(ToolManager.CmdAlt, str);
   }
+}
+
+public class CommandValue(string command, string keys)
+{
+  public string Command = Plain(MultiCommands.Split(ReplaceHelpers(command)));
+  public string[] Keys = [.. Parse.Split(keys).Where(k => k[0] != '-')];
+  public string[] BannedKeys = [.. Parse.Split(keys).Where(k => k[0] == '-').Select(k => k.Substring(1))];
+
+  public bool IsDown() => Keys.All(HammerHelper.IsDown) && !BannedKeys.Any(HammerHelper.IsDown);
+  private static string ReplaceHelpers(string command) => command
+    .Replace("hoe_", "tool_")
+    .Replace("hammer_command", "")
+    .Replace("<area>", "from=<x>,<z>,<y> circle=<r>-<r2> angle=<a> rect=<w>-<w2>,<d> ignore=<ignore> id=<include>")
+    .Replace("<place>", "from=<x>,<z>,<y>")
+    .Replace("<to>", "to=<x>,<z>,<y> circle=<r>-<r2> rect=<w>-<w2>,<d>");
+
   private static string Plain(string[] commands)
   {
     for (var i = 0; i < commands.Length; i++)
@@ -157,7 +206,6 @@ public class Tool
     return string.Join("; ", commands);
   }
 }
-
 public class InitialData
 {
   public static string Get()
@@ -309,14 +357,21 @@ hoe:
     Removes objects.
     Hold <mod1> to also reset the terrain.
   icon: softdeath
-  command: object remove id=* <area>;terrain keys=<mod1> reset <area>
+  commands:
+  - command: object remove id=* <area>
+  - command: terrain reset <area>
+    keys: <mod1>
   highlight: true
 - name: Tame
   description: |-
     Tames creatures.
     Hold <mod1> to untame
   icon: Carrot
-  command: object tame keys=-<mod1> <area>;object wild keys=<mod1> <area>
+  commands:
+  - command: object tame <area>
+    keys: -<mod1>
+  - command: object wild <area>
+    keys: <mod1>
 ";
   }
 }
