@@ -234,7 +234,8 @@ public class HammerBlueprintCommandJson
                 PrintSelected(args.Context, bp.Name);
             });
 
-        AutoComplete.Register("hammer_restore", (index, subIndex) =>
+        // todo
+        AutoComplete.Register("hammer_restore_json", (index, subIndex) =>
         {
             if (index == 0) return GetBlueprints();
             if (index == 1)
@@ -243,7 +244,8 @@ public class HammerBlueprintCommandJson
                     subIndex);
             return ParameterInfo.None;
         });
-        Helper.Command("hammer_restore",
+        // todo
+        Helper.Command("hammer_restore_json",
             "[blueprint file] [scale] - Restores the blueprint at its saved position.",
             args => {
                 

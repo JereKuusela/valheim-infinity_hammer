@@ -1,91 +1,103 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net4.8</TargetFramework>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>preview</LangVersion>
-    <nullable>enable</nullable>
-    <RunPostBuildEvent>Always</RunPostBuildEvent>
-  </PropertyGroup>
-  <Target Name="CopyDLL" AfterTargets="Build">
-    <Copy
-      SourceFiles="$(TargetDir)$(ProjectName).dll"
-      DestinationFolder="$(ProjectDir)\..\..\Libs" />
-  
-
-    <Message Text="Copied to Libs folder." Importance="High" />
-  </Target>
-  <Target Name="PostBuild" AfterTargets="CopyDLL">
-    <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(SolutionDir)\copy-dlls.ps1&quot;"/>
-  </Target>
-
-  <ItemGroup>    
-    <Reference Include="BepInEx.dll">
-      <HintPath>..\..\Libs\BepinEx.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.dll">
-      <HintPath>..\..\Libs\UnityEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.CoreModule.dll">
-      <HintPath>..\..\Libs\UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.JSONSerializeModule">
-      <HintPath>..\..\Libs\UnityEngine.JSONSerializeModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.PhysicsModule.dll">
-      <HintPath>..\..\Libs\UnityEngine.PhysicsModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.UI.dll">
-      <HintPath>..\..\Libs\UnityEngine.UI.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.IMGUIModule.dll">
-      <HintPath>..\..\Libs\UnityEngine.IMGUIModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.InputLegacyModule.dll">
-      <HintPath>..\..\Libs\UnityEngine.InputLegacyModule.dll</HintPath>
-    </Reference>
-    <Reference Include="UnityEngine.AnimationModule.dll">
-      <HintPath>..\..\Libs\UnityEngine.AnimationModule.dll</HintPath>
-    </Reference>
-    <Reference Include="0Harmony.dll">
-      <HintPath>..\..\Libs\0Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="BepInEx.Harmony.dll">
-      <HintPath>..\..\Libs\BepInEx.Harmony.dll</HintPath>
-    </Reference>
-    <Reference Include="SoftReferenceableAssets.dll">
-      <HintPath>..\..\Libs\SoftReferenceableAssets.dll</HintPath>
-    </Reference>
-    <Reference Include="assembly_valheim.dll">
-      <HintPath>..\..\Libs\assembly_valheim.dll</HintPath>
-    </Reference>
-    <Reference Include="assembly_utils.dll">
-      <HintPath>..\..\Libs\assembly_utils.dll</HintPath>
-    </Reference>
-    <Reference Include="assembly_guiutils.dll">
-      <HintPath>..\..\Libs\assembly_guiutils.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.TextMeshPro">
-      <HintPath>..\..\Libs\Unity.TextMeshPro.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.InputSystem">
-      <HintPath>..\..\Libs\Unity.InputSystem.dll</HintPath>
-    </Reference>
-    <Reference Include="ServerDevcommands.dll">
-      <HintPath>..\..\Libs\ServerDevcommands.dll</HintPath>
-    </Reference>
-    <Reference Include="Valheim-Argonaut">
-      <HintPath>..\..\Libs\Valheim-Argonaut.dll</HintPath>
-    </Reference>
-    <Reference Include="WorldEditCommands.dll">
-      <HintPath>..\..\Libs\WorldEditCommands.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Collections.Immutable" Version="9.0.3" />
-  </ItemGroup>
+    <PropertyGroup>
+        <TargetFramework>net4.8</TargetFramework>
+        <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+        <LangVersion>preview</LangVersion>
+        <nullable>enable</nullable>
+        <RunPostBuildEvent>Always</RunPostBuildEvent>
+    </PropertyGroup>
 
 
-  
+    <Target Name="CopyDLL" AfterTargets="Build" Condition=" '$(Configuration)' == 'Release' ">
+        <Copy
+                SourceFiles="$(TargetDir)Valheim-$(ProjectName).dll"
+                DestinationFolder="$(ProjectDir)\..\..\Libs"/>
+        <Message Text="Copied to Libs folder." Importance="High"/>
+       
+    </Target>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+        <DebugType>pdbonly</DebugType>
+    </PropertyGroup>
+    <Target Name="CopyDLL" AfterTargets="Build">
+        <Copy
+                SourceFiles="$(TargetDir)$(ProjectName).dll"
+                DestinationFolder="$(ProjectDir)\..\..\Libs"/>
+
+
+        <Message Text="Copied to Libs folder." Importance="High"/>
+    </Target>
+    <Target Name="PostBuild" AfterTargets="CopyDLL">
+      <Exec Command="powershell -ExecutionPolicy Bypass -File &quot;$(SolutionDir)\copy-dlls.ps1&quot;&#xA;xcopy /Y &quot;$(TargetDir)InfinityHammer.dll&quot; &quot;C:\Users\Seelenquell\AppData\Roaming\r2modmanPlus-local\Valheim\profiles\InfinityHammerJson_Test\BepInEx\plugins\JereKuusela-Infinity_Hammer\&quot;&#xA;xcopy /Y &quot;$(TargetDir)InfinityHammer.pdb&quot; &quot;C:\Users\Seelenquell\AppData\Roaming\r2modmanPlus-local\Valheim\profiles\InfinityHammerJson_Test\BepInEx\plugins\JereKuusela-Infinity_Hammer\&quot;&#xA;powershell $(SolutionDir)pdb2mdb.exe $(TargetPath)&#xA;rename &quot;$(TargetDir)InfinityHammer.dll.mdb&quot; &quot;InfinityHammer.mdb&quot;&#xA;xcopy /Y &quot;$(TargetDir)InfinityHammer.mdb&quot; &quot;C:\Users\Seelenquell\AppData\Roaming\r2modmanPlus-local\Valheim\profiles\InfinityHammerJson_Test\BepInEx\plugins\JereKuusela-Infinity_Hammer\&quot; &#xA;" />
+    </Target>
+   
+
+    <ItemGroup>
+        <Reference Include="BepInEx.dll">
+            <HintPath>..\..\Libs\BepinEx.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.dll">
+            <HintPath>..\..\Libs\UnityEngine.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule.dll">
+            <HintPath>..\..\Libs\UnityEngine.CoreModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.JSONSerializeModule">
+            <HintPath>..\..\Libs\UnityEngine.JSONSerializeModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.PhysicsModule.dll">
+            <HintPath>..\..\Libs\UnityEngine.PhysicsModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.UI.dll">
+            <HintPath>..\..\Libs\UnityEngine.UI.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.IMGUIModule.dll">
+            <HintPath>..\..\Libs\UnityEngine.IMGUIModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.InputLegacyModule.dll">
+            <HintPath>..\..\Libs\UnityEngine.InputLegacyModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.AnimationModule.dll">
+            <HintPath>..\..\Libs\UnityEngine.AnimationModule.dll</HintPath>
+        </Reference>
+        <Reference Include="0Harmony.dll">
+            <HintPath>..\..\Libs\0Harmony.dll</HintPath>
+        </Reference>
+        <Reference Include="BepInEx.Harmony.dll">
+            <HintPath>..\..\Libs\BepInEx.Harmony.dll</HintPath>
+        </Reference>
+        <Reference Include="SoftReferenceableAssets.dll">
+            <HintPath>..\..\Libs\SoftReferenceableAssets.dll</HintPath>
+        </Reference>
+        <Reference Include="assembly_valheim.dll">
+            <HintPath>..\..\Libs\assembly_valheim.dll</HintPath>
+        </Reference>
+        <Reference Include="assembly_utils.dll">
+            <HintPath>..\..\Libs\assembly_utils.dll</HintPath>
+        </Reference>
+        <Reference Include="assembly_guiutils.dll">
+            <HintPath>..\..\Libs\assembly_guiutils.dll</HintPath>
+        </Reference>
+        <Reference Include="Unity.TextMeshPro">
+            <HintPath>..\..\Libs\Unity.TextMeshPro.dll</HintPath>
+        </Reference>
+        <Reference Include="Unity.InputSystem">
+            <HintPath>..\..\Libs\Unity.InputSystem.dll</HintPath>
+        </Reference>
+        <Reference Include="ServerDevcommands.dll">
+            <HintPath>..\..\Libs\ServerDevcommands.dll</HintPath>
+        </Reference>
+        <Reference Include="Valheim-Argonaut">
+            <HintPath>..\..\Libs\Valheim-Argonaut.dll</HintPath>
+        </Reference>
+        <Reference Include="WorldEditCommands.dll">
+            <HintPath>..\..\Libs\WorldEditCommands.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="System.Collections.Immutable" Version="9.0.3"/>
+    </ItemGroup>
+
+
 </Project>

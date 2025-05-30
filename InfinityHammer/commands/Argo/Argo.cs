@@ -1,15 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using Data;
-using Microsoft.Win32.SafeHandles;
 using ServerDevcommands;
-using Service;
-using UnityEngine;
-using UnityEngine.Rendering;
-using Argo;
+using Argo.DataAnalysis;
 namespace InfinityHammer;
 
 public class ArgoExportPrefabData
@@ -25,7 +17,7 @@ public class ArgoExportPrefabData
                 Helper.ArgsCheck(args, 2, "Filename name is missing.");
                 try
                 {
-                    var data = new Argo.DataAnalysis.PrefabData();
+                    var data = new PrefabData();
                     var name = Path.GetFileNameWithoutExtension(args[1]) +
                         ".json";
                     
