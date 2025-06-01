@@ -109,6 +109,39 @@ public partial class ObjectSelection : BaseSelection
         PlaceRotation.Set(SelectedPrefab);
         Scaling.Set(SelectedPrefab);
     }
+  public  ObjectSelection(Terminal terminal, MultiSelectionNew multiSelection) { 
+        SelectedPrefab = new GameObject();
+        // todo, might not have to flatten/copy it, but need to test.
+        
+        Wrapper = new GameObject();
+        Wrapper.SetActive(false);
+
+        SelectedPrefab = new GameObject();
+        SelectedPrefab.transform.SetParent(Wrapper.transform);
+        SelectedPrefab.name                 = "Multiple Blueprints";
+        SelectedPrefab.transform.localScale = Vector3.one;
+        SelectedPrefab.transform.position =
+            Helper.GetPlayer().transform.position;
+        var piece = SelectedPrefab.AddComponent<Piece>();
+        
+        foreach (var selection in multiSelection.Selections) { 
+            for ( int i = 0; i < selection.SelectionWrapper.transform.childCount; i++ ) {
+                var child = selection.SelectionWrapper.transform.GetChild(i).gameObject;
+                child.transform.SetParent(SelectedPrefab.transform);
+                child.transform.localPosition = child.transform.localPosition + selection.SelectionWrapper.transform.localPosition;
+                child.transform.localRotation = child.transform.localRotation * selection.SelectionWrapper.transform.localRotation;;
+                child.transform.localScale
+                    = Vector3.Scale(child.transform.localScale, selection.SelectionWrapper.transform.localScale);
+            //    Objects.Add(new SelectedObject(child));
+                selection.Destroy();
+            }
+            selection.SelectionWrapper.transform.DetachChildren();
+        }
+        
+        piece.m_clipEverything = Snapping.CountSnapPoints(SelectedPrefab) == 0;
+
+    }
+    
     public ObjectSelection(Terminal terminal, BlueprintJson bp, Vector3 scale) {
         Wrapper = new GameObject();
         Wrapper.SetActive(false);
@@ -187,7 +220,7 @@ public partial class ObjectSelection : BaseSelection
         Wrapper = argoSelection.Wrapper;
         Wrapper.SetActive(false);
 
-        SelectedPrefab = argoSelection.SelectedPrefab;
+        SelectedPrefab = argoSelection.SelectionWrapper;
         SelectedPrefab.transform.SetParent(Wrapper.transform);
         SelectedPrefab.name                 = argoSelection.Name;
         SelectedPrefab.transform.localScale = scale;

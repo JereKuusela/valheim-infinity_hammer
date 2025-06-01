@@ -71,7 +71,7 @@ public class HammerSaveCommandJ2
                             $"rot: {HammerHelper.PrintYXZ(blueprint.Rotation.eulerAngles)}).");
                     }));
                     Entity blueprint    = store.GetBlueprint(selectedObjects.Name);
-                    var    selectionJob = new ExportSelectionJob(store, blueprint, config);
+                    var    selectionJob = new ExportToSelectionJob(store, config, new List<Entity>{ blueprint});
                     jobs.Add( importJob, exportJob, writeJob, selectionJob );
 
                     jobs.AddListener(  (() => {
@@ -79,9 +79,8 @@ public class HammerSaveCommandJ2
                             $"Json Blueprint saved to {path.Replace( "\\", "\\\\" )}"   +
                             $" (pos: {HammerHelper.PrintXZY( blueprint.Position )} " +
                             $"rot: {HammerHelper.PrintYXZ( blueprint.Rotation.eulerAngles )})." );
-                        Selection.CreateGhost( new ObjectSelection( args.Context,
-                            selectionJob.Selection ,
-                            Vector3.one ) );
+                        Selection.CreateGhost( new ObjectSelection( args.Context, selectionJob.Selection 
+                            ) );
                     }) );
                         jobs.UnityRunSequential();
 
