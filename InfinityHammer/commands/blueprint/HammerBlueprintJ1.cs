@@ -11,16 +11,19 @@ using UnityEngine;
 
 namespace InfinityHammer;
 
-public class HammerBlueprintCommandJson
+public class HammerBlueprintCommandJ1
 {
-    private static void PrintSelected(Terminal terminal, string name) {
+    private static void PrintSelected(Terminal terminal, string name)
+    {
         if (Configuration.DisableSelectMessages) return;
         HammerHelper.Message(terminal, $"Selected {name}.");
     }
 
     private static IEnumerable<string> LoadFiles(string folder,
-        IEnumerable<string> bps) {
-        if (Directory.Exists(folder)) {
+        IEnumerable<string> bps)
+    {
+        if (Directory.Exists(folder))
+        {
             var blueprints = Directory.EnumerateFiles(folder,
                 "*.blueprint",
                 SearchOption.AllDirectories);
@@ -36,7 +39,8 @@ public class HammerBlueprintCommandJson
         return bps;
     }
 
-    private static IEnumerable<string> Files() {
+    private static IEnumerable<string> Files()
+    {
         IEnumerable<string> bps = new List<string>();
         bps = LoadFiles(Configuration.BlueprintGlobalFolder, bps);
         if (Path.GetFullPath(Configuration.BlueprintLocalFolder) !=
@@ -46,29 +50,30 @@ public class HammerBlueprintCommandJson
     }
 
     private static List<string> GetBlueprints() => Files()
-                                                  .Select(
-                                                       path => Path
-                                                              .GetFileNameWithoutExtension(path).Replace(" ", "_")
-                                                              .Replace(".blueprint", ""))
-                                                  .ToList();
+        .Select(
+            path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_")
+                .Replace(".blueprint", ""))
+        .ToList();
 
-  
-    private static BlueprintJson GetBluePrint(Player player, string name, bool loadData) {
+    private static BlueprintJson GetBluePrint(Player player, string name, bool loadData)
+    {
         var path = Files().FirstOrDefault(path =>
-                Path.GetFileNameWithoutExtension(path)
-                    .Replace(" ", "_").Replace(".blueprint", "") == name)
-         ?? throw new InvalidOperationException(
-                "Blueprint not found.");
-        var split  = path.Split('.');
+                       Path.GetFileNameWithoutExtension(path)
+                           .Replace(" ", "_").Replace(".blueprint", "") == name)
+                   ?? throw new InvalidOperationException(
+                       "Blueprint not found.");
+        var split  = path.Split( '.' );
         var maxidx = split.Length - 1;
-        if (split.Length >= 2) {
+        if (split.Length >= 2)
+        {
             var extension1 = split[maxidx - 1] ?? "";
-            var extension2 = split[maxidx]     ?? "";
+            var extension2 = split[maxidx] ?? "";
             System.Diagnostics.Debug.WriteLine("Json file found:" + path);
-            BlueprintJson? bp; // = BlueprintJson.ReadFromFile(path, loadData) ;
-            //new(n) { Name = name }; // todo
-            if ((extension1 == "blueprint") && (extension2 == "json")) {
-                bp = BlueprintJson.ReadFromFile(path, loadData);
+            BlueprintJson? bp;// = BlueprintJson.ReadFromFile(path, loadData) ;
+                //new(n) { Name = name }; // todo
+            if ((extension1 == "blueprint") && (extension2 == "json"))
+            { 
+                bp   = BlueprintJson.ReadFromFile(path, loadData) ;
                 /*var           rows = File.ReadAllLines(path);
                 return GetPlanBuild(bp, rows, loadData);*/
                 return bp;
@@ -174,19 +179,23 @@ public class HammerBlueprintCommandJson
     }
     */
 
-    public HammerBlueprintCommandJson() {
-        AutoComplete.Register("hammer_blueprint_json",
-            (index, subIndex) => {
+    public HammerBlueprintCommandJ1()
+    {
+        AutoComplete.Register("hammer_blueprint_j1",
+            (index, subIndex) =>
+            {
                 if (index == 0) return GetBlueprints();
                 return ["c", "center", "d", "data", "sc", "scale", "s", "snap"];
             },
-            new() {
+            new()
+            {
                 {
                     "scale",
                     index => ParameterInfo.Scale("scale",
                         "Size of the object (if the object can be scaled).",
                         index)
-                }, {
+                },
+                {
                     "sc",
                     index => ParameterInfo.Scale("scale",
                         "Size of the object (if the object can be scaled).",
@@ -199,18 +208,20 @@ public class HammerBlueprintCommandJson
                 { "data", index => ["true", "false"] },
                 { "d", index => ["true", "false"] },
             });
-        Helper.Command("hammer_blueprint_json",
+        Helper.Command("hammer_blueprint_j1",
             "[blueprint file] [center=piece] [snap=piece] [scale=x,z,y] [data=true/false] - Selects the json blueprint to be placed.",
-            args => {
+            args =>
+            {
                 HammerHelper.CheatCheck();
                 Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
                 Hammer.Equip();
-                var                 name   = args[1];
-                HammerBlueprintPars pars   = new(args);
-                var                 player = Helper.GetPlayer();
-                var                 bp     = GetBluePrint(player, name, pars.LoadData); // todo couroutine stuff
+                var name = args[1];
+                HammerBlueprintPars pars = new(args);
+                var player = Helper.GetPlayer();
+                var bp = GetBluePrint(player, name, pars.LoadData); // todo couroutine stuff
                 bp.Center(pars.CenterPiece);
-                if (pars.SnapPiece != "") {
+                if (pars.SnapPiece != "")
+                {
                     foreach (var snap in bp.SnapPoints)
                         bp.Objects.Add(new BpjObject(pars.SnapPiece,
                             snap,
@@ -224,7 +235,8 @@ public class HammerBlueprintCommandJson
             });
 
         // todo
-        AutoComplete.Register("hammer_restore_json", (index, subIndex) => {
+        /*AutoComplete.Register("hammer_restore_json", (index, subIndex) =>
+        {
             if (index == 0) return GetBlueprints();
             if (index == 1)
                 return ParameterInfo.Scale("scale",
@@ -236,6 +248,7 @@ public class HammerBlueprintCommandJson
         Helper.Command("hammer_restore_json",
             "[blueprint file] [scale] - Restores the blueprint at its saved position.",
             args => {
+                
                 HammerHelper.CheatCheck();
                 Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
                 Hammer.Equip();
@@ -244,7 +257,7 @@ public class HammerBlueprintCommandJson
                     ? Parse.Scale(Parse.Split(args[2]))
                     : Vector3.one;
                 var player = Helper.GetPlayer();
-                var bp     = GetBluePrint(player, name, true); // todo couroutine stuff
+                var bp = GetBluePrint(player,name, true); // todo couroutine stuff
                 bp.Center("");
                 var obj =
                     Selection.CreateGhost(
@@ -252,6 +265,6 @@ public class HammerBlueprintCommandJson
                 Position.Override = bp.Coordinates;
                 PlaceRotation.Set(Quaternion.Euler(bp.Rotation));
                 PrintSelected(args.Context, bp.Name);
-            });
+            });*/
     }
 }

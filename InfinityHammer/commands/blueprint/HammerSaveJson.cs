@@ -17,7 +17,8 @@ using UnityEngine.Rendering;
 namespace InfinityHammer;
 
 public class HammerSaveCommandJson
-{
+{ 
+    /*
     public HammerSaveCommandJson() {
         AutoComplete.Register("hammer_save_json", (int index) => {
             if (index == 0) return ParameterInfo.Create("File name.");
@@ -32,13 +33,13 @@ public class HammerSaveCommandJson
             { "s", (int index) => ParameterInfo.ObjectIds },
             { "snap", (int index) => ParameterInfo.ObjectIds },
         });
-        Helper.Command("hammer_save_json",
+       Helper.Command("hammer_save_json",
             "[file name] [center=piece] [snap=piece] [data=true/false] [profile=true/false] - Saves the selection to a  json blueprint.",
             (args) => {
                 try {
 #if DEBUG
                     Harmony.DEBUG = true;
-              
+
 
                     if (System.Diagnostics.Debugger.IsAttached)
                     {
@@ -52,7 +53,7 @@ public class HammerSaveCommandJson
                         UnityEngine.Debug.Log("DEBUGGER IST NICHT VERBUNDEN");
                     }
 #endif
-                    
+
                     HammerHelper.CheatCheck();
                     Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
                     var              player         = Helper.GetPlayer();
@@ -101,7 +102,7 @@ public class HammerSaveCommandJson
                     System.Console.WriteLine("Error inhammer_save_json " + e);
                 }
             });
-    }
+    }*/
     public SettingsRegister GetConfig(Terminal.ConsoleEventArgs args, string name = "",
         SettingsRegister? cfg_ = null) {
         SettingsRegister cfg;

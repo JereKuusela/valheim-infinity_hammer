@@ -120,6 +120,7 @@ public class InfinityHammer : BaseUnityPlugin
     new HammerGridCommand();
     new HammerSaveCommand();
     new HammerSaveCommandJson();
+    new HammerSaveCommandJ2();
     new HammerMirrorCommand();
     new HammerZoopCommand();
     new HammerMeasureCommand();

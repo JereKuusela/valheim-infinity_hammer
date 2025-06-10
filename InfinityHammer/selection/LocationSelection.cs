@@ -34,7 +34,7 @@ public class LocationSelection : BaseSelection
     DataEntry data = new();
     data.Set(ZDOVars.s_location, location.Hash);
     data.Set(ZDOVars.s_seed, seed);
-    Object = new(location.Hash, false, data);
+    Object = new(location.Hash, false, data, Wrapper);
   }
   public override DataEntry? GetData(int index = 0) => Object.Data;
   public override int GetPrefab(int index = 0) => Object.Prefab;

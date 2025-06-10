@@ -30,7 +30,7 @@ public class ArgoExportPrefabData
                                 : Configuration.BlueprintGlobalFolder, name);
                     Directory.CreateDirectory(Path.GetDirectoryName(path));
                     //    File.Create(path);
-                    data.GetData(path);
+                 //   data.GetData(path);
                     //File.WriteAllLines(path, lines);
 
                 } catch (Exception e)

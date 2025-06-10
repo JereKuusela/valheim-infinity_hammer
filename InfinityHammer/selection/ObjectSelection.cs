@@ -9,6 +9,7 @@ using UnityEngine;
 using WorldEditCommands;
 
 namespace InfinityHammer;
+using  ArgoZVars = Argo.Blueprint.ZVars;
 
 // This is quite messy because single and multiple objects behave differently.
 // But they have to be the same because selection is changed when zooping.
@@ -50,7 +51,7 @@ public partial class ObjectSelection : BaseSelection
         SelectedPrefab                    = HammerHelper.SafeInstantiate(view, Wrapper);
         SelectedPrefab.transform.position = Vector3.zero;
         UpdateVisuals(SelectedPrefab, data);
-        Objects.Add(new(prefabHash, view.m_syncInitialScale, data));
+        Objects.Add(new(prefabHash, view.m_syncInitialScale, data, SelectedPrefab));
         if (zdo != null)
             PlaceRotation.Set(SelectedPrefab);
         // Reset for zoop bounds check.
@@ -76,7 +77,7 @@ public partial class ObjectSelection : BaseSelection
         SelectedPrefab.name = view.name;
 
         SingleUse = singleUse;
-        Objects.Add(new(prefabHash, view.m_syncInitialScale, null));
+        Objects.Add(new(prefabHash, view.m_syncInitialScale, null, SelectedPrefab));
         Scaling.Set(SelectedPrefab);
     }
 
@@ -100,7 +101,7 @@ public partial class ObjectSelection : BaseSelection
             obj.transform.rotation = view.transform.rotation;
             UpdateVisuals(obj, data);
             Objects.Add(new(view.GetZDO().GetPrefab(), view.m_syncInitialScale,
-                data));
+                data,obj ));
         }
 
         SelectedPrefab.transform.position = Vector3.zero;
@@ -124,7 +125,8 @@ public partial class ObjectSelection : BaseSelection
             Helper.GetPlayer().transform.position;
         var piece = SelectedPrefab.AddComponent<Piece>();
         
-        foreach (var selection in multiSelection.Selections) { 
+        foreach (var pair in multiSelection.Selections) {
+            SelectionBase selection = pair.Value;
             for ( int i = 0; i < selection.SelectionWrapper.transform.childCount; i++ ) {
                 var child = selection.SelectionWrapper.transform.GetChild(i).gameObject;
                 child.transform.SetParent(SelectedPrefab.transform);
@@ -177,7 +179,7 @@ public partial class ObjectSelection : BaseSelection
                 obj.transform.localScale    = item.Scale;
                 if (item.m_extraData.Count > 0) {
                     DataEntry data;
-                    if (item.ZVars is ExtraDataArgo adata) {
+                    if (item.ZVars is ArgoZVars adata) {
                         // todo maybe make an interface for conversion
                         data = adata.ToDataEntry();
                     } else {
@@ -190,7 +192,7 @@ public partial class ObjectSelection : BaseSelection
                     UpdateVisuals(obj, data);
                     Objects.Add(new SelectedObject(
                         item.Prefab.GetStableHashCode(),
-                        view.m_syncInitialScale, data));
+                        view.m_syncInitialScale, data, obj));
                 }
             } catch (Exception e) {
                 HammerHelper.Message(terminal, $"Warning: {e.Message}");
@@ -319,7 +321,7 @@ public partial class ObjectSelection : BaseSelection
                 UpdateVisuals(obj, data);
                 Objects.Add(new SelectedObject(
                     item.Prefab.GetStableHashCode(),
-                    view.m_syncInitialScale, data));
+                    view.m_syncInitialScale, data, obj));
             } catch (Exception e) {
                 HammerHelper.Message(terminal, $"Warning: {e.Message}");
             }
@@ -613,7 +615,7 @@ public partial class ObjectSelection : BaseSelection
         if (Configuration.Snapping != SnappingMode.Off)
             Snapping.RegenerateSnapPoints(SelectedPrefab);
         Objects.Add(new SelectedObject(Objects[0].Prefab, Objects[0].Scalable,
-            Objects[0].Data));
+            Objects[0].Data, obj));
         return obj;
     }
 

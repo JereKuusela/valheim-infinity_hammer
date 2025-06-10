@@ -32,7 +32,7 @@ public class RoomSelection : BaseSelection
     Wrapper = new GameObject();
     Wrapper.SetActive(false);
     SelectedPrefab = HammerHelper.SafeInstantiateRoom(room, emptyRoom, Wrapper);
-    Object = new(hash, false, null);
+    Object = new(hash, false, null, SelectedPrefab);
     var connections = SelectedPrefab.GetComponentsInChildren<RoomConnection>(includeInactive: false).ToList();
     var snaps = connections.Select(c => c.transform.position).ToList();
     Snapping.CreateSnapPoints(SelectedPrefab, snaps);
