@@ -9,7 +9,8 @@ using UnityEngine;
 using WorldEditCommands;
 
 namespace InfinityHammer;
-using  ArgoZVars = Argo.Blueprint.ZVars;
+
+using ArgoZVars = Argo.Blueprint.ZVars;
 
 // This is quite messy because single and multiple objects behave differently.
 // But they have to be the same because selection is changed when zooping.
@@ -101,7 +102,7 @@ public partial class ObjectSelection : BaseSelection
             obj.transform.rotation = view.transform.rotation;
             UpdateVisuals(obj, data);
             Objects.Add(new(view.GetZDO().GetPrefab(), view.m_syncInitialScale,
-                data,obj ));
+                data, obj));
         }
 
         SelectedPrefab.transform.position = Vector3.zero;
@@ -110,10 +111,10 @@ public partial class ObjectSelection : BaseSelection
         PlaceRotation.Set(SelectedPrefab);
         Scaling.Set(SelectedPrefab);
     }
-  public  ObjectSelection(Terminal terminal, MultiSelectionNew multiSelection) { 
+    public ObjectSelection(Terminal terminal, MultiSelection multiSelection) {
         SelectedPrefab = new GameObject();
         // todo, might not have to flatten/copy it, but need to test.
-        
+
         Wrapper = new GameObject();
         Wrapper.SetActive(false);
 
@@ -124,105 +125,38 @@ public partial class ObjectSelection : BaseSelection
         SelectedPrefab.transform.position =
             Helper.GetPlayer().transform.position;
         var piece = SelectedPrefab.AddComponent<Piece>();
-        
+
         foreach (var pair in multiSelection.Selections) {
             SelectionBase selection = pair.Value;
-            for ( int i = 0; i < selection.SelectionWrapper.transform.childCount; i++ ) {
+            for (int i = 0; i < selection.SelectionWrapper.transform.childCount; i++) {
                 var child = selection.SelectionWrapper.transform.GetChild(i).gameObject;
                 child.transform.SetParent(SelectedPrefab.transform);
-                child.transform.localPosition = child.transform.localPosition + selection.SelectionWrapper.transform.localPosition;
-                child.transform.localRotation = child.transform.localRotation * selection.SelectionWrapper.transform.localRotation;;
+                child.transform.localPosition = child.transform.localPosition +
+                    selection.SelectionWrapper.transform.localPosition;
+                child.transform.localRotation = child.transform.localRotation *
+                    selection.SelectionWrapper.transform.localRotation;
+                ;
                 child.transform.localScale
                     = Vector3.Scale(child.transform.localScale, selection.SelectionWrapper.transform.localScale);
-            //    Objects.Add(new SelectedObject(child));
-                selection.Destroy();
+                //    Objects.Add(new SelectedObject(child));
+                selection.Clear();
             }
             selection.SelectionWrapper.transform.DetachChildren();
         }
-        
-        piece.m_clipEverything = Snapping.CountSnapPoints(SelectedPrefab) == 0;
-
-    }
-    
-    public ObjectSelection(Terminal terminal, BlueprintJson bp, Vector3 scale) {
-        Wrapper = new GameObject();
-        Wrapper.SetActive(false);
-
-        SelectedPrefab = new GameObject();
-        SelectedPrefab.transform.SetParent(Wrapper.transform);
-        SelectedPrefab.name                 = bp.Name;
-        SelectedPrefab.transform.localScale = scale;
-        SelectedPrefab.transform.position =
-            Helper.GetPlayer().transform.position;
-        var piece = SelectedPrefab.AddComponent<Piece>();
-        piece.m_name        = bp.Name;
-        piece.m_description = bp.Description;
-        if (piece.m_description == "")
-            piece.m_description = "Center: " + bp.CenterPiece;
-        var centerPieceExists = false;
-
-        foreach (BpjObject item in bp.Objects) {
-            if (item.Prefab == bp.CenterPiece)
-                centerPieceExists = true;
-            if (Configuration.UseBlueprintChance && item.Chance != 1f &&
-                UnityEngine.Random.value                        > item.Chance) continue;
-            try {
-                GameObject? prefab = ZNetScene.instance.GetPrefab(item.Prefab);
-                if (!prefab) // todo maybe check here if its a mod piece and add option to exclude unknown pieces
-                    throw new InvalidOperationException(
-                        $"Prefab {item.Prefab} not found.");
-                var view = prefab.GetComponent<ZNetView>();
-                var obj =
-                    HammerHelper.ChildInstantiate(view, SelectedPrefab);
-                obj.transform.localPosition = item.Pos;
-                obj.transform.localRotation = item.Rot;
-                obj.transform.localScale    = item.Scale;
-                if (item.m_extraData.Count > 0) {
-                    DataEntry data;
-                    if (item.ZVars is ArgoZVars adata) {
-                        // todo maybe make an interface for conversion
-                        data = adata.ToDataEntry();
-                    } else {
-                        throw new ArgumentException($"Unknown extra data type {item.ZVars.GetType().Name}");
-                    }
-                    // data = 
-                    //       ? ReadExtraInfo(obj, item.ExtraInfo)
-                    //       : DataHelper.Get(item.Data);
-
-                    UpdateVisuals(obj, data);
-                    Objects.Add(new SelectedObject(
-                        item.Prefab.GetStableHashCode(),
-                        view.m_syncInitialScale, data, obj));
-                }
-            } catch (Exception e) {
-                HammerHelper.Message(terminal, $"Warning: {e.Message}");
-            }
-        }
-
-        // Might be good to have a proper loading for single item blueprints, but this works for now.
-        if (Objects.Count == 1)
-            ToSingle();
-
-        // Snapping not needed when the user is using a specific center point.
-        if (!centerPieceExists) {
-            if (bp.SnapPoints.Count == 0)
-                Snapping.GenerateSnapPoints(SelectedPrefab);
-            else
-                Snapping.CreateSnapPoints(SelectedPrefab, bp.SnapPoints);
-        }
 
         piece.m_clipEverything = Snapping.CountSnapPoints(SelectedPrefab) == 0;
-        Scaling.Set(SelectedPrefab);
     }
 
     public ObjectSelection(Terminal terminal, SelectionBase argoSelection, Vector3 scale) {
-        if (argoSelection.Blueprints.First().Entity is not Entity blueprint) {
-            throw new ArgumentException($"Selection contains no blueprint: {argoSelection.Name}");
+      
+        if (!argoSelection.Wrapper || !argoSelection.SelectionWrapper) {
+            throw new ArgumentException($"Error Selection Wrappers may not be null: {argoSelection.Name}");
         }
-        Wrapper = argoSelection.Wrapper;
+        // todo setting up wrappers shoulnd be nessecary here
+        Wrapper = argoSelection.Wrapper!;
         Wrapper.SetActive(false);
 
-        SelectedPrefab = argoSelection.SelectionWrapper;
+        SelectedPrefab = argoSelection.SelectionWrapper!;
         SelectedPrefab.transform.SetParent(Wrapper.transform);
         SelectedPrefab.name                 = argoSelection.Name;
         SelectedPrefab.transform.localScale = scale;
@@ -230,8 +164,8 @@ public partial class ObjectSelection : BaseSelection
             Helper.GetPlayer().transform.position;
         var piece = SelectedPrefab.AddComponent<Piece>();
         piece.m_name        = argoSelection.Name;
-        piece.m_description = blueprint.GetBpHeaderComponent()?.Description ?? "";
-        string centerpiece = blueprint.GetBpHeaderComponent()?.CenterPiece ?? "";
+        piece.m_description = argoSelection.Header.Description;
+        string centerpiece = argoSelection.Header.CenterPiece;
         if (piece.m_description == "") {
             piece.m_description = "Center: " + centerpiece;
         }
@@ -250,7 +184,6 @@ public partial class ObjectSelection : BaseSelection
                 var view = prefab.GetComponent<ZNetView>();
                 var obj =
                     HammerHelper.ChildInstantiate(view, SelectedPrefab);
-             
             } catch (Exception e) {
                 HammerHelper.Message(terminal, $"Warning: {e.Message}");
             }
@@ -262,10 +195,11 @@ public partial class ObjectSelection : BaseSelection
 
         // Snapping not needed when the user is using a specific center point.
         if (!centerPieceExists) {
-            if ((blueprint.GetBpHeaderComponent()?.SnapPoints is not {} snapPoints) || (snapPoints.Count == 0)) 
-                         
+            if ((argoSelection.GetSnapPoints() is not { } snapPoints) || (snapPoints.Count == 0))
+
                 Snapping.GenerateSnapPoints(SelectedPrefab);
             else
+              //  Snapping.CreateSnapPoints(SelectedPrefab, snapPoints.Select((go) => go.transform.localPosition).ToList());
                 Snapping.CreateSnapPoints(SelectedPrefab, snapPoints);
         }
 

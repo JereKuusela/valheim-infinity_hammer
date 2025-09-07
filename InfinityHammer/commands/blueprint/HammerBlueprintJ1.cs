@@ -55,7 +55,7 @@ public class HammerBlueprintCommandJ1
                 .Replace(".blueprint", ""))
         .ToList();
 
-    private static BlueprintJson GetBluePrint(Player player, string name, bool loadData)
+    private static Entity GetBluePrint(Player player, string name, bool loadData)
     {
         var path = Files().FirstOrDefault(path =>
                        Path.GetFileNameWithoutExtension(path)
@@ -69,11 +69,11 @@ public class HammerBlueprintCommandJ1
             var extension1 = split[maxidx - 1] ?? "";
             var extension2 = split[maxidx] ?? "";
             System.Diagnostics.Debug.WriteLine("Json file found:" + path);
-            BlueprintJson? bp;// = BlueprintJson.ReadFromFile(path, loadData) ;
+            Entity? bp = new Entity(EntityId.Zero, "",(GameObject) null) ;// = BlueprintJson.ReadFromFile(path, loadData) ;
                 //new(n) { Name = name }; // todo
             if ((extension1 == "blueprint") && (extension2 == "json"))
             { 
-                bp   = BlueprintJson.ReadFromFile(path, loadData) ;
+              //  bp   = BlueprintJson.ReadFromFile(path, loadData) ;
                 /*var           rows = File.ReadAllLines(path);
                 return GetPlanBuild(bp, rows, loadData);*/
                 return bp;
@@ -219,18 +219,18 @@ public class HammerBlueprintCommandJ1
                 HammerBlueprintPars pars = new(args);
                 var player = Helper.GetPlayer();
                 var bp = GetBluePrint(player, name, pars.LoadData); // todo couroutine stuff
-                bp.Center(pars.CenterPiece);
+                /*bp.Center(pars.CenterPiece);
                 if (pars.SnapPiece != "")
                 {
                     foreach (var snap in bp.SnapPoints)
                         bp.Objects.Add(new BpjObject(pars.SnapPiece,
                             snap,
                             Quaternion.identity, Vector3.one, 1f));
-                }
+                }*/
 
-                var obj =
-                    Selection.CreateGhost(
-                        new ObjectSelection(args.Context, bp, pars.Scale));
+           //     var obj =
+           //         Selection.CreateGhost(
+           //             new ObjectSelection(args.Context, bp, pars.Scale));
                 PrintSelected(args.Context, bp.Name);
             });
 

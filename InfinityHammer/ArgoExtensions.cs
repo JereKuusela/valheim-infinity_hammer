@@ -5,31 +5,39 @@ using Argo.Blueprint;
 using Data;
 using UnityEngine;
 using Argo.Zdo;
+using ArgoRegister = Argo.Registers.SettingsRegister;
+using SaveExtraData  = Argo.Registers.SaveExtraData;
 
 namespace InfinityHammer;
-using  ArgoZVars = Argo.Blueprint.ZVars;
+
+using ArgoZVars = Argo.Blueprint.ZVars;
 
 //using static Argo.Blueprint.BpjZVars;
-public static class ArgoExtensions {
-    
+public static class ArgoExtensions
+{
     public static readonly Dictionary<string, string> pars = new();
 
-    public static ArgoZVars ToArgoZVars(this DataEntry? data,  SettingsRegister mConfig) {
+    public static ArgoZVars ToArgoZVars(this DataEntry? data, ArgoRegister mConfig) {
         return Convert(data, mConfig);
     }
     public static DataEntry ToDataEntry(this ArgoZVars argozdo) {
         DataEntry data = new DataEntry();
-        data.Floats     = argozdo.Floats?.ToDictionary(pair => pair.Key, pair => (IFloatValue)new SimpleFloatValue(pair.Value));
-        data.Ints       = argozdo.Ints?.ToDictionary((pair) => pair.Key, pair =>  ( IIntValue) new SimpleIntValue( pair.Value ));
-        data.Longs      = argozdo.Longs?.ToDictionary((pair) => pair.Key, pair =>  ( ILongValue) new SimpleLongValue( pair.Value ));
-        data.Strings    = argozdo.Strings?.ToDictionary((pair) => pair.Key, pair =>  ( IStringValue) new SimpleStringValue( pair.Value ));
-        data.Vecs       = argozdo.Vec3s?.ToDictionary((pair) => pair.Key, pair =>  ( IVector3Value) new SimpleVector3Value( pair.Value ));
-        data.Quats      = argozdo.Quats?.ToDictionary((pair) => pair.Key, pair =>  ( IQuaternionValue) new SimpleQuaternionValue( pair.Value ));
-        data.ByteArrays = argozdo.ByteArrays?.ToDictionary((pair) => pair.Key, pair => pair.Value );
+        data.Floats = argozdo.Floats?.ToDictionary(pair => pair.Key,
+            pair => (IFloatValue)new SimpleFloatValue(pair.Value));
+        data.Ints = argozdo.Ints?.ToDictionary((pair) => pair.Key, pair => (IIntValue)new SimpleIntValue(pair.Value));
+        data.Longs = argozdo.Longs?.ToDictionary((pair) => pair.Key,
+            pair => (ILongValue)new SimpleLongValue(pair.Value));
+        data.Strings = argozdo.Strings?.ToDictionary((pair) => pair.Key,
+            pair => (IStringValue)new SimpleStringValue(pair.Value));
+        data.Vecs = argozdo.Vec3s?.ToDictionary((pair) => pair.Key,
+            pair => (IVector3Value)new SimpleVector3Value(pair.Value));
+        data.Quats = argozdo.Quats?.ToDictionary((pair) => pair.Key,
+            pair => (IQuaternionValue)new SimpleQuaternionValue(pair.Value));
+        data.ByteArrays = argozdo.ByteArrays?.ToDictionary((pair) => pair.Key, pair => pair.Value);
         return data;
     }
-    public static ArgoZVars Convert(DataEntry? data, SettingsRegister mConfig) {
-       var m_config = mConfig;
+    public static ArgoZVars Convert(DataEntry? data, ArgoRegister mConfig) {
+        var m_config = mConfig;
         if (mConfig.SaveMode != SaveExtraData.None) {
             var set = mConfig.Filter.Get();
             Func<int, bool> filter = (x) => {
@@ -77,8 +85,8 @@ public static class ArgoExtensions {
         return null;
     }
 
-    public static MultiSelectionNew CreateMultiSelection(GameObject? placementGhost_, ObjectSelection selection,
-        Player player, SettingsRegister mConfig) {
+    public static MultiSelection CreateMultiSelection(GameObject? placementGhost_, ObjectSelection selection,
+        Player player, ArgoRegister mConfig) {
         if (placementGhost_ == null) { throw new ArgumentNullException("No objects selected."); }
         var piece = placementGhost_.GetComponent<Piece>();
 
@@ -95,35 +103,40 @@ public static class ArgoExtensions {
             name = "";
             System.Console.WriteLine("ArgoWrapper: Error in GetPrefabName" + e);
         }
-        var position = placementGhost_?.transform.position             ?? Vector3.zero;
-        var rotation = placementGhost_?.transform.rotation.eulerAngles ?? Vector3.zero;
-   
+        var position = placementGhost_?.transform.position ?? Vector3.zero;
+        var rotation = placementGhost_?.transform.rotation ?? Quaternion.identity;
 
-        var selectionObejects = new List<SelectionObject>( selection.Objects.Count());
+        var selectionObejects = new List<SelectionObject>(selection.Objects.Count());
         selection.Objects.Select(x => x).Aggregate(
             selectionObejects,
             (target, obj) => {
                 if (obj.GameObject.TryGetTarget(out var go) &&
-                    ZNetScene.s_instance.m_namedPrefabs.TryGetValue(obj.Prefab, out var prefab))
-                { string prefabName = Utility.GetPrefabName(go);
+                    ZNetScene.s_instance.m_namedPrefabs.TryGetValue(obj.Prefab, out var prefab)) {
+                    string prefabName = Utility.GetPrefabName(go);
                     target.Add(new SelectionObject(prefabName,
-                            obj.Data?.ToArgoZVars(mConfig) ?? null,
-                            obj.Scalable,
-                            go
-                            ));
+                        obj.Data?.ToArgoZVars(mConfig) ?? null,
+                        obj.Scalable,
+                        go
+                    ));
                 }
                 return target;
             }
         );
-        MultiSelectionNew multiSelection = new MultiSelectionNew(selectionObejects,
-            placementGhost_,
-            position,
-            rotation, name, player.GetPlayerName(), "", "InfinityHammer");
-
+        MultiSelection multiSelection = new MultiSelection(selectionObejects,
+            name,
+            new SelectionHeader {
+                Creator  = player.GetPlayerName(),
+                Category = "InfinityHammer"
+            },
+            new Argo.Math.Transform(
+                position,
+                rotation),
+            placementGhost_);
+        
         return multiSelection;
     }
 
-    public static BaseSelection ToBaseSelection(MultiSelectionNew multiSelection) {
+    public static BaseSelection ToBaseSelection(MultiSelection multiSelection) {
         throw new NotImplementedException(); // todo
     }
     /*public static BaseSelection ToBaseSelection(Terminal terminal, MultiSelection multiSelection, string name) {

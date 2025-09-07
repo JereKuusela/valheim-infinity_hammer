@@ -135,7 +135,7 @@ public class HammerSaveCommand
     var z = HammerHelper.Format(pos.z);
     return $"{x};{y};{z}";
   }
-  private static string GetPlanBuildObject(IBlueprintObject iobj)
+  private static string GetPlanBuildObject(BlueprintObject iobj)
   {
     var obj = (BlueprintObject)iobj;
     var name = obj.Prefab;

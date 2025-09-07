@@ -15,7 +15,7 @@ public class BlueprintObject(
     Vector3 scale,
     string info,
     string data,
-    float chance) : IBlueprintObject
+    float chance) 
 {
     public string prefab = name;
     public Vector3 pos = pos;
@@ -35,7 +35,7 @@ public class BlueprintObject(
 }
 
 
-public class Blueprint : IBlueprint
+public class Blueprint 
 {
     public virtual string Name { get => name; set => name = value; }
     public virtual string Description { get => description; set => description = value; }

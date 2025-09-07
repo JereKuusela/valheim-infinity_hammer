@@ -13,6 +13,8 @@ using ServerDevcommands;
 using Service;
 using UnityEngine;
 using UnityEngine.Rendering;
+using ArgoRegister = Argo.Registers.SettingsRegister;
+using SaveExtraData  = Argo.Registers.SaveExtraData;
 
 namespace InfinityHammer;
 
@@ -58,7 +60,7 @@ public class HammerSaveCommandJson
                     Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
                     var              player         = Helper.GetPlayer();
                     var              placementGhost = HammerHelper.GetPlacementGhost();
-                    SettingsRegister config         = GetConfig(args);
+                    ArgoRegister config         = GetConfig(args);
 
                     var name = Path.GetFileNameWithoutExtension(args[1]) +
                         ".blueprint.json";
@@ -103,15 +105,15 @@ public class HammerSaveCommandJson
                 }
             });
     }*/
-    public SettingsRegister GetConfig(Terminal.ConsoleEventArgs args, string name = "",
-        SettingsRegister? cfg_ = null) {
-        SettingsRegister cfg;
+    public ArgoRegister GetConfig(Terminal.ConsoleEventArgs args, string name = "",
+        ArgoRegister? cfg_ = null) {
+        ArgoRegister cfg;
         try {
             if (cfg_ == null) {
                 if (name != "") {
-                    cfg = SettingsRegister.GetDefaultInstance().Clone(name);
+                    cfg = ArgoRegister.GetDefaultInstance().Clone(name);
                 } else {
-                    cfg = SettingsRegister.GetDefaultInstance();
+                    cfg = ArgoRegister.GetDefaultInstance();
                 }
             } else {
                 cfg = cfg_;

@@ -14,7 +14,8 @@ using ServerDevcommands;
 using Service;
 using UnityEngine;
 using UnityEngine.Rendering;
-
+using ArgoRegister = Argo.Registers.SettingsRegister;
+using SaveExtraData  = Argo.Registers.SaveExtraData;
 namespace InfinityHammer;
 
 public class HammerSaveCommandJ2
@@ -40,7 +41,7 @@ public class HammerSaveCommandJ2
                 Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
                 var              player         = Helper.GetPlayer();
                 var              placementGhost = HammerHelper.GetPlacementGhost();
-                SettingsRegister config         = GetConfig(args, "InfintyHammer");
+                ArgoRegister config         = GetConfig(args, "InfintyHammer");
 
                 var name = Path.GetFileNameWithoutExtension(args[1]) +
                     ".blueprint.json";
@@ -66,19 +67,19 @@ public class HammerSaveCommandJ2
                         if (Selection.Get() is not ObjectSelection selection) {
                             throw new ArgumentException("Selection error");
                         }
-                        MultiSelectionNew selectedObjects
+                        MultiSelection selectedObjects
                             = ArgoExtensions.CreateMultiSelection(placementGhost, selection, player, config);
                         bp_name   = selectedObjects.Name;
                         importJob = new ImportSelectionJob(store, selectedObjects, config);
                         exportJob = new JsonExportJob(store,
                             config, // todo since we construct a new entitystore here we can get all bp names from it
-                            new LazyGetter<MultiSelectionNew, List<string>>(selectedObjects, (x) => x.Blueprints),
+                            new LazyGetter<MultiSelection, List<string>>(selectedObjects, (x) => x.Blueprints),
                             importJob);
 
                         exportJob.AddListener((() => {
                                     // Entity Getblueprint() => store.GetBlueprint(selectedObjects.Name);
                                     //  string name   = selectedObjects.Name;
-                                    var getter = new LazyGetter<MultiSelectionNew, MultiSelectionNew>(selectedObjects,
+                                    var getter = new LazyGetter<MultiSelection, MultiSelection>(selectedObjects,
                                         (selection_) => {
                                             return selection_;
                                         });
@@ -116,16 +117,16 @@ public class HammerSaveCommandJ2
             });
     }
 
-    public SettingsRegister GetConfig(Terminal.ConsoleEventArgs args, string name = "",
-        SettingsRegister? cfg_ = null) {
-        SettingsRegister cfg;
+    public ArgoRegister GetConfig(Terminal.ConsoleEventArgs args, string name = "",
+        ArgoRegister? cfg_ = null) {
+        ArgoRegister cfg;
         if (cfg_ == null) {
             if (name != "") {
-                if (!SettingsRegister.TryGetConfig(name, out cfg)) {
-                    cfg = SettingsRegister.GetDefaultInstance().Clone(name);
+                if (!ArgoRegister.TryGetConfig(name, out cfg)) {
+                    cfg = ArgoRegister.GetDefaultInstance().Clone(name);
                 }
             } else {
-                cfg = SettingsRegister.GetDefaultInstance();
+                cfg = ArgoRegister.GetDefaultInstance();
             }
         } else {
             cfg = cfg_;
