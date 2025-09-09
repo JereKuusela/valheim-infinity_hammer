@@ -273,7 +273,8 @@ public partial class ObjectSelection : BaseSelection
     {
       var variant = data.TryGetInt(pars, ZDOVars.s_variant, out var v) ? v : 0;
       var quality = data.TryGetInt(pars, ZDOVars.s_quality, out var q) ? q : 1;
-      itemStand.SetVisualItem(item, variant, quality);
+      var orientation = data.TryGetInt(pars, ZDOVars.s_type, out var t) ? t : 0;
+      itemStand.SetVisualItem(item, variant, quality, orientation);
     }
     if (obj.TryGetComponent<ArmorStand>(out var armorStand))
     {
