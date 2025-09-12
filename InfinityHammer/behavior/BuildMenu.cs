@@ -22,10 +22,19 @@ public static class UpdateAvailable
     piece.m_icon = tool.Icon;
     return piece;
   }
+
+  static bool Prefix(PieceTable __instance)
+  {
+    if (!Configuration.IsCheats) return true;
+    if (!Configuration.ToolsEnabled) return true;
+
+    return CustomBuildMenu.HandleCustomMenuMode(__instance);
+  }
   static void Postfix(PieceTable __instance)
   {
     if (!Configuration.IsCheats) return;
     if (!Configuration.ToolsEnabled) return;
+    if (HammerMenuCommand.CurrentMode != MenuMode.Default) return;
     var hammer = Hammer.Get();
     List<Tool> tools = ToolManager.Get(hammer);
     int tab = 0;

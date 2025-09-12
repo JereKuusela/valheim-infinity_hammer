@@ -32,7 +32,7 @@ public class HammerBlueprintCommand
       bps = LoadFiles(Configuration.BlueprintLocalFolder, bps);
     return bps.Distinct().OrderBy(s => s);
   }
-  private static List<string> GetBlueprints() => Files().Select(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_")).ToList();
+  public static List<string> GetBlueprints() => Files().Select(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_")).ToList();
   private static Blueprint GetBluePrint(string name, bool loadData)
   {
     var path = Files().FirstOrDefault(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_") == name)
