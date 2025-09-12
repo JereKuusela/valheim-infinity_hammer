@@ -179,28 +179,29 @@ public static class HammerHelper
   ///<summary>Removes scripts that try to run (for example placement needs only the model and Piece component).</summary>
   private static void CleanObject(GameObject obj)
   {
-    DisableComponents<FootStep>(obj);
-    DisableComponents<Growup>(obj);
-    DisableComponents<RandomFlyingBird>(obj);
-    DisableComponents<Windmill>(obj);
-    DisableComponents<MineRock>(obj);
+    // These are confirmed to cause issues.
+    DestroyComponents<RandomFlyingBird>(obj);
+    DestroyComponents<DungeonGenerator>(obj);
+    DestroyComponents<MusicLocation>(obj);
+    DisableComponents<Fish>(obj);
+
+    // Could be disables but destroying maybe better for performance.
+    DestroyComponents<FootStep>(obj);
+    DestroyComponents<Growup>(obj);
+    DestroyComponents<Windmill>(obj);
+    DestroyComponents<MineRock>(obj);
 
     DestroyComponents<MineRock5>(obj);
-    DestroyComponents<Fish>(obj);
     DestroyComponents<CharacterAnimEvent>(obj);
     DestroyComponents<TreeLog>(obj);
     DestroyComponents<TreeBase>(obj);
     DestroyComponents<CreatureSpawner>(obj);
     DestroyComponents<TombStone>(obj);
     DestroyComponents<Aoe>(obj);
-    DestroyComponents<DungeonGenerator>(obj);
-    DestroyComponents<MusicLocation>(obj);
     DestroyComponents<SpawnArea>(obj);
     DestroyComponents<Procreation>(obj);
     DestroyComponents<StaticPhysics>(obj);
     DestroyComponents<Tameable>(obj);
-    DestroyComponents<MonsterAI>(obj);
-    DestroyComponents<AnimalAI>(obj);
     DestroyComponents<Catapult>(obj);
 
     // Many things rely on Character so better just undo the Awake.
@@ -357,4 +358,25 @@ public class UnregisterRenderers
 {
   // ItemStyles use this and may cause issues for armor and item stands.
   static bool Prefix(MaterialMan __instance, GameObject gameObject) => __instance.m_blocks.ContainsKey(gameObject.GetInstanceID());
+}
+
+[HarmonyPatch(typeof(ItemDrop), nameof(ItemDrop.MakePiece))]
+public class PreventFishBecomingPieces
+{
+  // Vanilla automatically turns placed item drops to pieces.
+  // This removes body which breaks fishes (that have Piece for some reasoon).
+  // Also prevent pointless error message from missing Piece.
+  static bool Prefix(ItemDrop __instance) => __instance.GetComponent<Piece>() && !__instance.GetComponent<Fish>();
+}
+
+[HarmonyPatch(typeof(Fish), nameof(Fish.Awake))]
+public class PreventFishBeingPiece
+{
+  // Good idea also auto clean up fish that have gone wrong.
+  static void Postfix(Fish __instance)
+  {
+    var view = __instance.m_nview;
+    if (!view || !view.IsValid()) return;
+    view.GetZDO().Set(ZDOVars.s_piece, false);
+  }
 }

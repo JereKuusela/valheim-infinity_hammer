@@ -45,29 +45,74 @@ public static class UpdateAvailable
   }
 }
 
-[HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece), typeof(Vector2Int))]
-public class RunBuildMenuCommands
+[HarmonyPatch]
+public class TakeOverBuildMenu
 {
+
+  [HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece), typeof(Vector2Int))]
+  [HarmonyPrefix]
   [HarmonyPriority(Priority.Low)]
-  public static bool Prefix(Player __instance, Vector2Int p)
+  public static bool HandleSetSelectedPiece(Player __instance, Vector2Int p)
   {
-    var piece = __instance.GetPiece(p);
+    // Just something else to not trigger continuous tools instantly.
+    __instance.m_placePressedTime = -9998f;
+    var wasInstant = HandleInstantTool(__instance.m_buildPieces, p);
+    return !wasInstant;
+  }
+  // Instant tools don't get selected when activated.
+  private static bool HandleInstantTool(PieceTable pt, Vector2Int p)
+  {
+    var piece = pt.GetPiece(p);
     if (piece && piece.TryGetComponent<BuildMenuTool>(out var menuTool) && menuTool.tool != null)
     {
-      // This is needed for continuous tools to not instantly trigger.
-      __instance.m_placePressedTime = -9998f;
       var tool = menuTool.tool;
       if (tool.Instant) Console.instance.TryRunCommand(tool.GetCommand());
-      else
-      {
-        Console.instance.TryRunCommand($"tool {tool.Name}");
-        var pieces = __instance.m_buildPieces;
-        // Must be set directly because SetSelected triggers object selection.
-        pieces.m_selectedPiece[(int)pieces.GetSelectedCategory()] = p;
-      }
-      return false;
+      return tool.Instant;
     }
-    return true;
+    return false;
+  }
+
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.LeftPiece))]
+  [HarmonyPostfix]
+  private static void HandleLeftPiece(PieceTable __instance) => ActivatePiece(__instance);
+
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.RightPiece))]
+  [HarmonyPostfix]
+  private static void HandleRightPiece(PieceTable __instance) => ActivatePiece(__instance);
+
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpPiece))]
+  [HarmonyPostfix]
+  private static void HandleUpPiece(PieceTable __instance) => ActivatePiece(__instance);
+
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.DownPiece))]
+  [HarmonyPostfix]
+  private static void HandleDownPiece(PieceTable __instance) => ActivatePiece(__instance);
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetCategory))]
+  [HarmonyPostfix]
+  private static void HandleSetCategory(PieceTable __instance) => ActivatePiece(__instance);
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.PrevCategory))]
+  [HarmonyPostfix]
+  private static void HandlePrevCategory(PieceTable __instance) => ActivatePiece(__instance);
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.NextCategory))]
+  [HarmonyPostfix]
+  private static void HandleNextCategory(PieceTable __instance) => ActivatePiece(__instance);
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetSelected))]
+  [HarmonyPostfix]
+  private static void HandleSetSelected(PieceTable __instance) => ActivatePiece(__instance);
+
+  private static void ActivatePiece(PieceTable pt)
+  {
+    var index = pt.GetSelectedIndex();
+    var piece = pt.GetPiece(pt.GetSelectedCategory(), index);
+    if (!piece)
+      Selection.Clear();
+    else if (piece.TryGetComponent<BuildMenuTool>(out var menuTool) && menuTool.tool != null)
+    {
+      var tool = menuTool.tool;
+      Console.instance.TryRunCommand($"tool {tool.Name}");
+    }
+    else if (piece.GetComponent<ZNetView>())
+      Selection.CreateGhost(new ObjectSelection(piece, false));
   }
 }
 

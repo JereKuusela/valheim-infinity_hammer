@@ -102,56 +102,6 @@ public class SetItemHack
   }
 }
 
-// This is invasive but simplifies the mod when normal selection can be handled the same way.
-[HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetSelected))]
-public class PieceTableSetSelected
-{
-  static void Prefix() => Selection.Clear();
-  static void Postfix(PieceTable __instance)
-  {
-    var index = __instance.GetSelectedIndex();
-    var piece = __instance.GetPiece(__instance.GetSelectedCategory(), index);
-    if (piece && piece.GetComponent<ZNetView>())
-      Selection.CreateGhost(new ObjectSelection(piece, false));
-  }
-}
-// This is invasive but simplifies the mod when normal selection can be handled the same way.
-[HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetCategory))]
-public class PieceTableSetCategory
-{
-  static void Prefix() => Selection.Clear();
-  static void Postfix(PieceTable __instance)
-  {
-    var index = __instance.GetSelectedIndex();
-    var piece = __instance.GetPiece(__instance.GetSelectedCategory(), index);
-    if (piece && piece.GetComponent<ZNetView>())
-      Selection.CreateGhost(new ObjectSelection(piece, false));
-  }
-}
-[HarmonyPatch(typeof(PieceTable), nameof(PieceTable.PrevCategory))]
-public class PieceTablePrevCategory
-{
-  static void Prefix() => Selection.Clear();
-  static void Postfix(PieceTable __instance)
-  {
-    var index = __instance.GetSelectedIndex();
-    var piece = __instance.GetPiece(__instance.GetSelectedCategory(), index);
-    if (piece && piece.GetComponent<ZNetView>())
-      Selection.CreateGhost(new ObjectSelection(piece, false));
-  }
-}
-[HarmonyPatch(typeof(PieceTable), nameof(PieceTable.NextCategory))]
-public class PieceTableNextCategory
-{
-  static void Prefix() => Selection.Clear();
-  static void Postfix(PieceTable __instance)
-  {
-    var index = __instance.GetSelectedIndex();
-    var piece = __instance.GetPiece(__instance.GetSelectedCategory(), index);
-    if (piece && piece.GetComponent<ZNetView>())
-      Selection.CreateGhost(new ObjectSelection(piece, false));
-  }
-}
 ///<summary>Overrides the piece selection.</summary>
 [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.GetSelectedPiece))]
 public class GetSelectedPiece

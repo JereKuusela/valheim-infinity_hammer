@@ -5,6 +5,7 @@ using ServerDevcommands;
 using UnityEngine;
 
 namespace InfinityHammer;
+
 public class HammerZoopCommand
 {
   private static void Command(string direction, string action, string reverse)
@@ -55,6 +56,15 @@ public class HammerZoopCommand
     Command("up", "up", "down");
     Command("backward", "backward", "forward");
     Command("forward", "forward", "backward");
+    AutoComplete.Register($"hammer_zoop_reset", (int index) => ParameterInfo.None);
+    Helper.Command($"hammer_zoop_reset", $"- Resets the zoop offset.", (args) =>
+    {
+      HammerHelper.CheatCheck();
+      HammerHelper.GetPlacementGhost();
+      if (Selection.Get() is not ObjectSelection selected)
+        return;
+      selected.ZoopReset();
+    });
   }
 }
 public partial class ObjectSelection : BaseSelection
@@ -74,6 +84,7 @@ public partial class ObjectSelection : BaseSelection
     ZoopsZ = 0;
     ZoopOffset = new();
     Zoops.Clear();
+    ZoopPostprocess();
   }
   private void RemoveChildSub(Vector3Int index)
   {

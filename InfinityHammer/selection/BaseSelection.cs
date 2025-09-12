@@ -44,6 +44,7 @@ public class BaseSelection
     {
       piece.m_canBeRemoved = true;
       NoCreator.Set(view, piece);
+
     }
     CustomHealth.SetHealth(view, false);
     if (obj.TryGetComponent<DungeonGenerator>(out var dg))

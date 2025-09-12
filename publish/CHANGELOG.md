@@ -1,3 +1,10 @@
+- v1.74
+  - Adds a new command "hammer_zoop_reset" to reset zoop offset.
+  - Adds automatic clean up for nearby corrupted fish.
+  - Fixes controller not working on build menu.
+  - Fixes trying to place Twig breaking the player entirely.
+  - Fixes placing fishes corrupting the area entirely.
+  - Fixes error message when placing some item drops.
 
 - v1.73
   - Fixed for the new game version.
