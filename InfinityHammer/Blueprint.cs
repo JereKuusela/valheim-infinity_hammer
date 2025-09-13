@@ -17,6 +17,7 @@ public class Blueprint
   public string Name = "";
   public string Description = "";
   public string Creator = "";
+  public string Category = "";
   public Vector3 Coordinates = Vector3.zero;
   public Vector3 Rotation = Vector3.zero;
   public string CenterPiece = Configuration.BlueprintCenterPiece;

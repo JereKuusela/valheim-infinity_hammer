@@ -5,6 +5,7 @@
   - Fixes trying to place Twig breaking the player entirely.
   - Fixes placing fishes corrupting the area entirely.
   - Fixes error message when placing some item drops.
+  - Fixes dungeon room removal removing random room from dungeon data instead of the selected one.
 
 - v1.73
   - Fixed for the new game version.

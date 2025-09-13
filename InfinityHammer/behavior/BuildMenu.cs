@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using HarmonyLib;
 using InfinityHammer;
+using Service;
 using UnityEngine;
 namespace InfinityTools;
 
@@ -81,32 +82,24 @@ public class TakeOverBuildMenu
     return false;
   }
 
-  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.LeftPiece))]
-  [HarmonyPostfix]
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.LeftPiece)), HarmonyPostfix]
   private static void HandleLeftPiece(PieceTable __instance) => ActivatePiece(__instance);
 
-  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.RightPiece))]
-  [HarmonyPostfix]
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.RightPiece)), HarmonyPostfix]
   private static void HandleRightPiece(PieceTable __instance) => ActivatePiece(__instance);
 
-  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpPiece))]
-  [HarmonyPostfix]
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpPiece)), HarmonyPostfix]
   private static void HandleUpPiece(PieceTable __instance) => ActivatePiece(__instance);
 
-  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.DownPiece))]
-  [HarmonyPostfix]
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.DownPiece)), HarmonyPostfix]
   private static void HandleDownPiece(PieceTable __instance) => ActivatePiece(__instance);
-  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetCategory))]
-  [HarmonyPostfix]
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetCategory)), HarmonyPostfix]
   private static void HandleSetCategory(PieceTable __instance) => ActivatePiece(__instance);
-  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.PrevCategory))]
-  [HarmonyPostfix]
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.PrevCategory)), HarmonyPostfix]
   private static void HandlePrevCategory(PieceTable __instance) => ActivatePiece(__instance);
-  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.NextCategory))]
-  [HarmonyPostfix]
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.NextCategory)), HarmonyPostfix]
   private static void HandleNextCategory(PieceTable __instance) => ActivatePiece(__instance);
-  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetSelected))]
-  [HarmonyPostfix]
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetSelected)), HarmonyPostfix]
   private static void HandleSetSelected(PieceTable __instance) => ActivatePiece(__instance);
 
   private static void ActivatePiece(PieceTable pt)
@@ -118,10 +111,13 @@ public class TakeOverBuildMenu
     else if (piece.TryGetComponent<BuildMenuTool>(out var menuTool) && menuTool.tool != null)
     {
       var tool = menuTool.tool;
-      Console.instance.TryRunCommand($"tool {tool.Name}");
+      if (!tool.Instant)
+        Console.instance.TryRunCommand($"tool {tool.Name}");
     }
     else if (piece.GetComponent<ZNetView>())
       Selection.CreateGhost(new ObjectSelection(piece, false));
+    else
+      Selection.Clear();
   }
 }
 

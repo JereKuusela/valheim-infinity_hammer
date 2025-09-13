@@ -186,8 +186,8 @@ public static class SpriteHelper
       // Split at uppercase letter (but keep the uppercase letter)
       else if (char.IsUpper(c) && currentPart.Length > 0)
       {
-        // If next is upper dont split yet
-        if (i + 1 < name.Length && char.IsUpper(name[i + 1]))
+        // If previous also is also upper dont split yet
+        if (i > 0 && char.IsUpper(name[i - 1]))
         {
           currentPart += c;
           continue;

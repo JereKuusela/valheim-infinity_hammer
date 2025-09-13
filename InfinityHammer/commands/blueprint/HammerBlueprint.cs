@@ -6,6 +6,7 @@ using System.Linq;
 using ServerDevcommands;
 using UnityEngine;
 namespace InfinityHammer;
+
 #pragma warning disable IDE0046
 public class HammerBlueprintCommand
 {
@@ -32,7 +33,52 @@ public class HammerBlueprintCommand
       bps = LoadFiles(Configuration.BlueprintLocalFolder, bps);
     return bps.Distinct().OrderBy(s => s);
   }
-  public static List<string> GetBlueprints() => Files().Select(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_")).ToList();
+  public static List<string> GetBlueprints() => [.. Files().Select(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_"))];
+
+  public static List<Blueprint> GetBlueprintsByCategory() => [.. Files().Select(GetBluePrintCategory)];
+
+  public static List<Blueprint> GetBlueprintsByFolder() => [.. Files().Select(GetBluePrintWithFolder)];
+
+  public static List<Blueprint> GetBlueprintsByCategoryAndFolder() => [.. Files().Select(GetBluePrintWithCategoryAndFolder)];
+
+  private static Blueprint GetBluePrintCategory(string filePath)
+  {
+    var name = Path.GetFileNameWithoutExtension(filePath).Replace(" ", "_");
+    var rows = File.ReadAllLines(filePath);
+    var extension = Path.GetExtension(filePath);
+    Blueprint bp = new() { Name = name };
+    if (extension == ".vbuild") return bp;
+    if (extension == ".blueprint") return GetPlanBuildCategory(bp, rows);
+    throw new InvalidOperationException("Unknown file format.");
+  }
+
+  private static Blueprint GetBluePrintWithFolder(string filePath)
+  {
+    var name = Path.GetFileNameWithoutExtension(filePath).Replace(" ", "_");
+    var category = GetFolderNameFromPath(filePath);
+    return new() { Name = name, Category = category };
+  }
+
+  private static Blueprint GetBluePrintWithCategoryAndFolder(string filePath)
+  {
+    var rows = File.ReadAllLines(filePath);
+    var extension = Path.GetExtension(filePath);
+
+    Blueprint bp = GetBluePrintWithFolder(filePath);
+    if (extension == ".vbuild") return bp;
+    if (extension == ".blueprint") return GetPlanBuildCategory(bp, rows);
+    throw new InvalidOperationException("Unknown file format.");
+  }
+
+  private static string GetFolderNameFromPath(string filePath)
+  {
+    var path = Path.GetDirectoryName(filePath);
+    if (string.IsNullOrEmpty(path))
+      return "Blueprints";
+    var name = Path.GetFileName(path);
+    return string.IsNullOrEmpty(name) ? "Blueprints" : name;
+  }
+
   private static Blueprint GetBluePrint(string name, bool loadData)
   {
     var path = Files().FirstOrDefault(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_") == name)
@@ -43,6 +89,19 @@ public class HammerBlueprintCommand
     if (extension == ".vbuild") return GetBuildShare(bp, rows, loadData);
     if (extension == ".blueprint") return GetPlanBuild(bp, rows, loadData);
     throw new InvalidOperationException("Unknown file format.");
+  }
+  private static Blueprint GetPlanBuildCategory(Blueprint bp, string[] rows)
+  {
+    foreach (var row in rows)
+    {
+      if (row.StartsWith("#name:", StringComparison.OrdinalIgnoreCase))
+        bp.Name = row.Split(':')[1];
+      else if (row.StartsWith("#category:", StringComparison.OrdinalIgnoreCase))
+        bp.Category = row.Split(':')[1];
+      else if (row.StartsWith("#pieces", StringComparison.OrdinalIgnoreCase))
+        return bp;
+    }
+    return bp;
   }
   private static Blueprint GetPlanBuild(Blueprint bp, string[] rows, bool loadData)
   {

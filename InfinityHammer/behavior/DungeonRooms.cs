@@ -89,10 +89,13 @@ public static class DungeonRooms
     DungeonGenerator.saveWriter.Write(rooms - 1);
     for (int i = 0; i < rooms; i++)
     {
+      var room = binaryReader.ReadInt32();
+      var pos = Utils.ReadVector3(binaryReader);
+      var rot = Utils.ReadQuaternion(binaryReader);
       if (i == index) continue;
-      DungeonGenerator.saveWriter.Write(binaryReader.ReadInt32());
-      Utils.Write(DungeonGenerator.saveWriter, Utils.ReadVector3(binaryReader));
-      Utils.Write(DungeonGenerator.saveWriter, Utils.ReadQuaternion(binaryReader));
+      DungeonGenerator.saveWriter.Write(room);
+      Utils.Write(DungeonGenerator.saveWriter, pos);
+      Utils.Write(DungeonGenerator.saveWriter, rot);
     }
     zdo.Set(ZDOVars.s_roomData, DungeonGenerator.saveStream.ToArray());
   }

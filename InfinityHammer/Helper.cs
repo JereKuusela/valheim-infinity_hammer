@@ -347,3 +347,17 @@ public class PreventFishBeingPiece
     view.GetZDO().Set(ZDOVars.s_piece, false);
   }
 }
+
+// For some reason, vanilla messes up the object name.
+[HarmonyPatch(typeof(MineRock5), nameof(MineRock5.Awake))]
+public class MineRock5_NameFix
+{
+  static void Prefix(MineRock5 __instance, ref string __state)
+  {
+    __state = __instance.name;
+  }
+  static void Postfix(MineRock5 __instance, string __state)
+  {
+    __instance.name = __state;
+  }
+}

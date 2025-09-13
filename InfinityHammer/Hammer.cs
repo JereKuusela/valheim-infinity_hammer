@@ -94,6 +94,16 @@ public static class Hammer
 
     player.EquipItem(item);
   }
+  public static void OpenBuildMenu()
+  {
+    Equip();
+    var player = Helper.GetPlayer();
+    player.SetBuildCategory(0);
+    Hud.instance.m_pieceSelectionWindow.SetActive(true);
+    Hud.instance.m_closePieceSelection = 0;
+    Hud.instance.UpdateBuild(Player.m_localPlayer, true);
+  }
+
 
   public static bool Is(ItemDrop.ItemData item) => item != null && item.m_shared.m_buildPieces != null;
 
