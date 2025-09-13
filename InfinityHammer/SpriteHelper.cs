@@ -92,13 +92,10 @@ public static class SpriteHelper
       tempObj.SetActive(false);
       var mesh = tempObj.AddComponent<TextMeshPro>();
       mesh.font = Hud.instance.m_buildSelection.font;
-      mesh.text = GenerateDisplayName(text);
-      mesh.fontSize = 12;
+      mesh.fontSize = 8;
       mesh.color = Color.white;
       mesh.alignment = TextAlignmentOptions.Center;
-      mesh.enableAutoSizing = true;
-      mesh.fontSizeMin = 8;
-      mesh.fontSizeMax = 16;
+      mesh.text = GenerateDisplayName(text);
       tempObj.SetActive(true);
 
       // Set up the transform
@@ -110,15 +107,18 @@ public static class SpriteHelper
       // Get text bounds
       var bounds = mesh.bounds;
 
-      // Update camera settings for current text
-      Camera.orthographicSize = Mathf.Max(bounds.size.x, bounds.size.y) * 0.6f;
+      // Use fixed orthographic size for consistent text scaling
+      // Common good values: 2.5f for smaller text, 4.0f for larger text
+      Camera.orthographicSize = mesh.text.Length <= 2 ? 0.75f : 2f; // Fixed size for consistent scaling
       CameraObj.transform.position = new Vector3(bounds.center.x, bounds.center.y, -5f);
       CameraObj.transform.LookAt(bounds.center);
 
       // Create RenderTexture
       int textureSize = 64;
-      RenderTexture renderTexture = new RenderTexture(textureSize, textureSize, 24);
-      renderTexture.format = RenderTextureFormat.ARGB32;
+      RenderTexture renderTexture = new RenderTexture(textureSize, textureSize, 24)
+      {
+        format = RenderTextureFormat.ARGB32
+      };
       Camera.targetTexture = renderTexture;
 
       // Render the text
@@ -145,7 +145,6 @@ public static class SpriteHelper
       UnityEngine.Object.DestroyImmediate(tempObj);
     }
   }
-
 
   /// <summary>
   /// Generates a display name from a prefab name following specific formatting rules:
@@ -174,7 +173,7 @@ public static class SpriteHelper
       char c = name[i];
 
       // Split at underscore
-      if (c == '_')
+      if (c == '_' || c == ' ')
       {
         if (currentPart.Length > 0)
         {

@@ -10,13 +10,14 @@ public enum MenuMode
 {
   Default,
   Menu,
-  Components,
+  Types,
   Objects,
   Locations,
   Blueprints,
   Sounds,
   Visuals,
-  Tools
+  Tools,
+  Binds
 }
 
 public class HammerMenuCommand
@@ -29,12 +30,12 @@ public class HammerMenuCommand
   {
     AutoComplete.Register("hammer_menu", (int index, int subIndex) =>
     {
-      if (index == 0) return ["components", "blueprints", "objects", "locations", "sounds", "visuals", "tools", "default"];
+      if (index == 0) return ["binds", "blueprints", "objects", "locations", "sounds", "visuals", "tools", "types", "default"];
       if (index == 1) return ParameterInfo.Create("Filter text (optional)");
       return ParameterInfo.None;
     });
 
-    Helper.Command("hammer_menu", "[mode] [filter] - Sets the hammer menu mode (components, blueprints, objects, locations, or default) with optional filter.", Execute);
+    Helper.Command("hammer_menu", "[mode] [filter] - Sets the hammer menu mode with optional filter.", Execute);
   }
   private static void Execute(Terminal.ConsoleEventArgs args)
   {
@@ -66,8 +67,12 @@ public class HammerMenuCommand
         CurrentMode = MenuMode.Menu;
         CurrentFilter = filter;
         break;
-      case "components":
-        CurrentMode = MenuMode.Components;
+      case "binds":
+        CurrentMode = MenuMode.Binds;
+        CurrentFilter = filter;
+        break;
+      case "types":
+        CurrentMode = MenuMode.Types;
         CurrentFilter = filter;
         break;
       case "objects":
@@ -99,7 +104,7 @@ public class HammerMenuCommand
         CurrentFilter = "";
         break;
       default:
-        HammerHelper.Message(args.Context, "Invalid mode. Use: components, objects, locations, blueprints, sounds, visuals, tools, or default");
+        HammerHelper.Message(args.Context, "Invalid mode.");
         return;
     }
     Hammer.OpenBuildMenu();
