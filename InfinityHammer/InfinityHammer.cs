@@ -16,7 +16,7 @@ public class InfinityHammer : BaseUnityPlugin
 {
   public const string GUID = "infinity_hammer";
   public const string NAME = "Infinity Hammer";
-  public const string VERSION = "1.73.11";
+  public const string VERSION = "1.73.10";
   public static bool StructureTweaks = false;
 #nullable disable
   public static ConfigWrapper Wrapper;
@@ -129,6 +129,7 @@ public class InfinityHammer : BaseUnityPlugin
     new ToolExportCommand();
     new ToolCmdCommand();
     new HammerRoomCommand();
+    new HammerMark();
   }
   public void LateUpdate()
   {

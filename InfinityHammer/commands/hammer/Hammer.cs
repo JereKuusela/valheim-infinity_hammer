@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Data;
 using ServerDevcommands;
 using Service;
 using UnityEngine;
 using WorldEditCommands;
 namespace InfinityHammer;
+
 public class HammerSelect
 {
   private static int WearNumber(Wear wear)
@@ -81,31 +83,31 @@ public class HammerSelect
       "false",
     ];
     named.Sort();
-    AutoComplete.Register("hammer", (int index, int subIndex) =>
+    AutoComplete.Register("hammer", (index, subIndex) =>
     {
       if (index == 0) return ParameterInfo.ObjectIds;
       return named;
     }, new() {
-      { "scale", (int index) => ParameterInfo.Scale("scale", "Size of the object (if the object can be scaled).", index) },
-      { "level", (int index) => ParameterInfo.Create("Level.") },
-      { "stars", (int index) => ParameterInfo.Create("Stars.") },
-      { "text", (int index) => ParameterInfo.Create("Text.") },
-      { "health", (int index) => ParameterInfo.Create("Health.") },
-      { "freeze", (int index) => ParameterInfo.Create("Freezes in the place.") },
-      { "pick", (int index) => ParameterInfo.Create("Picks up the selection.") },
-      { "connect", (int index) => ParameterInfo.Create("Selects whole building.") },
-      { "wear", (int index) => Wears },
-      { "fall", (int index) => Falls },
-      { "growth", (int index) => Growths },
-      { "show", (int index) => False },
-      { "collision", (int index) => False },
-      { "interact", (int index) => False },
-      { "restrict", (int index) => False },
-      { "include", (int index) => ParameterInfo.ObjectIds },
-      { "ignore", (int index) => ParameterInfo.ObjectIds },
-      { "id", (int index) => ParameterInfo.ObjectIds },
-      { "type", (int index) => ParameterInfo.Components },
-      { "data", (int index) => DataLoading.DataKeys },
+      { "scale", index => ParameterInfo.Scale("scale", "Size of the object (if the object can be scaled).", index) },
+      { "level", index => ParameterInfo.Create("Level.") },
+      { "stars", index => ParameterInfo.Create("Stars.") },
+      { "text", index => ParameterInfo.Create("Text.") },
+      { "health", index => ParameterInfo.Create("Health.") },
+      { "freeze", index => ParameterInfo.Create("Freezes in the place.") },
+      { "pick", index => ParameterInfo.Create("Picks up the selection.") },
+      { "connect", index => ParameterInfo.Create("Selects whole building.") },
+      { "wear", index => Wears },
+      { "fall", index => Falls },
+      { "growth", index => Growths },
+      { "show", index => False },
+      { "collision", index => False },
+      { "interact", index => False },
+      { "restrict", index => False },
+      { "include", index => ParameterInfo.ObjectIds },
+      { "ignore", index => ParameterInfo.ObjectIds },
+      { "id", index => ParameterInfo.ObjectIds },
+      { "type", index => ParameterInfo.Components },
+      { "data", index => DataLoading.DataKeys },
     });
     Helper.Command("hammer", "[object id] - Selects the object to be placed (the hovered object by default).", (args) =>
     {
@@ -129,6 +131,18 @@ public class HammerSelect
           views = [hovered];
       }
       if (views.Length == 0) return;
+
+      // Add marked pieces to the selection
+      var markedViews = HammerMark.GetMarkedAsViews().Where(view => !views.Contains(view)).ToArray();
+      if (markedViews.Length > 0)
+      {
+        var combinedViews = new List<ZNetView>(views);
+        combinedViews.AddRange(markedViews);
+        views = combinedViews.ToArray();
+        HammerMark.ClearMarked();
+        HammerHelper.Message(args.Context, $"Including {markedViews.Length} marked pieces in selection.");
+      }
+
       HammerHelper.Init();
       DataEntry? extraData = pars.Data == null ? null : DataHelper.Get(pars.Data);
       if (pars.Health.HasValue)

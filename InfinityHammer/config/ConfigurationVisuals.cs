@@ -1,8 +1,10 @@
 using BepInEx.Configuration;
 using HarmonyLib;
+using InfinityTools;
 using Service;
 
 namespace InfinityHammer;
+
 public partial class Configuration
 {
 
@@ -53,7 +55,8 @@ public class HidePlacementMarker
 [HarmonyPatch(typeof(WearNTear), nameof(WearNTear.Highlight))]
 public class HideSupportColor
 {
-  static bool Prefix() => !Configuration.HideSupportColor;
+  // Bit hacky, but some things reuse the highlight system and then HideSupportColor shouldn't apply.
+  static bool Prefix() => !Configuration.HideSupportColor || HammerMark.MarkedPieces.Count > 0 || Ruler.IsActive;
 }
 [HarmonyPatch(typeof(Hud), nameof(Hud.UpdateCrosshair))]
 public class HidePieceHealth
