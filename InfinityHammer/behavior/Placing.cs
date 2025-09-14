@@ -18,7 +18,7 @@ public class PlacePiece
     HideEffects.Active = false;
     DataHelper.CleanUp();
     if (Selection.Get().SingleUse)
-      Hammer.Clear();
+      Hammer.SelectRepair();
   }
   // Parameter is the selected piece which doesn't have the correct transformation.
   static GameObject GetPrefab(GameObject obj) => Configuration.Enabled ? Selection.Get().GetPrefab(obj) : obj;

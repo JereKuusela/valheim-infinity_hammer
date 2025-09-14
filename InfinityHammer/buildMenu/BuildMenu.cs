@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using HarmonyLib;
-using InfinityHammer;
+using InfinityTools;
 using Service;
 using UnityEngine;
-namespace InfinityTools;
+namespace InfinityHammer;
 
 public class BuildMenuTool : Piece
 {
@@ -24,18 +24,58 @@ public static class UpdateAvailable
     return piece;
   }
 
+  private static Piece BuildMenuButton()
+  {
+    GameObject obj = new();
+    var piece = obj.AddComponent<BuildMenuTool>();
+    var toolData = new ToolData()
+    {
+      name = "Menu",
+      description = "Open custom menu",
+      icon = "\u2630",
+      command = "hammer_menu",
+      instant = true
+    };
+    piece.tool = new Tool(toolData);
+    piece.m_description = "Open custom menu";
+    piece.m_name = "Menu";
+    piece.m_icon = piece.tool.Icon;
+    return piece;
+  }
+
+  private static void AddMenuButtonToTabs(PieceTable __instance)
+  {
+    // Add menu button to the start of each tab
+    for (int i = 0; i < __instance.m_availablePieces.Count; i++)
+    {
+      var pieces = __instance.m_availablePieces[i];
+      if (pieces.Count > 0)
+      {
+        var menuButton = BuildMenuButton();
+        // Set the category for the menu button
+        menuButton.m_category = (Piece.PieceCategory)i;
+        pieces.Insert(0, menuButton);
+      }
+    }
+  }
+
   static bool Prefix(PieceTable __instance)
   {
     if (!Configuration.IsCheats) return true;
     if (!Configuration.ToolsEnabled) return true;
-
-    return CustomBuildMenu.HandleCustomMenuMode(__instance);
+    return CustomBuildMenu.BuildOriginal(__instance);
   }
   static void Postfix(PieceTable __instance)
   {
     if (!Configuration.IsCheats) return;
     if (!Configuration.ToolsEnabled) return;
-    if (HammerMenuCommand.CurrentMode != MenuMode.Default) return;
+    if (HammerMenuCommand.CurrentMode != MenuMode.Default)
+    {
+      CustomBuildMenu.HandleCustomMenuMode(__instance);
+      return;
+    }
+
+
     var hammer = Hammer.Get();
     List<Tool> tools = ToolManager.Get(hammer);
     int tab = 0;
@@ -52,6 +92,8 @@ public static class UpdateAvailable
       pieces.Insert(index, Build(tool));
       indices[tab] = index;
     }
+    if (false && Configuration.ShowMenuButton)
+      AddMenuButtonToTabs(__instance);
   }
 }
 
@@ -64,22 +106,23 @@ public class TakeOverBuildMenu
   [HarmonyPriority(Priority.Low)]
   public static bool HandleSetSelectedPiece(Player __instance, Vector2Int p)
   {
-    // Just something else to not trigger continuous tools instantly.
-    __instance.m_placePressedTime = -9998f;
-    var wasInstant = HandleInstantTool(__instance.m_buildPieces, p);
-    return !wasInstant;
-  }
-  // Instant tools don't get selected when activated.
-  private static bool HandleInstantTool(PieceTable pt, Vector2Int p)
-  {
+    var pt = __instance.m_buildPieces;
+    if (!pt) return true;
     var piece = pt.GetPiece(p);
     if (piece && piece.TryGetComponent<BuildMenuTool>(out var menuTool) && menuTool.tool != null)
     {
+      // Just something else to not trigger continuous tools instantly.
+      __instance.m_placePressedTime = -9998f;
       var tool = menuTool.tool;
-      if (tool.Instant) Console.instance.TryRunCommand(tool.GetCommand());
-      return tool.Instant;
+      if (!tool.Instant) return true;
+      var previousSelection = Selection.Get();
+      Console.instance.TryRunCommand(tool.GetCommand());
+      // Bit of a hack, but if the command changed the selection then it should be selected on the build menu.
+      if (previousSelection != Selection.Get())
+        pt.m_selectedPiece[(int)pt.GetSelectedCategory()] = p;
+      return false;
     }
-    return false;
+    return true;
   }
 
   [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.LeftPiece)), HarmonyPostfix]
@@ -113,6 +156,8 @@ public class TakeOverBuildMenu
       var tool = menuTool.tool;
       if (!tool.Instant)
         Console.instance.TryRunCommand($"tool {tool.Name}");
+      // Tool command resets the selection to empty so restore it.
+      pt.m_selectedPiece[(int)pt.GetSelectedCategory()] = index;
     }
     else if (piece.GetComponent<ZNetView>())
       Selection.CreateGhost(new ObjectSelection(piece, false));

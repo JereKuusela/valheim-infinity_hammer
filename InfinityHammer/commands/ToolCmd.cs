@@ -13,7 +13,6 @@ public class ToolCmdCommand
   }
   protected static void Execute(Terminal.ConsoleEventArgs args)
   {
-
     Helper.ArgsCheck(args, 2, "Missing the command.");
     if (!Hammer.HasAny())
       Hammer.Equip();
@@ -24,7 +23,7 @@ public class ToolCmdCommand
       command = command,
       description = command,
     });
-    Hammer.Clear();
+    Hammer.SelectRepair();
     Selection.CreateGhost(new ToolSelection(tool));
     PlaceRotation.Set(Quaternion.identity);
     HammerHelper.Message(args.Context, $"Selected command {tool.Name}.");

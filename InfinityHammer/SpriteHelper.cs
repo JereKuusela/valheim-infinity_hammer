@@ -24,7 +24,7 @@ public static class SpriteHelper
     camera.orthographic = true;
     camera.nearClipPlane = 0.1f;
     camera.farClipPlane = 10f;
-    camera.backgroundColor = new Color(0.2f, 0.2f, 0.2f, 0.7f); // Semi-transparent dark background
+    camera.backgroundColor = new Color(0.2f, 0.2f, 0.2f, 0.4f);
     camera.clearFlags = CameraClearFlags.SolidColor;
     // Don't destroy on load to keep it cached
     UnityEngine.Object.DontDestroyOnLoad(obj);
@@ -107,8 +107,6 @@ public static class SpriteHelper
       // Get text bounds
       var bounds = mesh.bounds;
 
-      // Use fixed orthographic size for consistent text scaling
-      // Common good values: 2.5f for smaller text, 4.0f for larger text
       Camera.orthographicSize = mesh.text.Length <= 2 ? 0.75f : 2f; // Fixed size for consistent scaling
       CameraObj.transform.position = new Vector3(bounds.center.x, bounds.center.y, -5f);
       CameraObj.transform.LookAt(bounds.center);
@@ -146,16 +144,6 @@ public static class SpriteHelper
     }
   }
 
-  /// <summary>
-  /// Generates a display name from a prefab name following specific formatting rules:
-  /// 1. Removes '_' prefix if present
-  /// 2. Splits at underscores and uppercase letters (keeping uppercase letters)
-  /// 3. Trims each part to maximum 10 letters
-  /// 4. Capitalizes first letter of each part
-  /// 5. Combines parts up to 10 total letters
-  /// </summary>
-  /// <param name="name">The original name to process</param>
-  /// <returns>The formatted display name</returns>
   public static string GenerateDisplayName(string name)
   {
     if (string.IsNullOrEmpty(name)) return "";
@@ -172,7 +160,6 @@ public static class SpriteHelper
     {
       char c = name[i];
 
-      // Split at underscore
       if (c == '_' || c == ' ')
       {
         if (currentPart.Length > 0)

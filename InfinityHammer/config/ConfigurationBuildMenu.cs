@@ -13,6 +13,8 @@ public partial class Configuration
   public static int ItemsPerTab => configItemsPerTab.Value;
   public static ConfigEntry<string> configBlueprintSorting;
   public static string BlueprintSorting => configBlueprintSorting.Value;
+  public static ConfigEntry<bool> configShowMenuButton;
+  public static bool ShowMenuButton => configShowMenuButton.Value;
   public static ConfigEntry<KeyboardShortcut> configKeybindMenuComponents;
   public static ConfigEntry<KeyboardShortcut> configKeybindMenuBlueprints;
   public static ConfigEntry<KeyboardShortcut> configKeybindMenuObjects;
@@ -32,6 +34,7 @@ public partial class Configuration
     configMaxTabs = wrapper.Bind(section, "Max tabs", 5, "Maximum number of tabs in the custom build menu.");
     configItemsPerTab = wrapper.Bind(section, "Items per tab", 90, "Maximum number of items per tab in the custom build menu.");
     configBlueprintSorting = wrapper.Bind(section, "Blueprint sorting", BlueprintSortingMode.Folder, new ConfigDescription("How blueprints are sorted in the menu.", new AcceptableValueList<string>(BlueprintSortingMode.Category, BlueprintSortingMode.Folder, BlueprintSortingMode.CategoryAndFolder, BlueprintSortingMode.OnlyName)));
+    configShowMenuButton = wrapper.Bind(section, "Show menu button", true, "Shows the menu button at the start of every build menu tab.");
     configKeybindMenu = wrapper.BindCommand("hammer_menu", section, "Menu", new KeyboardShortcut(KeyCode.None), "Opens the custom menu.");
     configKeybindMenuDefault = wrapper.BindCommand("hammer_menu default", section, "Menu: Default", new KeyboardShortcut(KeyCode.None), "Opens the default build menu.");
     configKeybindMenuBlueprints = wrapper.BindCommand("hammer_menu blueprints", section, "Menu: Blueprints", new KeyboardShortcut(KeyCode.None), "Opens the blueprints menu.");

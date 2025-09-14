@@ -39,10 +39,13 @@ public class HammerMenuCommand
   }
   private static void Execute(Terminal.ConsoleEventArgs args)
   {
+    if (Hud.IsPieceSelectionVisible())
+      IgnoreNextHide.IgnoreHide = true;
+
+
     var mode = args.Length > 1 ? args[1].ToLowerInvariant() : "menu";
     if (mode == "back")
     {
-      IgnoreNextHide.IgnoreHide = true;
       if (CurrentPage >= 0)
         CurrentPage = -1;
       else CurrentMode = MenuMode.Menu;
@@ -51,13 +54,10 @@ public class HammerMenuCommand
     }
     if (mode == "navigate")
     {
-      IgnoreNextHide.IgnoreHide = true;
       CurrentPage = args.Length > 2 ? Parse.Int(args[2], -1) : -1;
       Hammer.OpenBuildMenu();
       return;
     }
-    if (CurrentMode == MenuMode.Menu)
-      IgnoreNextHide.IgnoreHide = true;
     var filter = args.Length > 2 ? args[2] : "";
 
     CurrentPage = -1;
@@ -102,6 +102,7 @@ public class HammerMenuCommand
       case "default":
         CurrentMode = MenuMode.Default;
         CurrentFilter = "";
+        CustomBuildMenu.Clear();
         break;
       default:
         HammerHelper.Message(args.Context, "Invalid mode.");

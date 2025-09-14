@@ -6,6 +6,7 @@ using Service;
 using UnityEngine;
 using WorldEditCommands;
 namespace InfinityHammer;
+
 public class HammerStackCommand
 {
   private static void Execute(GameObject obj, Vector3 delta, Vector3Int min, Vector3Int max)
@@ -35,7 +36,7 @@ public class HammerStackCommand
     UndoHelper.EndAction();
     // For existing objects, nothing was initially selected so makes sense to clear the selection.
     if (existingObject)
-      Hammer.Clear();
+      Hammer.SelectRepair();
   }
   private static List<string> AC(int index)
   {

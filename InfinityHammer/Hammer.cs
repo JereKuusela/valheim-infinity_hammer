@@ -10,13 +10,6 @@ public static class Hammer
   public static bool AllLocationsObjects = false;
   public static bool RandomLocationDamage = false;
 
-  public static void Clear()
-  {
-    Selection.Clear();
-    var player = Helper.GetPlayer();
-    player.SetSelectedPiece(new Vector2Int(0, 0));
-    player.SetupPlacementGhost();
-  }
   public static void Place()
   {
     var player = Player.m_localPlayer;
@@ -29,19 +22,19 @@ public static class Hammer
   {
     var build = Helper.GetPlayer().m_buildPieces;
     if (build)
-      build.m_selectedPiece[(int)build.GetSelectedCategory()] = new Vector2Int(-1, -1);
+      build.SetSelected(new(-1, -1));
   }
   public static void SelectRepair()
   {
     var build = Helper.GetPlayer().m_buildPieces;
     if (build)
-      build.m_selectedPiece[(int)build.GetSelectedCategory()] = new Vector2Int(0, 0);
+      build.SetSelected(new(0, 0));
   }
   public static void SelectRepairIfEmpty()
   {
     var build = Helper.GetPlayer().m_buildPieces;
     if (build && build.m_selectedPiece[(int)build.GetSelectedCategory()].x == -1)
-      build.m_selectedPiece[(int)build.GetSelectedCategory()] = new Vector2Int(0, 0);
+      build.SetSelected(new(0, 0));
   }
 
   private static bool OriginalUseDurability = false;
@@ -98,7 +91,13 @@ public static class Hammer
   {
     Equip();
     var player = Helper.GetPlayer();
-    player.SetBuildCategory(0);
+    var pt = player.m_buildPieces;
+    if (pt)
+    {
+      pt.m_selectedCategory = 0;
+      pt.m_selectedPiece[0] = new(0, 0);
+    }
+    player.UpdateAvailablePiecesList();
     Hud.instance.m_pieceSelectionWindow.SetActive(true);
     Hud.instance.m_closePieceSelection = 0;
     Hud.instance.UpdateBuild(Player.m_localPlayer, true);
