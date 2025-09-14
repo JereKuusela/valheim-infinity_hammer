@@ -18,14 +18,7 @@ public class HammerMark
       wtr.Highlight();
     return MarkedPieces.Count == 0;
   }
-  public static List<WearNTear> MarkedPieces = [];
-
-  private static void PrintMarked(Terminal terminal, GameObject obj)
-  {
-    if (Configuration.DisableSelectMessages) return;
-    var name = Utils.GetPrefabName(obj.gameObject);
-    HammerHelper.Message(terminal, $"Marked {name}.");
-  }
+  public static HashSet<WearNTear> MarkedPieces = [];
 
   public static void ClearMarked()
   {
@@ -74,19 +67,28 @@ public class HammerMark
         else
           views = [hovered];
       }
-      if (views.Length == 0) return;
-
-      foreach (var view in views)
+      var wtrs = views.Select(view => view.GetComponent<WearNTear>()).Where(wtr => wtr).ToArray();
+      if (wtrs.Length == 0) return;
+      bool allMarked = wtrs.All(wtr => MarkedPieces.Contains(wtr));
+      if (allMarked)
       {
-        var wtr = view.GetComponent<WearNTear>();
-        if (wtr && !MarkedPieces.Contains(wtr))
+        foreach (var wtr in wtrs)
+        {
+          wtr.ResetHighlight();
+          MarkedPieces.Remove(wtr);
+        }
+        HammerHelper.Message(args.Context, $"Unmarked {wtrs.Length} pieces (total {MarkedPieces.Count})");
+      }
+      else
+      {
+        foreach (var wtr in wtrs)
         {
           MarkedPieces.Add(wtr);
-          PrintMarked(args.Context, view.gameObject);
+          wtr.Highlight();
         }
+        HammerHelper.Message(args.Context, $"Marked {wtrs.Length}  pieces (total {MarkedPieces.Count})");
       }
 
-      HammerHelper.Message(args.Context, $"Total marked pieces: {MarkedPieces.Count}");
     });
   }
 }
