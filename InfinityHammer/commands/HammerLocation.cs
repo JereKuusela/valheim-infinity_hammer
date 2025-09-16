@@ -2,6 +2,7 @@ using System;
 using ServerDevcommands;
 using UnityEngine;
 namespace InfinityHammer;
+
 public class HammerLocationCommand
 {
   private static void PrintSelected(Terminal terminal, GameObject obj)
@@ -24,7 +25,7 @@ public class HammerLocationCommand
     {
       HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the location id.");
-      Hammer.Equip();
+      HammerHelper.Init();
       try
       {
         Hammer.AllLocationsObjects = args.Length > 2 && args[2] == "all";

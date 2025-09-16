@@ -18,39 +18,9 @@ public static class CustomBuildMenu
   private static int MaxItemsPerTab => Configuration.ItemsPerTab - 1; // Reserve 1 slot for back button
   private static List<CategoryInfo> CategoryInfos { get; set; } = [];
 
-  private static Dictionary<PieceTable, (List<Piece.PieceCategory> categories, List<string> labels)> OriginalPieceTableData { get; set; } = [];
 
-  public static bool BuildOriginal(PieceTable __instance)
+  public static void HandleCustomMenuMode(PieceTable pt)
   {
-    // Cache requires the original data to be present.
-    // For example when mods add categories. But this may require tweaking if mod conflicts are present.
-    return HammerMenuCommand.CurrentMode == MenuMode.Default || !OriginalPieceTableData.ContainsKey(__instance);
-  }
-
-  private static void UpdateCache(PieceTable __instance)
-  {
-    if (OriginalPieceTableData.ContainsKey(__instance)) return;
-    OriginalPieceTableData[__instance] = (__instance.m_categories, __instance.m_categoryLabels);
-  }
-  public static void Clear()
-  {
-    // Safest is to reset everything. This also cleans up logic elsewhere.
-    // Resetting the current piece table may not work if it has somehow changed.
-    foreach (var kvp in OriginalPieceTableData)
-    {
-      var pt = kvp.Key;
-      var (categories, labels) = kvp.Value;
-      pt.m_availablePieces.Clear();
-      pt.m_categories = categories;
-      pt.m_categoryLabels = labels;
-    }
-    CategoryInfos.Clear();
-  }
-
-  public static void HandleCustomMenuMode(PieceTable __instance)
-  {
-    var pt = __instance;
-    UpdateCache(pt);
     var tabs = pt.m_availablePieces;
     CategoryInfos.Clear();
     tabs.Clear();
@@ -71,25 +41,26 @@ public static class CustomBuildMenu
       case MenuMode.Types:
         categories = CustomMenu.GenerateComponents();
         break;
-
       case MenuMode.Locations:
         categories = CustomMenu.GenerateLocations();
         break;
-
       case MenuMode.Blueprints:
         categories = CustomMenu.GenerateBluePrints();
         break;
-
+      case MenuMode.Rooms:
+        categories = CustomMenu.GenerateRooms();
+        break;
       case MenuMode.Sounds:
         categories = CustomMenu.GenerateSounds();
         break;
-
       case MenuMode.Visuals:
         categories = CustomMenu.GenerateVisuals();
         break;
-
       case MenuMode.Tools:
         categories = CustomMenu.GenerateTools();
+        break;
+      case MenuMode.Builds:
+        categories = CustomMenu.GenerateBuilds();
         break;
     }
 
@@ -99,6 +70,10 @@ public static class CustomBuildMenu
     AddCategories(tabs, categories);
     pt.m_categories = [.. categories.Select((_, index) => (Piece.PieceCategory)index)];
     pt.m_categoryLabels = [.. categories.Select(c => c.Name)];
+    if (pt.m_selectedPiece.Length < pt.m_categories.Count)
+      pt.m_selectedPiece = new Vector2Int[pt.m_categories.Count];
+    if (pt.m_lastSelectedPiece.Length < pt.m_categories.Count)
+      pt.m_lastSelectedPiece = new Vector2Int[pt.m_categories.Count];
     if ((int)pt.m_selectedCategory >= pt.m_categories.Count)
       pt.m_selectedCategory = 0;
   }

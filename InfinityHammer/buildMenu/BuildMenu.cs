@@ -61,20 +61,18 @@ public static class UpdateAvailable
 
   static bool Prefix(PieceTable __instance)
   {
-    if (!Configuration.IsCheats) return true;
-    if (!Configuration.ToolsEnabled) return true;
-    return CustomBuildMenu.BuildOriginal(__instance);
+    if (__instance.name == "InfinityHammerPieceTable")
+    {
+      CustomBuildMenu.HandleCustomMenuMode(__instance);
+      return false;
+    }
+    return true;
   }
   static void Postfix(PieceTable __instance)
   {
     if (!Configuration.IsCheats) return;
     if (!Configuration.ToolsEnabled) return;
-    if (HammerMenuCommand.CurrentMode != MenuMode.Default)
-    {
-      CustomBuildMenu.HandleCustomMenuMode(__instance);
-      return;
-    }
-
+    if (__instance.name == "InfinityHammerPieceTable") return;
 
     var hammer = Hammer.Get();
     List<Tool> tools = ToolManager.Get(hammer);
@@ -147,8 +145,9 @@ public class TakeOverBuildMenu
 
   private static void ActivatePiece(PieceTable pt)
   {
+    var category = pt.GetSelectedCategory();
     var index = pt.GetSelectedIndex();
-    var piece = pt.GetPiece(pt.GetSelectedCategory(), index);
+    var piece = pt.GetPiece(category, index);
     if (!piece)
       Selection.Clear();
     else if (piece.TryGetComponent<BuildMenuTool>(out var menuTool) && menuTool.tool != null)
@@ -157,7 +156,7 @@ public class TakeOverBuildMenu
       if (!tool.Instant)
         Console.instance.TryRunCommand($"tool {tool.Name}");
       // Tool command resets the selection to empty so restore it.
-      pt.m_selectedPiece[(int)pt.GetSelectedCategory()] = index;
+      pt.m_selectedPiece[(int)category] = index;
     }
     else if (piece.GetComponent<ZNetView>())
       Selection.CreateGhost(new ObjectSelection(piece, false));

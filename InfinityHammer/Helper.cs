@@ -25,6 +25,8 @@ public static class HammerHelper
   {
     var player = Helper.GetPlayer();
     var item = player.GetRightItem();
+    if (Hammer.IsInfinityHammer(item))
+      return "infinity_hammer";
     return item?.m_dropPrefab?.name ?? "";
   }
   public static void RemoveZDO(ZDO zdo)
@@ -260,6 +262,7 @@ public static class HammerHelper
   {
     EnabledCheck();
     Hammer.Equip();
+    Hammer.SelectEmpty();
   }
 
 

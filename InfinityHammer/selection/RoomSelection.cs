@@ -110,9 +110,4 @@ public class RoomSelection : BaseSelection
       znetView.gameObject.SetActive(true);
     roomData.m_prefab.Release();
   }
-  public override void Activate()
-  {
-    base.Activate();
-    Hammer.SelectEmpty();
-  }
 }

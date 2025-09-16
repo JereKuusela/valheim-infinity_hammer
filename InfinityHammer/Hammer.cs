@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using HarmonyLib;
 using InfinityTools;
 using ServerDevcommands;
+using Service;
 using UnityEngine;
 namespace InfinityHammer;
 
@@ -89,7 +91,7 @@ public static class Hammer
   }
   public static void OpenBuildMenu()
   {
-    Equip();
+    EquipInfinityHammer();
     var player = Helper.GetPlayer();
     var pt = player.m_buildPieces;
     if (pt)
@@ -102,7 +104,26 @@ public static class Hammer
     Hud.instance.m_closePieceSelection = 0;
     Hud.instance.UpdateBuild(Player.m_localPlayer, true);
   }
-
+  public static bool IsInfinityHammer(ItemDrop.ItemData item) => item != null && item.m_customData != null && item.m_customData.ContainsKey("infinity_hammer");
+  public static void EquipInfinityHammer()
+  {
+    var player = Helper.GetPlayer();
+    var rightItem = player.GetRightItem();
+    if (rightItem != null && rightItem.m_customData.ContainsKey("infinity_hammer")) return;
+    var inventory = player.GetInventory();
+    var infinityHammer = inventory.m_inventory.Find(IsInfinityHammer);
+    if (infinityHammer == null)
+    {
+      var freeSlot = inventory.FindEmptySlot(true);
+      var data = new Dictionary<string, string>();
+      data["infinity_hammer"] = "true";
+      if (!inventory.AddItem("Hammer", 1, 100f, freeSlot, false, 1, 0, player.GetPlayerID(), Game.instance.GetPlayerProfile().GetName(), data, 0, true))
+        throw new InvalidOperationException("Unable to add the hammer to inventory.");
+    }
+    infinityHammer = inventory.m_inventory.Find(item => item != null && item.m_customData.ContainsKey("infinity_hammer"));
+    if (infinityHammer == null) throw new InvalidOperationException("Unable to find the hammer in inventory.");
+    player.EquipItem(infinityHammer);
+  }
 
   public static bool Is(ItemDrop.ItemData item) => item != null && item.m_shared.m_buildPieces != null;
 
@@ -121,6 +142,44 @@ public static class Hammer
   }
 }
 
+
+[HarmonyPatch]
+public class CustomHammer
+{
+
+  private static Sprite? cachedSprite = null;
+  [HarmonyPatch(typeof(ItemDrop.ItemData), nameof(ItemDrop.ItemData.GetIcon)), HarmonyPostfix]
+  public static Sprite GetIcon(Sprite result, ItemDrop.ItemData __instance)
+  {
+    if (!Hammer.IsInfinityHammer(__instance)) return result;
+    if (cachedSprite == null) cachedSprite = SpriteHelper.FindSprite("_IH");
+    return cachedSprite ?? result;
+  }
+
+  [HarmonyPatch(typeof(ItemDrop), nameof(ItemDrop.GetHoverName)), HarmonyPostfix]
+  public static string GetHoverName(string result, ItemDrop __instance)
+  {
+    var item = __instance.m_itemData;
+    if (!Hammer.IsInfinityHammer(item)) return result;
+    return "Infinity Hammer";
+  }
+
+  private static PieceTable? cachedPieceTable = null;
+
+  [HarmonyPatch(typeof(Player), nameof(Player.SetPlaceMode)), HarmonyPrefix]
+  public static void SetPlaceModePrefix(Player __instance, ref PieceTable buildPieces)
+  {
+    var item = __instance.GetRightItem();
+    if (!Hammer.IsInfinityHammer(item)) return;
+    if (cachedPieceTable == null)
+    {
+      var go = new GameObject("InfinityHammerPieceTable");
+      var pt = go.AddComponent<PieceTable>();
+      cachedPieceTable = pt;
+    }
+    buildPieces = cachedPieceTable;
+  }
+}
 
 
 [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.UnequipItem))]

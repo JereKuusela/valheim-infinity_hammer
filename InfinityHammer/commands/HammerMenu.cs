@@ -1,28 +1,26 @@
-using System;
-using System.Collections.Generic;
 using HarmonyLib;
 using ServerDevcommands;
-using Service;
 
 namespace InfinityHammer;
 
 public enum MenuMode
 {
-  Default,
   Menu,
   Types,
   Objects,
   Locations,
   Blueprints,
+  Rooms,
   Sounds,
   Visuals,
   Tools,
-  Binds
+  Binds,
+  Builds
 }
 
 public class HammerMenuCommand
 {
-  public static MenuMode CurrentMode { get; private set; } = MenuMode.Default;
+  public static MenuMode CurrentMode { get; private set; } = MenuMode.Menu;
   public static string CurrentFilter { get; private set; } = "";
   public static int CurrentPage { get; private set; } = -1;
 
@@ -30,7 +28,7 @@ public class HammerMenuCommand
   {
     AutoComplete.Register("hammer_menu", (int index, int subIndex) =>
     {
-      if (index == 0) return ["binds", "blueprints", "objects", "locations", "sounds", "visuals", "tools", "types", "default"];
+      if (index == 0) return ["binds", "blueprints", "builds", "objects", "locations", "rooms", "sounds", "visuals", "tools", "types"];
       if (index == 1) return ParameterInfo.Create("Filter text (optional)");
       return ParameterInfo.None;
     });
@@ -87,6 +85,10 @@ public class HammerMenuCommand
         CurrentMode = MenuMode.Blueprints;
         CurrentFilter = filter;
         break;
+      case "rooms":
+        CurrentMode = MenuMode.Rooms;
+        CurrentFilter = filter;
+        break;
       case "sounds":
         CurrentMode = MenuMode.Sounds;
         CurrentFilter = filter;
@@ -99,10 +101,9 @@ public class HammerMenuCommand
         CurrentMode = MenuMode.Tools;
         CurrentFilter = filter;
         break;
-      case "default":
-        CurrentMode = MenuMode.Default;
-        CurrentFilter = "";
-        CustomBuildMenu.Clear();
+      case "builds":
+        CurrentMode = MenuMode.Builds;
+        CurrentFilter = filter;
         break;
       default:
         HammerHelper.Message(args.Context, "Invalid mode.");

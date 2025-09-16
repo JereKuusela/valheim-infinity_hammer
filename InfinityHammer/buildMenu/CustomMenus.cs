@@ -92,7 +92,7 @@ public static class CustomMenu
   public static List<CategoryInfo> GenerateMenu()
   {
     List<BuildItem> items = [.. Enum.GetNames(typeof(MenuMode))
-      .Where(mode => mode != MenuMode.Default.ToString() && mode != MenuMode.Menu.ToString())
+      .Where(mode => mode != MenuMode.Menu.ToString())
       .OrderBy(mode => mode)
       .Select(mode => BuildItem($"hammer_menu {mode.ToString().ToLower()}", mode.ToString()))];
     List<CategoryInfo> categories = [];
@@ -102,82 +102,16 @@ public static class CustomMenu
 
   public static List<CategoryInfo> GenerateBinds()
   {
-    try
-    {
-      // Use reflection to access private members of BindManager
-      var bindManagerType = typeof(BindManager);
-      var printBindMethod = bindManagerType.GetMethod("PrintBind", BindingFlags.NonPublic | BindingFlags.Static);
-      var bindsField = bindManagerType.GetField("Binds", BindingFlags.NonPublic | BindingFlags.Static);
-      var wheelBindsField = bindManagerType.GetField("WheelBinds", BindingFlags.NonPublic | BindingFlags.Static);
-
-      // Early exit if reflection failed
-      if (printBindMethod == null || bindsField == null || wheelBindsField == null)
-      {
-        return [new CategoryInfo
-        {
-          Name = "Error",
-          Items = [BuildItem("", "Reflection failed", "Could not access BindManager private members")]
-        }];
-      }
-
-      List<CategoryInfo> categories = [];
-
-      // Process regular binds
-      var bindsCategory = ProcessBindCategory(bindsField, printBindMethod, "Binds");
-      if (bindsCategory != null) categories.Add(bindsCategory);
-
-      // Process wheel binds
-      var wheelCategory = ProcessBindCategory(wheelBindsField, printBindMethod, "Wheel");
-      if (wheelCategory != null) categories.Add(wheelCategory);
-
-      return categories;
-    }
-    catch (Exception ex)
-    {
-      return [new CategoryInfo
-      {
-        Name = "Error",
-        Items = [BuildItem("", "Exception", $"Error accessing binds: {ex.Message}")]
-      }];
-    }
+    return [
+      CreateBindCategory(BindManager.GetBinds(), "Binds"),
+      CreateBindCategory(BindManager.GetWheelBinds(), "Wheel")
+    ];
   }
 
-  private static CategoryInfo? ProcessBindCategory(FieldInfo bindsField, MethodInfo printBindMethod, string categoryName)
+  private static CategoryInfo CreateBindCategory(Tuple<string, string>[] binds, string categoryName)
   {
-    if (bindsField.GetValue(null) is not System.Collections.IList binds || binds.Count == 0)
-      return null;
-
-    List<BuildItem> bindItems = [];
-
-    foreach (var bind in binds)
-    {
-      if (bind == null) continue;
-
-      var bindItem = CreateBindItem(bind, printBindMethod);
-      if (bindItem != null) bindItems.Add(bindItem);
-    }
-
-    return bindItems.Count > 0 ? new CategoryInfo { Name = categoryName, Items = bindItems } : null;
-  }
-
-  private static BuildItem? CreateBindItem(object bind, MethodInfo printBindMethod)
-  {
-    // Use reflection to call PrintBind method
-    string bindString = printBindMethod.Invoke(null, [bind]) as string ?? "Unknown Bind";
-
-    // Apply filter early exit
-    if (!string.IsNullOrEmpty(HammerMenuCommand.CurrentFilter) &&
-        bindString.IndexOf(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase) < 0)
-      return null;
-
-    var parts = bindString.Split([':'], 2);
-    if (parts.Length < 2) return null;
-
-    string keys = parts[0].Trim();
-    string command = parts[1].Trim();
-
-    // Keys as display name, command gets executed when clicked
-    return BuildItem(command, keys, bindString);
+    List<BuildItem> bindItems = binds.Select(bind => BuildItem(bind.Item1, bind.Item2)).ToList();
+    return new CategoryInfo { Name = categoryName, Items = bindItems };
   }
   public static List<CategoryInfo> GenerateSounds()
   {
@@ -275,6 +209,15 @@ public static class CustomMenu
       .Where(loc => string.IsNullOrEmpty(HammerMenuCommand.CurrentFilter) ||
                    loc.m_prefab.Name.StartsWith(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase))
       .Select(loc => BuildItem($"hammer_location {loc.m_prefab.Name}", loc.m_prefab.Name)).ToList();
+    return GenerateCategories(items, MaxItemsPerTab);
+  }
+  public static List<CategoryInfo> GenerateRooms()
+  {
+    var items = DungeonDB.m_instance.m_rooms
+      .Where(room => room.m_prefab.IsValid)
+      .Where(room => string.IsNullOrEmpty(HammerMenuCommand.CurrentFilter) ||
+                    room.m_prefab.Name.StartsWith(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase))
+      .Select(room => BuildItem($"hammer_room {room.m_prefab.Name}", room.m_prefab.Name)).ToList();
     return GenerateCategories(items, MaxItemsPerTab);
   }
   public static List<CategoryInfo> GenerateBluePrints()
@@ -421,6 +364,81 @@ public static class CustomMenu
             Name = categoryName,
             Items = categoryItems
           });
+        }
+      }
+    }
+
+    return categories;
+  }
+
+  public static List<CategoryInfo> GenerateBuilds()
+  {
+    // Get all items from ObjectDB that have a piece table (build pieces)
+    var buildItems = ObjectDB.instance.m_items
+      .Where(item => item.TryGetComponent<ItemDrop>(out var itemDrop) &&
+                     itemDrop.m_itemData.m_shared.m_buildPieces != null)
+      .Where(item => string.IsNullOrEmpty(HammerMenuCommand.CurrentFilter) ||
+                     item.name.StartsWith(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase))
+      .ToList();
+
+    List<CategoryInfo> categories = [];
+
+    foreach (var item in buildItems)
+    {
+      var itemDrop = item.GetComponent<ItemDrop>();
+      var pieceTable = itemDrop.m_itemData.m_shared.m_buildPieces;
+      var itemName = itemDrop.m_itemData.m_shared.m_name;
+
+      // Get all pieces from this item's piece table
+      var pieces = new List<BuildItem>();
+
+      // Add pieces from each category in the piece table
+      for (int categoryIndex = 0; categoryIndex < pieceTable.m_availablePieces.Count; categoryIndex++)
+      {
+        var piecesInCategory = pieceTable.m_availablePieces[categoryIndex];
+        foreach (var piece in piecesInCategory)
+        {
+          if (piece != null)
+          {
+            pieces.Add(BuildItem($"hammer {piece.name}", piece.m_name, piece.m_description));
+          }
+        }
+      }
+
+      if (pieces.Count > 0)
+      {
+        // If we have too many pieces for one category, split them
+        if (pieces.Count <= MaxItemsPerTab)
+        {
+          categories.Add(new CategoryInfo
+          {
+            Name = itemName,
+            Items = pieces.OrderBy(p => p.ShortName, StringComparer.InvariantCultureIgnoreCase).ToList()
+          });
+        }
+        else
+        {
+          // Split large categories into smaller ones with letter prefixes
+          var sortedPieces = pieces.OrderBy(p => p.ShortName, StringComparer.InvariantCultureIgnoreCase).ToList();
+          int count = sortedPieces.Count;
+          int subIndex = 1;
+          while (count > 0)
+          {
+            var categoryItems = sortedPieces.Take(MaxItemsPerTab).ToList();
+            count -= categoryItems.Count;
+            sortedPieces = sortedPieces.Skip(categoryItems.Count).ToList();
+
+            var firstLetter = categoryItems.First().ShortName.Substring(0, 1).ToUpper();
+            var lastLetter = categoryItems.Last().ShortName.Substring(0, 1).ToUpper();
+            var subCategoryName = firstLetter == lastLetter ? $"{itemName}-{firstLetter}" : $"{itemName}-{firstLetter}-{lastLetter}";
+
+            categories.Add(new CategoryInfo
+            {
+              Name = subCategoryName,
+              Items = categoryItems
+            });
+            subIndex++;
+          }
         }
       }
     }

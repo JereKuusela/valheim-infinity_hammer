@@ -113,7 +113,7 @@ public class HammerStackCommand
     if (player.m_placementGhost && player.m_placementGhost.TryGetComponent<Piece>(out var piece) && !piece.m_repairPiece)
       return player.m_placementGhost;
     var hovered = Selector.GetHovered(player, Configuration.Range, [], Configuration.IgnoredIds);
-    if (hovered == null) return player.m_placementGhost;
+    if (hovered == null) return player.m_placementGhost!;
     ObjectSelection sel = new(hovered.Obj, false, null, null);
     Selection.CreateGhost(sel);
     return hovered.Obj.gameObject;

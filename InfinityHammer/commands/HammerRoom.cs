@@ -3,6 +3,7 @@ using ServerDevcommands;
 using Service;
 using UnityEngine;
 namespace InfinityHammer;
+
 public class HammerRoomCommand
 {
   private static void PrintSelected(Terminal terminal, GameObject obj)
@@ -24,7 +25,7 @@ public class HammerRoomCommand
     {
       HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the room id.");
-      Hammer.Equip();
+      HammerHelper.Init();
       var placeEmptyRoom = args.Length > 2 ? Parse.Boolean(args[2]) ?? Configuration.PlaceEmptyRooms : Configuration.PlaceEmptyRooms;
       try
       {

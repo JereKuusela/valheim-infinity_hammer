@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Data;
-using ServerDevcommands;
-using Service;
 using UnityEngine;
 using WorldEditCommands;
 
@@ -65,10 +63,5 @@ public class LocationSelection : BaseSelection
     CustomizeSpawnLocation.RandomDamage = null;
     CustomizeSpawnLocation.AllViews = false;
     UndoHelper.EndSubAction();
-  }
-  public override void Activate()
-  {
-    base.Activate();
-    Hammer.SelectEmpty();
   }
 }

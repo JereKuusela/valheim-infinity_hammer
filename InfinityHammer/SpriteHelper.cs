@@ -26,6 +26,12 @@ public static class SpriteHelper
     camera.farClipPlane = 10f;
     camera.backgroundColor = new Color(0.2f, 0.2f, 0.2f, 0.4f);
     camera.clearFlags = CameraClearFlags.SolidColor;
+
+    // Isolate the camera to prevent interference with main rendering
+    camera.enabled = false; // Disable by default, only enable during rendering
+    camera.cullingMask = LayerMask.GetMask("ghost"); // Don't render any layers by default
+    camera.depth = -1000; // Very low depth to avoid conflicts
+
     // Don't destroy on load to keep it cached
     UnityEngine.Object.DontDestroyOnLoad(obj);
     return obj;
@@ -89,6 +95,8 @@ public static class SpriteHelper
     GameObject tempObj = new GameObject("TempTextSprite");
     try
     {
+      // Move temp object to the same isolated position as camera
+      tempObj.transform.position = Vector3.zero;
       tempObj.SetActive(false);
       var mesh = tempObj.AddComponent<TextMeshPro>();
       mesh.font = Hud.instance.m_buildSelection.font;
@@ -97,9 +105,7 @@ public static class SpriteHelper
       mesh.alignment = TextAlignmentOptions.Center;
       mesh.text = GenerateDisplayName(text);
       tempObj.SetActive(true);
-
-      // Set up the transform
-      tempObj.transform.position = Vector3.zero;
+      tempObj.layer = LayerMask.NameToLayer("ghost"); // Ensure it's on UI layer for isolated rendering
 
       // Force mesh generation
       mesh.ForceMeshUpdate();
@@ -107,8 +113,10 @@ public static class SpriteHelper
       // Get text bounds
       var bounds = mesh.bounds;
 
+      // Temporarily enable camera and configure it for rendering
+      Camera.enabled = true;
       Camera.orthographicSize = mesh.text.Length <= 2 ? 0.75f : 2f; // Fixed size for consistent scaling
-      CameraObj.transform.position = new Vector3(bounds.center.x, bounds.center.y, -5f);
+      CameraObj.transform.position = new Vector3(bounds.center.x, bounds.center.y, bounds.center.z - 5f);
       CameraObj.transform.LookAt(bounds.center);
 
       // Create RenderTexture
@@ -117,6 +125,9 @@ public static class SpriteHelper
       {
         format = RenderTextureFormat.ARGB32
       };
+
+      // Store original render texture to restore later
+      var originalRenderTexture = Camera.targetTexture;
       Camera.targetTexture = renderTexture;
 
       // Render the text
@@ -132,8 +143,10 @@ public static class SpriteHelper
       // Create sprite from texture
       Sprite sprite = Sprite.Create(texture, new Rect(0, 0, textureSize, textureSize), new Vector2(0.5f, 0.5f));
 
-      // Cleanup render texture (but keep camera cached)
+      // Cleanup render texture and restore camera state
       renderTexture.Release();
+      Camera.targetTexture = originalRenderTexture;
+      Camera.enabled = false; // Disable camera again to prevent interference
 
       return sprite;
     }

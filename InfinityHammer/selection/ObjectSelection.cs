@@ -25,7 +25,6 @@ public partial class ObjectSelection : BaseSelection
     Objects.Clear();
     SelectedPrefab = null;
   }
-  private readonly bool FromBuildMenu = false;
 
   public ObjectSelection(ZNetView view, bool singleUse, Vector3? scale, DataEntry? extraData)
   {
@@ -57,7 +56,6 @@ public partial class ObjectSelection : BaseSelection
   // So when selecting from the build menu, the ghost doesn't have to be cleaned up.
   public ObjectSelection(Piece piece, bool singleUse)
   {
-    FromBuildMenu = true;
     Wrapper = new GameObject();
     Wrapper.SetActive(false);
     var view = piece.GetComponent<ZNetView>();
@@ -449,13 +447,11 @@ public partial class ObjectSelection : BaseSelection
     SelectedPrefab.SetActive(false);
     UnityEngine.Object.Destroy(SelectedPrefab);
     SelectedPrefab = obj;
-    Objects = Objects.Take(1).ToList();
+    Objects = [.. Objects.Take(1)];
   }
   public override void Activate()
   {
     base.Activate();
     Scaling.Set(SelectedPrefab);
-    if (!FromBuildMenu)
-      Hammer.SelectEmpty();
   }
 }
