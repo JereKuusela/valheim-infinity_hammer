@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using HarmonyLib;
 using InfinityTools;
+using ServerDevcommands;
 using Service;
 using UnityEngine;
 namespace InfinityHammer;
@@ -15,19 +16,31 @@ public static class UpdateAvailable
 {
   static bool Prefix(PieceTable __instance)
   {
-    if (__instance.name == "_InfinityHammerPieceTable")
+    if (Hammer.IsInfinityHammer(__instance))
     {
       CustomBuildMenu.HandleCustomMenuMode(__instance);
       return false;
     }
     return true;
   }
+  [HarmonyPriority(Priority.Low)]
   static void Postfix(PieceTable __instance)
   {
     if (!Configuration.IsCheats) return;
     if (!Configuration.ToolsEnabled) return;
-    if (__instance.name == "_InfinityHammerPieceTable" && HammerMenuCommand.CurrentMode != MenuMode.Menu) return;
+    if (Hammer.IsInfinityHammer(__instance) && HammerMenuCommand.CurrentMode != MenuMode.Menu) return;
     CustomMenu.AddTools(__instance);
+    if (HammerMenuCommand.CurrentMode == MenuMode.Builds && HammerMenuCommand.CurrentFilter != "")
+    {
+      var player = Helper.GetPlayer();
+      var item = player.GetRightItem();
+      if (!Hammer.IsInfinityHammer(item)) return;
+      var back = CustomMenu.BackButton();
+      foreach (var tab in __instance.m_availablePieces)
+      {
+        tab.Insert(0, back);
+      }
+    }
   }
 }
 

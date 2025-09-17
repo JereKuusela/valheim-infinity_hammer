@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using HarmonyLib;
 using InfinityTools;
 using ServerDevcommands;
-using Service;
 using UnityEngine;
 namespace InfinityHammer;
 
@@ -91,25 +91,29 @@ public static class Hammer
   }
   public static void OpenBuildMenu()
   {
-    EquipInfinityHammer();
     var player = Helper.GetPlayer();
+    if (EquipInfinityHammer())
+    {
+      // Some mods trigger when place mode is set. So make sure it is retriggered if the hammer is already equipped.
+      player.SetPlaceMode(player.m_buildPieces);
+    }
     var pt = player.m_buildPieces;
     if (pt)
     {
       pt.m_selectedCategory = pt.m_categories.Count > 0 ? pt.m_categories[0] : 0;
       pt.m_selectedPiece[(int)pt.m_selectedCategory] = new(0, 0);
     }
-    player.UpdateAvailablePiecesList();
     Hud.instance.m_pieceSelectionWindow.SetActive(true);
     Hud.instance.m_closePieceSelection = 0;
     Hud.instance.UpdateBuild(Player.m_localPlayer, true);
   }
   public static bool IsInfinityHammer(ItemDrop.ItemData item) => item != null && item.m_customData != null && item.m_customData.ContainsKey("infinity_hammer");
-  public static void EquipInfinityHammer()
+  public static bool IsInfinityHammer(PieceTable pt) => pt && pt.name == "_InfinityHammerPieceTable";
+  public static bool EquipInfinityHammer()
   {
     var player = Helper.GetPlayer();
     var rightItem = player.GetRightItem();
-    if (rightItem != null && rightItem.m_customData.ContainsKey("infinity_hammer")) return;
+    if (rightItem != null && rightItem.m_customData.ContainsKey("infinity_hammer")) return true;
     var inventory = player.GetInventory();
     var infinityHammer = inventory.m_inventory.Find(IsInfinityHammer);
     if (infinityHammer == null)
@@ -123,6 +127,7 @@ public static class Hammer
     infinityHammer = inventory.m_inventory.Find(item => item != null && item.m_customData.ContainsKey("infinity_hammer"));
     if (infinityHammer == null) throw new InvalidOperationException("Unable to find the hammer in inventory.");
     player.EquipItem(infinityHammer);
+    return false;
   }
 
   public static bool Is(ItemDrop.ItemData item) => item != null && item.m_shared.m_buildPieces != null;
@@ -171,10 +176,21 @@ public class CustomHammer
   {
     var item = __instance.GetRightItem();
     if (!Hammer.IsInfinityHammer(item)) return;
+    if (HammerMenuCommand.CurrentMode == MenuMode.Builds && HammerMenuCommand.CurrentFilter != "")
+    {
+      var items = CustomMenu.GetBuildItems();
+      var build = items.FirstOrDefault(i => i.name.Equals(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase));
+      if (build != null)
+      {
+        buildPieces = build.m_itemData.m_shared.m_buildPieces;
+        return;
+      }
+    }
     if (cachedPieceTable == null)
     {
-      var go = new GameObject("_InfinityHammerPieceTable");
-      var pt = go.AddComponent<PieceTable>();
+      var obj = new GameObject("_InfinityHammerPieceTable");
+      UnityEngine.Object.DontDestroyOnLoad(obj);
+      var pt = obj.AddComponent<PieceTable>();
       pt.m_canRemoveFeasts = true;
       pt.m_canRemovePieces = true;
       pt.m_skill = Skills.SkillType.None;

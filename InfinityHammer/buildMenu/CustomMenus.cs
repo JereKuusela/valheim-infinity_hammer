@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using System.Linq;
 using InfinityTools;
 using ServerDevcommands;
-using Service;
 using UnityEngine;
 
 namespace InfinityHammer;
@@ -21,6 +20,7 @@ public class BuildItem
 
 public static class CustomMenu
 {
+  public const int CATEGORY_OFFSET = 1000;
   private static int MaxTabs => Configuration.MaxTabs;
   private static int MaxItemsPerTab => Configuration.ItemsPerTab - 1; // Reserve 1 slot for back button
   private static int MaxItems => MaxTabs * MaxItemsPerTab;
@@ -389,25 +389,6 @@ public static class CustomMenu
     return [category];
   }
 
-  public static void CopyPieceTable(string filter, PieceTable target)
-  {
-    var items = GetBuildItems();
-    var item = items.FirstOrDefault(i => i.name.Equals(filter, StringComparison.InvariantCultureIgnoreCase));
-    if (item == null) return;
-    var back = BackButton();
-    PieceTable source = item.m_itemData.m_shared.m_buildPieces;
-    if (source.m_availablePieces.Count == 0)
-    {
-      var player = Helper.GetPlayer();
-      source.UpdateAvailable(player.m_knownRecipes, player, false, player.m_noPlacementCost || ZoneSystem.instance.GetGlobalKey(GlobalKeys.AllPiecesUnlocked));
-    }
-    target.m_categoryLabels = source.m_categoryLabels;
-    target.m_availablePieces.Clear();
-    foreach (var tab in source.m_availablePieces)
-      target.m_availablePieces.Add([back, .. tab]);
-
-    target.m_categories = source.m_categories;
-  }
   public static void AddTools(PieceTable pt)
   {
     var equipment = PieceTableToEquipment(pt);
@@ -445,7 +426,7 @@ public static class CustomMenu
     return piece;
   }
 
-  private static List<ItemDrop> GetBuildItems()
+  public static List<ItemDrop> GetBuildItems()
   {
     var buildItems = ObjectDB.instance.m_items
      .Where(item => item.TryGetComponent<ItemDrop>(out var itemDrop) && itemDrop.m_itemData.m_shared.m_buildPieces)
@@ -483,13 +464,17 @@ public static class CustomMenu
   }
 
   private static readonly Dictionary<string, Piece> pieceCache = [];
-  public static Piece BuildObject(BuildItem item)
+  public static Piece BuildObject(BuildItem item, Piece.PieceCategory category)
   {
     var key = $"{item.Command}|{item.ShortName}";
     if (pieceCache.TryGetValue(key, out var cachedPiece))
+    {
+      cachedPiece.m_category = category;
       return cachedPiece;
+    }
 
     GameObject obj = new();
+    UnityEngine.Object.DontDestroyOnLoad(obj);
     var piece = obj.AddComponent<BuildMenuTool>();
     var toolData = new ToolData()
     {
@@ -504,13 +489,18 @@ public static class CustomMenu
     piece.m_name = item.ShortName;
     piece.m_icon = piece.tool.Icon;
     pieceCache[key] = piece;
+    piece.m_category = category;
     return piece;
   }
 
   public static Piece RepairButton()
   {
     if (pieceCache.TryGetValue("piece_repair", out var cachedPiece))
-      return cachedPiece;
+    {
+      // Log out might invalidate the cached piece.
+      if (!cachedPiece) pieceCache.Remove("piece_repair");
+      else return cachedPiece;
+    }
     var buildItem = GetBuildItems().FirstOrDefault(i => i.name.Equals("hammer", StringComparison.InvariantCultureIgnoreCase));
     if (!buildItem) return BackButton();
     var pt = buildItem.m_itemData.m_shared.m_buildPieces;
@@ -522,11 +512,6 @@ public static class CustomMenu
     pieceCache["piece_repair"] = piece;
     return piece;
   }
-  public static Piece BackButton()
-  {
-    var back = BuildObject(BuildItem("hammer_menu back", "←", "Back"));
-    back.m_category = Piece.PieceCategory.All;
-    return back;
-  }
+  public static Piece BackButton() => BuildObject(BuildItem("hammer_menu back", "←", "Back"), Piece.PieceCategory.All);
 
 }
