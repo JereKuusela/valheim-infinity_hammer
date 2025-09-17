@@ -3,9 +3,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using InfinityTools;
 using ServerDevcommands;
+using Service;
+using UnityEngine;
 
 namespace InfinityHammer;
 
@@ -15,6 +16,7 @@ public class BuildItem
   public string ShortName { get; set; } = "";
   public string FullName { get; set; } = "";
   public bool Instant { get; set; } = true;
+  public string? Icon { get; set; }
 }
 
 public static class CustomMenu
@@ -22,14 +24,15 @@ public static class CustomMenu
   private static int MaxTabs => Configuration.MaxTabs;
   private static int MaxItemsPerTab => Configuration.ItemsPerTab - 1; // Reserve 1 slot for back button
   private static int MaxItems => MaxTabs * MaxItemsPerTab;
-  public static BuildItem BuildItem(string command, string shortName, string? fullName = null, bool instant = true)
+  public static BuildItem BuildItem(string command, string shortName, string? fullName = null, bool instant = true, string? icon = null)
   {
     return new BuildItem()
     {
       Command = command,
       ShortName = shortName,
       FullName = fullName ?? shortName,
-      Instant = instant
+      Instant = instant,
+      Icon = icon
     };
   }
   public static List<CategoryInfo> GenerateObjects()
@@ -91,10 +94,13 @@ public static class CustomMenu
 
   public static List<CategoryInfo> GenerateMenu()
   {
-    List<BuildItem> items = [.. Enum.GetNames(typeof(MenuMode))
-      .Where(mode => mode != MenuMode.Menu.ToString())
+    List<BuildItem> items = [];
+
+    items.AddRange(GetBuildItems().Select(item => BuildItem($"hammer_menu builds {item.name}", item.name, item.name, true, item.name)));
+    items.AddRange(Enum.GetNames(typeof(MenuMode))
+      .Where(mode => mode != MenuMode.Menu.ToString() && mode != MenuMode.Builds.ToString())
       .OrderBy(mode => mode)
-      .Select(mode => BuildItem($"hammer_menu {mode.ToString().ToLower()}", mode.ToString()))];
+      .Select(mode => BuildItem($"hammer_menu {mode.ToString().ToLower()}", mode.ToString())));
     List<CategoryInfo> categories = [];
     categories.Add(new CategoryInfo { Name = "Menu", Items = items });
     return categories;
@@ -110,7 +116,7 @@ public static class CustomMenu
 
   private static CategoryInfo CreateBindCategory(Tuple<string, string>[] binds, string categoryName)
   {
-    List<BuildItem> bindItems = binds.Select(bind => BuildItem(bind.Item1, bind.Item2)).ToList();
+    List<BuildItem> bindItems = binds.Select(bind => BuildItem(bind.Item2, bind.Item1, bind.Item2)).ToList();
     return new CategoryInfo { Name = categoryName, Items = bindItems };
   }
   public static List<CategoryInfo> GenerateSounds()
@@ -373,80 +379,81 @@ public static class CustomMenu
 
   public static List<CategoryInfo> GenerateBuilds()
   {
-    // Get all items from ObjectDB that have a piece table (build pieces)
-    var buildItems = ObjectDB.instance.m_items
-      .Where(item => item.TryGetComponent<ItemDrop>(out var itemDrop) &&
-                     itemDrop.m_itemData.m_shared.m_buildPieces != null)
-      .Where(item => string.IsNullOrEmpty(HammerMenuCommand.CurrentFilter) ||
-                     item.name.StartsWith(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase))
-      .ToList();
+    var buildItems = GetBuildItems();
 
-    List<CategoryInfo> categories = [];
+    CategoryInfo category = new CategoryInfo { Name = "Builds", Items = [] };
 
     foreach (var item in buildItems)
-    {
-      var itemDrop = item.GetComponent<ItemDrop>();
-      var pieceTable = itemDrop.m_itemData.m_shared.m_buildPieces;
-      var itemName = itemDrop.m_itemData.m_shared.m_name;
+      category.Items.Add(BuildItem($"hammer_menu navigate {item.name}", item.name, item.name, true, item.name));
 
-      // Get all pieces from this item's piece table
-      var pieces = new List<BuildItem>();
-
-      // Add pieces from each category in the piece table
-      for (int categoryIndex = 0; categoryIndex < pieceTable.m_availablePieces.Count; categoryIndex++)
-      {
-        var piecesInCategory = pieceTable.m_availablePieces[categoryIndex];
-        foreach (var piece in piecesInCategory)
-        {
-          if (piece != null)
-          {
-            pieces.Add(BuildItem($"hammer {piece.name}", piece.m_name, piece.m_description));
-          }
-        }
-      }
-
-      if (pieces.Count > 0)
-      {
-        // If we have too many pieces for one category, split them
-        if (pieces.Count <= MaxItemsPerTab)
-        {
-          categories.Add(new CategoryInfo
-          {
-            Name = itemName,
-            Items = pieces.OrderBy(p => p.ShortName, StringComparer.InvariantCultureIgnoreCase).ToList()
-          });
-        }
-        else
-        {
-          // Split large categories into smaller ones with letter prefixes
-          var sortedPieces = pieces.OrderBy(p => p.ShortName, StringComparer.InvariantCultureIgnoreCase).ToList();
-          int count = sortedPieces.Count;
-          int subIndex = 1;
-          while (count > 0)
-          {
-            var categoryItems = sortedPieces.Take(MaxItemsPerTab).ToList();
-            count -= categoryItems.Count;
-            sortedPieces = sortedPieces.Skip(categoryItems.Count).ToList();
-
-            var firstLetter = categoryItems.First().ShortName.Substring(0, 1).ToUpper();
-            var lastLetter = categoryItems.Last().ShortName.Substring(0, 1).ToUpper();
-            var subCategoryName = firstLetter == lastLetter ? $"{itemName}-{firstLetter}" : $"{itemName}-{firstLetter}-{lastLetter}";
-
-            categories.Add(new CategoryInfo
-            {
-              Name = subCategoryName,
-              Items = categoryItems
-            });
-            subIndex++;
-          }
-        }
-      }
-    }
-
-    return categories;
+    return [category];
   }
 
+  public static void CopyPieceTable(string filter, PieceTable target)
+  {
+    var items = GetBuildItems();
+    var item = items.FirstOrDefault(i => i.name.Equals(filter, StringComparison.InvariantCultureIgnoreCase));
+    if (item == null) return;
+    var back = BackButton();
+    PieceTable source = item.m_itemData.m_shared.m_buildPieces;
+    if (source.m_availablePieces.Count == 0)
+    {
+      var player = Helper.GetPlayer();
+      source.UpdateAvailable(player.m_knownRecipes, player, false, player.m_noPlacementCost || ZoneSystem.instance.GetGlobalKey(GlobalKeys.AllPiecesUnlocked));
+    }
+    target.m_categoryLabels = source.m_categoryLabels;
+    target.m_availablePieces.Clear();
+    foreach (var tab in source.m_availablePieces)
+      target.m_availablePieces.Add([back, .. tab]);
 
+    target.m_categories = source.m_categories;
+  }
+  public static void AddTools(PieceTable pt)
+  {
+    var equipment = PieceTableToEquipment(pt);
+    List<Tool> tools = ToolManager.Get(equipment);
+    int tab = 0;
+    Dictionary<int, int> indices = [];
+    foreach (var tool in tools)
+    {
+      tab = tool.TabIndex ?? tab;
+      if (pt.m_availablePieces.Count <= tab) return;
+      if (!indices.ContainsKey(tab))
+        indices[tab] = equipment == "hammer" ? 0 : pt.m_availablePieces[tab].Count - 1;
+      var index = tool.Index ?? indices[tab] + 1;
+      var pieces = pt.m_availablePieces[tab];
+      index = Math.Min(index, pieces.Count);
+      pieces.Insert(index, Build(tool));
+      indices[tab] = index;
+    }
+  }
+  private static string PieceTableToEquipment(PieceTable pt)
+  {
+    var name = pt.name;
+    if (name.StartsWith("_")) name = name.Substring(1);
+    if (name.EndsWith("PieceTable")) name = name.Substring(0, name.Length - "PieceTable".Length);
+    return name.ToLowerInvariant();
+  }
+  private static Piece Build(Tool tool)
+  {
+    GameObject obj = new();
+    var piece = obj.AddComponent<BuildMenuTool>();
+    piece.tool = tool;
+    piece.m_description = tool.Description;
+    piece.m_name = tool.Name;
+    piece.m_icon = tool.Icon;
+    return piece;
+  }
+
+  private static List<ItemDrop> GetBuildItems()
+  {
+    var buildItems = ObjectDB.instance.m_items
+     .Where(item => item.TryGetComponent<ItemDrop>(out var itemDrop) && itemDrop.m_itemData.m_shared.m_buildPieces)
+     .Select(item => item.GetComponent<ItemDrop>())
+     .OrderBy(item => item.name, StringComparer.InvariantCultureIgnoreCase)
+     .ToList();
+    return buildItems;
+  }
 
   public static List<CategoryInfo> GenerateCategories(List<BuildItem> items, int limit)
   {
@@ -475,5 +482,51 @@ public static class CustomMenu
 
   }
 
+  private static readonly Dictionary<string, Piece> pieceCache = [];
+  public static Piece BuildObject(BuildItem item)
+  {
+    var key = $"{item.Command}|{item.ShortName}";
+    if (pieceCache.TryGetValue(key, out var cachedPiece))
+      return cachedPiece;
+
+    GameObject obj = new();
+    var piece = obj.AddComponent<BuildMenuTool>();
+    var toolData = new ToolData()
+    {
+      name = item.ShortName,
+      description = item.FullName,
+      icon = item.Icon ?? $"_{item.ShortName}",
+      command = item.Command,
+      instant = item.Instant
+    };
+    piece.tool = new Tool(toolData);
+    piece.m_description = item.FullName;
+    piece.m_name = item.ShortName;
+    piece.m_icon = piece.tool.Icon;
+    pieceCache[key] = piece;
+    return piece;
+  }
+
+  public static Piece RepairButton()
+  {
+    if (pieceCache.TryGetValue("piece_repair", out var cachedPiece))
+      return cachedPiece;
+    var buildItem = GetBuildItems().FirstOrDefault(i => i.name.Equals("hammer", StringComparison.InvariantCultureIgnoreCase));
+    if (!buildItem) return BackButton();
+    var pt = buildItem.m_itemData.m_shared.m_buildPieces;
+    if (!pt) return BackButton();
+    var repair = pt.m_pieces.FirstOrDefault(p => p.name.Equals("piece_repair", StringComparison.InvariantCultureIgnoreCase));
+    if (!repair) return BackButton();
+    var piece = repair.GetComponent<Piece>();
+    if (!piece) return BackButton();
+    pieceCache["piece_repair"] = piece;
+    return piece;
+  }
+  public static Piece BackButton()
+  {
+    var back = BuildObject(BuildItem("hammer_menu back", "←", "Back"));
+    back.m_category = Piece.PieceCategory.All;
+    return back;
+  }
 
 }

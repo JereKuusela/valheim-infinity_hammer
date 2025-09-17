@@ -96,8 +96,8 @@ public static class Hammer
     var pt = player.m_buildPieces;
     if (pt)
     {
-      pt.m_selectedCategory = 0;
-      pt.m_selectedPiece[0] = new(0, 0);
+      pt.m_selectedCategory = pt.m_categories.Count > 0 ? pt.m_categories[0] : 0;
+      pt.m_selectedPiece[(int)pt.m_selectedCategory] = new(0, 0);
     }
     player.UpdateAvailablePiecesList();
     Hud.instance.m_pieceSelectionWindow.SetActive(true);
@@ -137,6 +137,7 @@ public static class Hammer
     var player = Helper.GetPlayer();
     if (!player) return "";
     var item = player.GetRightItem();
+    if (IsInfinityHammer(item)) return "infinity_hammer";
     if (item == null) return "";
     return Utils.GetPrefabName(item.m_dropPrefab).ToLower();
   }
@@ -152,7 +153,7 @@ public class CustomHammer
   public static Sprite GetIcon(Sprite result, ItemDrop.ItemData __instance)
   {
     if (!Hammer.IsInfinityHammer(__instance)) return result;
-    if (cachedSprite == null) cachedSprite = SpriteHelper.FindSprite("_IH");
+    if (cachedSprite == null) cachedSprite = SpriteHelper.FindSprite("+🛠️");
     return cachedSprite ?? result;
   }
 
@@ -160,8 +161,7 @@ public class CustomHammer
   public static string GetHoverName(string result, ItemDrop __instance)
   {
     var item = __instance.m_itemData;
-    if (!Hammer.IsInfinityHammer(item)) return result;
-    return "Infinity Hammer";
+    return Hammer.IsInfinityHammer(item) ? "Infinity Hammer" : result;
   }
 
   private static PieceTable? cachedPieceTable = null;
@@ -173,8 +173,11 @@ public class CustomHammer
     if (!Hammer.IsInfinityHammer(item)) return;
     if (cachedPieceTable == null)
     {
-      var go = new GameObject("InfinityHammerPieceTable");
+      var go = new GameObject("_InfinityHammerPieceTable");
       var pt = go.AddComponent<PieceTable>();
+      pt.m_canRemoveFeasts = true;
+      pt.m_canRemovePieces = true;
+      pt.m_skill = Skills.SkillType.None;
       cachedPieceTable = pt;
     }
     buildPieces = cachedPieceTable;

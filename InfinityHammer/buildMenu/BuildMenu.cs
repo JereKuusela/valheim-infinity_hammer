@@ -13,55 +13,9 @@ public class BuildMenuTool : Piece
 [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpdateAvailable))]
 public static class UpdateAvailable
 {
-  private static Piece Build(Tool tool)
-  {
-    GameObject obj = new();
-    var piece = obj.AddComponent<BuildMenuTool>();
-    piece.tool = tool;
-    piece.m_description = tool.Description;
-    piece.m_name = tool.Name;
-    piece.m_icon = tool.Icon;
-    return piece;
-  }
-
-  private static Piece BuildMenuButton()
-  {
-    GameObject obj = new();
-    var piece = obj.AddComponent<BuildMenuTool>();
-    var toolData = new ToolData()
-    {
-      name = "Menu",
-      description = "Open custom menu",
-      icon = "\u2630",
-      command = "hammer_menu",
-      instant = true
-    };
-    piece.tool = new Tool(toolData);
-    piece.m_description = "Open custom menu";
-    piece.m_name = "Menu";
-    piece.m_icon = piece.tool.Icon;
-    return piece;
-  }
-
-  private static void AddMenuButtonToTabs(PieceTable __instance)
-  {
-    // Add menu button to the start of each tab
-    for (int i = 0; i < __instance.m_availablePieces.Count; i++)
-    {
-      var pieces = __instance.m_availablePieces[i];
-      if (pieces.Count > 0)
-      {
-        var menuButton = BuildMenuButton();
-        // Set the category for the menu button
-        menuButton.m_category = (Piece.PieceCategory)i;
-        pieces.Insert(0, menuButton);
-      }
-    }
-  }
-
   static bool Prefix(PieceTable __instance)
   {
-    if (__instance.name == "InfinityHammerPieceTable")
+    if (__instance.name == "_InfinityHammerPieceTable")
     {
       CustomBuildMenu.HandleCustomMenuMode(__instance);
       return false;
@@ -72,26 +26,8 @@ public static class UpdateAvailable
   {
     if (!Configuration.IsCheats) return;
     if (!Configuration.ToolsEnabled) return;
-    if (__instance.name == "InfinityHammerPieceTable") return;
-
-    var hammer = Hammer.Get();
-    List<Tool> tools = ToolManager.Get(hammer);
-    int tab = 0;
-    Dictionary<int, int> indices = [];
-    foreach (var tool in tools)
-    {
-      tab = tool.TabIndex ?? tab;
-      if (__instance.m_availablePieces.Count <= tab) return;
-      if (!indices.ContainsKey(tab))
-        indices[tab] = hammer == "hammer" ? 0 : __instance.m_availablePieces[tab].Count - 1;
-      var index = tool.Index ?? indices[tab] + 1;
-      var pieces = __instance.m_availablePieces[tab];
-      index = Math.Min(index, pieces.Count);
-      pieces.Insert(index, Build(tool));
-      indices[tab] = index;
-    }
-    if (false && Configuration.ShowMenuButton)
-      AddMenuButtonToTabs(__instance);
+    if (__instance.name == "_InfinityHammerPieceTable" && HammerMenuCommand.CurrentMode != MenuMode.Menu) return;
+    CustomMenu.AddTools(__instance);
   }
 }
 

@@ -91,6 +91,8 @@ public static class SpriteHelper
 
   private static Sprite CreateTextSprite(string text)
   {
+    var isHuge = text.StartsWith("+");
+    if (isHuge) text = text.Substring(1);
     // Create a temporary GameObject with TextMeshPro component
     GameObject tempObj = new GameObject("TempTextSprite");
     try
@@ -116,6 +118,7 @@ public static class SpriteHelper
       // Temporarily enable camera and configure it for rendering
       Camera.enabled = true;
       Camera.orthographicSize = mesh.text.Length <= 2 ? 0.75f : 2f; // Fixed size for consistent scaling
+      if (isHuge) Camera.orthographicSize *= 0.25f;
       CameraObj.transform.position = new Vector3(bounds.center.x, bounds.center.y, bounds.center.z - 5f);
       CameraObj.transform.LookAt(bounds.center);
 

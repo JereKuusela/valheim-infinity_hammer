@@ -13,17 +13,22 @@ public partial class Configuration
   public static int ItemsPerTab => configItemsPerTab.Value;
   public static ConfigEntry<string> configBlueprintSorting;
   public static string BlueprintSorting => configBlueprintSorting.Value;
-  public static ConfigEntry<bool> configShowMenuButton;
-  public static bool ShowMenuButton => configShowMenuButton.Value;
-  public static ConfigEntry<KeyboardShortcut> configKeybindMenuComponents;
+  public static ConfigEntry<KeyboardShortcut> configKeybindMenuTypes;
   public static ConfigEntry<KeyboardShortcut> configKeybindMenuBlueprints;
   public static ConfigEntry<KeyboardShortcut> configKeybindMenuObjects;
   public static ConfigEntry<KeyboardShortcut> configKeybindMenuLocations;
   public static ConfigEntry<KeyboardShortcut> configKeybindMenuSounds;
   public static ConfigEntry<KeyboardShortcut> configKeybindMenuVisuals;
   public static ConfigEntry<KeyboardShortcut> configKeybindMenuTools;
-  public static ConfigEntry<KeyboardShortcut> configKeybindMenuDefault;
+  public static ConfigEntry<KeyboardShortcut> configKeybindMenuRooms;
+  public static ConfigEntry<KeyboardShortcut> configKeybindMenuBinds;
   public static ConfigEntry<KeyboardShortcut> configKeybindMenu;
+  public static ConfigEntry<KeyboardShortcut> configKeybindMenuBuilds;
+  public static ConfigEntry<KeyboardShortcut> configKeybindMenuBuildsHammer;
+  public static ConfigEntry<KeyboardShortcut> configKeybindMenuBuildsHoe;
+  public static ConfigEntry<KeyboardShortcut> configKeybindMenuBuildsCultivator;
+  public static ConfigEntry<KeyboardShortcut> configKeybindMenuBuildsFeaster;
+
 
 #nullable enable
 
@@ -34,16 +39,21 @@ public partial class Configuration
     configMaxTabs = wrapper.Bind(section, "Max tabs", 5, "Maximum number of tabs in the custom build menu.");
     configItemsPerTab = wrapper.Bind(section, "Items per tab", 90, "Maximum number of items per tab in the custom build menu.");
     configBlueprintSorting = wrapper.Bind(section, "Blueprint sorting", BlueprintSortingMode.Folder, new ConfigDescription("How blueprints are sorted in the menu.", new AcceptableValueList<string>(BlueprintSortingMode.Category, BlueprintSortingMode.Folder, BlueprintSortingMode.CategoryAndFolder, BlueprintSortingMode.OnlyName)));
-    configShowMenuButton = wrapper.Bind(section, "Show menu button", true, "Shows the menu button at the start of every build menu tab.");
     configKeybindMenu = wrapper.BindCommand("hammer_menu", section, "Menu", new KeyboardShortcut(KeyCode.None), "Opens the custom menu.");
-    configKeybindMenuDefault = wrapper.BindCommand("hammer_menu default", section, "Menu: Default", new KeyboardShortcut(KeyCode.None), "Opens the default build menu.");
+    configKeybindMenuBinds = wrapper.BindCommand("hammer_menu binds", section, "Menu: Binds", new KeyboardShortcut(KeyCode.None), "Opens the binds menu.");
     configKeybindMenuBlueprints = wrapper.BindCommand("hammer_menu blueprints", section, "Menu: Blueprints", new KeyboardShortcut(KeyCode.None), "Opens the blueprints menu.");
-    configKeybindMenuComponents = wrapper.BindCommand("hammer_menu components", section, "Menu: Components", new KeyboardShortcut(KeyCode.None), "Opens the objects by component menu.");
-    configKeybindMenuObjects = wrapper.BindCommand("hammer_menu objects", section, "Menu: Objects", new KeyboardShortcut(KeyCode.None), "Opens the objects menu.");
+    configKeybindMenuBuilds = wrapper.BindCommand("hammer_menu builds", section, "Menu: Builds", new KeyboardShortcut(KeyCode.None), "Opens the builds menu.");
     configKeybindMenuLocations = wrapper.BindCommand("hammer_menu locations", section, "Menu: Locations", new KeyboardShortcut(KeyCode.None), "Opens the locations menu.");
+    configKeybindMenuObjects = wrapper.BindCommand("hammer_menu objects", section, "Menu: Objects", new KeyboardShortcut(KeyCode.None), "Opens the objects menu.");
+    configKeybindMenuRooms = wrapper.BindCommand("hammer_menu rooms", section, "Menu: Rooms", new KeyboardShortcut(KeyCode.None), "Opens the rooms menu.");
     configKeybindMenuSounds = wrapper.BindCommand("hammer_menu sounds", section, "Menu: Sounds", new KeyboardShortcut(KeyCode.None), "Opens the sounds menu.");
     configKeybindMenuTools = wrapper.BindCommand("hammer_menu tools", section, "Menu: Tools", new KeyboardShortcut(KeyCode.None), "Opens the tools menu.");
+    configKeybindMenuTypes = wrapper.BindCommand("hammer_menu types", section, "Menu: Types", new KeyboardShortcut(KeyCode.None), "Opens the objects by type menu.");
     configKeybindMenuVisuals = wrapper.BindCommand("hammer_menu visuals", section, "Menu: Visuals", new KeyboardShortcut(KeyCode.None), "Opens the visuals menu.");
+    configKeybindMenuBuildsHammer = wrapper.BindCommand("hammer_menu builds hammer", section, "Menu: Builds (Hammer)", new KeyboardShortcut(KeyCode.None), "Opens the builds menu with hammer filter.");
+    configKeybindMenuBuildsHoe = wrapper.BindCommand("hammer_menu builds hoe", section, "Menu: Builds (Hoe)", new KeyboardShortcut(KeyCode.None), "Opens the builds menu with hoe filter.");
+    configKeybindMenuBuildsCultivator = wrapper.BindCommand("hammer_menu builds cultivator", section, "Menu: Builds (Cultivator)", new KeyboardShortcut(KeyCode.None), "Opens the builds menu with cultivator filter.");
+    configKeybindMenuBuildsFeaster = wrapper.BindCommand("hammer_menu builds feaster", section, "Menu: Builds (Feaster)", new KeyboardShortcut(KeyCode.None), "Opens the builds menu with feaster filter.");
   }
 
 }

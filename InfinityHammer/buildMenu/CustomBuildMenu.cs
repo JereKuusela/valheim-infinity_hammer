@@ -60,6 +60,12 @@ public static class CustomBuildMenu
         categories = CustomMenu.GenerateTools();
         break;
       case MenuMode.Builds:
+        if (HammerMenuCommand.CurrentFilter != "")
+        {
+          CustomMenu.CopyPieceTable(HammerMenuCommand.CurrentFilter, pt);
+          SanityCheck(pt);
+          return;
+        }
         categories = CustomMenu.GenerateBuilds();
         break;
     }
@@ -70,33 +76,19 @@ public static class CustomBuildMenu
     AddCategories(tabs, categories);
     pt.m_categories = [.. categories.Select((_, index) => (Piece.PieceCategory)index)];
     pt.m_categoryLabels = [.. categories.Select(c => c.Name)];
-    if (pt.m_selectedPiece.Length < pt.m_categories.Count)
-      pt.m_selectedPiece = new Vector2Int[pt.m_categories.Count];
-    if (pt.m_lastSelectedPiece.Length < pt.m_categories.Count)
-      pt.m_lastSelectedPiece = new Vector2Int[pt.m_categories.Count];
-    if ((int)pt.m_selectedCategory >= pt.m_categories.Count)
-      pt.m_selectedCategory = 0;
+    SanityCheck(pt);
   }
 
 
-
-  private static Piece BuildObject(BuildItem item)
+  private static void SanityCheck(PieceTable pt)
   {
-    GameObject obj = new();
-    var piece = obj.AddComponent<BuildMenuTool>();
-    var toolData = new ToolData()
-    {
-      name = item.ShortName,
-      description = item.FullName,
-      icon = $"_{item.ShortName}",
-      command = item.Command,
-      instant = item.Instant
-    };
-    piece.tool = new Tool(toolData);
-    piece.m_description = item.FullName;
-    piece.m_name = item.ShortName;
-    piece.m_icon = piece.tool.Icon;
-    return piece;
+    int amount = 1 + (pt.m_categories.Count > 0 ? pt.m_categories.Max(c => (int)c) : 0);
+    if (pt.m_selectedPiece.Length < amount)
+      pt.m_selectedPiece = new Vector2Int[amount];
+    if (pt.m_lastSelectedPiece.Length < amount)
+      pt.m_lastSelectedPiece = new Vector2Int[amount];
+    if (!pt.m_categories.Contains(pt.m_selectedCategory))
+      pt.m_selectedCategory = pt.m_categories.Count > 0 ? pt.m_categories[0] : 0;
   }
   private static List<CategoryInfo> HandleNavigation(List<CategoryInfo> categories)
   {
@@ -148,9 +140,7 @@ public static class CustomBuildMenu
 
   private static void AddCategories(List<List<Piece>> tabs, List<CategoryInfo> categories)
   {
-    var backCommand = HammerMenuCommand.CurrentMode == MenuMode.Menu ? "hammer_menu default" : "hammer_menu back";
-    var back = BuildObject(CustomMenu.BuildItem(backCommand, "←", "Back"));
-    back.m_category = Piece.PieceCategory.All;
+    var back = HammerMenuCommand.CurrentMode == MenuMode.Menu ? CustomMenu.RepairButton() : CustomMenu.BackButton();
     if (categories.Count == 0)
     {
       tabs.Add([back]);
@@ -161,7 +151,7 @@ public static class CustomBuildMenu
       var items = category.Items;
       if (items.Count == 0) continue;
 
-      var pieces = items.Select(BuildObject).ToList();
+      var pieces = items.Select(CustomMenu.BuildObject).ToList();
 
       foreach (var piece in pieces)
         piece.m_category = (Piece.PieceCategory)tabs.Count;
