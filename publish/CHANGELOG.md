@@ -1,3 +1,6 @@
+- v1.75
+  - Reverts the fix for error message when placing some item drops (this modified vanilla behavior).
+
 - v1.74
   - Adds a new command "hammer_zoop_reset" to reset zoop offset.
   - Adds a new command "hammer_mark" to mark individual pieces for selection (experimental).
