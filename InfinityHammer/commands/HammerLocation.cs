@@ -35,6 +35,7 @@ public class HammerLocationCommand
         if (seed == 0) seed = rng.Next();
         var location = ZoneSystem.instance.GetLocation(args[1].GetStableHashCode());
         var ghost = Selection.CreateGhost(new LocationSelection(location, seed));
+        Hammer.SelectEmpty();
         ghost.name = args[1];
         PrintSelected(args.Context, ghost);
       }

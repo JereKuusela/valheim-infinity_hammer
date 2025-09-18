@@ -24,6 +24,8 @@ public static class Selection
       return;
     selection.Deactivate();
     selection.Destroy();
+
+    Hammer.SelectRepairIfEmpty();
     Selections.Remove(HammerHelper.GetTool());
   }
   public static void Destroy()

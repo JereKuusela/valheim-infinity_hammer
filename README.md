@@ -36,6 +36,13 @@ See [hammer.md](hammer.md) for more information.
 
 See [blueprints.md](blueprints.md) for more information.
 
+## Custom hammer
+
+- Using command `hammer_menu` gives you a custom Infinity Hammer.
+- New hammer allows selecting any piece, location, room or tool from the build menu.
+
+See [custom_hammer.md](custom_hammer.md) for more information.
+
 ## Tools
 
 - Add console commands to the build menu.

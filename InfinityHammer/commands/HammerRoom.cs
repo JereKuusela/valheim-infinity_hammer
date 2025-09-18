@@ -30,6 +30,7 @@ public class HammerRoomCommand
       try
       {
         var ghost = Selection.CreateGhost(new RoomSelection(args[1].GetStableHashCode(), placeEmptyRoom));
+        Hammer.SelectEmpty();
         ghost.name = args[1];
         PrintSelected(args.Context, ghost);
       }

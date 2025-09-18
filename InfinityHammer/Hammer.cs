@@ -24,19 +24,20 @@ public static class Hammer
   {
     var build = Helper.GetPlayer().m_buildPieces;
     if (build)
-      build.SetSelected(new(-1, -1));
+      build.m_selectedPiece[(int)build.m_selectedCategory] = new(-1, -1);
   }
   public static void SelectRepair()
   {
     var build = Helper.GetPlayer().m_buildPieces;
     if (build)
-      build.SetSelected(new(0, 0));
+      build.m_selectedPiece[(int)build.m_selectedCategory] = new(0, 0);
   }
   public static void SelectRepairIfEmpty()
   {
     var build = Helper.GetPlayer().m_buildPieces;
-    if (build && build.m_selectedPiece[(int)build.GetSelectedCategory()].x == -1)
-      build.SetSelected(new(0, 0));
+    foreach (var category in build.m_categories)
+      if (build.m_selectedPiece[(int)category].x == -1)
+        build.m_selectedPiece[(int)category] = new(0, 0);
   }
 
   private static bool OriginalUseDurability = false;

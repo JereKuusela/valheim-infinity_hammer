@@ -262,7 +262,6 @@ public static class HammerHelper
   {
     EnabledCheck();
     Hammer.Equip();
-    Hammer.SelectEmpty();
   }
 
 

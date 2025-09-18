@@ -64,7 +64,6 @@ public class BaseSelection
   }
   public virtual void Deactivate()
   {
-    Hammer.SelectRepairIfEmpty();
   }
 
 }

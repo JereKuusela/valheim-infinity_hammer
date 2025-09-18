@@ -23,8 +23,8 @@ public class ToolCmdCommand
       command = command,
       description = command,
     });
-    Hammer.SelectRepair();
     Selection.CreateGhost(new ToolSelection(tool));
+    Hammer.SelectEmpty();
     PlaceRotation.Set(Quaternion.identity);
     HammerHelper.Message(args.Context, $"Selected command {tool.Name}.");
   }

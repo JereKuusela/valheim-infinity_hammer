@@ -203,6 +203,7 @@ public class HammerSelect
       }
       ObjectSelection selection = views.Length == 1 ? new(views[0], pars.Pick, pars.Scale, extraData) : new(views, pars.Pick, pars.Scale, extraData);
       var ghost = Selection.CreateGhost(selection);
+      Hammer.SelectEmpty();
       if (pars.Freeze) Position.Freeze(views.Length > 0 ? views[0].transform.position : Helper.GetPlayer().transform.position);
       if (pars.Pick)
       {

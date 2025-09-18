@@ -45,6 +45,12 @@ For Structure Tweaks mod:
 
 For example `hammer Beech1 scale=2 health=1000` would select a beech tree with a double size and 1000 health.
 
+## Marking
+
+Individual pieces can be marked for selection with command `hammer_mark`.
+
+When a selection is made with `hammer` command, all marked pieces are included in the selection.
+
 ## Scale
 
 The scale can be directly set with following commands:
@@ -162,6 +168,8 @@ Possible directions are `backward`, `down`, `forward`,`left`, `right` and `up`.
 The step sets the distance between cloned objects. By default this is the size of the object.
 
 The recommended way is to set a keybinding in the config. Custom bindings can also be used for special cases.
+
+Current zoop can be reset with command `hammer_zoop_reset`.
 
 Examples:
 
