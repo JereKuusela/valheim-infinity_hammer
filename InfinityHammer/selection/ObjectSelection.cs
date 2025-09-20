@@ -18,11 +18,14 @@ public partial class ObjectSelection : BaseSelection
   // This mimics the ZNetScene.m_namedPrefabs behavior.
   private readonly GameObject Wrapper;
   public List<SelectedObject> Objects = [];
+  public TerrainData? TerrainInfo;
+  public float TerrainRadius = 0f;
   public override void Destroy()
   {
     base.Destroy();
     UnityEngine.Object.Destroy(Wrapper);
     Objects.Clear();
+    TerrainInfo = null;
     SelectedPrefab = null;
   }
 
@@ -150,6 +153,12 @@ public partial class ObjectSelection : BaseSelection
 
     piece.m_clipEverything = Snapping.CountSnapPoints(SelectedPrefab) == 0;
     Scaling.Set(SelectedPrefab);
+  }
+
+  public void SetTerrainData(TerrainData terrainInfo, float terrainRadius)
+  {
+    TerrainInfo = terrainInfo;
+    TerrainRadius = terrainRadius;
   }
 
   public void Mirror()
@@ -368,13 +377,91 @@ public partial class ObjectSelection : BaseSelection
       if (!view) return;
       view.m_body?.WakeUp();
       PostProcessPlaced(obj);
+      ApplyTerrainChanges(obj.transform.position, obj.transform.rotation);
     }
     else
     {
       HandleMultiple(HammerHelper.GetPlacementGhost());
       UnityEngine.Object.Destroy(obj);
     }
+
     UndoHelper.EndSubAction();
+  }
+
+  private void ApplyTerrainChanges(Vector3 placementPosition, Quaternion placementRotation)
+  {
+    if (TerrainInfo == null) return;
+
+    // Calculate rotation difference specifically along Y-axis in degrees
+    var originalRotation = TerrainInfo.FirstNodeRotation;
+
+    // Calculate the rotation difference by finding the quaternion that transforms from original to placement
+    var rotationDifference = placementRotation * Quaternion.Inverse(originalRotation);
+
+    // Extract the Y-axis rotation from the difference quaternion
+    var yRotationDifference = rotationDifference.eulerAngles.y;
+
+    // Convert to signed angle (-180 to +180 degrees)
+    if (yRotationDifference > 180f)
+      yRotationDifference -= 360f;
+
+    // Convert to radians for the terrain lookup
+    var rotation = Mathf.Deg2Rad * yRotationDifference;
+
+    // Get terrain compilers around the placement position
+    var compilers = Terrain.GetCompilers(placementPosition, new(TerrainRadius));
+
+    foreach (var compiler in compilers)
+    {
+      var max = compiler.m_width + 1;
+      for (int x = 0; x < max; x++)
+      {
+        for (int z = 0; z < max; z++)
+        {
+          var nodePos = VertexToWorld(compiler.m_hmap, x, z);
+          var index = z * max + x;
+
+          // Apply height changes using optimized lookup
+          var nearestHeight = TerrainInfo.FindNearestHeight(nodePos, placementPosition, rotation);
+          if (nearestHeight != null)
+          {
+            if (index < compiler.m_hmap.m_heights.Count)
+            {
+              var altitude = nearestHeight.Value + placementPosition.y;
+              compiler.m_levelDelta[index] += altitude - compiler.m_hmap.m_heights[index];
+              compiler.m_smoothDelta[index] = 0f;
+              compiler.m_modifiedHeight[index] = compiler.m_levelDelta[index] != 0f;
+            }
+          }
+
+          // Apply paint changes using optimized lookup
+          var paintWorldPos = nodePos;
+          //paintWorldPos.x += 0.5f;
+          //paintWorldPos.z += 0.5f;
+          var nearestPaint = TerrainInfo.FindNearestPaint(paintWorldPos, placementPosition, rotation);
+          if (nearestPaint != null)
+          {
+            if (index < compiler.m_paintMask.Length)
+            {
+              compiler.m_paintMask[index] = nearestPaint.Value;
+              compiler.m_modifiedPaint[index] = true;
+            }
+          }
+        }
+      }
+    }
+
+    foreach (var compiler in compilers)
+      Terrain.Save(compiler);
+    ClutterSystem.instance?.ResetGrass(placementPosition, TerrainRadius);
+  }
+
+  private static Vector3 VertexToWorld(Heightmap hmap, int x, int z)
+  {
+    var vector = hmap.transform.position;
+    vector.x += (x - hmap.m_width / 2) * hmap.m_scale;
+    vector.z += (z - hmap.m_width / 2) * hmap.m_scale;
+    return vector;
   }
   private void HandleMultiple(GameObject ghost)
   {
@@ -392,6 +479,8 @@ public partial class ObjectSelection : BaseSelection
         var childObj = UnityEngine.Object.Instantiate(prefab, ghostChild.transform.position, ghostChild.transform.rotation);
         PostProcessPlaced(childObj);
       }
+      if (i == 0)
+        ApplyTerrainChanges(ghostChild.transform.position, ghostChild.transform.rotation);
     }
   }
 

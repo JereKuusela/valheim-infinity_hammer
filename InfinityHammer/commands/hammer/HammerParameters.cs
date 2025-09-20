@@ -4,6 +4,7 @@ using ServerDevcommands;
 using Service;
 using UnityEngine;
 namespace InfinityHammer;
+
 public enum Growth
 {
   Default,
@@ -52,6 +53,7 @@ public class HammerParameters
   public Fall Fall = Fall.Default;
   public string[] Ignored = [];
   public string[] Included = [];
+  public float? Terrain;
 
   public HammerParameters(Terminal.ConsoleEventArgs args)
   {
@@ -71,6 +73,8 @@ public class HammerParameters
         Freeze = true;
       if (name == "pick")
         Pick = true;
+      if (name == "terrain")
+        Terrain = 0f;
       if (split.Length < 2) continue;
       var value = split[1].ToLower();
       var values = Parse.Split(value);
@@ -124,6 +128,7 @@ public class HammerParameters
       if (name == "include") Included = values;
       if (name == "id") Included = values;
       if (name == "ignore") Ignored = values;
+      if (name == "terrain") Terrain = Parse.Float(value);
     }
     if (Ignored.Length == 0)
       Ignored = Configuration.IgnoredIds;

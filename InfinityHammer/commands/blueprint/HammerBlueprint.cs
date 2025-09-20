@@ -27,7 +27,7 @@ public class HammerBlueprintCommand
   }
   private static IEnumerable<string> Files()
   {
-    IEnumerable<string> bps = new List<string>();
+    IEnumerable<string> bps = [];
     bps = LoadFiles(Configuration.BlueprintGlobalFolder, bps);
     if (Path.GetFullPath(Configuration.BlueprintLocalFolder) != Path.GetFullPath(Configuration.BlueprintGlobalFolder))
       bps = LoadFiles(Configuration.BlueprintLocalFolder, bps);

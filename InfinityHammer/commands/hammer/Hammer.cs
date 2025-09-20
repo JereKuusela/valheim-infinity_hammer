@@ -52,7 +52,7 @@ public class HammerSelect
   public HammerSelect()
   {
     List<string> named = [
-      "freeze", "pick", "scale", "level", "stars", "connect", "health", "type", "include", "ignore", "id", "data",
+      "freeze", "pick", "scale", "level", "stars", "connect", "health", "type", "include", "ignore", "id", "data", "terrain",
     ];
     if (InfinityHammer.StructureTweaks)
     {
@@ -108,6 +108,7 @@ public class HammerSelect
       { "id", index => ParameterInfo.ObjectIds },
       { "type", index => ParameterInfo.Components },
       { "data", index => DataLoading.DataKeys },
+      { "terrain", index => ParameterInfo.Create("Terrain radius offset for including terrain height and paint in selection.") },
     });
     Helper.Command("hammer", "[object id] - Selects the object to be placed (the hovered object by default).", (args) =>
     {
@@ -201,7 +202,29 @@ public class HammerSelect
         extraData ??= new();
         extraData.Set(Hash.Text, pars.Text);
       }
+
       ObjectSelection selection = views.Length == 1 ? new(views[0], pars.Pick, pars.Scale, extraData) : new(views, pars.Pick, pars.Scale, extraData);
+      if (pars.Terrain.HasValue)
+      {
+        // Calculate terrain selection radius based on object selection area
+        float selectionRadius = 0f;
+        if (pars.Radius != null)
+          selectionRadius = pars.Radius.Max;
+        else if (pars.Width != null && pars.Depth != null)
+          selectionRadius = Math.Max(pars.Width.Max, pars.Depth.Max);
+        else if (views.Length > 0)
+          selectionRadius = 5f; // Default radius for single object selection
+
+        var terrainRadius = selectionRadius + pars.Terrain.Value;
+        Vector3 centerPos = views[0].transform.position;
+        Quaternion centerRot = views[0].transform.rotation;
+        Vector3 searchPos = centerPos;
+        if (pars.Radius != null || (pars.Width != null && pars.Depth != null))
+          searchPos = pars.Position;
+
+        var heightData = SelectTerrain(centerPos, centerRot, searchPos, terrainRadius);
+        selection.SetTerrainData(heightData, terrainRadius);
+      }
       var ghost = Selection.CreateGhost(selection);
       Hammer.SelectEmpty();
       if (pars.Freeze) Position.Freeze(views.Length > 0 ? views[0].transform.position : Helper.GetPlayer().transform.position);
@@ -216,5 +239,10 @@ public class HammerSelect
       }
       PrintSelected(args.Context, ghost);
     });
+  }
+
+  private static TerrainData SelectTerrain(Vector3 centerPos, Quaternion centerRot, Vector3 searchPos, float radius)
+  {
+    return TerrainInfo.CollectTerrainDataInRadius(centerPos, centerRot, searchPos, radius);
   }
 }
