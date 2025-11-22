@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Service;
 namespace InfinityHammer;
+
 public class BlueprintObject(string name, Vector3 pos, Quaternion rot, Vector3 scale, string info, string data, float chance)
 {
   public string Prefab = name;
@@ -23,6 +25,7 @@ public class Blueprint
   public string CenterPiece = Configuration.BlueprintCenterPiece;
   public List<BlueprintObject> Objects = [];
   public List<Vector3> SnapPoints = [];
+  public TerrainData? TerrainData = null;
   public float Radius = 0f;
   public Vector3 Center(string centerPiece)
   {

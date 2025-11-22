@@ -1,13 +1,9 @@
-using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using Data;
 using ServerDevcommands;
-using Service;
 using UnityEngine;
-using UnityEngine.Rendering;
 namespace InfinityHammer;
 
 
@@ -113,7 +109,9 @@ public class HammerSaveCommand
       $"#Pieces",
       .. bp.Objects.OrderBy(o => o.Prefab).Select(GetPlanBuildObject),
     ];
-    return [
+
+    var lines = new List<string>
+    {
       $"#Name:{bp.Name}",
       $"#Creator:{bp.Creator}",
       $"#Description:{bp.Description}",
@@ -121,11 +119,52 @@ public class HammerSaveCommand
       $"#Center:{bp.CenterPiece}",
       $"#Coordinates:{HammerHelper.PrintXZY(bp.Coordinates)}",
       $"#Rotation:{HammerHelper.PrintYXZ(bp.Rotation)}",
-      $"#SnapPoints",
-      .. bp.SnapPoints.Select(GetPlanBuildSnapPoint),
-      $"#Pieces",
-      .. bp.Objects.OrderBy(o => o.Prefab).Select(GetPlanBuildObject),
-    ];
+      "#SnapPoints",
+    };
+    lines.AddRange(bp.SnapPoints.Select(GetPlanBuildSnapPoint));
+    lines.Add("#Pieces");
+    lines.AddRange(bp.Objects.OrderBy(o => o.Prefab).Select(GetPlanBuildObject));
+
+    // Add terrain data if it exists
+    if (bp.TerrainData != null)
+    {
+      lines.Add($"#Height:{HammerHelper.PrintXZY(bp.TerrainData.FirstNodePosition)};{HammerHelper.PrintYXZ(bp.TerrainData.FirstNodeRotation.eulerAngles)};{HammerHelper.Format(bp.TerrainData.DistanceBetweenNodes)}");
+
+      // Add height data
+      for (int z = 0; z < bp.TerrainData.Height; z++)
+      {
+        var heightRow = new List<string>();
+        for (int x = 0; x < bp.TerrainData.Width; x++)
+        {
+          var height = bp.TerrainData.GetHeight(x, z);
+          heightRow.Add(height.HasValue ? HammerHelper.Format(height.Value) : "");
+        }
+        lines.Add(string.Join(";", heightRow));
+      }
+
+      // Add paint data
+      lines.Add("#Paint");
+      for (int z = 0; z < bp.TerrainData.Height; z++)
+      {
+        var paintRow = new List<string>();
+        for (int x = 0; x < bp.TerrainData.Width; x++)
+        {
+          var paint = bp.TerrainData.GetPaint(x, z);
+          if (paint.HasValue)
+          {
+            var c = paint.Value;
+            paintRow.Add($"{HammerHelper.Format(c.r)}:{HammerHelper.Format(c.g)}:{HammerHelper.Format(c.b)}:{HammerHelper.Format(c.a)}");
+          }
+          else
+          {
+            paintRow.Add("");
+          }
+        }
+        lines.Add(string.Join(";", paintRow));
+      }
+    }
+
+    return lines.ToArray();
   }
   private static string GetPlanBuildSnapPoint(Vector3 pos)
   {

@@ -206,24 +206,31 @@ public class HammerSelect
       ObjectSelection selection = views.Length == 1 ? new(views[0], pars.Pick, pars.Scale, extraData) : new(views, pars.Pick, pars.Scale, extraData);
       if (pars.Terrain.HasValue)
       {
-        // Calculate terrain selection radius based on object selection area
-        float selectionRadius = 0f;
-        if (pars.Radius != null)
-          selectionRadius = pars.Radius.Max;
-        else if (pars.Width != null && pars.Depth != null)
-          selectionRadius = Math.Max(pars.Width.Max, pars.Depth.Max);
-        else if (views.Length > 0)
-          selectionRadius = 5f; // Default radius for single object selection
+        var terrainRange = pars.Terrain.Value;
 
-        var terrainRadius = selectionRadius + pars.Terrain.Value;
         Vector3 centerPos = views[0].transform.position;
         Quaternion centerRot = views[0].transform.rotation;
         Vector3 searchPos = centerPos;
         if (pars.Radius != null || (pars.Width != null && pars.Depth != null))
           searchPos = pars.Position;
 
-        var heightData = SelectTerrain(centerPos, centerRot, searchPos, terrainRadius);
-        selection.SetTerrainData(heightData, terrainRadius);
+        TerrainData? terrainInfo;
+        if (pars.Width != null && pars.Depth != null)
+        {
+          var width = pars.Width.Min == pars.Width.Max ? new Range<float>(pars.Width.Max + terrainRange) : new Range<float>(pars.Width.Min, pars.Width.Max + terrainRange);
+          var depth = pars.Depth.Min == pars.Depth.Max ? new Range<float>(pars.Depth.Max + terrainRange) : new Range<float>(pars.Depth.Min, pars.Depth.Max + terrainRange);
+
+          terrainInfo = TerrainInfo.CollectTerrainDataInRect(centerPos, centerRot, searchPos, width, depth, pars.Angle);
+        }
+        else
+        {
+          var radius = new Range<float>(Mathf.Max(1f, terrainRange));
+          if (pars.Radius != null)
+            radius = pars.Radius.Min == pars.Radius.Max ? new Range<float>(pars.Radius.Max + terrainRange) : new Range<float>(pars.Radius.Min, pars.Radius.Max + terrainRange);
+
+          terrainInfo = TerrainInfo.CollectTerrainDataInRadius(centerPos, centerRot, searchPos, radius);
+        }
+        selection.SetTerrainData(terrainInfo, terrainRange);
       }
       var ghost = Selection.CreateGhost(selection);
       Hammer.SelectEmpty();
@@ -241,8 +248,4 @@ public class HammerSelect
     });
   }
 
-  private static TerrainData SelectTerrain(Vector3 centerPos, Quaternion centerRot, Vector3 searchPos, float radius)
-  {
-    return TerrainInfo.CollectTerrainDataInRadius(centerPos, centerRot, searchPos, radius);
-  }
 }

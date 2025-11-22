@@ -16,6 +16,7 @@ public class TerrainData(Vector3 heightmapPosition)
   public Color?[,] Paints = new Color?[0, 0];
   public Vector3 FirstNodePosition;
   public Quaternion FirstNodeRotation = Quaternion.identity;
+  public float DistanceBetweenNodes = 1.0f;
   public int Width = 0;
   public int Height = 0;
 
@@ -282,9 +283,9 @@ public class TerrainInfo
     return heightmapData;
   }
 
-  public static TerrainData CollectTerrainDataInRadius(Vector3 centerPos, Quaternion centerRot, Vector3 searchPos, float radius)
+  public static TerrainData CollectTerrainDataInRadius(Vector3 centerPos, Quaternion centerRot, Vector3 searchPos, Range<float> radius)
   {
-    var compilers = Terrain.GetCompilers(searchPos, new(radius)).ToList();
+    var compilers = Terrain.GetCompilers(searchPos, new(radius.Max)).ToList();
     var data = MergeHeightmapsWithCircle(compilers, searchPos, radius);
     data.SetReference(centerPos, centerRot);
     return data;
@@ -299,7 +300,7 @@ public class TerrainInfo
     return data;
   }
 
-  private static TerrainData MergeHeightmapsWithCircle(List<TerrainComp> compilers, Vector3 centerPos, float radius)
+  private static TerrainData MergeHeightmapsWithCircle(List<TerrainComp> compilers, Vector3 centerPos, Range<float> radius)
   {
     if (compilers.Count == 0)
       return new TerrainData(centerPos);
@@ -320,7 +321,7 @@ public class TerrainInfo
         {
           var nodePos = VertexToWorld(compiler.m_hmap, x, z);
           var distance = Utils.DistanceXZ(centerPos, nodePos);
-          if (distance <= radius)
+          if (Helper.Within(radius, distance))
           {
             if (!hasAnyNodes)
             {
@@ -357,7 +358,7 @@ public class TerrainInfo
         {
           var nodePos = VertexToWorld(compiler.m_hmap, x, z);
           var distance = Utils.DistanceXZ(centerPos, nodePos);
-          if (distance > radius) continue;
+          if (!Helper.Within(radius, distance)) continue;
 
           var index = z * max + x;
           nodePos.y = compiler.m_hmap.m_heights[index];
