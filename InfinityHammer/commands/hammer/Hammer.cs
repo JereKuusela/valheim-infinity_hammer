@@ -159,48 +159,48 @@ public class HammerSelect
       if (pars.Growth != Growth.Default)
       {
         extraData ??= new();
-        extraData.Set(Hash.Growth, GrowthNumber(pars.Growth));
+        extraData.Set(Hashes.Growth, GrowthNumber(pars.Growth));
         extraData.Set(ZDOVars.s_plantTime, DateTime.MaxValue.Ticks / 2L);
       }
       if (pars.Wear != Wear.Default)
       {
         extraData ??= new();
-        extraData.Set(Hash.Wear, WearNumber(pars.Wear));
+        extraData.Set(Hashes.Wear, WearNumber(pars.Wear));
       }
       if (pars.Fall != Fall.Default)
       {
         extraData ??= new();
-        extraData.Set(Hash.Fall, FallNumber(pars.Fall));
+        extraData.Set(Hashes.Fall, FallNumber(pars.Fall));
       }
       if (pars.Wear != Wear.Default)
       {
         extraData ??= new();
-        extraData.Set(Hash.Wear, WearNumber(pars.Wear));
+        extraData.Set(Hashes.Wear, WearNumber(pars.Wear));
       }
       if (!pars.Collision)
       {
         extraData ??= new();
-        extraData.Set(Hash.Collision, false);
+        extraData.Set(Hashes.Collision, false);
       }
       if (!pars.Show)
       {
         extraData ??= new();
-        extraData.Set(Hash.Render, false);
+        extraData.Set(Hashes.Render, false);
       }
       if (!pars.Restrict)
       {
         extraData ??= new();
-        extraData.Set(Hash.Restrict, false);
+        extraData.Set(Hashes.Restrict, false);
       }
       if (!pars.Interact)
       {
         extraData ??= new();
-        extraData.Set(Hash.Interact, false);
+        extraData.Set(Hashes.Interact, false);
       }
       if (pars.Text != null)
       {
         extraData ??= new();
-        extraData.Set(Hash.Text, pars.Text);
+        extraData.Set(Hashes.Text, pars.Text);
       }
 
       ObjectSelection selection = views.Length == 1 ? new(views[0], pars.Pick, pars.Scale, extraData) : new(views, pars.Pick, pars.Scale, extraData);

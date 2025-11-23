@@ -311,11 +311,11 @@ public partial class ObjectSelection : BaseSelection
       }
     }
 
-    if (data.TryGetInt(pars, Hash.Wear, out var wear) && obj.TryGetComponent<WearNTear>(out var wearNTear))
+    if (data.TryGetInt(pars, Hashes.Wear, out var wear) && obj.TryGetComponent<WearNTear>(out var wearNTear))
     {
       SetWear(wearNTear, wear);
     }
-    if (data.TryGetInt(pars, Hash.Growth, out var growth) && obj.TryGetComponent<Plant>(out var plant))
+    if (data.TryGetInt(pars, Hashes.Growth, out var growth) && obj.TryGetComponent<Plant>(out var plant))
     {
       SetGrowth(plant, growth);
     }

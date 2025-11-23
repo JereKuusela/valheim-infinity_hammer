@@ -5,6 +5,7 @@ using UnityEngine;
 using WorldEditCommands;
 // Code related to repairing objects.
 namespace InfinityHammer;
+
 [HarmonyPatch(typeof(Player), nameof(Player.Repair))]
 public class Repair
 {
@@ -188,7 +189,7 @@ public class AdvancedRepair
     if (!Configuration.Enabled || !__instance.m_nview) return true;
     var zdo = __instance.m_nview.GetZDO();
     var customHealth = Configuration.OverwriteHealth > 0f || Configuration.Invulnerability != InvulnerabilityMode.Off;
-    var hasCustomHealth = zdo.GetFloat(CustomHealth.HashMaxHealth) != 0f;
+    var hasCustomHealth = zdo.GetFloat(Hashes.MaxHealth) != 0f;
     if (!customHealth && !hasCustomHealth) return true;
     __result = Repair.RepairStructure(__instance.m_nview);
     return false;

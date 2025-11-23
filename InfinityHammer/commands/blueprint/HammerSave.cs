@@ -126,7 +126,7 @@ public class HammerSaveCommand
     lines.AddRange(bp.Objects.OrderBy(o => o.Prefab).Select(GetPlanBuildObject));
 
     // Add terrain data if it exists
-    if (bp.TerrainData != null)
+    if (false && bp.TerrainData != null)
     {
       lines.Add($"#Height:{HammerHelper.PrintXZY(bp.TerrainData.FirstNodePosition)};{HammerHelper.PrintYXZ(bp.TerrainData.FirstNodeRotation.eulerAngles)};{HammerHelper.Format(bp.TerrainData.DistanceBetweenNodes)}");
 

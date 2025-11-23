@@ -1,24 +1,11 @@
 using System.Runtime.Remoting.Messaging;
 using TMPro;
+using Service;
 
 namespace InfinityHammer;
 
 public class CustomHealth
 {
-  private static readonly int HashFields = "HasFields".GetStableHashCode();
-  private static readonly int HashFieldsDestructible = "HasFieldsDestructible".GetStableHashCode();
-  private static readonly int HashFieldsMineRock = "HasFieldsMineRock".GetStableHashCode();
-  private static readonly int HashFieldsMineRock5 = "HasFieldsMineRock5".GetStableHashCode();
-  private static readonly int HashFieldsTreeBase = "HasFieldsTreeBase".GetStableHashCode();
-  private static readonly int HashFieldsTreeLog = "HasFieldsTreeLog".GetStableHashCode();
-  private static readonly int HashToolTierDestructible = "Destructible.m_minToolTier".GetStableHashCode();
-  private static readonly int HashHealthMineRock = "MineRock.m_health".GetStableHashCode();
-  private static readonly int HashToolTierMineRock = "MineRock.m_minToolTier".GetStableHashCode();
-  private static readonly int HashToolTierMineRock5 = "MineRock5.m_minToolTier".GetStableHashCode();
-  private static readonly int HashToolTierTreeBase = "TreeBase.m_minToolTier".GetStableHashCode();
-  private static readonly int HashToolTierTreeLog = "TreeLog.m_minToolTier".GetStableHashCode();
-  private static readonly int HashFieldsWearNTear = "HasFieldsWearNTear".GetStableHashCode();
-  public static readonly int HashMaxHealth = "WearNTear.m_health".GetStableHashCode();
 
   public static float SetHealth(ZNetView obj, bool isRepair)
   {
@@ -82,7 +69,7 @@ public class CustomHealth
     var change = original.m_health - mineRock.m_health;
     mineRock.m_health = original.m_health;
 
-    zdo.RemoveFloat(HashHealthMineRock);
+    zdo.RemoveFloat(Hashes.HealthMineRock);
     var repair = RemoveCurrentHealth(mineRock, zdo);
 
     if (RemoveToolTier(mineRock, zdo))
@@ -106,11 +93,11 @@ public class CustomHealth
   {
     var prev = zdo.GetFloat(ZDOVars.s_health, wear.m_health);
     zdo.RemoveFloat(ZDOVars.s_health);
-    var maxHealth = zdo.GetFloat(HashMaxHealth);
+    var maxHealth = zdo.GetFloat(Hashes.MaxHealth);
     if (maxHealth != 0f)
     {
       wear.m_health = ZNetScene.instance.GetPrefab(zdo.GetPrefab()).GetComponent<WearNTear>().m_health;
-      zdo.RemoveFloat(HashMaxHealth);
+      zdo.RemoveFloat(Hashes.MaxHealth);
     }
     UpdateVisual(zdo, wear);
     return maxHealth < 0f ? float.NegativeInfinity : wear.m_health - prev;
@@ -171,10 +158,10 @@ public class CustomHealth
   }
   private static float SetCustomHealth(ZDO zdo, MineRock mineRock, float health)
   {
-    zdo.Set(HashFields, true);
-    zdo.Set(HashFieldsMineRock, true);
+    zdo.Set(Hashes.HasFields, true);
+    zdo.Set(Hashes.HashFieldsMineRock, true);
     // To avoid bloating data, update the default health.
-    zdo.Set(HashHealthMineRock, health);
+    zdo.Set(Hashes.HealthMineRock, health);
     var change = health - mineRock.m_health;
     mineRock.m_health = health;
     var repair = RemoveCurrentHealth(mineRock, zdo);
@@ -202,13 +189,13 @@ public class CustomHealth
   {
     var prev = zdo.GetFloat(ZDOVars.s_health, wear.m_health);
     zdo.Set(ZDOVars.s_health, health);
-    var maxHealth = zdo.GetFloat(HashMaxHealth);
+    var maxHealth = zdo.GetFloat(Hashes.MaxHealth);
     if (maxHealth != 0f)
     {
       wear.m_health = ZNetScene.instance.GetPrefab(zdo.GetPrefab()).GetComponent<WearNTear>().m_health;
-      zdo.RemoveFloat(HashMaxHealth);
+      zdo.RemoveFloat(Hashes.MaxHealth);
     }
-    zdo.RemoveFloat(Hash.BuildingSkillLevel);
+    zdo.RemoveFloat(Hashes.BuildingSkillLevel);
     UpdateVisual(zdo, wear);
     return maxHealth < 0f ? float.NegativeInfinity : health - prev;
   }
@@ -244,51 +231,50 @@ public class CustomHealth
 
   private static bool SetInfiniteHealth(ZDO zdo, Destructible destructible)
   {
-    var changed = zdo.GetInt(HashToolTierDestructible) != int.MaxValue / 2;
+    var changed = zdo.GetInt(Hashes.ToolTierDestructible) != int.MaxValue / 2;
     zdo.RemoveFloat(ZDOVars.s_health);
-    zdo.Set(HashFields, true);
-    zdo.Set(HashFieldsDestructible, true);
-    zdo.Set(HashToolTierDestructible, int.MaxValue / 2);
+    zdo.Set(Hashes.HasFields, true);
+    zdo.Set(Hashes.HashFieldsDestructible, true);
+    zdo.Set(Hashes.ToolTierDestructible, int.MaxValue / 2);
     destructible.m_minToolTier = int.MaxValue / 2;
     return changed;
   }
   private static bool SetInfiniteHealth(ZDO zdo, TreeBase treeBase)
   {
-    var changed = zdo.GetInt(HashToolTierTreeBase) != int.MaxValue / 2;
+    var changed = zdo.GetInt(Hashes.ToolTierTreeBase) != int.MaxValue / 2;
     zdo.RemoveFloat(ZDOVars.s_health);
-    zdo.Set(HashFields, true);
-    zdo.Set(HashFieldsTreeBase, true);
-    zdo.Set(HashToolTierTreeBase, int.MaxValue / 2);
+    zdo.Set(Hashes.HasFields, true);
+    zdo.Set(Hashes.HashFieldsTreeBase, true);
+    zdo.Set(Hashes.ToolTierTreeBase, int.MaxValue / 2);
     treeBase.m_minToolTier = int.MaxValue / 2;
     return changed;
   }
   private static bool SetInfiniteHealth(ZDO zdo, TreeLog treeLog)
   {
-    var changed = zdo.GetInt(HashToolTierTreeLog) != int.MaxValue / 2;
+    var changed = zdo.GetInt(Hashes.ToolTierTreeLog) != int.MaxValue / 2;
     zdo.RemoveFloat(ZDOVars.s_health);
-    zdo.Set(HashFields, true);
-    zdo.Set(HashFieldsTreeLog, true);
-    zdo.Set(HashToolTierTreeLog, int.MaxValue / 2);
+    zdo.Set(Hashes.HasFields, true);
+    zdo.Set(Hashes.HashFieldsTreeLog, true);
+    zdo.Set(Hashes.ToolTierTreeLog, int.MaxValue / 2);
     treeLog.m_minToolTier = int.MaxValue / 2;
     return changed;
   }
   private static bool SetInfiniteHealth(ZDO zdo, MineRock mineRock)
   {
-    var changed = zdo.GetInt(HashToolTierMineRock) != int.MaxValue / 2;
-    zdo.RemoveFloat(HashHealthMineRock);
+    var changed = zdo.GetInt(Hashes.ToolTierMineRock) != int.MaxValue / 2;
     var change = RemoveCurrentHealth(mineRock, zdo);
     mineRock.m_minToolTier = int.MaxValue / 2;
-    zdo.Set(HashFields, true);
-    zdo.Set(HashFieldsMineRock, true);
-    zdo.Set(HashToolTierMineRock, int.MaxValue / 2);
+    zdo.Set(Hashes.HasFields, true);
+    zdo.Set(Hashes.HashFieldsMineRock, true);
+    zdo.Set(Hashes.ToolTierMineRock, int.MaxValue / 2);
     return changed || change != 0f;
   }
   private static bool SetInfiniteHealth(ZDO zdo, MineRock5 mineRock)
   {
-    var changed = zdo.GetInt(HashToolTierMineRock5) != int.MaxValue / 2;
-    zdo.Set(HashFields, true);
-    zdo.Set(HashFieldsMineRock5, true);
-    zdo.Set(HashToolTierMineRock5, int.MaxValue / 2);
+    var changed = zdo.GetInt(Hashes.ToolTierMineRock5) != int.MaxValue / 2;
+    zdo.Set(Hashes.HasFields, true);
+    zdo.Set(Hashes.HashFieldsMineRock5, true);
+    zdo.Set(Hashes.ToolTierMineRock5, int.MaxValue / 2);
     mineRock.m_minToolTier = int.MaxValue / 2;
     foreach (var area in mineRock.m_hitAreas)
     {
@@ -300,7 +286,7 @@ public class CustomHealth
   }
   private static bool SetInfiniteHealth(ZDO zdo, WearNTear wear)
   {
-    var currentMaxHealth = zdo.GetFloat(HashMaxHealth);
+    var currentMaxHealth = zdo.GetFloat(Hashes.MaxHealth);
     // Structures ignore damage when below zero health.
     zdo.Set(ZDOVars.s_health, -1f);
     // Max health must be equal or less than health to prevent repair.
@@ -313,7 +299,7 @@ public class CustomHealth
     {
       if (currentMaxHealth < 0f) // already invulnerable, preserve current type of invulnerability
         maxHealth = currentMaxHealth;
-      else 
+      else
       {
         // not invulnerable, convert to equivalent wear level
         // but only damaged pieces, the other should respect InvulnerabilityMode
@@ -323,12 +309,12 @@ public class CustomHealth
           maxHealth = -2f;
       }
     }
-      
+
     var changed = currentMaxHealth != maxHealth;
-    zdo.Set(HashFields, true);
-    zdo.Set(HashFieldsWearNTear, true);
-    zdo.Set(HashMaxHealth, maxHealth);
-    zdo.RemoveFloat(Hash.BuildingSkillLevel);
+    zdo.Set(Hashes.HasFields, true);
+    zdo.Set(Hashes.HashFieldsWearNTear, true);
+    zdo.Set(Hashes.MaxHealth, maxHealth);
+    zdo.RemoveFloat(Hashes.BuildingSkillLevel);
     wear.m_health = maxHealth;
     UpdateVisual(zdo, wear);
     return changed;
@@ -367,36 +353,36 @@ public class CustomHealth
   }
   private static bool RemoveToolTier(MineRock5 obj, ZDO zdo)
   {
-    if (zdo.GetInt(HashToolTierMineRock5, -1) < 0) return false;
-    zdo.RemoveInt(HashToolTierMineRock5);
+    if (zdo.GetInt(Hashes.ToolTierMineRock5, -1) < 0) return false;
+    zdo.RemoveInt(Hashes.ToolTierMineRock5);
     obj.m_minToolTier = ZNetScene.instance.GetPrefab(zdo.GetPrefab()).GetComponent<MineRock5>()?.m_minToolTier ?? 0;
     return true;
   }
   private static bool RemoveToolTier(MineRock obj, ZDO zdo)
   {
-    if (zdo.GetInt(HashToolTierMineRock, -1) < 0) return false;
-    zdo.RemoveInt(HashToolTierMineRock);
+    if (zdo.GetInt(Hashes.ToolTierMineRock, -1) < 0) return false;
+    zdo.RemoveInt(Hashes.ToolTierMineRock);
     obj.m_minToolTier = ZNetScene.instance.GetPrefab(zdo.GetPrefab()).GetComponent<MineRock>()?.m_minToolTier ?? 0;
     return true;
   }
   private static bool RemoveToolTier(TreeBase obj, ZDO zdo)
   {
-    if (zdo.GetInt(HashToolTierTreeBase, -1) < 0) return false;
-    zdo.RemoveInt(HashToolTierTreeBase);
+    if (zdo.GetInt(Hashes.ToolTierTreeBase, -1) < 0) return false;
+    zdo.RemoveInt(Hashes.ToolTierTreeBase);
     obj.m_minToolTier = ZNetScene.instance.GetPrefab(zdo.GetPrefab()).GetComponent<TreeBase>()?.m_minToolTier ?? 0;
     return true;
   }
   private static bool RemoveToolTier(TreeLog obj, ZDO zdo)
   {
-    if (zdo.GetInt(HashToolTierTreeLog, -1) < 0) return false;
-    zdo.RemoveInt(HashToolTierTreeLog);
+    if (zdo.GetInt(Hashes.ToolTierTreeLog, -1) < 0) return false;
+    zdo.RemoveInt(Hashes.ToolTierTreeLog);
     obj.m_minToolTier = ZNetScene.instance.GetPrefab(zdo.GetPrefab()).GetComponent<TreeLog>()?.m_minToolTier ?? 0;
     return true;
   }
   private static bool RemoveToolTier(Destructible obj, ZDO zdo)
   {
-    if (zdo.GetInt(HashToolTierDestructible, -1) < 0) return false;
-    zdo.RemoveInt(HashToolTierDestructible);
+    if (zdo.GetInt(Hashes.ToolTierDestructible, -1) < 0) return false;
+    zdo.RemoveInt(Hashes.ToolTierDestructible);
     obj.m_minToolTier = ZNetScene.instance.GetPrefab(zdo.GetPrefab()).GetComponent<Destructible>()?.m_minToolTier ?? 0;
     return true;
   }

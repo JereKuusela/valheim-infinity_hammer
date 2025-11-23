@@ -35,10 +35,10 @@ public partial class Configuration
   public static bool RepairAnything => configRepairAnything.Value && IsCheats;
   public static ConfigEntry<bool> configNoCreator;
   public static bool NoCreator => configNoCreator.Value && IsCheats;
-  public static ConfigEntry<bool> configNoPrimaryTarget;
-  public static bool NoPrimaryTarget => configNoPrimaryTarget.Value && IsCheats;
-  public static ConfigEntry<bool> configNoSecondaryTarget;
-  public static bool NoSecondaryTarget => configNoSecondaryTarget.Value && IsCheats;
+  public static ConfigEntry<bool> configNoTarget;
+  public static bool NoTarget => configNoTarget.Value && IsCheats;
+  public static ConfigEntry<bool> configNoPhysics;
+  public static bool NoPhysics => configNoPhysics.Value && IsCheats;
   public static ConfigEntry<string> configZoopMagic;
   public static string ZoopMagic => configZoopMagic.Value;
 
@@ -85,8 +85,8 @@ public partial class Configuration
     configZoopMagic = wrapper.Bind(section, "Zoop magic mode", ZoopMagicMode.Off, new ConfigDescription("Zoop magic mode.", new AcceptableValueList<string>(ZoopMagicMode.Off, ZoopMagicMode.Mild, ZoopMagicMode.Wild)));
 
     configNoCreator = wrapper.Bind(section, "No creator", false, "Reduces save data by not setting the creator id.");
-    configNoPrimaryTarget = wrapper.Bind(section, "No primary target", false, "Removes the primary target status. Requires World Edit Commands mod on the server.");
-    configNoSecondaryTarget = wrapper.Bind(section, "No secondary target", false, "Removes the secondary target status. Requires World Edit Commands mod on the server.");
+    configNoTarget = wrapper.Bind(section, "No target", false, "Prevents the build piece being targeted by enemies.");
+    configNoPhysics = wrapper.Bind(section, "No physics", false, "Prevents objects from falling when placed.");
     configUnfreezeOnSelect = wrapper.Bind(section, "Unfreeze on select", true, "Removes the placement freeze when selecting a new object.");
     configResetOffsetOnUnfreeze = wrapper.Bind(section, "Reset offset on unfreeze", true, "Removes the placement offset when unfreezing the placement.");
     configUnfreezeOnUnequip = wrapper.Bind(section, "Unfreeze on unequip", true, "Removes the placement freeze when unequipping the hammer.");

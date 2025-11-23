@@ -240,10 +240,8 @@ For example you could bind command `hammer_rotate_y random;hammer_place` to buil
 - Infinite health (default: `false`): Sets the Overwrite health setting to 1E30.
 - No cost (default: `false`): Removes durability, resource and stamina costs.
 - No creator (default: `false`): Reduces save data by not setting the creator id.
-- No primary target (default: `false`): Removes the primary target status.
-  - Requires World Edit Commands mod on the server, otherwise the change is removed on world load.
-- No secondary target (default: `false`): Removes the secondary target status.
-  - Requires World Edit Commands mod on the server, otherwise the change is removed on world load.
+- No target (default: `false`): Prevents the build piece being targeted by enemies.
+- No physics (default: `false`): Prevents objects from falling when placed.
 - Overwrite health (default: `0`): Sets the health of built or repaired objects (0 reverts to the default max health, except for creatures).
 - Range (default: `0`): Range for the hammer (capped at about 50 meters).
 - Remove anything (default: `false`): Allows removing any object.
