@@ -38,7 +38,7 @@ public static class CustomMenu
   public static List<CategoryInfo> GenerateObjects()
   {
     var allItems = ZNetScene.instance.m_namedPrefabs.Values
-      .Where(prefab => !prefab.name.StartsWith("sfx_") && !prefab.name.StartsWith("vfx_") && !prefab.name.StartsWith("fx_"))
+      .Where(prefab => !prefab.name.StartsWith("sfx_") && !prefab.name.StartsWith("vfx_") && !prefab.name.StartsWith("fx_") && !prefab.name.StartsWith("vx_"))
       .Where(prefab => string.IsNullOrEmpty(HammerMenuCommand.CurrentFilter) ||
                       prefab.name.StartsWith(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase))
       .Select(prefab => BuildItem($"hammer {prefab.name}", prefab.name))
@@ -132,7 +132,7 @@ public static class CustomMenu
   public static List<CategoryInfo> GenerateVisuals()
   {
     var items = ZNetScene.instance.m_namedPrefabs.Values
-      .Where(prefab => prefab.name.StartsWith("vfx_") || prefab.name.StartsWith("fx_"))
+      .Where(prefab => prefab.name.StartsWith("vfx_") || prefab.name.StartsWith("fx_") || prefab.name.StartsWith("vx_"))
       .Where(prefab => string.IsNullOrEmpty(HammerMenuCommand.CurrentFilter) ||
                       prefab.name.Split(['_'], 2).Last().Trim().StartsWith(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase))
       .Select(prefab => BuildItem($"hammer {prefab.name}", prefab.name.Split(['_'], 2).Last().Trim(), prefab.name)).ToList();

@@ -1,6 +1,7 @@
 - v1.77
   - Adds new setting "No target" to replace both "No primary target" and "No secondary target" settings.
   - Adds a new setting "No physics" to disable fall and push up properties.
+  - Fixes prefabs starting with "vx_" not appearing in visuals menu.
 
 - v1.76
   - Fixes some issues with build tables.
