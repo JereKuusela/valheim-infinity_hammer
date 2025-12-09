@@ -39,6 +39,8 @@ public partial class Configuration
   public static bool NoTarget => configNoTarget.Value && IsCheats;
   public static ConfigEntry<bool> configNoPhysics;
   public static bool NoPhysics => configNoPhysics.Value && IsCheats;
+  public static ConfigEntry<bool> configNoRemove;
+  public static bool NoRemove => configNoRemove.Value && IsCheats;
   public static ConfigEntry<string> configZoopMagic;
   public static string ZoopMagic => configZoopMagic.Value;
 
@@ -87,6 +89,7 @@ public partial class Configuration
     configNoCreator = wrapper.Bind(section, "No creator", false, "Reduces save data by not setting the creator id.");
     configNoTarget = wrapper.Bind(section, "No target", false, "Prevents the build piece being targeted by enemies.");
     configNoPhysics = wrapper.Bind(section, "No physics", false, "Prevents objects from falling when placed.");
+    configNoRemove = wrapper.Bind(section, "No remove", false, "Prevents the build piece from being removed by players.");
     configUnfreezeOnSelect = wrapper.Bind(section, "Unfreeze on select", true, "Removes the placement freeze when selecting a new object.");
     configResetOffsetOnUnfreeze = wrapper.Bind(section, "Reset offset on unfreeze", true, "Removes the placement offset when unfreezing the placement.");
     configUnfreezeOnUnequip = wrapper.Bind(section, "Unfreeze on unequip", true, "Removes the placement freeze when unequipping the hammer.");

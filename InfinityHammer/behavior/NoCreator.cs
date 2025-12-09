@@ -55,5 +55,14 @@ public class NoCreator()
         view.LoadFields();
       }
     }
+    if (Configuration.NoRemove)
+    {
+      zdo.Set(Hashes.HasFields, true);
+      zdo.Set(Hashes.HasFieldsPiece, true);
+      if (piece.m_primaryTarget)
+        zdo.Set(Hashes.PieceCanBeRemoved, false);
+      piece.m_canBeRemoved = false;
+      view.LoadFields();
+    }
   }
 }

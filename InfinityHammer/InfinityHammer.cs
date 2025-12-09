@@ -1,9 +1,11 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using HarmonyLib;
 using InfinityTools;
+using ServerDevcommands;
 using Service;
 namespace InfinityHammer;
 
@@ -16,7 +18,7 @@ public class InfinityHammer : BaseUnityPlugin
 {
   public const string GUID = "infinity_hammer";
   public const string NAME = "Infinity Hammer";
-  public const string VERSION = "1.76.1";
+  public const string VERSION = "1.77";
   public static bool StructureTweaks = false;
 #nullable disable
   public static ConfigWrapper Wrapper;
@@ -134,6 +136,8 @@ public class InfinityHammer : BaseUnityPlugin
   public void LateUpdate()
   {
     Ruler.Update();
+    if (Player_ManualUpdate.Projector)
+      Player_ManualUpdate.Projector.Update();
   }
 }
 
@@ -168,5 +172,17 @@ public class ChatAwake
   {
     CreateAlias();
     InfinityHammer.Wrapper.Bind();
+  }
+}
+[HarmonyPatch(typeof(Player), nameof(Player.SetupPlacementGhost)), HarmonyPriority(Priority.Last)]
+public class Player_ManualUpdate
+{
+  public static CircleProjector? Projector = null;
+  static void Postfix(Player __instance)
+  {
+    if (__instance.m_placementGhost)
+      Projector = __instance.m_placementGhost.GetComponentInChildren<CircleProjector>(true);
+    else
+      Projector = null;
   }
 }

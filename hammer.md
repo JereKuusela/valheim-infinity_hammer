@@ -242,6 +242,7 @@ For example you could bind command `hammer_rotate_y random;hammer_place` to buil
 - No creator (default: `false`): Reduces save data by not setting the creator id.
 - No target (default: `false`): Prevents the build piece being targeted by enemies.
 - No physics (default: `false`): Prevents objects from falling when placed.
+- No remove (default: `false`): Prevents the build piece from being removed by players.
 - Overwrite health (default: `0`): Sets the health of built or repaired objects (0 reverts to the default max health, except for creatures).
 - Range (default: `0`): Range for the hammer (capped at about 50 meters).
 - Remove anything (default: `false`): Allows removing any object.

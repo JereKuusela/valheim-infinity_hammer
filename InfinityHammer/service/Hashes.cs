@@ -7,6 +7,8 @@ public static class Hashes
   public static readonly int XRayCreatedID = "xray_created".GetStableHashCode();
   public static readonly int HasFields = "HasFields".GetStableHashCode();
   public static readonly int HasFieldsStaticTarget = "HasFieldsStaticTarget".GetStableHashCode();
+  public static readonly int HasFieldsPiece = "HasFieldsPiece".GetStableHashCode();
+  public static readonly int PieceCanBeRemoved = "Piece.m_canBeRemoved".GetStableHashCode();
   public static readonly int StaticTargetPrimaryTarget = "StaticTarget.m_primaryTarget".GetStableHashCode();
   public static readonly int StaticTargetRandomTarget = "StaticTarget.m_randomTarget".GetStableHashCode();
   public static readonly int HasFieldsStaticPhysics = "HasFieldsStaticPhysics".GetStableHashCode();
