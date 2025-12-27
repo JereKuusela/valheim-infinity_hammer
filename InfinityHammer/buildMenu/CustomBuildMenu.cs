@@ -39,6 +39,9 @@ public static class CustomBuildMenu
       case MenuMode.Types:
         categories = CustomMenu.GenerateComponents();
         break;
+      case MenuMode.Vegetation:
+        categories = CustomMenu.GenerateVegetations();
+        break;
       case MenuMode.Locations:
         categories = CustomMenu.GenerateLocations();
         break;

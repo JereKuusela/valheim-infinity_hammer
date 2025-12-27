@@ -176,7 +176,7 @@ public static class SpriteHelper
     {
       char c = name[i];
 
-      if (c == '_' || c == ' ')
+      if (c == '_' || c == ' ' || c == ':')
       {
         if (currentPart.Length > 0)
         {

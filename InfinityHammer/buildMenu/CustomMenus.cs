@@ -208,13 +208,20 @@ public static class CustomMenu
     return categories;
   }
 
+  public static List<CategoryInfo> GenerateVegetations()
+  {
+    var items = ParameterInfo.VegetationIds
+      .Where(veg => string.IsNullOrEmpty(HammerMenuCommand.CurrentFilter) ||
+                   veg.StartsWith(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase))
+      .Select(veg => BuildItem($"hammer {veg}", veg)).ToList();
+    return GenerateCategories(items, MaxItemsPerTab);
+  }
   public static List<CategoryInfo> GenerateLocations()
   {
-    var items = ZoneSystem.instance.m_locations
-      .Where(loc => loc.m_prefab.IsValid)
+    var items = ParameterInfo.LocationIds
       .Where(loc => string.IsNullOrEmpty(HammerMenuCommand.CurrentFilter) ||
-                   loc.m_prefab.Name.StartsWith(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase))
-      .Select(loc => BuildItem($"hammer_location {loc.m_prefab.Name}", loc.m_prefab.Name)).ToList();
+                   loc.StartsWith(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase))
+      .Select(loc => BuildItem($"hammer_location {loc}", loc)).ToList();
     return GenerateCategories(items, MaxItemsPerTab);
   }
   public static List<CategoryInfo> GenerateRooms()

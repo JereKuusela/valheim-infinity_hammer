@@ -1,11 +1,9 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using HarmonyLib;
 using InfinityTools;
-using ServerDevcommands;
 using Service;
 namespace InfinityHammer;
 
@@ -18,7 +16,7 @@ public class InfinityHammer : BaseUnityPlugin
 {
   public const string GUID = "infinity_hammer";
   public const string NAME = "Infinity Hammer";
-  public const string VERSION = "1.77";
+  public const string VERSION = "1.78";
   public static bool StructureTweaks = false;
 #nullable disable
   public static ConfigWrapper Wrapper;

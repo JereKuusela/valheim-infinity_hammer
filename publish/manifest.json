@@ -1,11 +1,11 @@
 {
   "name": "Infinity_Hammer",
-  "version_number": "1.77.0",
+  "version_number": "1.78.0",
   "website_url": "https://discord.gg/VFRJcPwUdm",
   "description": "Bend the rules of building! Copy any object, make structures indestructible, remove all restrictions, destroy anything and more...",
   "dependencies": [
     "denikson-BepInExPack_Valheim-5.4.2333",
-    "JereKuusela-Server_devcommands-1.99.0",
+    "JereKuusela-Server_devcommands-1.102.0",
     "JereKuusela-World_Edit_Commands-1.67.0"
   ]
 }

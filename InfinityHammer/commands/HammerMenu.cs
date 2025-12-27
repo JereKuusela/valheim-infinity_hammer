@@ -17,6 +17,7 @@ public enum MenuMode
   Tools,
   Types,
   Visuals,
+  Vegetation,
 }
 
 public class MenuNavigation(MenuMode mode, string filter, int page)
@@ -111,6 +112,9 @@ public class HammerMenuCommand
         break;
       case "builds":
         NavigationStack.Add(new MenuNavigation(MenuMode.Builds, filter, -1));
+        break;
+      case "vegetation":
+        NavigationStack.Add(new MenuNavigation(MenuMode.Vegetation, filter, -1));
         break;
       default:
         HammerHelper.Message(args.Context, "Invalid mode.");

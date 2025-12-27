@@ -1,3 +1,7 @@
+- v1.78
+  - Adds a new menu for vegetation in the Infinity Hammer build menu.
+  - Adds support for receiving server side location and vegetation IDs from Expand World Data mod.
+
 - v1.77
   - Adds a new setting "No target" to replace both "No primary target" and "No secondary target" settings.
   - Adds a new setting "No remove" to prevent placed pieces from being removed by players.
@@ -21,6 +25,3 @@
   - Fixes placing fishes corrupting the area entirely.
   - Fixes error message when placing some item drops.
   - Fixes dungeon room removal removing random room from dungeon data instead of the selected one.
-
-- v1.73
-  - Fixed for the new game version.
