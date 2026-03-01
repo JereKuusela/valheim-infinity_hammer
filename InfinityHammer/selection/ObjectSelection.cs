@@ -6,6 +6,7 @@ using ServerDevcommands;
 using Service;
 using UnityEngine;
 using WorldEditCommands;
+using System.Text.RegularExpressions;
 
 namespace InfinityHammer;
 
@@ -228,6 +229,13 @@ public partial class ObjectSelection : BaseSelection
   protected static DataEntry? ReadExtraInfo(GameObject obj, string extraInfo)
   {
     if (extraInfo == "") return null;
+
+    // new planbuild format can have an escaped string, try to deserialize
+    if (extraInfo.StartsWith("\"") && extraInfo.EndsWith("\""))
+    {
+      extraInfo = Regex.Unescape(extraInfo.Substring(1, extraInfo.Length - 2));
+    }
+
     DataEntry data = new();
     if (obj.TryGetComponent<Sign>(out var sign))
     {
@@ -242,15 +250,24 @@ public partial class ObjectSelection : BaseSelection
     {
       data.Set(ZDOVars.s_tamedName, extraInfo);
     }
+    if (obj.TryGetComponent<ItemDrop>(out var itemDrop))
+    {
+      data.Set(ZDOVars.s_piece, 1);
+    }
     if (obj.TryGetComponent<ItemStand>(out var itemStand))
     {
       var split = extraInfo.Split(':');
       var name = split[0];
       var variant = Parse.Int(split, 1, 0);
       var quality = Parse.Int(split, 2, 1);
+      var orientation = Parse.Int(split, 3, 0);
       data.Set(ZDOVars.s_item, name);
       data.Set(ZDOVars.s_variant, variant);
       data.Set(ZDOVars.s_quality, quality);
+      if (split.Length > 3)
+      {
+        data.Set(ZDOVars.s_type, orientation);
+      }
     }
     if (obj.TryGetComponent<ArmorStand>(out var armorStand))
     {
