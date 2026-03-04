@@ -157,6 +157,14 @@ public class HammerBlueprintCommand
         terrainHeight = false;
         terrainPaint = false;
       }
+      else if (row.StartsWith("#terrain", StringComparison.OrdinalIgnoreCase))
+      {
+        // Planbuild terrain format, not implemented
+        piece = false;
+        terrain = false;
+        terrainHeight = false;
+        terrainPaint = false;
+      }
       else if (row.StartsWith("#pieces", StringComparison.OrdinalIgnoreCase))
       {
         piece = true;
