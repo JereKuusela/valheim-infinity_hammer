@@ -1,3 +1,7 @@
+- v1.79
+  - Improves compatibility with PlanBuild mod (extra info, item drops, item stand orientation). Thanks Haloa!
+  - Fixes some prefabs disappearing from selection (TimedDestruction and Vine components are now removed). Thanks Haloa!
+
 - v1.78
   - Adds a new menu for vegetation in the Infinity Hammer build menu.
   - Adds support for receiving server side location and vegetation IDs from Expand World Data mod.
@@ -14,14 +18,3 @@
 
 - v1.75
   - Reverts the fix for error message when placing some item drops (this modified vanilla behavior).
-
-- v1.74
-  - Adds a new command "hammer_zoop_reset" to reset zoop offset.
-  - Adds a new command "hammer_mark" to mark individual pieces for selection (experimental).
-  - Adds a new command "hammer_menu" to use a custom UI for selecting pieces (experimental).
-  - Adds automatic clean up for nearby corrupted fish.
-  - Fixes controller not working on build menu.
-  - Fixes trying to place Twig breaking the player entirely.
-  - Fixes placing fishes corrupting the area entirely.
-  - Fixes error message when placing some item drops.
-  - Fixes dungeon room removal removing random room from dungeon data instead of the selected one.

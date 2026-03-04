@@ -250,11 +250,12 @@ public partial class ObjectSelection : BaseSelection
     {
       data.Set(ZDOVars.s_tamedName, extraInfo);
     }
-    if (obj.TryGetComponent<ItemDrop>(out var itemDrop))
+    // Fish don't work with piece, see PreventFishBecomingPieces patch.
+    if (obj.TryGetComponent<ItemDrop>(out var _) && !obj.TryGetComponent<Fish>(out var _))
     {
       data.Set(ZDOVars.s_piece, 1);
     }
-    if (obj.TryGetComponent<ItemStand>(out var itemStand))
+    if (obj.TryGetComponent<ItemStand>(out var _))
     {
       var split = extraInfo.Split(':');
       var name = split[0];

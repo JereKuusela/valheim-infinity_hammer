@@ -345,6 +345,7 @@ public class PreventFishBeingPiece
   {
     var view = __instance.m_nview;
     if (!view || !view.IsValid()) return;
+    if (!view.GetZDO().GetBool(ZDOVars.s_piece)) return;
     view.GetZDO().Set(ZDOVars.s_piece, false);
   }
 }
