@@ -205,6 +205,8 @@ public static class HammerHelper
     DestroyComponents<StaticPhysics>(obj);
     DestroyComponents<Tameable>(obj);
     DestroyComponents<Catapult>(obj);
+    DestroyComponents<TimedDestruction>(obj);
+    DestroyComponents<Vine>(obj);
 
     // Many things rely on Character so better just undo the Awake.
     var c = obj.GetComponent<Character>();
