@@ -186,6 +186,10 @@ public static class HammerHelper
     DestroyComponents<DungeonGenerator>(obj);
     DestroyComponents<MusicLocation>(obj);
     DisableComponents<Fish>(obj);
+    DestroyComponents<Ragdoll>(obj);
+    DestroyComponents<LocationProxy>(obj);
+    DestroyComponents<MapTable>(obj);
+    DestroyComponents<ArcheryTarget>(obj);
 
     // Could be disables but destroying maybe better for performance.
     DestroyComponents<FootStep>(obj);
@@ -205,8 +209,11 @@ public static class HammerHelper
     DestroyComponents<StaticPhysics>(obj);
     DestroyComponents<Tameable>(obj);
     DestroyComponents<Catapult>(obj);
+
+    // Can destroy the prefab and break selection data
     DestroyComponents<TimedDestruction>(obj);
     DestroyComponents<Vine>(obj);
+    DestroyComponents<Plant>(obj);
 
     // Many things rely on Character so better just undo the Awake.
     var c = obj.GetComponent<Character>();
