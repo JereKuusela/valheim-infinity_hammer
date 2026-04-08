@@ -112,6 +112,7 @@ public class HammerBlueprintCommand
     var terrainPaint = false;
     TerrainData? terrainData = null;
     var terrainRowIndex = 0;
+    var planbuildTerrain = false;
 
     foreach (var row in rows)
     {
@@ -140,6 +141,7 @@ public class HammerBlueprintCommand
           terrain = true;
           terrainHeight = true;
           terrainPaint = false;
+          planbuildTerrain = false;
           piece = false;
           terrainRowIndex = 0;
         }
@@ -148,6 +150,7 @@ public class HammerBlueprintCommand
       {
         terrainHeight = false;
         terrainPaint = true;
+        planbuildTerrain = false;
         terrainRowIndex = 0;
       }
       else if (row.StartsWith("#snappoints", StringComparison.OrdinalIgnoreCase))
@@ -156,6 +159,7 @@ public class HammerBlueprintCommand
         terrain = false;
         terrainHeight = false;
         terrainPaint = false;
+        planbuildTerrain = false;
       }
       else if (row.StartsWith("#terrain", StringComparison.OrdinalIgnoreCase))
       {
@@ -164,6 +168,7 @@ public class HammerBlueprintCommand
         terrain = false;
         terrainHeight = false;
         terrainPaint = false;
+        planbuildTerrain = true;
       }
       else if (row.StartsWith("#pieces", StringComparison.OrdinalIgnoreCase))
       {
@@ -171,6 +176,7 @@ public class HammerBlueprintCommand
         terrain = false;
         terrainHeight = false;
         terrainPaint = false;
+        planbuildTerrain = false;
       }
       else if (row.StartsWith("#", StringComparison.Ordinal))
         continue;
@@ -183,6 +189,10 @@ public class HammerBlueprintCommand
         else if (terrainPaint)
           ParseTerrainPaintRow(terrainData, row, terrainRowIndex);
         terrainRowIndex++;
+      }
+      else if (planbuildTerrain)
+      {
+        continue;
       }
       else if (!terrain)
         bp.SnapPoints.Add(GetPlanBuildSnapPoint(row));
