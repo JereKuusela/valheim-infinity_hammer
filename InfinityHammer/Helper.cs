@@ -1,12 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
 using HarmonyLib;
 using ServerDevcommands;
 using Service;
+using System;
+using System.ComponentModel;
+using System.Globalization;
+using System.Linq;
+using TMPro;
 using UnityEngine;
-using UnityEngine.Animations;
+using UnityEngine.UI;
+
 namespace InfinityHammer;
 
 public static class HammerHelper
@@ -181,37 +183,30 @@ public static class HammerHelper
   ///<summary>Removes scripts that try to run (for example placement needs only the model and Piece component).</summary>
   private static void CleanObject(GameObject obj)
   {
-    // These are confirmed to cause issues.
-    DestroyComponents<RandomFlyingBird>(obj);
-    DestroyComponents<DungeonGenerator>(obj);
-    DestroyComponents<MusicLocation>(obj);
-    DisableComponents<Fish>(obj);
-
-    // Could be disables but destroying maybe better for performance.
-    DestroyComponents<FootStep>(obj);
-    DestroyComponents<Growup>(obj);
-    DestroyComponents<Windmill>(obj);
-    DestroyComponents<MineRock>(obj);
-
-    DestroyComponents<MineRock5>(obj);
-    DestroyComponents<CharacterAnimEvent>(obj);
-    DestroyComponents<TreeLog>(obj);
-    DestroyComponents<TreeBase>(obj);
-    DestroyComponents<CreatureSpawner>(obj);
-    DestroyComponents<TombStone>(obj);
-    DestroyComponents<Aoe>(obj);
-    DestroyComponents<SpawnArea>(obj);
-    DestroyComponents<Procreation>(obj);
-    DestroyComponents<StaticPhysics>(obj);
-    DestroyComponents<Tameable>(obj);
-    DestroyComponents<Catapult>(obj);
-    DestroyComponents<TimedDestruction>(obj);
-    DestroyComponents<Vine>(obj);
-
     // Many things rely on Character so better just undo the Awake.
     var c = obj.GetComponent<Character>();
     if (c)
       Character.s_characters.Remove(c);
+
+    DestroyComponents<CharacterDrop>(obj);
+    DestroyComponents<BaseAI>(obj);
+
+    foreach (var component in obj.GetComponentsInChildren<Behaviour>())
+    {
+      if (component is ZNetView) continue; // mandatory
+      
+      if (component is WaterVolume) continue; // to keep seeing water color
+      if (component is ItemStand) continue; // to see the mounted item
+      if (component is ItemDrop) continue; // needed to save the fields
+
+      // to display Sign texts
+      if (component is Sign) continue; // needed to save the fields
+      if (component.name == "Canvas") continue;
+      if (component is CanvasScaler) continue;
+      if (component is TextMeshProUGUI) continue;
+
+      UnityEngine.Object.DestroyImmediate(component);
+    }
   }
   private static void DisableComponents<T>(GameObject obj) where T : MonoBehaviour
   {
@@ -364,4 +359,45 @@ public class MineRock5_NameFix
   {
     __instance.name = __state;
   }
+}
+
+[HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacement))]
+public class PlacementPerformanceFix
+{
+  [HarmonyPriority(Priority.VeryLow)]
+  static bool Prefix(Player __instance, bool takeInput, float dt)
+  {
+    if (__instance.InPlaceMode() && __instance.m_placementGhost)
+    {
+      return ZInput.GetButton("JoyAltKeys")
+        || ZInput.GetButton("JoyRotate")
+        || ZInput.GetButton("JoyRotateRight")
+        || ZInput.GetButtonDown("JoyButtonA")
+        || ZInput.GetButtonDown("JoyButtonB")
+        || ZInput.GetButtonDown("JoyButtonX")
+        || ZInput.GetButtonDown("JoyButtonY")
+        || ZInput.GetButtonDown("JoyDPadDown")
+        || ZInput.GetButtonDown("JoyDPadLeft")
+        || ZInput.GetButtonDown("JoyDPadRight")
+        || ZInput.GetButtonDown("JoyDPadUp")
+        || ZInput.GetButtonDown("JoyLStick")
+        || ZInput.GetButtonDown("JoyPlace")
+        || ZInput.GetButtonDown("JoyRemove")
+        || ZInput.GetButtonDown("JoyRStick")
+        || ZInput.GetButtonDown("Remove")
+        || ZInput.GetButtonUp("JoyRemove")
+        || ZInput.GetButtonDown("Attack")
+        || ZInput.GetButtonUp("Remove")
+        || (ZInput.GetJoyRightStickX() > 0)
+        //|| ZInput.GetButton("AltPlace")
+        //|| ZInput.GetKey(KeyCode.LeftControl)
+        //|| (ZInput.GetMouseScrollWheel() != 0f)
+        || ZInput.GetMouseButton(1)
+        || ZInput.GetMouseButton(2)
+        ;
+      }
+    
+    return true;
+  }
+
 }
