@@ -1,6 +1,7 @@
 using System;
 using ServerDevcommands;
 namespace InfinityHammer;
+
 public class HammerScaleCommand
 {
   private static void Scale(string amountStr, string direction, Action<float> action)
@@ -18,7 +19,6 @@ public class HammerScaleCommand
     });
     Helper.Command(name, $"[amount] - Sets the scale of {axis} axis (if the object supports it).", (args) =>
     {
-      HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
       var selection = Selection.Get();
       if (!Helper.GetPlayer().InPlaceMode()) return;
@@ -43,7 +43,6 @@ public class HammerScaleCommand
     });
     Helper.Command(name, "[amount or x,z,y] - Sets the scale (if the object supports it).", (args) =>
     {
-      HammerHelper.CheatCheck();
       var selection = Selection.Get();
       if (!Helper.GetPlayer().InPlaceMode()) return;
       if (!selection.IsScalingSupported())

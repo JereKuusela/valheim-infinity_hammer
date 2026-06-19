@@ -52,6 +52,12 @@ See [custom_hammer.md](custom_hammer.md) for more information.
 
 See [tools.md](tools.md) for more information.
 
+## Permissions
+
+- Supports Server Devcommands permissions system.
+
+See [permissions.md](permissions.md) for more information.
+
 ### Configuration
 
 There are lots of customization available. The simplest way is to install Configuration Manager mod but you can modify the setting file directly too.

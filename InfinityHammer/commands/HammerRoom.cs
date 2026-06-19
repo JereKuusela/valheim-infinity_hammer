@@ -23,7 +23,6 @@ public class HammerRoomCommand
     });
     Helper.Command("hammer_room", "[room id] [empty_room] - Selects the room to be placed.", (args) =>
     {
-      HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the room id.");
       HammerHelper.Init();
       var placeEmptyRoom = args.Length > 2 ? Parse.Boolean(args[2]) ?? Configuration.PlaceEmptyRooms : Configuration.PlaceEmptyRooms;

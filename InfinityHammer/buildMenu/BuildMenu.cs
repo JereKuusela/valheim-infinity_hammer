@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using HarmonyLib;
 using InfinityTools;
 using ServerDevcommands;
@@ -26,7 +25,6 @@ public static class UpdateAvailable
   [HarmonyPriority(Priority.Low)]
   static void Postfix(PieceTable __instance)
   {
-    if (!Configuration.IsCheats) return;
     if (!Configuration.ToolsEnabled) return;
     if (Hammer.IsInfinityHammer(__instance) && HammerMenuCommand.CurrentMode != MenuMode.Menu) return;
     CustomMenu.AddTools(__instance);

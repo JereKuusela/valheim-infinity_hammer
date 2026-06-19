@@ -17,7 +17,6 @@ public class HammerZoopCommand
     });
     Helper.Command($"hammer_zoop_{direction}", $"[value=auto] - Zoops towards the {direction} direction.", (args) =>
     {
-      HammerHelper.CheatCheck();
       HammerHelper.GetPlacementGhost();
       var value = "auto";
       if (args.Args.Length > 1)
@@ -59,7 +58,6 @@ public class HammerZoopCommand
     AutoComplete.Register($"hammer_zoop_reset", (int index) => ParameterInfo.None);
     Helper.Command($"hammer_zoop_reset", $"- Resets the zoop offset.", (args) =>
     {
-      HammerHelper.CheatCheck();
       HammerHelper.GetPlacementGhost();
       if (Selection.Get() is not ObjectSelection selected)
         return;

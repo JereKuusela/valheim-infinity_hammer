@@ -4,6 +4,7 @@ using ServerDevcommands;
 using UnityEngine;
 
 namespace InfinityHammer;
+
 public class HammerMeasureCommand
 {
   private static readonly int[] IgnoredLayers = [LayerMask.NameToLayer("character_trigger"), LayerMask.NameToLayer("viewblock"), LayerMask.NameToLayer("pathblocker")];
@@ -25,7 +26,6 @@ public class HammerMeasureCommand
     AutoComplete.RegisterEmpty("hammer_measure");
     Helper.Command("hammer_measure", "Tries to measure all structures.", (args) =>
     {
-      HammerHelper.CheatCheck();
       ZNetView.m_forceDisableInit = true;
       foreach (var prefab in ZNetScene.instance.m_prefabs)
       {

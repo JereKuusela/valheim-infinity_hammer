@@ -1,14 +1,14 @@
 using BepInEx.Configuration;
-using InfinityHammer;
 using Service;
 using UnityEngine;
 
 namespace InfinityHammer;
+
 public partial class Configuration
 {
 #nullable disable
   public static ConfigEntry<bool> configToolsEnabled;
-  public static bool ToolsEnabled => configToolsEnabled.Value;
+  public static bool ToolsEnabled => IsEnabled(InfinityPermissionHash.ToolsEnabled, configToolsEnabled.Value);
   public static ConfigEntry<bool> configShapeCircle;
   public static bool ShapeCircle => configShapeCircle.Value;
   public static ConfigEntry<bool> configShapeRing;

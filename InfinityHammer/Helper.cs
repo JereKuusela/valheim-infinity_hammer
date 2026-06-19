@@ -259,10 +259,6 @@ public static class HammerHelper
     piece.m_randomTarget = false;
     piece.m_primaryTarget = false;
   }
-  public static void CheatCheck()
-  {
-    if (!Configuration.IsCheats) throw new InvalidOperationException("This command is disabled.");
-  }
   public static void EnabledCheck()
   {
     if (!Configuration.Enabled) throw new InvalidOperationException("Infinity Hammer is disabled.");

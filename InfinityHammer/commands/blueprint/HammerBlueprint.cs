@@ -352,7 +352,6 @@ public class HammerBlueprintCommand
     });
     Helper.Command("hammer_blueprint", "[blueprint file] [center=piece] [snap=piece] [scale=x,z,y] [data=true/false] - Selects the blueprint to be placed.", (args) =>
     {
-      HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
       Hammer.Equip();
       var name = args[1];
@@ -376,7 +375,6 @@ public class HammerBlueprintCommand
     });
     Helper.Command("hammer_restore", "[blueprint file] [scale] - Restores the blueprint at its saved position.", (args) =>
     {
-      HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
       Hammer.Equip();
       var name = args[1];

@@ -1,6 +1,7 @@
 using ServerDevcommands;
 using UnityEngine;
 namespace InfinityHammer;
+
 public class HammerPosCommand
 {
   public HammerPosCommand()
@@ -9,7 +10,6 @@ public class HammerPosCommand
 
     Helper.Command("hammer_pos", "[posX,posZ,posY=0,0,0] [rotY,rotX,rotZ=0,0,0] - Sets the hammer position.", (args) =>
     {
-      HammerHelper.CheatCheck();
       Hammer.Equip();
       var value = Vector3.zero;
       if (args.Length > 1) value = Parse.VectorXZY(args[1]);

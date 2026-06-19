@@ -4,6 +4,7 @@ using BepInEx.Bootstrap;
 using BepInEx.Configuration;
 using HarmonyLib;
 using InfinityTools;
+using ServerDevcommands;
 using Service;
 namespace InfinityHammer;
 
@@ -16,7 +17,7 @@ public class InfinityHammer : BaseUnityPlugin
 {
   public const string GUID = "infinity_hammer";
   public const string NAME = "Infinity Hammer";
-  public const string VERSION = "1.79";
+  public const string VERSION = "1.79.1";
   public static bool StructureTweaks = false;
 #nullable disable
   public static ConfigWrapper Wrapper;
@@ -130,12 +131,18 @@ public class InfinityHammer : BaseUnityPlugin
     new ToolCmdCommand();
     new HammerRoomCommand();
     new HammerMark();
+    PermissionApi.Subscribe(UpdateBuildMenu);
   }
   public void LateUpdate()
   {
     Ruler.Update();
     if (Player_ManualUpdate.Projector)
       Player_ManualUpdate.Projector.Update();
+  }
+
+  private void UpdateBuildMenu()
+  {
+    Player.m_localPlayer?.UpdateAvailablePiecesList();
   }
 }
 

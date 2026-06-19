@@ -209,7 +209,6 @@ public class HammerSaveCommand
     });
     Helper.Command("hammer_save", "[file name] [center=piece] [snap=piece] [data=true/false] [profile=true/false] - Saves the selection to a blueprint.", (args) =>
     {
-      HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
       var player = Helper.GetPlayer();
       var ghost = HammerHelper.GetPlacementGhost();

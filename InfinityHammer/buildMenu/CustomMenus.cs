@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using InfinityTools;
 using ServerDevcommands;
+using Service;
 using UnityEngine;
 
 namespace InfinityHammer;
@@ -404,6 +405,7 @@ public static class CustomMenu
     Dictionary<int, int> indices = [];
     foreach (var tool in tools)
     {
+      if (!IsToolCommandAllowed(tool)) continue;
       tab = tool.TabIndex ?? tab;
       if (pt.m_availablePieces.Count <= tab) return;
       if (!indices.ContainsKey(tab))
@@ -415,6 +417,23 @@ public static class CustomMenu
       indices[tab] = index;
     }
   }
+
+  private static bool IsToolCommandAllowed(Tool tool)
+  {
+    var command = tool.GetCommand();
+    if (string.IsNullOrWhiteSpace(command)) return true;
+    var subCommands = command.Split(';');
+    foreach (var subCommand in subCommands)
+    {
+      var trimmed = subCommand.Trim();
+      if (trimmed == "") continue;
+      var commandName = trimmed.Split(' ')[0];
+      if (!PermissionApi.IsCommandAllowed(commandName))
+        return false;
+    }
+    return true;
+  }
+
   private static string PieceTableToEquipment(PieceTable pt)
   {
     var name = pt.name;

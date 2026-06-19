@@ -50,7 +50,6 @@ public class HammerStackCommand
     AutoComplete.Register(name, AC);
     Helper.Command(name, Description(description), (args) =>
     {
-      HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
       Hammer.Equip();
       var target = SelectTarget();
@@ -78,7 +77,6 @@ public class HammerStackCommand
     });
     Helper.Command("hammer_stack", "[forward,up,right] [step=auto,auto,auto] - Places multiple objects next to each other.", (args) =>
     {
-      HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
       Hammer.Equip();
       var target = SelectTarget();

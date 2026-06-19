@@ -1,6 +1,7 @@
 using System;
 using ServerDevcommands;
 namespace InfinityHammer;
+
 public class HammerZoomCommand
 {
   private static void Zoom(string amountStr, string direction, Action<float, float> action)
@@ -26,7 +27,6 @@ public class HammerZoomCommand
     });
     Helper.Command(name, $"[amount or percentage] - Zooms the {axis} axis (if the object supports it).", (args) =>
     {
-      HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
       var selection = Selection.Get();
       if (!Helper.GetPlayer().InPlaceMode()) return;
@@ -51,7 +51,6 @@ public class HammerZoomCommand
     });
     Helper.Command(name, "[amount/percentage or x,z,y] - Zooms the selection (if the object supports it).", (args) =>
     {
-      HammerHelper.CheatCheck();
       Helper.ArgsCheck(args, 2, "Missing the amount.");
       var selection = Selection.Get();
       if (!Helper.GetPlayer().InPlaceMode()) return;

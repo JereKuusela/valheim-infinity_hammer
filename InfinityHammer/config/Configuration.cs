@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using BepInEx.Configuration;
 using ServerDevcommands;
 using Service;
@@ -7,20 +6,21 @@ namespace InfinityHammer;
 
 public partial class Configuration
 {
+
+  public static bool IsEnabled(int hash, bool localValue) => Enabled && PermissionManager.Instance.IsFeatureEnabledByHash(InfinityPermissionHash.Section, hash, localValue);
 #nullable disable
-  public static bool IsCheats => Enabled && ((ZNet.instance && ZNet.instance.IsServer()) || Console.instance.IsCheatsEnabled());
   public static ConfigEntry<bool> configNoCost;
-  public static bool NoCost => configNoCost.Value && IsCheats;
+  public static bool NoCost => IsEnabled(InfinityPermissionHash.NoCost, configNoCost.Value);
   public static ConfigEntry<bool> configIgnoreWards;
-  public static bool IgnoreWards => configIgnoreWards.Value && IsCheats;
+  public static bool IgnoreWards => IsEnabled(InfinityPermissionHash.IgnoreWards, configIgnoreWards.Value);
   public static ConfigEntry<bool> configIgnoreNoBuild;
-  public static bool IgnoreNoBuild => configIgnoreNoBuild.Value && IsCheats;
+  public static bool IgnoreNoBuild => IsEnabled(InfinityPermissionHash.IgnoreNoBuild, configIgnoreNoBuild.Value);
   public static ConfigEntry<bool> configAllowInDungeons;
-  public static bool AllowInDungeons => configAllowInDungeons.Value && IsCheats;
+  public static bool AllowInDungeons => IsEnabled(InfinityPermissionHash.AllowInDungeons, configAllowInDungeons.Value);
   public static ConfigEntry<bool> configIgnoreOtherRestrictions;
-  public static bool IgnoreOtherRestrictions => configIgnoreOtherRestrictions.Value && IsCheats;
+  public static bool IgnoreOtherRestrictions => IsEnabled(InfinityPermissionHash.IgnoreOtherRestrictions, configIgnoreOtherRestrictions.Value);
   public static ConfigEntry<bool> configRemoveAnything;
-  public static bool RemoveAnything => configRemoveAnything.Value && IsCheats;
+  public static bool RemoveAnything => IsEnabled(InfinityPermissionHash.RemoveAnything, configRemoveAnything.Value);
   public static ConfigEntry<bool> configDisableMessages;
   public static bool DisableMessages => configDisableMessages.Value;
   public static ConfigEntry<bool> configDisableSelectMessages;
@@ -30,17 +30,17 @@ public partial class Configuration
   public static ConfigEntry<bool> configDisableScaleMessages;
   public static bool DisableScaleMessages => configDisableScaleMessages.Value;
   public static ConfigEntry<bool> configDisableLoot;
-  public static bool DisableLoot => configDisableLoot.Value && IsCheats;
+  public static bool DisableLoot => IsEnabled(InfinityPermissionHash.DisableLoot, configDisableLoot.Value);
   public static ConfigEntry<bool> configRepairAnything;
-  public static bool RepairAnything => configRepairAnything.Value && IsCheats;
+  public static bool RepairAnything => IsEnabled(InfinityPermissionHash.RepairAnything, configRepairAnything.Value);
   public static ConfigEntry<bool> configNoCreator;
-  public static bool NoCreator => configNoCreator.Value && IsCheats;
+  public static bool NoCreator => IsEnabled(InfinityPermissionHash.NoCreator, configNoCreator.Value);
   public static ConfigEntry<bool> configNoTarget;
-  public static bool NoTarget => configNoTarget.Value && IsCheats;
+  public static bool NoTarget => IsEnabled(InfinityPermissionHash.NoTarget, configNoTarget.Value);
   public static ConfigEntry<bool> configNoPhysics;
-  public static bool NoPhysics => configNoPhysics.Value && IsCheats;
+  public static bool NoPhysics => IsEnabled(InfinityPermissionHash.NoPhysics, configNoPhysics.Value);
   public static ConfigEntry<bool> configNoRemove;
-  public static bool NoRemove => configNoRemove.Value && IsCheats;
+  public static bool NoRemove => IsEnabled(InfinityPermissionHash.NoRemove, configNoRemove.Value);
   public static ConfigEntry<string> configZoopMagic;
   public static string ZoopMagic => configZoopMagic.Value;
 
@@ -51,9 +51,9 @@ public partial class Configuration
   public static ConfigEntry<bool> configUnfreezeOnSelect;
   public static bool UnfreezeOnSelect => configUnfreezeOnSelect.Value;
   public static ConfigEntry<string> configOverwriteHealth;
-  public static float OverwriteHealth => IsCheats ? Parse.Float(configOverwriteHealth.Value) : 0f;
+  public static float OverwriteHealth => IsEnabled(InfinityPermissionHash.OverwriteHealth, true) ? Parse.Float(configOverwriteHealth.Value) : 0f;
   public static ConfigEntry<string> configInvulnerability;
-  public static string Invulnerability => IsCheats ? configInvulnerability.Value : InvulnerabilityMode.Off;
+  public static string Invulnerability => IsEnabled(InfinityPermissionHash.Invulnerability, true) ? configInvulnerability.Value : InvulnerabilityMode.Off;
   public static ConfigEntry<string> configSnapping;
   public static bool PreserveWear => configPreserveWear.Value;
   public static ConfigEntry<bool> configPreserveWear;
@@ -61,7 +61,7 @@ public partial class Configuration
   public static ConfigEntry<string> configRemoveArea;
   public static float RemoveArea => Enabled ? Parse.Float(configRemoveArea.Value) : 0f;
   public static ConfigEntry<string> configRange;
-  public static float Range => IsCheats ? Parse.Float(configRange.Value) : 0f;
+  public static float Range => IsEnabled(InfinityPermissionHash.Range, true) ? Parse.Float(configRange.Value) : 0f;
   public static ConfigEntry<bool> configPlaceEmptyRooms;
   public static bool PlaceEmptyRooms => configPlaceEmptyRooms.Value;
   public static ConfigWrapper Wrapper;
