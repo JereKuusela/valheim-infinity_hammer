@@ -128,8 +128,10 @@ public static class Hammer
     if (infinityHammer == null)
     {
       var freeSlot = inventory.FindEmptySlot(true);
-      var data = new Dictionary<string, string>();
-      data["infinity_hammer"] = "true";
+      var data = new Dictionary<string, string>
+      {
+        ["infinity_hammer"] = "true"
+      };
       if (!inventory.AddItem("Hammer", 1, 100f, freeSlot, false, 1, 0, player.GetPlayerID(), Game.instance.GetPlayerProfile().GetName(), data, 0, true))
         throw new InvalidOperationException("Unable to add the hammer to inventory.");
     }

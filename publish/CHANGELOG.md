@@ -1,3 +1,10 @@
+- v1.80
+  - Adds support for the permission system from Server Devcommands mod. This allows granularly granting access to specific commands and features.
+  - Adds current blueprint names to the autocomplete of `hammer_save` command.
+  - Adds text input when `hammer_save` command is used without a name.
+  - Improves compatibility with PlanBuild mod (terrain data is ignored). Thanks Haloa!
+  - Fixes some prefabs disappearing from selection (Ragdoll, LocationProxy, MapTable, ArcheryTarget and Plant components are now removed). Thanks Haloa!
+
 - v1.79
   - Improves compatibility with PlanBuild mod (extra info, item drops, item stand orientation). Thanks Haloa!
   - Fixes some prefabs disappearing from selection (TimedDestruction and Vine components are now removed). Thanks Haloa!

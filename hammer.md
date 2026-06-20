@@ -78,6 +78,13 @@ For example `hammer_zoom 0.1` changes 100 % to 110 % or 200 % to 210 %. While `h
 
 Note: If you notice using these commands frequency, make a [key binding](https://docs.unity3d.com/ScriptReference/KeyCode.html) for them.
 
+Binding on mouse wheel automatically turns the number negative when scrolling down. For example in binds.yaml:
+
+```yaml
+- keys: wheel, g
+  command: hammer_zoom_x 0.5
+```
+
 ## Locations
 
 Locations (or [Points of Interests](https://valheim.fandom.com/wiki/Points_of_Interest_(POI))) usually include multiple objects so copying them with the `hammer` command is not simple.

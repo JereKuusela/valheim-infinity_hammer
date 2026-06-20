@@ -6,7 +6,9 @@ Basic support is provided for BuildShare .vbuild and [PlanBuild](https://valheim
 
 Blueprints can be selected with the `hammer_blueprint [file name]` command and then placed with the hammer.
 
-The command has following parameters:
+Recommended to use `hammer_menu blueprints` for an easier access.
+
+The command has following advanced parameters:
 
 - `center=object`: If given, the blueprint is centered around this object.
   - Note: The object is not included in the selection.
@@ -22,6 +24,8 @@ If the blueprint has no snap points, some are automatically generated.
 ## Creating blueprints
 
 New PlanBuild blueprints can be created with the `hammer_save [file name]` command.
+
+If file name is not given, a text input is shown.
 
 The command has optional parameters. Their default values can be set in the config.
 

@@ -9,7 +9,7 @@ using Service;
 namespace InfinityHammer;
 
 #pragma warning disable IDE0046
-public class HammerBlueprintCommand
+public class HammerBlueprintCommand : TextReceiver
 {
   private static void PrintSelected(Terminal terminal, string name)
   {
@@ -332,42 +332,54 @@ public class HammerBlueprintCommand
     return float.Parse(s, NumberStyles.Any, NumberFormatInfo.InvariantInfo);
   }
 
+  private void SelectBlueprint(Terminal.ConsoleEventArgs args, HammerBlueprintPars pars)
+  {
+    if (pars.Name == "") return;
+    Hammer.Equip();
+    var bp = GetBluePrint(pars.Name, pars.LoadData);
+    bp.Center(pars.CenterPiece);
+    if (pars.SnapPiece != "")
+    {
+      foreach (var snap in bp.SnapPoints)
+        bp.Objects.Add(new BlueprintObject(pars.SnapPiece, snap, Quaternion.identity, Vector3.one, "", "", 1f));
+    }
+    var obj = Selection.CreateGhost(new ObjectSelection(args.Context, bp, pars.Scale));
+    PrintSelected(args.Context, bp.Name);
+  }
+
   public HammerBlueprintCommand()
   {
-    AutoComplete.Register("hammer_blueprint", (int index, int subIndex) =>
+    AutoComplete.Register("hammer_blueprint", (index, subIndex) =>
     {
       if (index == 0) return GetBlueprints();
       return ["c", "center", "d", "data", "sc", "scale", "s", "snap"];
     },
     new() {
-      { "scale", (int index) => ParameterInfo.Scale("scale", "Size of the object (if the object can be scaled).", index) },
-      { "sc", (int index) => ParameterInfo.Scale("scale", "Size of the object (if the object can be scaled).", index) },
-      { "center", (int index) => ParameterInfo.ObjectIds},
-      { "c", (int index) => ParameterInfo.ObjectIds},
-      { "snap", (int index) => ParameterInfo.ObjectIds},
-      { "s", (int index) => ParameterInfo.ObjectIds},
-      { "data", (int index) => ["true", "false"]},
-      { "d", (int index) => ["true", "false"]},
+      { "scale", index => ParameterInfo.Scale("scale", "Size of the object (if the object can be scaled).", index) },
+      { "sc", index => ParameterInfo.Scale("scale", "Size of the object (if the object can be scaled).", index) },
+      { "center", index => ParameterInfo.ObjectIds},
+      { "c", index => ParameterInfo.ObjectIds},
+      { "snap", index => ParameterInfo.ObjectIds},
+      { "s", index => ParameterInfo.ObjectIds},
+      { "data", index => ["true", "false"]},
+      { "d", index => ["true", "false"]},
 
     });
     Helper.Command("hammer_blueprint", "[blueprint file] [center=piece] [snap=piece] [scale=x,z,y] [data=true/false] - Selects the blueprint to be placed.", (args) =>
     {
-      Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
-      Hammer.Equip();
-      var name = args[1];
-      HammerBlueprintPars pars = new(args);
-      var bp = GetBluePrint(name, pars.LoadData);
-      bp.Center(pars.CenterPiece);
-      if (pars.SnapPiece != "")
+      Args = args;
+      Pars = new(args);
+      if (Pars.Name != "")
       {
-        foreach (var snap in bp.SnapPoints)
-          bp.Objects.Add(new BlueprintObject(pars.SnapPiece, snap, Quaternion.identity, Vector3.one, "", "", 1f));
+        SelectBlueprint(args, Pars);
+        Pars = null;
+        Args = null;
       }
-      var obj = Selection.CreateGhost(new ObjectSelection(args.Context, bp, pars.Scale));
-      PrintSelected(args.Context, bp.Name);
+      else
+        TextInput.instance.RequestText(this, "Name", 1000);
     });
 
-    AutoComplete.Register("hammer_restore", (int index, int subIndex) =>
+    AutoComplete.Register("hammer_restore", (index, subIndex) =>
     {
       if (index == 0) return GetBlueprints();
       if (index == 1) return ParameterInfo.Scale("scale", "Size of the object (if the object can be scaled).", subIndex);
@@ -387,10 +399,26 @@ public class HammerBlueprintCommand
       PrintSelected(args.Context, bp.Name);
     });
   }
+
+  HammerBlueprintPars? Pars = null;
+  Terminal.ConsoleEventArgs? Args = null;
+
+  public string GetText() => "";
+
+  public void SetText(string text)
+  {
+    if (Pars == null || Args == null)
+      return;
+    Pars.Name = text;
+    SelectBlueprint(Args, Pars);
+    Pars = null;
+    Args = null;
+  }
 }
 
 public class HammerBlueprintPars
 {
+  public string Name = "";
   public string CenterPiece = "";
   public string SnapPiece = "";
   public bool LoadData = true;
@@ -398,16 +426,17 @@ public class HammerBlueprintPars
 
   public HammerBlueprintPars(Terminal.ConsoleEventArgs args)
   {
-    var pars = args.Args.Skip(2).ToArray();
-    int index = 0;
-    foreach (var par in pars)
+    var pars = args.Args.Skip(1).ToArray();
+    for (int i = 0; i < pars.Length; i++)
     {
+      var par = pars[i];
       var split = par.Split('=');
       if (split.Length < 2)
       {
         // Legacy support.
-        if (index == 0) CenterPiece = par;
-        if (index == 1) Scale = Parse.Scale(Parse.Split(par));
+        if (i == 0) Name = par;
+        if (i == 1) CenterPiece = par;
+        if (i == 2) Scale = Parse.Scale(Parse.Split(par));
         continue;
       }
       if (split[0] == "center" || split[0] == "c")

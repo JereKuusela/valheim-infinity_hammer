@@ -7,7 +7,7 @@ using UnityEngine;
 namespace InfinityHammer;
 
 
-public class HammerSaveCommand
+public class HammerSaveCommand : TextReceiver
 {
 
   private static string GetExtraInfo(GameObject obj, DataEntry data)
@@ -193,35 +193,62 @@ public class HammerSaveCommand
 
   public HammerSaveCommand()
   {
-    AutoComplete.Register("hammer_save", (int index) =>
+    AutoComplete.Register("hammer_save", index =>
     {
-      if (index == 0) return ParameterInfo.Create("File name.");
+      if (index == 0) return HammerBlueprintCommand.GetBlueprints();
       return ["c", "center", "d", "data", "p", "profile", "s", "snap"];
     }, new() {
-      { "c", (int index) => ParameterInfo.ObjectIds },
-      { "center", (int index) => ParameterInfo.ObjectIds },
-      { "d", (int index) => ["true", "false"] },
-      { "data", (int index) => ["true", "false"] },
-      { "p", (int index) => ["true", "false"] },
-      { "profile", (int index) => ["true", "false"] },
-      { "s", (int index) => ParameterInfo.ObjectIds },
-      { "snap", (int index) => ParameterInfo.ObjectIds },
+      { "c", index => ParameterInfo.ObjectIds },
+      { "center", index => ParameterInfo.ObjectIds },
+      { "d", index => ["true", "false"] },
+      { "data", index => ["true", "false"] },
+      { "p", index => ["true", "false"] },
+      { "profile", index => ["true", "false"] },
+      { "s", index => ParameterInfo.ObjectIds },
+      { "snap", index => ParameterInfo.ObjectIds },
     });
     Helper.Command("hammer_save", "[file name] [center=piece] [snap=piece] [data=true/false] [profile=true/false] - Saves the selection to a blueprint.", (args) =>
     {
-      Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
+      Args = args;
+      Pars = new(args);
+      if (Pars.Name != "")
+        SaveBlueprint(args, Pars);
+      else
+        TextInput.instance.RequestText(this, "Name", 1000);
+    });
+  }
+
+  HammerSavePars? Pars = null;
+  Terminal.ConsoleEventArgs? Args = null;
+  private void SaveBlueprint(Terminal.ConsoleEventArgs args, HammerSavePars pars)
+  {
+    if (pars.Name != "")
+    {
       var player = Helper.GetPlayer();
       var ghost = HammerHelper.GetPlacementGhost();
-      HammerSavePars pars = new(args);
       var bp = BuildBluePrint(player, ghost, pars.CenterPiece, pars.SnapPiece, pars.SaveData);
       var lines = GetPlanBuildFile(bp);
-      var name = Path.GetFileNameWithoutExtension(args[1]) + ".blueprint";
+      var name = Path.GetFileNameWithoutExtension(pars.Name) + ".blueprint";
       var path = Path.Combine(pars.Profile ? Configuration.BlueprintLocalFolder : Configuration.BlueprintGlobalFolder, name);
       Directory.CreateDirectory(Path.GetDirectoryName(path));
       File.WriteAllLines(path, lines);
       args.Context.AddString($"Blueprint saved to {path.Replace("\\", "\\\\")} (pos: {HammerHelper.PrintXZY(bp.Coordinates)} rot: {HammerHelper.PrintYXZ(bp.Rotation)}).");
       Selection.CreateGhost(new ObjectSelection(args.Context, bp, Vector3.one));
-    });
+    }
+    Pars = null;
+    Args = null;
+  }
+
+  public string GetText() => "";
+
+  public void SetText(string text)
+  {
+    if (Pars == null || Args == null)
+      return;
+    Pars.Name = text;
+    SaveBlueprint(Args, Pars);
+    Pars = null;
+    Args = null;
   }
 }
 
@@ -231,19 +258,21 @@ public class HammerSavePars
   public string SnapPiece = Configuration.BlueprintSnapPiece;
   public bool SaveData = Configuration.SaveBlueprintData;
   public bool Profile = Configuration.SaveBlueprintsToProfile;
+  public string Name = "";
 
   public HammerSavePars(Terminal.ConsoleEventArgs args)
   {
-    var pars = args.Args.Skip(2).ToArray();
-    int index = 0;
-    foreach (var par in pars)
+    var pars = args.Args.Skip(1).ToArray();
+    for (int i = 0; i < pars.Length; i++)
     {
+      var par = pars[i];
       var split = par.Split('=');
       if (split.Length < 2)
       {
+        if (i == 0) Name = par;
         // Legacy support.
-        if (index == 0) CenterPiece = par;
-        if (index == 1) SnapPiece = par;
+        if (i == 1) CenterPiece = par;
+        if (i == 2) SnapPiece = par;
         continue;
       }
       if (split[0] == "center" || split[0] == "c")

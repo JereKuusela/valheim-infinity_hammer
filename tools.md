@@ -16,6 +16,7 @@ Following fields are available:
   - Various parameters can be used inject coordinates and other information to the command.
   - Use `<area>` parameter to select the place and size with the mouse.
   - Use `<place>` parameter to select the place with the mouse.
+  - Use `<input_title>` to show a text input for the value. Especially useful for instant commands.
 - continous: If true, the command is executed continuously while holding the mouse button.
 - initialHeight: If set, the height parameter is set to this value when the tool is selected.
   - This can be useful if you typically use a specific height, while still allowing changes if needed.
