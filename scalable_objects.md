@@ -1,306 +1,306 @@
-ancient_skull
-Ashlands_Fortress_Wall_Pillar_base_frac
-Ashlands_Fortress_Wall_Pillar_frac
-Ashlands_Fortress_Wall_PillarTop_frac
-Ashlands_Fortress_Wall_PillarTopStone_frac
-Ashlands_rock1
-Ashlands_rock2
-AshlandsBranch1
-AshlandsBranch2
-AshlandsBranch3
-AshlandsBush1
-AshlandsBush2
-AshlandsTree1
-AshlandsTree3
-AshlandsTree4
-AshlandsTree5
-AshlandsTree6
-AshlandsTree6_big
-AshlandsTreeLog1
-AshlandsTreeLog2
-AshlandsTreeLogHalf1
-AshlandsTreeLogHalf2
-AshlandsTreeStump1
-AshlandsTreeStump2
-AshlandsTreeStump3
-beech_log
-beech_log_half
-Beech_Sapling
-Beech_small1
-Beech_small2
-Beech_Stub
-Beech1
-BigRock
-Birch_log
-Birch_log_half
-Birch_Sapling
-Birch1
-Birch1_aut
-Birch2
-Birch2_aut
-BirchStub
-BlueberryBush
-Bush01
-Bush01_heath
-Bush02_en
-caverock_ice_pillar_wall
-caverock_ice_stalagmite
-caverock_ice_stalagmite_broken
-caverock_ice_stalagmite_destruction
-caverock_ice_stalagtite
-caverock_ice_stalagtite_destruction
-caverock_ice_stalagtite_falling
-caverock_ice_wall_destruction
-cliff_ashlands_Arch_frac
-cliff_ashlands1
-cliff_ashlands1_frac
-cliff_ashlands2
-cliff_ashlands2_frac
-cliff_ashlands3_Arch_1
-cliff_ashlands4
-cliff_ashlands4_frac
-cliff_ashlands5
-cliff_ashlands6
-cliff_ashlands6_frac
-cliff_ashlands7_HalfArch
-cliff_ashlands7_HalfArch_frac
-cliff_ashlands8
-cliff_ashlandsflowrock_frac
-cliff_mistlands1
-cliff_mistlands1_creep
-cliff_mistlands1_creep_frac
-cliff_mistlands1_frac
-cliff_mistlands2
-cliff_mistlands2_frac
-CloudberryBush
-CreepProp_egg_hanging01
-CreepProp_egg_hanging02
-CreepProp_entrance1
-CreepProp_entrance2
-CreepProp_hanging01
-CreepProp_wall01
-dvergrprops_crate
-dvergrprops_crate_ashlands
-dvergrprops_crate_long
-dvergrtown_arch
-dvergrtown_wood_wall01
-dvergrtown_wood_wall02
-dvergrtown_wood_wall03
-FernAshlands
-FernFiddleHeadAshlands
-FirTree
-FirTree_log
-FirTree_log_half
-FirTree_oldLog
-FirTree_Sapling
-FirTree_small
-FirTree_small_dead
-FirTree_Stub
-FlametalRockstand
-FlametalRockstand_frac
-flying_core
-fx_Adrenaline1
-fx_GoblinShieldBreak
-fx_GoblinShieldHit
-fx_icefloor_destruction
-fx_Lightning
-fx_Potion_fireresist
-fx_Potion_frostresist
-fx_Puke
-fx_StaffShield_Break
-fx_StaffShield_Hit
-giant_arm
-giant_brain
-giant_brain_frac
-giant_helmet1
-giant_helmet1_destruction
-giant_helmet2
-giant_helmet2_destruction
-giant_ribs
-giant_ribs_frac
-giant_skull
-giant_skull_frac
-giant_sword1
-giant_sword1_destruction
-giant_sword2
-giant_sword2_destruction
-GlowingMushroom
-GuckSack
-GuckSack_small
-highstone
-highstone_frac
-HugeRoot1
-Ice_floor
-Ice_floor_fractured
-ice_rock1
-ice_rock1_frac
-lavabomb_rock1
-lavarock_ashlands1
-marker01
-marker02
-MineRock_Obsidian
-MineRock_Tin
-MountainGraveStone01
-mudpile
-mudpile_beacon
-mudpile_frac
-mudpile_old
-mudpile2
-mudpile2_frac
-Oak_log
-Oak_log_half
-Oak_Sapling
-Oak1
-OakStub
-Pickable_Barley
-Pickable_Barley_Wild
-Pickable_Branch
-Pickable_Carrot
-Pickable_DvergerThing
-Pickable_Flax
-Pickable_Flax_Wild
-Pickable_ForestCryptRemains01
-Pickable_ForestCryptRemains02
-Pickable_ForestCryptRemains03
-Pickable_ForestCryptRemains04
-Pickable_Hairstrands01
-Pickable_Hairstrands02
-Pickable_MeatPile
-Pickable_MountainRemains01_buried
-Pickable_Onion
-Pickable_SeedCarrot
-Pickable_SeedOnion
-Pickable_SeedTurnip
-Pickable_SulfurRock
-Pickable_Thistle
-Pickable_Turnip
-PineTree
-Pinetree_01
-Pinetree_01_Stub
-PineTree_log
-PineTree_log_half
-PineTree_log_halfOLD
-PineTree_logOLD
-PineTree_Sapling
-RaspberryBush
-Rock_3
-Rock_3_frac
-Rock_4
-Rock_4_plains
-Rock_7
-rock_mistlands1
-rock_mistlands1_frac
-rock_mistlands2
-rock1_mistlands
-rock1_mountain
-rock1_mountain_frac
-rock2_heath
-rock2_heath_frac
-rock2_mountain
-rock2_mountain_frac
-rock3_ice
-rock3_ice_frac
-rock3_mountain
-rock3_mountain_frac
-rock3_silver
-rock3_silver_frac
-rock4_ashlands_frac
-rock4_bigrock_frac
-rock4_coast
-rock4_coast_frac
-rock4_copper
-rock4_copper_frac
-rock4_forest
-rock4_forest_frac
-rock4_heath
-rock4_heath_frac
-RockDolmen_1
-RockDolmen_2
-RockDolmen_3
-RockFinger
-RockFinger_frac
-RockFingerBroken
-RockFingerBroken_frac
-RockThumb
-RockThumb_frac
-root07
-root08
-root11
-root12
-sapling_barley
-sapling_carrot
-sapling_flax
-sapling_jotunpuffs
-sapling_magecap
-sapling_onion
-sapling_seedcarrot
-sapling_seedonion
-sapling_seedturnip
-sapling_turnip
-sfx_Puke_female
-sfx_Puke_male
-ShootStump
-shrub_2
-shrub_2_heath
-silvervein
-silvervein_frac
-stubbe
-stubbe_spawner
-SwampTree1
-SwampTree1_log
-SwampTree1_Stub
-SwampTree2
-SwampTree2_darkland
-SwampTree2_log
-tarlump1
-tarlump1_frac
-veg_skull_Ashlands
-vfx_ashlandslogdestroyed
-vfx_ashlandslogdestroyed_half
-vfx_beechlog_destroyed
-vfx_beechlog_half_destroyed
-vfx_BugRepellent
-vfx_Burning
-vfx_bush2_e_hit
-vfx_bush2_en_destroyed
-vfx_Cold
-vfx_fir_oldlog
-vfx_firlogdestroyed
-vfx_firlogdestroyed_half
-vfx_Freezing
-vfx_Frost
-vfx_GoblinShield
-vfx_Harpooned
-vfx_LightFoot
-vfx_MeadBzerker
-vfx_MeadHasty
-vfx_MeadStrength
-vfx_MeadSwimmer
-vfx_MeadTamer
-vfx_oaklogdestroyed
-vfx_oaklogdestroyed_half
-vfx_pinelogdestroyed
-vfx_pinelogdestroyed_half
-vfx_Poison
-vfx_Potion_eitr_minor
-vfx_Potion_health_medium
-vfx_Potion_stamina_medium
-vfx_Slimed
-vfx_Smoked
-vfx_StaffShield
-vfx_stubbe
-vfx_Tared
-vfx_TrollPheromones
-vfx_UndeadBurn
-vfx_Wet
-VineAsh_sapling
-VineGreen_sapling
-widestone
-widestone_frac
-yggashoot_log
-yggashoot_log_half
-YggaShoot_small1
-YggaShoot1
-YggaShoot2
-YggaShoot3
-YggdrasilRoot
+- ancient_skull
+- Ashlands_Fortress_Wall_Pillar_base_frac
+- Ashlands_Fortress_Wall_Pillar_frac
+- Ashlands_Fortress_Wall_PillarTop_frac
+- Ashlands_Fortress_Wall_PillarTopStone_frac
+- Ashlands_rock1
+- Ashlands_rock2
+- AshlandsBranch1
+- AshlandsBranch2
+- AshlandsBranch3
+- AshlandsBush1
+- AshlandsBush2
+- AshlandsTree1
+- AshlandsTree3
+- AshlandsTree4
+- AshlandsTree5
+- AshlandsTree6
+- AshlandsTree6_big
+- AshlandsTreeLog1
+- AshlandsTreeLog2
+- AshlandsTreeLogHalf1
+- AshlandsTreeLogHalf2
+- AshlandsTreeStump1
+- AshlandsTreeStump2
+- AshlandsTreeStump3
+- beech_log
+- beech_log_half
+- Beech_Sapling
+- Beech_small1
+- Beech_small2
+- Beech_Stub
+- Beech1
+- BigRock
+- Birch_log
+- Birch_log_half
+- Birch_Sapling
+- Birch1
+- Birch1_aut
+- Birch2
+- Birch2_aut
+- BirchStub
+- BlueberryBush
+- Bush01
+- Bush01_heath
+- Bush02_en
+- caverock_ice_pillar_wall
+- caverock_ice_stalagmite
+- caverock_ice_stalagmite_broken
+- caverock_ice_stalagmite_destruction
+- caverock_ice_stalagtite
+- caverock_ice_stalagtite_destruction
+- caverock_ice_stalagtite_falling
+- caverock_ice_wall_destruction
+- cliff_ashlands_Arch_frac
+- cliff_ashlands1
+- cliff_ashlands1_frac
+- cliff_ashlands2
+- cliff_ashlands2_frac
+- cliff_ashlands3_Arch_1
+- cliff_ashlands4
+- cliff_ashlands4_frac
+- cliff_ashlands5
+- cliff_ashlands6
+- cliff_ashlands6_frac
+- cliff_ashlands7_HalfArch
+- cliff_ashlands7_HalfArch_frac
+- cliff_ashlands8
+- cliff_ashlandsflowrock_frac
+- cliff_mistlands1
+- cliff_mistlands1_creep
+- cliff_mistlands1_creep_frac
+- cliff_mistlands1_frac
+- cliff_mistlands2
+- cliff_mistlands2_frac
+- CloudberryBush
+- CreepProp_egg_hanging01
+- CreepProp_egg_hanging02
+- CreepProp_entrance1
+- CreepProp_entrance2
+- CreepProp_hanging01
+- CreepProp_wall01
+- dvergrprops_crate
+- dvergrprops_crate_ashlands
+- dvergrprops_crate_long
+- dvergrtown_arch
+- dvergrtown_wood_wall01
+- dvergrtown_wood_wall02
+- dvergrtown_wood_wall03
+- FernAshlands
+- FernFiddleHeadAshlands
+- FirTree
+- FirTree_log
+- FirTree_log_half
+- FirTree_oldLog
+- FirTree_Sapling
+- FirTree_small
+- FirTree_small_dead
+- FirTree_Stub
+- FlametalRockstand
+- FlametalRockstand_frac
+- flying_core
+- fx_Adrenaline1
+- fx_GoblinShieldBreak
+- fx_GoblinShieldHit
+- fx_icefloor_destruction
+- fx_Lightning
+- fx_Potion_fireresist
+- fx_Potion_frostresist
+- fx_Puke
+- fx_StaffShield_Break
+- fx_StaffShield_Hit
+- giant_arm
+- giant_brain
+- giant_brain_frac
+- giant_helmet1
+- giant_helmet1_destruction
+- giant_helmet2
+- giant_helmet2_destruction
+- giant_ribs
+- giant_ribs_frac
+- giant_skull
+- giant_skull_frac
+- giant_sword1
+- giant_sword1_destruction
+- giant_sword2
+- giant_sword2_destruction
+- GlowingMushroom
+- GuckSack
+- GuckSack_small
+- highstone
+- highstone_frac
+- HugeRoot1
+- Ice_floor
+- Ice_floor_fractured
+- ice_rock1
+- ice_rock1_frac
+- lavabomb_rock1
+- lavarock_ashlands1
+- marker01
+- marker02
+- MineRock_Obsidian
+- MineRock_Tin
+- MountainGraveStone01
+- mudpile
+- mudpile_beacon
+- mudpile_frac
+- mudpile_old
+- mudpile2
+- mudpile2_frac
+- Oak_log
+- Oak_log_half
+- Oak_Sapling
+- Oak1
+- OakStub
+- Pickable_Barley
+- Pickable_Barley_Wild
+- Pickable_Branch
+- Pickable_Carrot
+- Pickable_DvergerThing
+- Pickable_Flax
+- Pickable_Flax_Wild
+- Pickable_ForestCryptRemains01
+- Pickable_ForestCryptRemains02
+- Pickable_ForestCryptRemains03
+- Pickable_ForestCryptRemains04
+- Pickable_Hairstrands01
+- Pickable_Hairstrands02
+- Pickable_MeatPile
+- Pickable_MountainRemains01_buried
+- Pickable_Onion
+- Pickable_SeedCarrot
+- Pickable_SeedOnion
+- Pickable_SeedTurnip
+- Pickable_SulfurRock
+- Pickable_Thistle
+- Pickable_Turnip
+- PineTree
+- Pinetree_01
+- Pinetree_01_Stub
+- PineTree_log
+- PineTree_log_half
+- PineTree_log_halfOLD
+- PineTree_logOLD
+- PineTree_Sapling
+- RaspberryBush
+- Rock_3
+- Rock_3_frac
+- Rock_4
+- Rock_4_plains
+- Rock_7
+- rock_mistlands1
+- rock_mistlands1_frac
+- rock_mistlands2
+- rock1_mistlands
+- rock1_mountain
+- rock1_mountain_frac
+- rock2_heath
+- rock2_heath_frac
+- rock2_mountain
+- rock2_mountain_frac
+- rock3_ice
+- rock3_ice_frac
+- rock3_mountain
+- rock3_mountain_frac
+- rock3_silver
+- rock3_silver_frac
+- rock4_ashlands_frac
+- rock4_bigrock_frac
+- rock4_coast
+- rock4_coast_frac
+- rock4_copper
+- rock4_copper_frac
+- rock4_forest
+- rock4_forest_frac
+- rock4_heath
+- rock4_heath_frac
+- RockDolmen_1
+- RockDolmen_2
+- RockDolmen_3
+- RockFinger
+- RockFinger_frac
+- RockFingerBroken
+- RockFingerBroken_frac
+- RockThumb
+- RockThumb_frac
+- root07
+- root08
+- root11
+- root12
+- sapling_barley
+- sapling_carrot
+- sapling_flax
+- sapling_jotunpuffs
+- sapling_magecap
+- sapling_onion
+- sapling_seedcarrot
+- sapling_seedonion
+- sapling_seedturnip
+- sapling_turnip
+- sfx_Puke_female
+- sfx_Puke_male
+- ShootStump
+- shrub_2
+- shrub_2_heath
+- silvervein
+- silvervein_frac
+- stubbe
+- stubbe_spawner
+- SwampTree1
+- SwampTree1_log
+- SwampTree1_Stub
+- SwampTree2
+- SwampTree2_darkland
+- SwampTree2_log
+- tarlump1
+- tarlump1_frac
+- veg_skull_Ashlands
+- vfx_ashlandslogdestroyed
+- vfx_ashlandslogdestroyed_half
+- vfx_beechlog_destroyed
+- vfx_beechlog_half_destroyed
+- vfx_BugRepellent
+- vfx_Burning
+- vfx_bush2_e_hit
+- vfx_bush2_en_destroyed
+- vfx_Cold
+- vfx_fir_oldlog
+- vfx_firlogdestroyed
+- vfx_firlogdestroyed_half
+- vfx_Freezing
+- vfx_Frost
+- vfx_GoblinShield
+- vfx_Harpooned
+- vfx_LightFoot
+- vfx_MeadBzerker
+- vfx_MeadHasty
+- vfx_MeadStrength
+- vfx_MeadSwimmer
+- vfx_MeadTamer
+- vfx_oaklogdestroyed
+- vfx_oaklogdestroyed_half
+- vfx_pinelogdestroyed
+- vfx_pinelogdestroyed_half
+- vfx_Poison
+- vfx_Potion_eitr_minor
+- vfx_Potion_health_medium
+- vfx_Potion_stamina_medium
+- vfx_Slimed
+- vfx_Smoked
+- vfx_StaffShield
+- vfx_stubbe
+- vfx_Tared
+- vfx_TrollPheromones
+- vfx_UndeadBurn
+- vfx_Wet
+- VineAsh_sapling
+- VineGreen_sapling
+- widestone
+- widestone_frac
+- yggashoot_log
+- yggashoot_log_half
+- YggaShoot_small1
+- YggaShoot1
+- YggaShoot2
+- YggaShoot3
+- YggdrasilRoot
