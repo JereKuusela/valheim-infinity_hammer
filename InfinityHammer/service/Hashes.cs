@@ -35,5 +35,9 @@ public static class Hashes
   public static readonly int Restrict = "Restrict".GetStableHashCode();
   public static readonly int Interact = "Interact".GetStableHashCode();
   public static readonly int Text = "Text".GetStableHashCode();
+  public static readonly int HasFieldsZSyncTransform = "HasFieldsZSyncTransform".GetStableHashCode();
+  public static readonly int ZSyncTransformSyncScale = "ZSyncTransform.m_syncScale".GetStableHashCode();
   public static readonly int BuildingSkillLevel = "BuildingSkillLevel".GetStableHashCode();
+  public static readonly int ScaleBackupVecHash = "scaleBackup".GetStableHashCode();
+  public static readonly int ScaleBackupScalarHash = "scaleScalarBackup".GetStableHashCode();
 }

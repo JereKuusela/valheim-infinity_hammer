@@ -44,7 +44,7 @@ public partial class ObjectSelection : BaseSelection
     SelectedPrefab = HammerHelper.SafeInstantiate(view, Wrapper);
     SelectedPrefab.transform.position = Vector3.zero;
     UpdateVisuals(SelectedPrefab, data);
-    Objects.Add(new(prefabHash, view.m_syncInitialScale, data));
+    Objects.Add(new(prefabHash, IsScalable(view), data));
     if (zdo != null)
       PlaceRotation.Set(SelectedPrefab);
     // Reset for zoop bounds check.
@@ -68,7 +68,7 @@ public partial class ObjectSelection : BaseSelection
     SelectedPrefab.name = view.name;
 
     SingleUse = singleUse;
-    Objects.Add(new(prefabHash, view.m_syncInitialScale, null));
+    Objects.Add(new(prefabHash, IsScalable(view), null));
     Scaling.Set(SelectedPrefab);
   }
   public ObjectSelection(IEnumerable<ZNetView> views, bool singleUse, Vector3? scale, DataEntry? extraData)
@@ -90,7 +90,7 @@ public partial class ObjectSelection : BaseSelection
       obj.transform.position = view.transform.position;
       obj.transform.rotation = view.transform.rotation;
       UpdateVisuals(obj, data);
-      Objects.Add(new(view.GetZDO().GetPrefab(), view.m_syncInitialScale, data));
+      Objects.Add(new(view.GetZDO().GetPrefab(), IsScalable(view), data));
     }
     SelectedPrefab.transform.position = Vector3.zero;
     Snapping.GenerateSnapPoints(SelectedPrefab);
@@ -132,7 +132,7 @@ public partial class ObjectSelection : BaseSelection
         obj.transform.localScale = item.Scale;
         DataEntry? data = item.Data == null || item.Data == "" ? ReadExtraInfo(obj, item.ExtraInfo) : DataHelper.Get(item.Data);
         UpdateVisuals(obj, data);
-        Objects.Add(new SelectedObject(item.Prefab.GetStableHashCode(), view.m_syncInitialScale, data));
+        Objects.Add(new SelectedObject(item.Prefab.GetStableHashCode(), IsScalable(view), data));
       }
       catch (Exception e)
       {
@@ -480,6 +480,12 @@ public partial class ObjectSelection : BaseSelection
     vector.x += (x - hmap.m_width / 2) * hmap.m_scale;
     vector.z += (z - hmap.m_width / 2) * hmap.m_scale;
     return vector;
+  }
+  private static bool IsScalable(ZNetView view)
+  {
+    if (view.m_syncInitialScale) return true;
+    if (Configuration.ScaleZSyncObjects && view.GetComponent<ZSyncTransform>()) return true;
+    return false;
   }
   private void HandleMultiple(GameObject ghost)
   {

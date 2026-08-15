@@ -44,6 +44,7 @@ public class BaseSelection
       NoCreator.Set(view, piece);
 
     }
+    EnableSyncScale(view);
     CustomHealth.SetHealth(view, false);
     if (obj.TryGetComponent<DungeonGenerator>(out var dg))
     {
@@ -53,6 +54,37 @@ public class BaseSelection
       if (rooms == 0 && data == null)
         dg.Generate(ZoneSystem.SpawnMode.Full);
     }
+  }
+
+  private static void EnableSyncScale(ZNetView view)
+  {
+    if (!Configuration.ScaleZSyncObjects) return;
+    if (view.m_syncInitialScale) return;
+    if (!view.TryGetComponent<ZSyncTransform>(out var syncTransform)) return;
+    var defaultScale = GetPrefabScale(view.GetPrefabName().GetStableHashCode());
+    if ((Scaling.Get().Vec3 - defaultScale).sqrMagnitude <= 0.0001f) return;
+    var scale = Scaling.Get().Vec3;
+    view.transform.localScale = scale;
+    syncTransform.m_syncScale = true;
+    var zdo = view.GetZDO();
+    zdo.Set(Hashes.HasFields, true);
+    zdo.Set(Hashes.HasFieldsZSyncTransform, true);
+    zdo.Set(Hashes.ZSyncTransformSyncScale, true);
+    if (Mathf.Approximately(scale.x, scale.y) && Mathf.Approximately(scale.x, scale.z))
+    {
+      zdo.Set(ZDOVars.s_scaleScalarHash, scale.x);
+      zdo.Set(Hashes.ScaleBackupScalarHash, scale.x);
+    }
+    else
+    {
+      zdo.Set(ZDOVars.s_scaleHash, scale);
+      zdo.Set(Hashes.ScaleBackupScalarHash, scale);
+    }
+  }
+  private static Vector3 GetPrefabScale(int hash)
+  {
+    var prefab = ZNetScene.instance.GetPrefab(hash);
+    return prefab ? prefab.transform.localScale : Vector3.one;
   }
 
 

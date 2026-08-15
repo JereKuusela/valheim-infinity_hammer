@@ -46,5 +46,16 @@ public class HammerMeasureCommand
       ZNetView.m_forceDisableInit = false;
       HammerHelper.Message(args.Context, "Objects measured.");
     });
+    AutoComplete.Register("hammer_print_scalable", (index) =>
+    {
+      if (index == 0)
+        return ParameterInfo.Components;
+      return ParameterInfo.None;
+    });
+    Helper.Command("hammer_print_scalable", "[component] - Prints scalable objects, optionally filtered by component.", (args) =>
+    {
+      var scalables = ZNetScene.instance.m_prefabs.Where(p => p.GetComponent<ZNetView>().m_syncInitialScale).Where(p => args.Length == 1 || p.GetComponent(args[1])).Select(p => p.name).ToArray();
+      ZLog.Log($"Scalable objects ({scalables.Length}):\n{string.Join("\n", scalables)}");
+    });
   }
 }

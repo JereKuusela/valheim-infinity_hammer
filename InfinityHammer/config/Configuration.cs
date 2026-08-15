@@ -64,6 +64,8 @@ public partial class Configuration
   public static float Range => IsEnabled(InfinityPermissionHash.Range, true) ? Parse.Float(configRange.Value) : 0f;
   public static ConfigEntry<bool> configPlaceEmptyRooms;
   public static bool PlaceEmptyRooms => configPlaceEmptyRooms.Value;
+  public static ConfigEntry<bool> configScaleZSyncObjects;
+  public static bool ScaleZSyncObjects => configScaleZSyncObjects.Value;
   public static ConfigWrapper Wrapper;
 
 #nullable enable
@@ -94,6 +96,7 @@ public partial class Configuration
     configResetOffsetOnUnfreeze = wrapper.Bind(section, "Reset offset on unfreeze", true, "Removes the placement offset when unfreezing the placement.");
     configUnfreezeOnUnequip = wrapper.Bind(section, "Unfreeze on unequip", true, "Removes the placement freeze when unequipping the hammer.");
     configSnapping = wrapper.Bind(section, "Snap points", SnappingMode.Corners, new ConfigDescription("Automatic snap points.", new AcceptableValueList<string>(SnappingMode.Off, SnappingMode.Edges, SnappingMode.Corners, SnappingMode.All)));
+    configScaleZSyncObjects = wrapper.Bind(section, "Scale ZSyncTransform objects", false, "Allows scaling objects with ZSyncTransform (required Expand World Prefabs mod on server)");
     configIgnoreOtherRestrictions = wrapper.Bind(section, "Ignore other restrictions", true, "Ignores any other restrictions (material, biome, etc.)");
     configPlaceEmptyRooms = wrapper.Bind(section, "Place empty rooms", false, "hammer_room command places rooms without their contents.");
     InitVisuals(wrapper);
