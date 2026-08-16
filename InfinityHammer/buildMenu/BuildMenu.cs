@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using HarmonyLib;
 using InfinityTools;
 using ServerDevcommands;
@@ -45,7 +46,6 @@ public static class UpdateAvailable
 [HarmonyPatch]
 public class TakeOverBuildMenu
 {
-
   [HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece), typeof(Vector2Int))]
   [HarmonyPrefix]
   [HarmonyPriority(Priority.Low)]
@@ -61,7 +61,7 @@ public class TakeOverBuildMenu
       var tool = menuTool.tool;
       if (!tool.Instant) return true;
       var previousSelection = Selection.Get();
-      Console.instance.TryRunCommand(tool.GetCommand());
+      Console.instance.TryRunCommand(GetInstantCommand(tool, __instance));
       // Bit of a hack, but if the command changed the selection then it should be selected on the build menu.
       if (previousSelection != Selection.Get())
         pt.m_selectedPiece[(int)pt.GetSelectedCategory()] = p;
@@ -109,6 +109,35 @@ public class TakeOverBuildMenu
       Selection.CreateGhost(new ObjectSelection(piece, false));
     else
       Selection.Clear();
+  }
+
+  private static string GetInstantCommand(Tool tool, Player player)
+  {
+    var command = tool.GetCommand();
+    var position = GetHoveredPosition(player);
+    command = command.Replace("<x>", position.x.ToString(CultureInfo.InvariantCulture));
+    command = command.Replace("<y>", position.y.ToString(CultureInfo.InvariantCulture));
+    command = command.Replace("<z>", position.z.ToString(CultureInfo.InvariantCulture));
+    if (command.Contains("<id>"))
+    {
+      var hovered = Selector.GetHovered(Configuration.Range, [], Configuration.IgnoredIds);
+      if (hovered != null)
+        command = command.Replace("<id>", Utils.GetPrefabName(hovered.gameObject));
+    }
+    return command;
+  }
+
+  private static Vector3 GetHoveredPosition(Player player)
+  {
+    var camera = Camera.main;
+    var range = Configuration.Range > 0f ? Configuration.Range : 50f;
+    if (camera != null)
+    {
+      var ray = new Ray(camera.transform.position, camera.transform.forward);
+      if (Physics.Raycast(ray, out var hit, range, Character.s_blockedRayMask))
+        return hit.point;
+    }
+    return player.transform.position;
   }
 }
 

@@ -4,6 +4,7 @@
   - Adds text input when `hammer_save` command is used without a name.
   - Improves compatibility with PlanBuild mod (terrain data is ignored). Thanks Haloa!
   - Fixes some prefabs disappearing from selection (Ragdoll, LocationProxy, MapTable, ArcheryTarget and Plant components are now removed). Thanks Haloa!
+  - Fixes instant tools always using player coordinates instead of the hovered coordinates.
 
 - v1.79
   - Improves compatibility with PlanBuild mod (extra info, item drops, item stand orientation). Thanks Haloa!
@@ -22,6 +23,3 @@
 
 - v1.76
   - Fixes some issues with build tables.
-
-- v1.75
-  - Reverts the fix for error message when placing some item drops (this modified vanilla behavior).

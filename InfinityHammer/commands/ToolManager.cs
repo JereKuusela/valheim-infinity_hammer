@@ -96,30 +96,31 @@ public class ToolManager
   public static List<Tool> GetAll() => Tools.SelectMany(kvp => kvp.Value).ToList();
   public static void FromFile()
   {
-    var tools = Yaml.Read(Pattern, Yaml.Deserialize<Dictionary<string, ToolData[]>>);
-    if (tools.Count == 0)
+    ToolData.Clear();
+    Tools.Clear();
+    if (!File.Exists(FilePath))
     {
       CreateFile();
       return;
     }
-    try
+    Yaml.LoadDictFromDirectory<ToolData>(Paths.ConfigPath, Pattern, LoadTool);
+    if (ToolData.Count == 0)
     {
-      var count = tools.Values.SelectMany(x => x).Count();
-      if (count == 0)
-      {
-        Log.Warning($"Failed to load any tools.");
-        return;
-      }
-      ToolData = tools.ToDictionary(kvp => kvp.Key.ToLower(), kvp => kvp.Value);
-      Tools = tools.ToDictionary(kvp => kvp.Key.ToLower(), kvp => kvp.Value.Select(s => new Tool(s)).ToList());
-      Log.Info($"Reloading {count} tools.");
-      Player.m_localPlayer?.UpdateAvailablePiecesList();
+      Log.Warning($"Failed to load any tools.");
+      return;
     }
-    catch (Exception e)
-    {
-      Log.Error(e.StackTrace);
-    }
+    Tools = ToolData.ToDictionary(kvp => kvp.Key.ToLower(), kvp => kvp.Value.Select(s => new Tool(s)).ToList());
+    Log.Info($"Reloading {ToolData.Values.SelectMany(x => x).Count()} tools.");
+    Player.m_localPlayer?.UpdateAvailablePiecesList();
   }
+
+  private static void LoadTool(string file, string equipment, ToolData toolData)
+  {
+    if (!ToolData.ContainsKey(equipment))
+      ToolData.Add(equipment, []);
+    ToolData[equipment].Add(toolData);
+  }
+
   public static void SetupWatcher()
   {
     Yaml.SetupWatcher(Pattern, FromFile);
