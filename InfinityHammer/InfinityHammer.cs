@@ -34,9 +34,6 @@ public class InfinityHammer : BaseUnityPlugin
     try
     {
       SetupWatcher();
-      ToolManager.CreateFile();
-      ToolManager.SetupWatcher();
-      ToolManager.FromFile();
     }
     catch
     {
@@ -104,6 +101,30 @@ public class InfinityHammer : BaseUnityPlugin
     if (Chainloader.PluginInfos.TryGetValue("m3to.mods.GizmoReloaded", out info))
       PlaceRotation.Reloaded = info.Instance.GetType().Assembly;
     StructureTweaks = Chainloader.PluginInfos.ContainsKey("structure_tweaks");
+    PermissionApi.Subscribe(UpdateBuildMenu);
+  }
+  public void LateUpdate()
+  {
+    Ruler.Update();
+    if (Player_ManualUpdate.Projector)
+      Player_ManualUpdate.Projector.Update();
+  }
+
+  private void UpdateBuildMenu()
+  {
+    Player.m_localPlayer?.UpdateAvailablePiecesList();
+  }
+}
+
+
+[HarmonyPatch(typeof(Terminal), nameof(Terminal.InitTerminal)), HarmonyPriority(Priority.HigherThanNormal)]
+public class Initialize
+{
+  private static bool Initialized = false;
+  static void Postfix()
+  {
+    if (Initialized) return;
+    Initialized = true;
     new HammerAddPieceComponentsCommand();
     new HammerSelect();
     new HammerLocationCommand();
@@ -131,54 +152,11 @@ public class InfinityHammer : BaseUnityPlugin
     new ToolCmdCommand();
     new HammerRoomCommand();
     new HammerMark();
-    PermissionApi.Subscribe(UpdateBuildMenu);
-  }
-  public void LateUpdate()
-  {
-    Ruler.Update();
-    if (Player_ManualUpdate.Projector)
-      Player_ManualUpdate.Projector.Update();
-  }
-
-  private void UpdateBuildMenu()
-  {
-    Player.m_localPlayer?.UpdateAvailablePiecesList();
-  }
-}
-
-[HarmonyPatch(typeof(Chat), nameof(Chat.Awake))]
-public class ChatAwake
-{
-
-  private static bool Initialized = false;
-  static void CreateAlias()
-  {
-    if (Initialized) return;
-    Initialized = true;
-    var pars = "from=<x>,<z>,<y> circle=<r>-<r2> angle=<a> rect=<w>-<w2>,<d>";
-    var parsSpawn = "from=<x>,<z>,<y> radius=<r>-<r2>";
-    var parsTo = "to=<x>,<z>,<y> circle=<r>-<r2> rect=<w>-<w2>,<d>";
-    var sub = ServerDevcommands.Settings.Substitution;
-    Console.instance.TryRunCommand($"alias tool_terrain terrain {pars}");
-    Console.instance.TryRunCommand($"alias t_t tool tool_terrain");
-    Console.instance.TryRunCommand($"alias tool_object object {pars} height=<h> ignore=<ignore> id=<include>");
-    Console.instance.TryRunCommand($"alias t_o tool tool_object");
-    Console.instance.TryRunCommand($"alias tool_spawn spawn_object {sub} {parsSpawn}");
-    Console.instance.TryRunCommand($"alias t_s tool tool_spawn");
-
-    Console.instance.TryRunCommand($"alias tool_terrain_to terrain {parsTo}");
-    // Bit pointless but kept for legacy.
-    Console.instance.TryRunCommand($"alias tool_slope tool_terrain_to slope");
-
-    Console.instance.TryRunCommand($"alias tool_area hammer {pars} height=<h> ignore=<ignore> id=<include>");
-
-  }
-  static void Postfix()
-  {
-    CreateAlias();
+    ToolManager.Initialize();
     InfinityHammer.Wrapper.Bind();
   }
 }
+
 [HarmonyPatch(typeof(Player), nameof(Player.SetupPlacementGhost)), HarmonyPriority(Priority.Last)]
 public class Player_ManualUpdate
 {

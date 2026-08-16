@@ -111,7 +111,7 @@ public class Tool
     TabIndex = data.tabIndex;
     targetEdge = data.targetEdge;
     Index = data.index;
-    Commands = data.commands == null ? GetCommands(data.command) : data.commands.Select(c => new CommandValue(c.command, c.keys)).ToList();
+    Commands = data.commands == null ? GetCommands(data.command) : [.. data.commands.Select(c => new CommandValue(c.command, c.keys))];
     Instant = Commands.All(c => !c.Command.Contains("<") && !c.Command.Contains("hammer "));
     Instant = data.instant == null ? Instant : (bool)data.instant;
     RotateWithPlayer = true;

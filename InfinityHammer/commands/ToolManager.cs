@@ -17,6 +17,32 @@ public class ToolManager
   public static string FilePath = Path.Combine(Paths.ConfigPath, "infinity_tools.yaml");
   public static string Pattern = "infinity_tools.yaml";
 
+  public static void Initialize()
+  {
+    CreateAlias();
+    CreateFile();
+    SetupWatcher();
+    FromFile();
+  }
+
+  private static void CreateAlias()
+  {
+    var pars = "from=<x>,<z>,<y> circle=<r>-<r2> angle=<a> rect=<w>-<w2>,<d>";
+    var parsSpawn = "from=<x>,<z>,<y> radius=<r>-<r2>";
+    var parsTo = "to=<x>,<z>,<y> circle=<r>-<r2> rect=<w>-<w2>,<d>";
+    var sub = ServerDevcommands.Settings.Substitution;
+    AliasManager.AddAlias("tool_terrain", $"terrain {pars}");
+    AliasManager.AddAlias("t_t", "tool tool_terrain");
+    AliasManager.AddAlias("tool_object", $"object {pars} height=<h> ignore=<ignore> id=<include>");
+    AliasManager.AddAlias("t_o", "tool tool_object");
+    AliasManager.AddAlias("tool_spawn", $"spawn_object {sub} {parsSpawn}");
+    AliasManager.AddAlias("t_s", "tool tool_spawn");
+    AliasManager.AddAlias("tool_terrain_to", $"terrain {parsTo}");
+    // Bit pointless but kept for legacy.
+    AliasManager.AddAlias("tool_slope", "tool_terrain_to slope");
+    AliasManager.AddAlias("tool_area", $"hammer {pars} height=<h> ignore=<ignore> id=<include>");
+  }
+
 
   public static void CreateFile()
   {
@@ -103,7 +129,7 @@ public class ToolManager
       CreateFile();
       return;
     }
-    Yaml.LoadDictFromDirectory<ToolData>(Paths.ConfigPath, Pattern, LoadTool);
+    Yaml.LoadDictFromDirectory<List<ToolData>>(Paths.ConfigPath, Pattern, LoadTool);
     if (ToolData.Count == 0)
     {
       Log.Warning($"Failed to load any tools.");
@@ -114,11 +140,11 @@ public class ToolManager
     Player.m_localPlayer?.UpdateAvailablePiecesList();
   }
 
-  private static void LoadTool(string file, string equipment, ToolData toolData)
+  private static void LoadTool(string file, string equipment, List<ToolData> tools)
   {
     if (!ToolData.ContainsKey(equipment))
       ToolData.Add(equipment, []);
-    ToolData[equipment].Add(toolData);
+    ToolData[equipment].AddRange(tools);
   }
 
   public static void SetupWatcher()

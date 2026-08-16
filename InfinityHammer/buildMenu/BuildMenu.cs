@@ -129,15 +129,12 @@ public class TakeOverBuildMenu
 
   private static Vector3 GetHoveredPosition(Player player)
   {
-    var camera = Camera.main;
     var range = Configuration.Range > 0f ? Configuration.Range : 50f;
-    if (camera != null)
-    {
-      var ray = new Ray(camera.transform.position, camera.transform.forward);
-      if (Physics.Raycast(ray, out var hit, range, Character.s_blockedRayMask))
-        return hit.point;
-    }
-    return player.transform.position;
+    var ray = new Ray(GameCamera.instance.transform.position, GameCamera.instance.transform.forward);
+    if (Physics.Raycast(ray, out var hit, range, player.m_placeRayMask))
+      return hit.point;
+    else
+      return player.transform.position;
   }
 }
 
