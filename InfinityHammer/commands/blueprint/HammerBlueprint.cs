@@ -107,10 +107,10 @@ public class HammerBlueprintCommand : TextReceiver
   private static Blueprint GetPlanBuild(Blueprint bp, string[] rows, bool loadData)
   {
     var piece = true;
-    var terrain = false;
-    var terrainHeight = false;
-    var terrainPaint = false;
-    TerrainData? terrainData = null;
+    var parseTerrainHeight = false;
+    var parseTerrainPaint = false;
+    TerrainHeight? terrainHeightData = null;
+    TerrainPaint? terrainPaintData = null;
     var terrainRowIndex = 0;
     var planbuildTerrain = false;
 
@@ -126,80 +126,93 @@ public class HammerBlueprintCommand : TextReceiver
         bp.Coordinates = Parse.VectorXZY(row.Split(':')[1]);
       else if (row.StartsWith("#rotation:", StringComparison.OrdinalIgnoreCase))
         bp.Rotation = Parse.VectorXZY(row.Split(':')[1]);
-      else if (row.StartsWith("#height:", StringComparison.OrdinalIgnoreCase))
+      else if (row.StartsWith("#height:", StringComparison.OrdinalIgnoreCase) || row.StartsWith("#paint:", StringComparison.OrdinalIgnoreCase))
       {
-        // Parse terrain data header: reference position, reference rotation, distance between nodes
+        throw new InvalidOperationException("Legacy #Height/#Paint terrain format is no longer supported. Re-save the blueprint with a newer Infinity Hammer version.");
+      }
+      else if (row.StartsWith("#terrainheight:", StringComparison.OrdinalIgnoreCase))
+      {
         var parts = row.Split(':')[1].Split(';');
         if (parts.Length >= 3)
         {
-          terrainData = new TerrainData(Vector3.zero)
+          var rotation = InvariantFloat(parts, 1, 0f);
+          terrainHeightData = new TerrainHeight
           {
             FirstNodePosition = Parse.VectorXZY(parts[0]),
-            FirstNodeRotation = Quaternion.Euler(Parse.VectorXZY(parts[1])),
+            FirstNodeRotation = Quaternion.Euler(0f, rotation, 0f),
             DistanceBetweenNodes = InvariantFloat(parts, 2, 1.0f)
           };
-          terrain = true;
-          terrainHeight = true;
-          terrainPaint = false;
-          planbuildTerrain = false;
           piece = false;
+          parseTerrainHeight = true;
+          parseTerrainPaint = false;
+          planbuildTerrain = false;
           terrainRowIndex = 0;
         }
       }
-      else if (row.StartsWith("#paint", StringComparison.OrdinalIgnoreCase))
+      else if (row.StartsWith("#terrainpaint:", StringComparison.OrdinalIgnoreCase))
       {
-        terrainHeight = false;
-        terrainPaint = true;
+        var parts = row.Split(':')[1].Split(';');
+        if (parts.Length >= 3)
+        {
+          var rotation = InvariantFloat(parts, 1, 0f);
+          terrainPaintData = new TerrainPaint
+          {
+            FirstNodePosition = Parse.VectorXZY(parts[0]),
+            FirstNodeRotation = Quaternion.Euler(0f, rotation, 0f),
+            DistanceBetweenNodes = InvariantFloat(parts, 2, 1.0f)
+          };
+          piece = false;
+          parseTerrainHeight = false;
+          parseTerrainPaint = true;
+          planbuildTerrain = false;
+          terrainRowIndex = 0;
+        }
+      }
+      else if (row.StartsWith("#terrain", StringComparison.OrdinalIgnoreCase))
+      {
+        piece = false;
+        parseTerrainHeight = false;
+        parseTerrainPaint = false;
         planbuildTerrain = false;
-        terrainRowIndex = 0;
       }
       else if (row.StartsWith("#snappoints", StringComparison.OrdinalIgnoreCase))
       {
         piece = false;
-        terrain = false;
-        terrainHeight = false;
-        terrainPaint = false;
+        parseTerrainHeight = false;
+        parseTerrainPaint = false;
         planbuildTerrain = false;
-      }
-      else if (row.StartsWith("#terrain", StringComparison.OrdinalIgnoreCase))
-      {
-        // Planbuild terrain format, not implemented
-        piece = false;
-        terrain = false;
-        terrainHeight = false;
-        terrainPaint = false;
-        planbuildTerrain = true;
       }
       else if (row.StartsWith("#pieces", StringComparison.OrdinalIgnoreCase))
       {
         piece = true;
-        terrain = false;
-        terrainHeight = false;
-        terrainPaint = false;
+        parseTerrainHeight = false;
+        parseTerrainPaint = false;
         planbuildTerrain = false;
       }
       else if (row.StartsWith("#", StringComparison.Ordinal))
         continue;
       else if (piece)
         bp.Objects.Add(GetPlanBuildObject(row, loadData));
-      else if (terrain && terrainData != null)
+      else if (parseTerrainHeight && terrainHeightData != null)
       {
-        if (terrainHeight)
-          ParseTerrainHeightRow(terrainData, row, terrainRowIndex);
-        else if (terrainPaint)
-          ParseTerrainPaintRow(terrainData, row, terrainRowIndex);
+        ParseTerrainHeightRow(terrainHeightData, row, terrainRowIndex);
+        terrainRowIndex++;
+      }
+      else if (parseTerrainPaint && terrainPaintData != null)
+      {
+        ParseTerrainPaintRow(terrainPaintData, row, terrainRowIndex);
         terrainRowIndex++;
       }
       else if (planbuildTerrain)
       {
         continue;
       }
-      else if (!terrain)
+      else if (!parseTerrainHeight && !parseTerrainPaint)
         bp.SnapPoints.Add(GetPlanBuildSnapPoint(row));
     }
 
-    if (terrainData != null)
-      bp.TerrainData = terrainData;
+    bp.TerrainHeight = terrainHeightData;
+    bp.TerrainPaint = terrainPaintData;
 
     return bp;
   }
@@ -255,56 +268,67 @@ public class HammerBlueprintCommand : TextReceiver
     return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), Vector3.one, "", data, chance);
   }
 
-  private static void ParseTerrainHeightRow(TerrainData terrainData, string row, int rowIndex)
+  private static void ParseTerrainHeightRow(TerrainHeight terrainData, string row, int rowIndex)
   {
     if (row.IndexOf(',') > -1) row = row.Replace(',', '.');
     var values = row.Split(';');
 
-    // Initialize terrain grid on first height row
     if (rowIndex == 0)
     {
       terrainData.InitializeGrid(values.Length, 0, terrainData.FirstNodePosition);
     }
 
-    // Expand height array if needed
     if (rowIndex >= terrainData.Height)
     {
       var oldHeights = terrainData.Heights;
-      var oldPaints = terrainData.Paints;
       terrainData.Heights = new float?[terrainData.Width, rowIndex + 1];
-      terrainData.Paints = new Color?[terrainData.Width, rowIndex + 1];
 
-      // Copy existing data
       for (int x = 0; x < terrainData.Width; x++)
       {
         for (int z = 0; z < terrainData.Height; z++)
         {
           terrainData.Heights[x, z] = oldHeights[x, z];
-          terrainData.Paints[x, z] = oldPaints[x, z];
         }
       }
       terrainData.Height = rowIndex + 1;
     }
 
-    // Parse height values
     for (int x = 0; x < values.Length && x < terrainData.Width; x++)
     {
       if (!string.IsNullOrEmpty(values[x]))
       {
         if (float.TryParse(values[x], NumberStyles.Any, NumberFormatInfo.InvariantInfo, out float height))
         {
-          terrainData.Heights[x, rowIndex] = height;
+          terrainData.Set(x, rowIndex, height);
         }
       }
     }
   }
 
-  private static void ParseTerrainPaintRow(TerrainData terrainData, string row, int rowIndex)
+  private static void ParseTerrainPaintRow(TerrainPaint terrainData, string row, int rowIndex)
   {
     if (row.IndexOf(',') > -1) row = row.Replace(',', '.');
     var values = row.Split(';');
 
-    // Parse paint values (assuming RGBA format)
+    if (rowIndex == 0)
+    {
+      terrainData.InitializeGrid(values.Length, 0, terrainData.FirstNodePosition);
+    }
+
+    if (rowIndex >= terrainData.Height)
+    {
+      var oldPaints = terrainData.Paints;
+      terrainData.Paints = new Color?[terrainData.Width, rowIndex + 1];
+      for (int x = 0; x < terrainData.Width; x++)
+      {
+        for (int z = 0; z < terrainData.Height; z++)
+        {
+          terrainData.Paints[x, z] = oldPaints[x, z];
+        }
+      }
+      terrainData.Height = rowIndex + 1;
+    }
+
     for (int x = 0; x < values.Length && x < terrainData.Width; x++)
     {
       if (!string.IsNullOrEmpty(values[x]))
@@ -317,7 +341,7 @@ public class HammerBlueprintCommand : TextReceiver
               float.TryParse(colorParts[2], NumberStyles.Any, NumberFormatInfo.InvariantInfo, out float b))
           {
             float a = colorParts.Length > 3 && float.TryParse(colorParts[3], NumberStyles.Any, NumberFormatInfo.InvariantInfo, out float alpha) ? alpha : 1f;
-            terrainData.Paints[x, rowIndex] = new Color(r, g, b, a);
+            terrainData.Set(x, rowIndex, new Color(r, g, b, a));
           }
         }
       }

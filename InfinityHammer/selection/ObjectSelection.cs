@@ -19,18 +19,26 @@ public partial class ObjectSelection : BaseSelection
   // This mimics the ZNetScene.m_namedPrefabs behavior.
   private readonly GameObject Wrapper;
   public List<SelectedObject> Objects = [];
-  public TerrainData? TerrainInfo;
-  public float TerrainRadius = 0f;
+  public TerrainHeight? TerrainHeightInfo;
+  public TerrainPaint? TerrainPaintInfo;
+  private string SelectionBaseDescription = "";
   public override void Destroy()
   {
     base.Destroy();
     UnityEngine.Object.Destroy(Wrapper);
     Objects.Clear();
-    TerrainInfo = null;
+    TerrainHeightInfo = null;
+    TerrainPaintInfo = null;
     SelectedPrefab = null;
   }
 
-  public ObjectSelection(ZNetView view, bool singleUse, Vector3? scale, DataEntry? extraData)
+  private void SetTerrainState(TerrainHeight? terrainHeightInfo, TerrainPaint? terrainPaintInfo)
+  {
+    TerrainHeightInfo = terrainHeightInfo;
+    TerrainPaintInfo = terrainPaintInfo;
+  }
+
+  public ObjectSelection(ZNetView view, bool singleUse, Vector3? scale, DataEntry? extraData, TerrainHeight? terrainHeightInfo = null, TerrainPaint? terrainPaintInfo = null)
   {
     if (view.GetComponent<Player>()) throw new InvalidOperationException("Players are not valid objects.");
     Wrapper = new GameObject();
@@ -55,6 +63,9 @@ public partial class ObjectSelection : BaseSelection
     var hasSnaps = Snapping.GetSnapPoints(SelectedPrefab).Count > 0;
     if (Configuration.Snapping != SnappingMode.Off && !hasSnaps)
       Snapping.BuildSnaps(SelectedPrefab);
+
+    SetTerrainState(terrainHeightInfo, terrainPaintInfo);
+    UpdateSelectionDescription();
   }
   // This is for compatibility. Many mods don't expect a cleaned up ghost.
   // So when selecting from the build menu, the ghost doesn't have to be cleaned up.
@@ -71,7 +82,7 @@ public partial class ObjectSelection : BaseSelection
     Objects.Add(new(prefabHash, IsScalable(view), null));
     Scaling.Set(SelectedPrefab);
   }
-  public ObjectSelection(IEnumerable<ZNetView> views, bool singleUse, Vector3? scale, DataEntry? extraData)
+  public ObjectSelection(IEnumerable<ZNetView> views, bool singleUse, Vector3? scale, DataEntry? extraData, TerrainHeight? terrainHeightInfo = null, TerrainPaint? terrainPaintInfo = null)
   {
     Wrapper = new GameObject();
     Wrapper.SetActive(false);
@@ -97,6 +108,9 @@ public partial class ObjectSelection : BaseSelection
     CountObjects();
     PlaceRotation.Set(SelectedPrefab);
     Scaling.Set(SelectedPrefab);
+
+    SetTerrainState(terrainHeightInfo, terrainPaintInfo);
+    UpdateSelectionDescription();
   }
 
 
@@ -115,6 +129,7 @@ public partial class ObjectSelection : BaseSelection
     piece.m_description = bp.Description;
     if (piece.m_description == "")
       piece.m_description = "Center: " + bp.CenterPiece;
+    SelectionBaseDescription = piece.m_description;
     var centerPieceExists = false;
     foreach (var item in bp.Objects)
     {
@@ -154,12 +169,48 @@ public partial class ObjectSelection : BaseSelection
 
     piece.m_clipEverything = Snapping.CountSnapPoints(SelectedPrefab) == 0;
     Scaling.Set(SelectedPrefab);
+
+    var terrainHeightInfo = bp.TerrainHeight?.Clone();
+    var terrainPaintInfo = bp.TerrainPaint?.Clone();
+    SetTerrainState(terrainHeightInfo, terrainPaintInfo);
+    UpdateSelectionDescription();
   }
 
-  public void SetTerrainData(TerrainData terrainInfo, float terrainRadius)
+  private string BuildTerrainSummaryDescription()
   {
-    TerrainInfo = terrainInfo;
-    TerrainRadius = terrainRadius;
+    var lines = new List<string>();
+
+    if (TerrainHeightInfo != null)
+      lines.Add($"Terrain height radius: {HammerHelper.Format(TerrainHeightInfo.GetRadius())}");
+    if (TerrainPaintInfo != null)
+      lines.Add($"Terrain paint radius: {HammerHelper.Format(TerrainPaintInfo.GetRadius())}");
+
+    return string.Join("\n", lines);
+  }
+
+  private static string BuildObjectCountDescription(Dictionary<int, int> counts)
+  {
+    var topKeys = counts.OrderBy(kvp => kvp.Value).Reverse().ToArray();
+    if (topKeys.Length <= 5)
+      return string.Join("\n", topKeys.Select(kvp => $"{ZNetScene.instance.GetPrefab(kvp.Key).name}: {kvp.Value}"));
+
+    var description = string.Join("\n", topKeys.Take(4).Select(kvp => $"{ZNetScene.instance.GetPrefab(kvp.Key).name}: {kvp.Value}"));
+    description += $"\n{topKeys.Length - 4} other types: {topKeys.Skip(4).Sum(kvp => kvp.Value)}";
+    return description;
+  }
+
+  private void UpdateSelectionDescription()
+  {
+    var piece = SelectedPrefab.GetComponent<Piece>();
+    if (!piece)
+      return;
+
+    var terrainSummary = BuildTerrainSummaryDescription();
+    var lines = string.IsNullOrEmpty(SelectionBaseDescription) ? new List<string>() : SelectionBaseDescription.Split('\n').ToList();
+    if (!string.IsNullOrEmpty(terrainSummary))
+      lines.Add(terrainSummary);
+
+    piece.m_description = string.Join("\n", lines);
   }
 
   public void Mirror()
@@ -347,14 +398,7 @@ public partial class ObjectSelection : BaseSelection
     piece.m_clipEverything = Snapping.CountSnapPoints(SelectedPrefab) == 0;
     piece.m_name = SelectedPrefab.name;
     Dictionary<int, int> counts = Objects.GroupBy(obj => obj.Prefab).ToDictionary(kvp => kvp.Key, kvp => kvp.Count());
-    var topKeys = counts.OrderBy(kvp => kvp.Value).Reverse().ToArray();
-    if (topKeys.Length <= 5)
-      piece.m_description = string.Join("\n", topKeys.Select(kvp => $"{ZNetScene.instance.GetPrefab(kvp.Key).name}: {kvp.Value}"));
-    else
-    {
-      piece.m_description = string.Join("\n", topKeys.Take(4).Select(kvp => $"{ZNetScene.instance.GetPrefab(kvp.Key).name}: {kvp.Value}"));
-      piece.m_description += $"\n{topKeys.Length - 4} other types: {topKeys.Skip(4).Sum(kvp => kvp.Value)}";
-    }
+    SelectionBaseDescription = BuildObjectCountDescription(counts);
   }
   public override DataEntry? GetData(int index = 0)
   {
@@ -408,26 +452,14 @@ public partial class ObjectSelection : BaseSelection
 
   private void ApplyTerrainChanges(Vector3 placementPosition, Quaternion placementRotation)
   {
-    if (TerrainInfo == null) return;
+    if (TerrainHeightInfo == null && TerrainPaintInfo == null) return;
+    var terrainRadius = TerrainInfo.ResolveRadius(TerrainHeightInfo, TerrainPaintInfo);
 
-    // Calculate rotation difference specifically along Y-axis in degrees
-    var originalRotation = TerrainInfo.FirstNodeRotation;
-
-    // Calculate the rotation difference by finding the quaternion that transforms from original to placement
-    var rotationDifference = placementRotation * Quaternion.Inverse(originalRotation);
-
-    // Extract the Y-axis rotation from the difference quaternion
-    var yRotationDifference = rotationDifference.eulerAngles.y;
-
-    // Convert to signed angle (-180 to +180 degrees)
-    if (yRotationDifference > 180f)
-      yRotationDifference -= 360f;
-
-    // Convert to radians for the terrain lookup
-    var rotation = Mathf.Deg2Rad * yRotationDifference;
+    var heightRotation = TerrainHeightInfo == null ? Quaternion.identity : GetRelativeYawRotation(placementRotation, TerrainHeightInfo.FirstNodeRotation);
+    var paintRotation = TerrainPaintInfo == null ? Quaternion.identity : GetRelativeYawRotation(placementRotation, TerrainPaintInfo.FirstNodeRotation);
 
     // Get terrain compilers around the placement position
-    var compilers = Terrain.GetCompilers(placementPosition, new(TerrainRadius));
+    var compilers = Terrain.GetCompilers(placementPosition, new(terrainRadius));
 
     foreach (var compiler in compilers)
     {
@@ -440,7 +472,7 @@ public partial class ObjectSelection : BaseSelection
           var index = z * max + x;
 
           // Apply height changes using optimized lookup
-          var nearestHeight = TerrainInfo.FindNearestHeight(nodePos, placementPosition, rotation);
+          var nearestHeight = TerrainHeightInfo?.FindNearest(nodePos, placementPosition, heightRotation);
           if (nearestHeight != null)
           {
             if (index < compiler.m_hmap.m_heights.Count)
@@ -454,9 +486,7 @@ public partial class ObjectSelection : BaseSelection
 
           // Apply paint changes using optimized lookup
           var paintWorldPos = nodePos;
-          //paintWorldPos.x += 0.5f;
-          //paintWorldPos.z += 0.5f;
-          var nearestPaint = TerrainInfo.FindNearestPaint(paintWorldPos, placementPosition, rotation);
+          var nearestPaint = TerrainPaintInfo?.FindNearest(paintWorldPos, placementPosition, paintRotation);
           if (nearestPaint != null)
           {
             if (index < compiler.m_paintMask.Length)
@@ -471,7 +501,17 @@ public partial class ObjectSelection : BaseSelection
 
     foreach (var compiler in compilers)
       Terrain.Save(compiler);
-    ClutterSystem.instance?.ResetGrass(placementPosition, TerrainRadius);
+    ClutterSystem.instance?.ResetGrass(placementPosition, terrainRadius);
+  }
+
+  private static Quaternion GetRelativeYawRotation(Quaternion placementRotation, Quaternion originalRotation)
+  {
+    var rotationDifference = placementRotation * Quaternion.Inverse(originalRotation);
+    var forward = rotationDifference * Vector3.forward;
+    forward.y = 0f;
+    if (forward.sqrMagnitude <= 0.0001f)
+      return Quaternion.identity;
+    return Quaternion.LookRotation(forward.normalized, Vector3.up);
   }
 
   private static Vector3 VertexToWorld(Heightmap hmap, int x, int z)

@@ -8,6 +8,7 @@ using ServerDevcommands;
 using UnityEngine;
 
 namespace Service;
+
 public class ConfigWrapper
 {
 
@@ -153,11 +154,6 @@ public class ConfigWrapper
   }
   private void UpdateWheelKey(KeyboardShortcut key, string command, string offCommand, string mode)
   {
-    if (!Chat.instance)
-    {
-      BindsDone = false;
-      return;
-    }
     List<string> keys = [];
     // Dirty hack to allow command binds to work without a modifier key.
     if (key.MainKey != KeyCode.None || mode == "command")

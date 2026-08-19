@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.IO;
+using System;
 using BepInEx;
 using BepInEx.Configuration;
 using Service;
+using ServerDevcommands;
 namespace InfinityHammer;
 
 public partial class Configuration
@@ -19,6 +21,18 @@ public partial class Configuration
   public static bool SimplerBlueprints => configSaveSimplerBlueprints.Value;
   public static ConfigEntry<bool> configUseBlueprintChance;
   public static bool UseBlueprintChance => configUseBlueprintChance.Value;
+  public static ConfigEntry<bool> configIncludeTerrainHeight;
+  public static bool IncludeTerrainHeight => configIncludeTerrainHeight.Value;
+  public static ConfigEntry<bool> configIncludeTerrainPaint;
+  public static bool IncludeTerrainPaint => configIncludeTerrainPaint.Value;
+  public static ConfigEntry<string> configBlueprintTerrainHeightOffset;
+  public static float BlueprintTerrainHeightOffset => Parse.Float(configBlueprintTerrainHeightOffset.Value);
+  public static ConfigEntry<string> configBlueprintTerrainPaintOffset;
+  public static float BlueprintTerrainPaintOffset => Parse.Float(configBlueprintTerrainPaintOffset.Value);
+  public static ConfigEntry<string> configBlueprintTerrainNodeSpacing;
+  public static float BlueprintTerrainNodeSpacing => Math.Max(0f, Parse.Float(configBlueprintTerrainNodeSpacing.Value));
+  public static ConfigEntry<string> configBlueprintPaintNodeSpacing;
+  public static float BlueprintPaintNodeSpacing => Math.Max(0f, Parse.Float(configBlueprintPaintNodeSpacing.Value));
   public static ConfigEntry<string> configBlueprintFolder;
   public static string BlueprintGlobalFolder => Path.Combine("BepInEx", "config", configBlueprintFolder.Value);
   public static string BlueprintLocalFolder => Path.Combine(Paths.ConfigPath, configBlueprintFolder.Value);
@@ -41,6 +55,12 @@ public partial class Configuration
     configSavedObjectData = wrapper.Bind(section, "Save object data blueprints", "", "Object ids that save extra data if save data is disabled.");
     configSavedObjectData.SettingChanged += (s, e) => UpdateSavedObjectData();
     configUseBlueprintChance = wrapper.Bind(section, "Use blueprint chance", false, "If enabled, chance field is checked from the blueprint.");
+    configIncludeTerrainHeight = wrapper.Bind(section, "Include terrain height", false, "If enabled, hammer area selection captures terrain height.");
+    configIncludeTerrainPaint = wrapper.Bind(section, "Include terrain paint", false, "If enabled, hammer area selection captures terrain paint.");
+    configBlueprintTerrainHeightOffset = wrapper.Bind(section, "Terrain height offset", "0", "Radius/size offset in meters used when capturing terrain height.");
+    configBlueprintTerrainPaintOffset = wrapper.Bind(section, "Terrain paint offset", "0", "Radius/size offset in meters used when capturing terrain paint.");
+    configBlueprintTerrainNodeSpacing = wrapper.Bind(section, "Terrain height spacing", "0", "Distance between captured terrain nodes in meters. Use 0 to auto-detect from the terrain heightmap scale.");
+    configBlueprintPaintNodeSpacing = wrapper.Bind(section, "Terrain paint spacing", "0", "Distance between captured terrain paint nodes in meters. Use 0 to auto-detect from the terrain heightmap scale.");
     configBlueprintCenterPiece = wrapper.Bind(section, "Blueprint center piece", "", "Piece name that is used as the center point when saving a blueprint.");
     configBlueprintSnapPiece = wrapper.Bind(section, "Blueprint snap piece", "", "Piece name that is used as the snap point when saving a blueprint.");
     UpdateSavedObjectData();

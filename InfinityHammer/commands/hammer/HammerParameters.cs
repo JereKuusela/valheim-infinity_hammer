@@ -54,6 +54,7 @@ public class HammerParameters
   public string[] Ignored = [];
   public string[] Included = [];
   public float? Terrain;
+  public float? Paint;
 
   public HammerParameters(Terminal.ConsoleEventArgs args)
   {
@@ -75,6 +76,8 @@ public class HammerParameters
         Pick = true;
       if (name == "terrain")
         Terrain = 0f;
+      if (name == "paint")
+        Paint = 0f;
       if (split.Length < 2) continue;
       var value = split[1].ToLower();
       var values = Parse.Split(value);
@@ -129,6 +132,7 @@ public class HammerParameters
       if (name == "id") Included = values;
       if (name == "ignore") Ignored = values;
       if (name == "terrain") Terrain = Parse.Float(value);
+      if (name == "paint") Paint = Parse.Float(value);
     }
     if (Ignored.Length == 0)
       Ignored = Configuration.IgnoredIds;

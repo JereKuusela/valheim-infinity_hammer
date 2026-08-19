@@ -52,7 +52,7 @@ public class HammerSelect
   public HammerSelect()
   {
     List<string> named = [
-      "freeze", "pick", "scale", "level", "stars", "connect", "health", "type", "include", "ignore", "id", "data", "terrain",
+      "freeze", "pick", "scale", "level", "stars", "connect", "health", "type", "include", "ignore", "id", "data", "terrain", "paint",
     ];
     if (InfinityHammer.StructureTweaks)
     {
@@ -109,6 +109,7 @@ public class HammerSelect
       { "type", index => ParameterInfo.Components },
       { "data", index => DataLoading.DataKeys },
       { "terrain", index => ParameterInfo.Create("Terrain radius offset for including terrain height and paint in selection.") },
+      { "paint", index => ParameterInfo.Create("Paint radius offset for including terrain paint in selection.") },
     });
     Helper.Command("hammer", "[object id] - Selects the object to be placed (the hovered object by default).", (args) =>
     {
@@ -172,11 +173,6 @@ public class HammerSelect
         extraData ??= new();
         extraData.Set(Hashes.Fall, FallNumber(pars.Fall));
       }
-      if (pars.Wear != Wear.Default)
-      {
-        extraData ??= new();
-        extraData.Set(Hashes.Wear, WearNumber(pars.Wear));
-      }
       if (!pars.Collision)
       {
         extraData ??= new();
@@ -203,10 +199,16 @@ public class HammerSelect
         extraData.Set(Hashes.Text, pars.Text);
       }
 
-      ObjectSelection selection = views.Length == 1 ? new(views[0], pars.Pick, pars.Scale, extraData) : new(views, pars.Pick, pars.Scale, extraData);
-      if (pars.Terrain.HasValue)
+      TerrainHeight? terrainHeightInfo = null;
+      TerrainPaint? terrainPaintInfo = null;
+      var includeTerrainHeight = pars.Terrain.HasValue || Configuration.IncludeTerrainHeight;
+      var includeTerrainPaint = pars.Paint.HasValue || Configuration.IncludeTerrainPaint;
+      if (includeTerrainHeight || includeTerrainPaint)
       {
-        var terrainRange = pars.Terrain.Value;
+        var terrainRange = (pars.Terrain ?? 0) + Configuration.BlueprintTerrainHeightOffset;
+        var paintRange = (pars.Paint ?? 0) + Configuration.BlueprintTerrainPaintOffset;
+        var terrainNodeSpacing = Configuration.BlueprintTerrainNodeSpacing;
+        var paintNodeSpacing = Configuration.BlueprintPaintNodeSpacing;
 
         Vector3 centerPos = views[0].transform.position;
         Quaternion centerRot = views[0].transform.rotation;
@@ -214,24 +216,39 @@ public class HammerSelect
         if (pars.Radius != null || (pars.Width != null && pars.Depth != null))
           searchPos = pars.Position;
 
-        TerrainData? terrainInfo;
+        var collectHeight = includeTerrainHeight;
+        var collectPaint = includeTerrainPaint;
         if (pars.Width != null && pars.Depth != null)
         {
-          var width = pars.Width.Min == pars.Width.Max ? new Range<float>(pars.Width.Max + terrainRange) : new Range<float>(pars.Width.Min, pars.Width.Max + terrainRange);
-          var depth = pars.Depth.Min == pars.Depth.Max ? new Range<float>(pars.Depth.Max + terrainRange) : new Range<float>(pars.Depth.Min, pars.Depth.Max + terrainRange);
+          var terrainWidth = pars.Width.Min == pars.Width.Max ? new Range<float>(pars.Width.Max + terrainRange) : new Range<float>(pars.Width.Min, pars.Width.Max + terrainRange);
+          var terrainDepth = pars.Depth.Min == pars.Depth.Max ? new Range<float>(pars.Depth.Max + terrainRange) : new Range<float>(pars.Depth.Min, pars.Depth.Max + terrainRange);
+          var paintWidth = pars.Width.Min == pars.Width.Max ? new Range<float>(pars.Width.Max + paintRange) : new Range<float>(pars.Width.Min, pars.Width.Max + paintRange);
+          var paintDepth = pars.Depth.Min == pars.Depth.Max ? new Range<float>(pars.Depth.Max + paintRange) : new Range<float>(pars.Depth.Min, pars.Depth.Max + paintRange);
 
-          terrainInfo = TerrainInfo.CollectTerrainDataInRect(centerPos, centerRot, searchPos, width, depth, pars.Angle);
+          if (includeTerrainHeight)
+            terrainHeightInfo = TerrainInfo.CollectTerrainHeightInRect(centerPos, centerRot, searchPos, terrainWidth, terrainDepth, pars.Angle, terrainNodeSpacing);
+          if (includeTerrainPaint)
+            terrainPaintInfo = TerrainInfo.CollectTerrainPaintInRect(centerPos, centerRot, searchPos, paintWidth, paintDepth, pars.Angle, paintNodeSpacing);
         }
         else
         {
-          var radius = new Range<float>(Mathf.Max(1f, terrainRange));
+          var terrainRadius = new Range<float>(Mathf.Max(1f, terrainRange));
+          var paintRadius = new Range<float>(Mathf.Max(1f, paintRange));
           if (pars.Radius != null)
-            radius = pars.Radius.Min == pars.Radius.Max ? new Range<float>(pars.Radius.Max + terrainRange) : new Range<float>(pars.Radius.Min, pars.Radius.Max + terrainRange);
+          {
+            terrainRadius = pars.Radius.Min == pars.Radius.Max ? new Range<float>(pars.Radius.Max + terrainRange) : new Range<float>(pars.Radius.Min, pars.Radius.Max + terrainRange);
+            paintRadius = pars.Radius.Min == pars.Radius.Max ? new Range<float>(pars.Radius.Max + paintRange) : new Range<float>(pars.Radius.Min, pars.Radius.Max + paintRange);
+          }
 
-          terrainInfo = TerrainInfo.CollectTerrainDataInRadius(centerPos, centerRot, searchPos, radius);
+          if (includeTerrainHeight)
+            terrainHeightInfo = TerrainInfo.CollectTerrainHeightInRadius(centerPos, centerRot, searchPos, terrainRadius, terrainNodeSpacing);
+          if (includeTerrainPaint)
+            terrainPaintInfo = TerrainInfo.CollectTerrainPaintInRadius(centerPos, centerRot, searchPos, paintRadius, paintNodeSpacing);
         }
-        selection.SetTerrainData(terrainInfo, terrainRange);
       }
+      ObjectSelection selection = views.Length == 1
+        ? new(views[0], pars.Pick, pars.Scale, extraData, terrainHeightInfo, terrainPaintInfo)
+        : new(views, pars.Pick, pars.Scale, extraData, terrainHeightInfo, terrainPaintInfo);
       var ghost = Selection.CreateGhost(selection);
       Hammer.SelectEmpty();
       if (pars.Freeze) Position.Freeze(views.Length > 0 ? views[0].transform.position : Helper.GetPlayer().transform.position);

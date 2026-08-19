@@ -51,6 +51,10 @@ public class HammerSaveCommand : TextReceiver
       bp.Name = Localization.instance.Localize(piece.m_name);
     }
     if (Selection.Get() is not ObjectSelection selection) return bp;
+    if (selection.TerrainHeightInfo != null)
+      bp.TerrainHeight = selection.TerrainHeightInfo.Clone();
+    if (selection.TerrainPaintInfo != null)
+      bp.TerrainPaint = selection.TerrainPaintInfo.Clone();
     var objects = Snapping.GetChildren(obj);
     Dictionary<string, string> pars = [];
     if (selection.Objects.Count() == 1)
@@ -125,31 +129,31 @@ public class HammerSaveCommand : TextReceiver
     lines.Add("#Pieces");
     lines.AddRange(bp.Objects.OrderBy(o => o.Prefab).Select(GetPlanBuildObject));
 
-    // Add terrain data if it exists
-    if (false && bp.TerrainData != null)
+    if (bp.TerrainHeight != null)
     {
-      lines.Add($"#Height:{HammerHelper.PrintXZY(bp.TerrainData.FirstNodePosition)};{HammerHelper.PrintYXZ(bp.TerrainData.FirstNodeRotation.eulerAngles)};{HammerHelper.Format(bp.TerrainData.DistanceBetweenNodes)}");
+      lines.Add($"#TerrainHeight:{HammerHelper.PrintXZY(bp.TerrainHeight.FirstNodePosition)};{HammerHelper.Format(bp.TerrainHeight.FirstNodeRotation.eulerAngles.y)};{HammerHelper.Format(bp.TerrainHeight.DistanceBetweenNodes)}");
 
-      // Add height data
-      for (int z = 0; z < bp.TerrainData.Height; z++)
+      for (int z = 0; z < bp.TerrainHeight.Height; z++)
       {
         var heightRow = new List<string>();
-        for (int x = 0; x < bp.TerrainData.Width; x++)
+        for (int x = 0; x < bp.TerrainHeight.Width; x++)
         {
-          var height = bp.TerrainData.GetHeight(x, z);
+          var height = bp.TerrainHeight.Get(x, z);
           heightRow.Add(height.HasValue ? HammerHelper.Format(height.Value) : "");
         }
         lines.Add(string.Join(";", heightRow));
       }
+    }
 
-      // Add paint data
-      lines.Add("#Paint");
-      for (int z = 0; z < bp.TerrainData.Height; z++)
+    if (bp.TerrainPaint != null)
+    {
+      lines.Add($"#TerrainPaint:{HammerHelper.PrintXZY(bp.TerrainPaint.FirstNodePosition)};{HammerHelper.Format(bp.TerrainPaint.FirstNodeRotation.eulerAngles.y)};{HammerHelper.Format(bp.TerrainPaint.DistanceBetweenNodes)}");
+      for (int z = 0; z < bp.TerrainPaint.Height; z++)
       {
         var paintRow = new List<string>();
-        for (int x = 0; x < bp.TerrainData.Width; x++)
+        for (int x = 0; x < bp.TerrainPaint.Width; x++)
         {
-          var paint = bp.TerrainData.GetPaint(x, z);
+          var paint = bp.TerrainPaint.Get(x, z);
           if (paint.HasValue)
           {
             var c = paint.Value;

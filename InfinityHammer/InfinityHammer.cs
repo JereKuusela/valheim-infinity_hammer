@@ -17,14 +17,13 @@ public class InfinityHammer : BaseUnityPlugin
 {
   public const string GUID = "infinity_hammer";
   public const string NAME = "Infinity Hammer";
-  public const string VERSION = "1.79.4";
+  public const string VERSION = "1.79.6";
   public static bool StructureTweaks = false;
 #nullable disable
   public static ConfigWrapper Wrapper;
 #nullable enable
   public void Awake()
   {
-    Log.Init(Logger);
     new Harmony(GUID).PatchAll();
     Wrapper = new("hammer_config", Config);
     Configuration.Init(Wrapper);
