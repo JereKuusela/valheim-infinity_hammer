@@ -131,7 +131,7 @@ public class HammerSaveCommand : TextReceiver
 
     if (bp.TerrainHeight != null)
     {
-      lines.Add($"#TerrainHeight:{HammerHelper.PrintXZY(bp.TerrainHeight.FirstNodePosition)};{HammerHelper.Format(bp.TerrainHeight.FirstNodeRotation.eulerAngles.y)};{HammerHelper.Format(bp.TerrainHeight.DistanceBetweenNodes)}");
+      lines.Add($"#TerrainHeight:{HammerHelper.PrintXZY(bp.TerrainHeight.CenterPosition)};{HammerHelper.Format(bp.TerrainHeight.CenterRotation.eulerAngles.y)};{HammerHelper.Format(bp.TerrainHeight.DistanceBetweenNodes)}");
 
       for (int z = 0; z < bp.TerrainHeight.Height; z++)
       {
@@ -147,7 +147,7 @@ public class HammerSaveCommand : TextReceiver
 
     if (bp.TerrainPaint != null)
     {
-      lines.Add($"#TerrainPaint:{HammerHelper.PrintXZY(bp.TerrainPaint.FirstNodePosition)};{HammerHelper.Format(bp.TerrainPaint.FirstNodeRotation.eulerAngles.y)};{HammerHelper.Format(bp.TerrainPaint.DistanceBetweenNodes)}");
+      lines.Add($"#TerrainPaint:{HammerHelper.PrintXZY(bp.TerrainPaint.CenterPosition)};{HammerHelper.Format(bp.TerrainPaint.CenterRotation.eulerAngles.y)};{HammerHelper.Format(bp.TerrainPaint.DistanceBetweenNodes)}");
       for (int z = 0; z < bp.TerrainPaint.Height; z++)
       {
         var paintRow = new List<string>();

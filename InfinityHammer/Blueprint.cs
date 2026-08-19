@@ -57,7 +57,7 @@ public class Blueprint
     SnapPoints = SnapPoints.Select(p => p - center).ToList();
     if (TerrainHeight != null)
     {
-      TerrainHeight.FirstNodePosition -= center;
+      TerrainHeight.CenterPosition -= center;
       for (int x = 0; x < TerrainHeight.Width; x++)
       {
         for (int z = 0; z < TerrainHeight.Height; z++)
@@ -68,7 +68,7 @@ public class Blueprint
       }
     }
     if (TerrainPaint != null)
-      TerrainPaint.FirstNodePosition -= center;
+      TerrainPaint.CenterPosition -= center;
     if (rot != Quaternion.identity)
     {
       foreach (var obj in Objects)
@@ -79,15 +79,15 @@ public class Blueprint
       SnapPoints = SnapPoints.Select(p => rot * p).ToList();
       if (TerrainHeight != null)
       {
-        TerrainHeight.FirstNodePosition = rot * TerrainHeight.FirstNodePosition;
-        var terrainRotation = rot * TerrainHeight.FirstNodeRotation;
-        TerrainHeight.FirstNodeRotation = Quaternion.Euler(0f, terrainRotation.eulerAngles.y, 0f);
+        TerrainHeight.CenterPosition = rot * TerrainHeight.CenterPosition;
+        var terrainRotation = rot * TerrainHeight.CenterRotation;
+        TerrainHeight.CenterRotation = Quaternion.Euler(0f, terrainRotation.eulerAngles.y, 0f);
       }
       if (TerrainPaint != null)
       {
-        TerrainPaint.FirstNodePosition = rot * TerrainPaint.FirstNodePosition;
-        var paintTerrainRotation = rot * TerrainPaint.FirstNodeRotation;
-        TerrainPaint.FirstNodeRotation = Quaternion.Euler(0f, paintTerrainRotation.eulerAngles.y, 0f);
+        TerrainPaint.CenterPosition = rot * TerrainPaint.CenterPosition;
+        var paintTerrainRotation = rot * TerrainPaint.CenterRotation;
+        TerrainPaint.CenterRotation = Quaternion.Euler(0f, paintTerrainRotation.eulerAngles.y, 0f);
       }
     }
     return center;

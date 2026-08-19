@@ -138,8 +138,8 @@ public class HammerBlueprintCommand : TextReceiver
           var rotation = InvariantFloat(parts, 1, 0f);
           terrainHeightData = new TerrainHeight
           {
-            FirstNodePosition = Parse.VectorXZY(parts[0]),
-            FirstNodeRotation = Quaternion.Euler(0f, rotation, 0f),
+            CenterPosition = Parse.VectorXZY(parts[0]),
+            CenterRotation = Quaternion.Euler(0f, rotation, 0f),
             DistanceBetweenNodes = InvariantFloat(parts, 2, 1.0f)
           };
           piece = false;
@@ -157,8 +157,8 @@ public class HammerBlueprintCommand : TextReceiver
           var rotation = InvariantFloat(parts, 1, 0f);
           terrainPaintData = new TerrainPaint
           {
-            FirstNodePosition = Parse.VectorXZY(parts[0]),
-            FirstNodeRotation = Quaternion.Euler(0f, rotation, 0f),
+            CenterPosition = Parse.VectorXZY(parts[0]),
+            CenterRotation = Quaternion.Euler(0f, rotation, 0f),
             DistanceBetweenNodes = InvariantFloat(parts, 2, 1.0f)
           };
           piece = false;
@@ -275,7 +275,7 @@ public class HammerBlueprintCommand : TextReceiver
 
     if (rowIndex == 0)
     {
-      terrainData.InitializeGrid(values.Length, 0, terrainData.FirstNodePosition);
+      terrainData.InitializeGrid(values.Length, 0, terrainData.CenterPosition);
     }
 
     if (rowIndex >= terrainData.Height)
@@ -312,7 +312,7 @@ public class HammerBlueprintCommand : TextReceiver
 
     if (rowIndex == 0)
     {
-      terrainData.InitializeGrid(values.Length, 0, terrainData.FirstNodePosition);
+      terrainData.InitializeGrid(values.Length, 0, terrainData.CenterPosition);
     }
 
     if (rowIndex >= terrainData.Height)

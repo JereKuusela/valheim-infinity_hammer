@@ -455,15 +455,19 @@ public partial class ObjectSelection : BaseSelection
     if (TerrainHeightInfo == null && TerrainPaintInfo == null) return;
     var terrainRadius = TerrainInfo.ResolveRadius(TerrainHeightInfo, TerrainPaintInfo);
 
-    var heightRotation = TerrainHeightInfo == null ? Quaternion.identity : GetRelativeYawRotation(placementRotation, TerrainHeightInfo.FirstNodeRotation);
-    var paintRotation = TerrainPaintInfo == null ? Quaternion.identity : GetRelativeYawRotation(placementRotation, TerrainPaintInfo.FirstNodeRotation);
+    var before = new Dictionary<Vector3, TerrainUndoData>();
+    var after = new Dictionary<Vector3, TerrainUndoData>();
 
-    // Get terrain compilers around the placement position
+    var heightRotation = TerrainHeightInfo == null ? Quaternion.identity : GetRelativeYawRotation(placementRotation, TerrainHeightInfo.CenterRotation);
+    var paintRotation = TerrainPaintInfo == null ? Quaternion.identity : GetRelativeYawRotation(placementRotation, TerrainPaintInfo.CenterRotation);
+
     var compilers = Terrain.GetCompilers(placementPosition, new(terrainRadius));
 
     foreach (var compiler in compilers)
     {
       var max = compiler.m_width + 1;
+      TerrainUndoData beforeTerrain = new();
+      TerrainUndoData afterTerrain = new();
       for (int x = 0; x < max; x++)
       {
         for (int z = 0; z < max; z++)
@@ -471,33 +475,59 @@ public partial class ObjectSelection : BaseSelection
           var nodePos = VertexToWorld(compiler.m_hmap, x, z);
           var index = z * max + x;
 
-          // Apply height changes using optimized lookup
           var nearestHeight = TerrainHeightInfo?.FindNearest(nodePos, placementPosition, heightRotation);
-          if (nearestHeight != null)
+          if (nearestHeight != null && index < compiler.m_hmap.m_heights.Count)
           {
-            if (index < compiler.m_hmap.m_heights.Count)
+            beforeTerrain.Heights.Add(new()
             {
-              var altitude = nearestHeight.Value + placementPosition.y;
-              compiler.m_levelDelta[index] += altitude - compiler.m_hmap.m_heights[index];
-              compiler.m_smoothDelta[index] = 0f;
-              compiler.m_modifiedHeight[index] = compiler.m_levelDelta[index] != 0f;
-            }
+              Index = index,
+              Level = compiler.m_levelDelta[index],
+              Smooth = compiler.m_smoothDelta[index],
+              HeightModified = compiler.m_modifiedHeight[index]
+            });
+
+            var altitude = nearestHeight.Value + placementPosition.y;
+            compiler.m_levelDelta[index] += altitude - compiler.m_hmap.m_heights[index];
+            compiler.m_smoothDelta[index] = 0f;
+            compiler.m_modifiedHeight[index] = compiler.m_levelDelta[index] != 0f;
+
+            afterTerrain.Heights.Add(new()
+            {
+              Index = index,
+              Level = compiler.m_levelDelta[index],
+              Smooth = compiler.m_smoothDelta[index],
+              HeightModified = compiler.m_modifiedHeight[index]
+            });
           }
 
-          // Apply paint changes using optimized lookup
-          var paintWorldPos = nodePos;
-          var nearestPaint = TerrainPaintInfo?.FindNearest(paintWorldPos, placementPosition, paintRotation);
-          if (nearestPaint != null)
+          var nearestPaint = TerrainPaintInfo?.FindNearest(nodePos, placementPosition, paintRotation);
+          if (nearestPaint != null && index < compiler.m_paintMask.Length && nearestPaint != compiler.m_paintMask[index])
           {
-            if (index < compiler.m_paintMask.Length)
+            beforeTerrain.Paints.Add(new()
             {
-              compiler.m_paintMask[index] = nearestPaint.Value;
-              compiler.m_modifiedPaint[index] = true;
-            }
+              Index = index,
+              Paint = compiler.m_paintMask[index],
+              PaintModified = compiler.m_modifiedPaint[index]
+            });
+
+            compiler.m_paintMask[index] = nearestPaint.Value;
+            compiler.m_modifiedPaint[index] = true;
+
+            afterTerrain.Paints.Add(new()
+            {
+              Index = index,
+              Paint = compiler.m_paintMask[index],
+              PaintModified = compiler.m_modifiedPaint[index]
+            });
           }
         }
       }
+      before[compiler.transform.position] = beforeTerrain;
+      after[compiler.transform.position] = afterTerrain;
     }
+
+    if (before.Count > 0 || after.Count > 0)
+      UndoHelper.AddTerrainAction(before, after, placementPosition, terrainRadius);
 
     foreach (var compiler in compilers)
       Terrain.Save(compiler);

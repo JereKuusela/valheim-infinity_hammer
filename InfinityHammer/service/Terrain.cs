@@ -9,8 +9,9 @@ namespace Service;
 
 public abstract class TerrainChannelData<TValue> where TValue : struct
 {
-  public Vector3 FirstNodePosition;
-  public Quaternion FirstNodeRotation = Quaternion.identity;
+  public Vector3 CenterPosition;
+  public Quaternion CenterRotation = Quaternion.identity;
+  public Vector3? FirstNodeAnchor;
   public float DistanceBetweenNodes = 1.0f;
   public float? CaptureRadius;
   public int Width = 0;
@@ -18,11 +19,20 @@ public abstract class TerrainChannelData<TValue> where TValue : struct
 
   public float GetRadius() => CaptureRadius ??= GetRequiredRadius();
 
-  protected void InitializeReference(int width, int height, Vector3 firstNodePos)
+  protected void InitializeReference(int width, int height, Vector3 centerPos)
   {
     Width = width;
     Height = height;
-    FirstNodePosition = firstNodePos;
+    CenterPosition = centerPos;
+    FirstNodeAnchor = null;
+  }
+
+  protected void InitializeReference(int width, int height, Vector3 centerPos, Vector3 firstNodeAnchor)
+  {
+    Width = width;
+    Height = height;
+    CenterPosition = centerPos;
+    FirstNodeAnchor = firstNodeAnchor;
   }
 
   private float GetRequiredRadius()
@@ -31,22 +41,24 @@ public abstract class TerrainChannelData<TValue> where TValue : struct
       return 0f;
 
     var spacing = Mathf.Max(0.001f, DistanceBetweenNodes);
-    var maxOffsetX = (Width - 1) * spacing;
-    var maxOffsetZ = (Height - 1) * spacing;
+    var halfOffsetX = (Width - 1) * spacing * 0.5f;
+    var halfOffsetZ = (Height - 1) * spacing * 0.5f;
     var corners = new[]
     {
-      FirstNodePosition,
-      FirstNodePosition + new Vector3(maxOffsetX, 0f, 0f),
-      FirstNodePosition + new Vector3(0f, 0f, maxOffsetZ),
-      FirstNodePosition + new Vector3(maxOffsetX, 0f, maxOffsetZ)
+      CenterPosition + CenterRotation * new Vector3(-halfOffsetX, 0f, -halfOffsetZ),
+      CenterPosition + CenterRotation * new Vector3(halfOffsetX, 0f, -halfOffsetZ),
+      CenterPosition + CenterRotation * new Vector3(-halfOffsetX, 0f, halfOffsetZ),
+      CenterPosition + CenterRotation * new Vector3(halfOffsetX, 0f, halfOffsetZ)
     };
     return corners.Max(Utils.LengthXZ);
   }
 
   public void SetReference(Vector3 center, Quaternion rotation)
   {
-    FirstNodePosition -= center;
-    FirstNodeRotation = GetYawRotation(rotation);
+    CenterPosition -= center;
+    if (FirstNodeAnchor.HasValue)
+      FirstNodeAnchor = FirstNodeAnchor.Value - center;
+    CenterRotation = GetYawRotation(rotation);
     OnSetReference(center);
   }
 
@@ -63,7 +75,23 @@ public abstract class TerrainChannelData<TValue> where TValue : struct
   {
   }
 
-  protected static bool TryGetGridCoordinates(Vector3 nodePos, Vector3 placementPos, Quaternion relativeRotation, Vector3 firstNodePosition, float distanceBetweenNodes, out int gridX, out int gridZ)
+  protected Vector3 GetCenterAnchor()
+  {
+    return CenterPosition;
+  }
+
+  protected Vector3 GetFirstNodeAnchor()
+  {
+    if (FirstNodeAnchor.HasValue)
+      return FirstNodeAnchor.Value;
+
+    var spacing = Mathf.Max(0.001f, DistanceBetweenNodes);
+    var halfOffsetX = (Width - 1) * spacing * 0.5f;
+    var halfOffsetZ = (Height - 1) * spacing * 0.5f;
+    return new Vector3(CenterPosition.x - halfOffsetX, CenterPosition.y, CenterPosition.z - halfOffsetZ);
+  }
+
+  protected static bool TryGetGridCoordinates(Vector3 nodePos, Vector3 placementPos, Quaternion relativeRotation, Vector3 firstNodeAnchor, float distanceBetweenNodes, out int gridX, out int gridZ)
   {
     var spacing = Mathf.Max(0.001f, distanceBetweenNodes);
 
@@ -73,8 +101,8 @@ public abstract class TerrainChannelData<TValue> where TValue : struct
     var localX = localPos.x;
     var localZ = localPos.z;
 
-    var fromFirstNodeX = localX - firstNodePosition.x;
-    var fromFirstNodeZ = localZ - firstNodePosition.z;
+    var fromFirstNodeX = localX - firstNodeAnchor.x;
+    var fromFirstNodeZ = localZ - firstNodeAnchor.z;
 
     gridX = Mathf.RoundToInt(fromFirstNodeX / spacing);
     gridZ = Mathf.RoundToInt(fromFirstNodeZ / spacing);
@@ -90,9 +118,15 @@ public class TerrainHeight : TerrainChannelData<float>
 {
   public float?[,] Heights = new float?[0, 0];
 
-  public void InitializeGrid(int width, int height, Vector3 firstNodePos)
+  public void InitializeGrid(int width, int height, Vector3 centerPosition)
   {
-    InitializeReference(width, height, firstNodePos);
+    InitializeReference(width, height, centerPosition);
+    Heights = new float?[width, height];
+  }
+
+  public void InitializeGrid(int width, int height, Vector3 centerPosition, Vector3 firstNodeAnchor)
+  {
+    InitializeReference(width, height, centerPosition, firstNodeAnchor);
     Heights = new float?[width, height];
   }
 
@@ -111,7 +145,7 @@ public class TerrainHeight : TerrainChannelData<float>
 
   public override float? FindNearest(Vector3 nodePos, Vector3 placementPos, Quaternion relativeRotation)
   {
-    if (!TryGetGridCoordinates(nodePos, placementPos, relativeRotation, FirstNodePosition, DistanceBetweenNodes, out var gridX, out var gridZ))
+    if (!TryGetGridCoordinates(nodePos, placementPos, relativeRotation, GetFirstNodeAnchor(), DistanceBetweenNodes, out var gridX, out var gridZ))
       return null;
     if (gridX < 0 || gridX >= Width || gridZ < 0 || gridZ >= Height)
       return null;
@@ -134,8 +168,9 @@ public class TerrainHeight : TerrainChannelData<float>
   {
     var clone = new TerrainHeight
     {
-      FirstNodePosition = FirstNodePosition,
-      FirstNodeRotation = FirstNodeRotation,
+      CenterPosition = CenterPosition,
+      CenterRotation = CenterRotation,
+      FirstNodeAnchor = FirstNodeAnchor,
       DistanceBetweenNodes = DistanceBetweenNodes,
       CaptureRadius = CaptureRadius,
       Width = Width,
@@ -159,9 +194,15 @@ public class TerrainPaint : TerrainChannelData<Color>
 {
   public Color?[,] Paints = new Color?[0, 0];
 
-  public void InitializeGrid(int width, int height, Vector3 firstNodePos)
+  public void InitializeGrid(int width, int height, Vector3 centerPosition)
   {
-    InitializeReference(width, height, firstNodePos);
+    InitializeReference(width, height, centerPosition);
+    Paints = new Color?[width, height];
+  }
+
+  public void InitializeGrid(int width, int height, Vector3 centerPosition, Vector3 firstNodeAnchor)
+  {
+    InitializeReference(width, height, centerPosition, firstNodeAnchor);
     Paints = new Color?[width, height];
   }
 
@@ -180,7 +221,7 @@ public class TerrainPaint : TerrainChannelData<Color>
 
   public override Color? FindNearest(Vector3 nodePos, Vector3 placementPos, Quaternion relativeRotation)
   {
-    if (!TryGetGridCoordinates(nodePos, placementPos, relativeRotation, FirstNodePosition, DistanceBetweenNodes, out var gridX, out var gridZ))
+    if (!TryGetGridCoordinates(nodePos, placementPos, relativeRotation, GetFirstNodeAnchor(), DistanceBetweenNodes, out var gridX, out var gridZ))
       return null;
     if (gridX < 0 || gridX >= Width || gridZ < 0 || gridZ >= Height)
       return null;
@@ -191,8 +232,9 @@ public class TerrainPaint : TerrainChannelData<Color>
   {
     var clone = new TerrainPaint
     {
-      FirstNodePosition = FirstNodePosition,
-      FirstNodeRotation = FirstNodeRotation,
+      CenterPosition = CenterPosition,
+      CenterRotation = CenterRotation,
+      FirstNodeAnchor = FirstNodeAnchor,
       DistanceBetweenNodes = DistanceBetweenNodes,
       CaptureRadius = CaptureRadius,
       Width = Width,
@@ -319,7 +361,12 @@ public class TerrainInfo
     int gridWidth = Mathf.RoundToInt((maxWorldX - minWorldX) / spacing) + 1;
     int gridHeight = Mathf.RoundToInt((maxWorldZ - minWorldZ) / spacing) + 1;
 
-    mergedData.InitializeGrid(gridWidth, gridHeight, new Vector3(minWorldX, 0f, minWorldZ));
+    mergedData.InitializeGrid(
+      gridWidth,
+      gridHeight,
+      new Vector3(minWorldX + (gridWidth - 1) * spacing * 0.5f, 0f, minWorldZ + (gridHeight - 1) * spacing * 0.5f),
+      new Vector3(minWorldX, 0f, minWorldZ)
+    );
     mergedData.DistanceBetweenNodes = spacing;
 
     foreach (var compiler in compilers)
@@ -390,7 +437,12 @@ public class TerrainInfo
     int gridWidth = Mathf.RoundToInt((maxWorldX - minWorldX) / spacing) + 1;
     int gridHeight = Mathf.RoundToInt((maxWorldZ - minWorldZ) / spacing) + 1;
 
-    mergedData.InitializeGrid(gridWidth, gridHeight, new Vector3(minWorldX, 0f, minWorldZ));
+    mergedData.InitializeGrid(
+      gridWidth,
+      gridHeight,
+      new Vector3(minWorldX + (gridWidth - 1) * spacing * 0.5f, 0f, minWorldZ + (gridHeight - 1) * spacing * 0.5f),
+      new Vector3(minWorldX, 0f, minWorldZ)
+    );
     mergedData.DistanceBetweenNodes = spacing;
 
     foreach (var compiler in compilers)
@@ -465,7 +517,12 @@ public class TerrainInfo
     int gridWidth = Mathf.RoundToInt((maxWorldX - minWorldX) / spacing) + 1;
     int gridHeight = Mathf.RoundToInt((maxWorldZ - minWorldZ) / spacing) + 1;
 
-    mergedData.InitializeGrid(gridWidth, gridHeight, new Vector3(minWorldX, 0f, minWorldZ));
+    mergedData.InitializeGrid(
+      gridWidth,
+      gridHeight,
+      new Vector3(minWorldX + (gridWidth - 1) * spacing * 0.5f, 0f, minWorldZ + (gridHeight - 1) * spacing * 0.5f),
+      new Vector3(minWorldX, 0f, minWorldZ)
+    );
     mergedData.DistanceBetweenNodes = spacing;
 
     foreach (var compiler in compilers)
@@ -544,7 +601,12 @@ public class TerrainInfo
     int gridWidth = Mathf.RoundToInt((maxWorldX - minWorldX) / spacing) + 1;
     int gridHeight = Mathf.RoundToInt((maxWorldZ - minWorldZ) / spacing) + 1;
 
-    mergedData.InitializeGrid(gridWidth, gridHeight, new Vector3(minWorldX, 0f, minWorldZ));
+    mergedData.InitializeGrid(
+      gridWidth,
+      gridHeight,
+      new Vector3(minWorldX + (gridWidth - 1) * spacing * 0.5f, 0f, minWorldZ + (gridHeight - 1) * spacing * 0.5f),
+      new Vector3(minWorldX, 0f, minWorldZ)
+    );
     mergedData.DistanceBetweenNodes = spacing;
 
     foreach (var compiler in compilers)
