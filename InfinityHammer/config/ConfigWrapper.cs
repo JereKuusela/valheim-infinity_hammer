@@ -112,11 +112,8 @@ public class ConfigWrapper
   }
   private readonly Dictionary<string, Action<Terminal, string>> SettingHandlers = [];
   private readonly List<Action> Binders = [];
-  private bool BindsDone = false;
   public void Bind()
   {
-    if (BindsDone) return;
-    BindsDone = true;
     foreach (var binder in Binders)
       binder();
   }
@@ -136,11 +133,6 @@ public class ConfigWrapper
   }
   private void UpdateKey(KeyboardShortcut key, string command, string offCommand, string mode)
   {
-    if (!Chat.instance)
-    {
-      BindsDone = false;
-      return;
-    }
     BindManager.SetTemporaryBind(GetKeys(key), mode, command, offCommand);
   }
   private string ToKey(string name) => name.ToLower().Replace(' ', '_').Replace("(", "").Replace(")", "");
