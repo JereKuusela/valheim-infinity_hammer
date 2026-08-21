@@ -55,9 +55,11 @@ public class Blueprint
     foreach (var obj in Objects)
       obj.Pos -= center;
     SnapPoints = SnapPoints.Select(p => p - center).ToList();
+    // Terrain rows stay in their saved reference frame, so translate the new
+    // blueprint root into that frame instead of rotating the rows.
     if (TerrainHeight != null)
     {
-      TerrainHeight.CenterPosition -= center;
+      TerrainHeight.CenterPosition -= TerrainHeight.CenterRotation * center;
       for (int x = 0; x < TerrainHeight.Width; x++)
       {
         for (int z = 0; z < TerrainHeight.Height; z++)
@@ -68,7 +70,7 @@ public class Blueprint
       }
     }
     if (TerrainPaint != null)
-      TerrainPaint.CenterPosition -= center;
+      TerrainPaint.CenterPosition -= TerrainPaint.CenterRotation * center;
     if (rot != Quaternion.identity)
     {
       foreach (var obj in Objects)
@@ -79,14 +81,13 @@ public class Blueprint
       SnapPoints = SnapPoints.Select(p => rot * p).ToList();
       if (TerrainHeight != null)
       {
-        TerrainHeight.CenterPosition = rot * TerrainHeight.CenterPosition;
-        var terrainRotation = rot * TerrainHeight.CenterRotation;
+        // Piece positions use rot, while the terrain reference uses its inverse.
+        var terrainRotation = TerrainHeight.CenterRotation * Quaternion.Inverse(rot);
         TerrainHeight.CenterRotation = Quaternion.Euler(0f, terrainRotation.eulerAngles.y, 0f);
       }
       if (TerrainPaint != null)
       {
-        TerrainPaint.CenterPosition = rot * TerrainPaint.CenterPosition;
-        var paintTerrainRotation = rot * TerrainPaint.CenterRotation;
+        var paintTerrainRotation = TerrainPaint.CenterRotation * Quaternion.Inverse(rot);
         TerrainPaint.CenterRotation = Quaternion.Euler(0f, paintTerrainRotation.eulerAngles.y, 0f);
       }
     }

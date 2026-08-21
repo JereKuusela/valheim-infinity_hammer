@@ -40,6 +40,42 @@ The command has optional parameters. Their default values can be set in the conf
 
 Note: Infinity Hammer also stores the object data when creating blueprints. This can significantly increase the file size and cause incompatibility with future PlanBuild versions. If needed, disable "Save blueprint data" from the config.
 
+### Terrain snapshots
+
+Area selections can include the final terrain height and paint values. These are snapshots of the selected terrain nodes, not a list of terrain operations. Placing the blueprint applies the saved values once relative to the blueprint root, so the result doesn't depend on the order of the original terrain edits.
+
+Terrain is stored in two optional sections after `#Pieces`:
+
+```text
+#TerrainHeight:<center x,z,y>;<reference yaw>;<node spacing>
+<height or empty>;<height or empty>;...
+#TerrainPaint:<center x,z,y>;<reference yaw>;<node spacing>
+<r:g:b:a or empty>;<r:g:b:a or empty>;...
+```
+
+- Header vectors and all numbers use invariant decimal notation. The vector order is X, Z, Y.
+- The center is relative to the blueprint root. Height samples are relative to the root Y coordinate.
+- Each following line is one Z row and each semicolon-separated field is one X column. Every row in a section has the same number of columns.
+- Empty fields are outside the captured shape and must not modify terrain.
+- The first node is `center - ((columns - 1) * spacing / 2, 0, (rows - 1) * spacing / 2)`.
+- Reference yaw records the terrain capture reference. Placement uses the yaw difference between this value and the blueprint root yaw.
+- A section ends at the next line beginning with `#` or at the end of the file.
+- Consumers without terrain support must skip the section rows until that boundary instead of interpreting them as pieces or snap points.
+- These sections are an Infinity Hammer/Expand World Data extension. Current PlanBuild versions do not understand the snapshot rows, so terrain-enabled files must not be loaded directly in PlanBuild until it adds support for this contract.
+- Blueprint object scaling does not scale the terrain grid.
+
+When a blueprint is recentered, terrain rows keep their X/Z order. Given the selected center offset `T`, its inverse rotation `K` as applied to piece positions, terrain center `C` and reference yaw `R`, the terrain contract transforms as follows:
+
+```text
+C' = C - R * T
+R' = R * inverse(K)
+height' = height - T.y
+```
+
+Paint values and empty cells are unchanged.
+
+The "Save simpler blueprints" option only writes mandatory piece data and omits terrain sections.
+
 Following data is not copied:
 
 - Object scale (redundant because the blueprint has own fields or the scale).

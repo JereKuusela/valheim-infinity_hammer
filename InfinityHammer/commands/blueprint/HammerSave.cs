@@ -57,7 +57,7 @@ public class HammerSaveCommand : TextReceiver
       bp.TerrainPaint = selection.TerrainPaintInfo.Clone();
     var objects = Snapping.GetChildren(obj);
     Dictionary<string, string> pars = [];
-    if (selection.Objects.Count() == 1)
+    if (!selection.UsesSelectionRoot)
     {
       AddSingleObject(bp, pars, obj, saveData);
       // Snap points are sort of useful for single objects.
@@ -237,7 +237,10 @@ public class HammerSaveCommand : TextReceiver
       Directory.CreateDirectory(Path.GetDirectoryName(path));
       File.WriteAllLines(path, lines);
       args.Context.AddString($"Blueprint saved to {path.Replace("\\", "\\\\")} (pos: {HammerHelper.PrintXZY(bp.Coordinates)} rot: {HammerHelper.PrintYXZ(bp.Rotation)}).");
-      Selection.CreateGhost(new ObjectSelection(args.Context, bp, Vector3.one));
+      // Use the serialized representation so immediate placement and a later reload
+      // have identical terrain anchors, dimensions and numeric precision.
+      var savedBlueprint = HammerBlueprintCommand.GetPlanBuild(new() { Name = bp.Name }, lines, true);
+      Selection.CreateGhost(new ObjectSelection(args.Context, savedBlueprint, Vector3.one));
     }
     Pars = null;
     Args = null;

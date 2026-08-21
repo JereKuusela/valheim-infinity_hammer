@@ -1,0 +1,17 @@
+#Name:Rotated terrain center fixture
+#Creator:Infinity Hammer
+#Description:Recenter this blueprint around the rotated wood_floor
+#Category:InfinityHammer
+#Center:wood_floor
+#Coordinates:0,0,0
+#Rotation:0,0,0
+#SnapPoints
+#Pieces
+wood_floor;;2;1;0;0;0.707;0;0.707;;1;1;1;
+wood_wall;;5;2;4;0;0;0;1;;1;1;1;
+#TerrainHeight:5,7,10;30;1
+11;12
+13;14
+#TerrainPaint:5,7,10;30;1
+1:0:0:1;0:1:0:1
+0:0:1:1;1:1:1:1

@@ -21,6 +21,7 @@ public partial class ObjectSelection : BaseSelection
   public List<SelectedObject> Objects = [];
   public TerrainHeight? TerrainHeightInfo;
   public TerrainPaint? TerrainPaintInfo;
+  public bool UsesSelectionRoot { get; private set; }
   private string SelectionBaseDescription = "";
   public override void Destroy()
   {
@@ -37,6 +38,8 @@ public partial class ObjectSelection : BaseSelection
     TerrainHeightInfo = terrainHeightInfo;
     TerrainPaintInfo = terrainPaintInfo;
   }
+
+  private bool CanCollapseToSingleObject => Objects.Count == 1 && TerrainHeightInfo == null && TerrainPaintInfo == null;
 
   public ObjectSelection(ZNetView view, bool singleUse, Vector3? scale, DataEntry? extraData, TerrainHeight? terrainHeightInfo = null, TerrainPaint? terrainPaintInfo = null)
   {
@@ -86,6 +89,7 @@ public partial class ObjectSelection : BaseSelection
   {
     Wrapper = new GameObject();
     Wrapper.SetActive(false);
+    UsesSelectionRoot = true;
 
     SingleUse = singleUse;
     SelectedPrefab = new GameObject();
@@ -118,6 +122,7 @@ public partial class ObjectSelection : BaseSelection
   {
     Wrapper = new GameObject();
     Wrapper.SetActive(false);
+    UsesSelectionRoot = true;
 
     SelectedPrefab = new GameObject();
     SelectedPrefab.transform.SetParent(Wrapper.transform);
@@ -154,8 +159,10 @@ public partial class ObjectSelection : BaseSelection
         HammerHelper.Message(terminal, $"Warning: {e.Message}");
       }
     }
-    // Might be good to have a proper loading for single item blueprints, but this works for now.
-    if (Objects.Count == 1)
+    SetTerrainState(bp.TerrainHeight?.Clone(), bp.TerrainPaint?.Clone());
+    // Terrain is placed relative to the blueprint root, even when only one
+    // object survives prefab filtering.
+    if (CanCollapseToSingleObject)
       ToSingle();
 
     // Snapping not needed when the user is using a specific center point.
@@ -170,9 +177,6 @@ public partial class ObjectSelection : BaseSelection
     piece.m_clipEverything = Snapping.CountSnapPoints(SelectedPrefab) == 0;
     Scaling.Set(SelectedPrefab);
 
-    var terrainHeightInfo = bp.TerrainHeight?.Clone();
-    var terrainPaintInfo = bp.TerrainPaint?.Clone();
-    SetTerrainState(terrainHeightInfo, terrainPaintInfo);
     UpdateSelectionDescription();
   }
 
@@ -237,7 +241,7 @@ public partial class ObjectSelection : BaseSelection
   }
   public void Postprocess()
   {
-    if (Objects.Count == 1)
+    if (!UsesSelectionRoot)
     {
       if (Snapping.CountSnapPoints(SelectedPrefab) == 0)
         Snapping.CreateSnapPoint(SelectedPrefab, Vector3.zero, "Center");
@@ -414,7 +418,7 @@ public partial class ObjectSelection : BaseSelection
   public override GameObject GetPrefab(GameObject obj)
   {
     UndoHelper.BeginSubAction();
-    if (Objects.Count == 1)
+    if (!UsesSelectionRoot)
     {
       var name = Utils.GetPrefabName(obj);
       var tr = HammerHelper.GetPlacementGhost().transform;
@@ -432,7 +436,7 @@ public partial class ObjectSelection : BaseSelection
   }
   public override void AfterPlace(GameObject obj)
   {
-    if (Objects.Count == 1)
+    if (!UsesSelectionRoot)
     {
       var view = obj.GetComponent<ZNetView>();
       // Hoe adds pieces too.
@@ -487,7 +491,7 @@ public partial class ObjectSelection : BaseSelection
             });
 
             var altitude = nearestHeight.Value + placementPosition.y;
-            compiler.m_levelDelta[index] += altitude - compiler.m_hmap.m_heights[index];
+            compiler.m_levelDelta[index] += compiler.m_smoothDelta[index] + altitude - compiler.m_hmap.m_heights[index];
             compiler.m_smoothDelta[index] = 0f;
             compiler.m_modifiedHeight[index] = compiler.m_levelDelta[index] != 0f;
 
@@ -501,7 +505,10 @@ public partial class ObjectSelection : BaseSelection
           }
 
           var nearestPaint = TerrainPaintInfo?.FindNearest(nodePos, placementPosition, paintRotation);
-          if (nearestPaint != null && index < compiler.m_paintMask.Length && nearestPaint != compiler.m_paintMask[index])
+          // Snapshot paint is an exact final value. An unmodified compiler cell
+          // must still be written so the destination's base biome paint cannot leak through.
+          if (nearestPaint != null && index < compiler.m_paintMask.Length &&
+              (!compiler.m_modifiedPaint[index] || nearestPaint != compiler.m_paintMask[index]))
           {
             beforeTerrain.Paints.Add(new()
             {
@@ -559,6 +566,7 @@ public partial class ObjectSelection : BaseSelection
   }
   private void HandleMultiple(GameObject ghost)
   {
+    ApplyTerrainChanges(ghost.transform.position, ghost.transform.rotation);
     var children = Snapping.GetChildren(ghost);
     for (var i = 0; i < children.Count; i++)
     {
@@ -573,14 +581,12 @@ public partial class ObjectSelection : BaseSelection
         var childObj = UnityEngine.Object.Instantiate(prefab, ghostChild.transform.position, ghostChild.transform.rotation);
         PostProcessPlaced(childObj);
       }
-      if (i == 0)
-        ApplyTerrainChanges(ghostChild.transform.position, ghostChild.transform.rotation);
     }
   }
 
   public GameObject AddObject(ZNetView view, Vector3 pos)
   {
-    if (Objects.Count == 1)
+    if (!UsesSelectionRoot)
       ToMulti();
     var obj = HammerHelper.ChildInstantiate(view, SelectedPrefab);
     obj.transform.rotation = view.transform.rotation;
@@ -605,6 +611,7 @@ public partial class ObjectSelection : BaseSelection
       if (prefab && !prefab.GetComponent<Piece>())
         UnityEngine.Object.Destroy(piece);
     }
+    UsesSelectionRoot = true;
   }
   public void RemoveObject(GameObject obj)
   {
@@ -615,7 +622,7 @@ public partial class ObjectSelection : BaseSelection
     obj.transform.SetParent(null);
     UnityEngine.Object.Destroy(obj);
     Objects.RemoveAt(Objects.Count - 1);
-    if (Objects.Count == 1)
+    if (CanCollapseToSingleObject)
       ToSingle();
     else if (Configuration.Snapping != SnappingMode.Off)
       Snapping.RegenerateSnapPoints(SelectedPrefab);
@@ -631,6 +638,7 @@ public partial class ObjectSelection : BaseSelection
     UnityEngine.Object.Destroy(SelectedPrefab);
     SelectedPrefab = obj;
     Objects = [.. Objects.Take(1)];
+    UsesSelectionRoot = false;
   }
   public override void Activate()
   {
