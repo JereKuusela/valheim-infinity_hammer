@@ -45,6 +45,8 @@ public class ToolData
   public int? tabIndex;
   [DefaultValue(null)]
   public int? index;
+  // Non-public so YamlDotNet's default field serialization skips it.
+  internal bool IsDefaultData = false;
 }
 
 public class CommandData

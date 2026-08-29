@@ -14,16 +14,21 @@ public class ToolManager
   public const string CmdMod1 = "<mod1>";
   public const string CmdMod2 = "<mod2>";
   public const string CmdAlt = "<alt>";
-  public static string DefaultFile = Path.Combine(Paths.ConfigPath, "infinity_tools.yaml");
+  public static string DefaultFile = "infinity_tools.yaml";
   public static string Folder = "tools";
   public static string Pattern = "infinity_tools*.yaml";
 
+  private static string GetFolderPath()
+  {
+    var folderPath = Path.Combine(Paths.ConfigPath, Folder);
+    return Directory.Exists(folderPath) ? folderPath : Paths.ConfigPath;
+  }
   public static void Initialize()
   {
     CreateAlias();
-    CreateFile();
+    Yaml.ConsolidateDefaultFile(Paths.ConfigPath, Folder, DefaultFile);
+    FromFiles();
     SetupWatcher();
-    FromFile();
   }
 
   private static void CreateAlias()
@@ -47,13 +52,13 @@ public class ToolManager
 
   public static void CreateFile()
   {
-    if (File.Exists(DefaultFile)) return;
-    File.WriteAllText(DefaultFile, InitialData.Get());
+    File.WriteAllText(Path.Combine(GetFolderPath(), DefaultFile), InitialData.Get());
   }
   public static void ToFile()
   {
-    var yaml = Yaml.Serializer().Serialize(ToolData);
-    File.WriteAllText(DefaultFile, yaml);
+    var data = ToolData.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Where(tool => tool.IsDefaultData).ToList());
+    var yaml = Yaml.Serializer().Serialize(data);
+    File.WriteAllText(Path.Combine(GetFolderPath(), DefaultFile), yaml);
   }
 
   public static ToolData Import(string equipment, string tool)
@@ -67,6 +72,7 @@ public class ToolManager
   {
     if (!ToolData.ContainsKey(equipment))
       ToolData.Add(equipment, []);
+    tool.IsDefaultData = true;
     ToolData[equipment].Add(tool);
     ToFile();
   }
@@ -121,19 +127,18 @@ public class ToolManager
   }
   public static List<Tool> Get(string equipment) => Tools.TryGetValue(equipment, out var tools) ? tools : [];
   public static List<Tool> GetAll() => Tools.SelectMany(kvp => kvp.Value).ToList();
-  public static void FromFile()
+  public static void FromFiles()
   {
     ToolData.Clear();
     Tools.Clear();
-    if (!File.Exists(DefaultFile))
-    {
-      CreateFile();
-      return;
-    }
+
     Yaml.LoadDictFromDirectory<List<ToolData>>(Paths.ConfigPath, Pattern, Folder, LoadTool);
     if (ToolData.Count == 0)
     {
-      Log.Warning($"Failed to load any tools.");
+      if (Yaml.AnyFileExists(Paths.ConfigPath, Pattern, Folder))
+        Log.Warning($"Failed to load any tools.");
+      else
+        CreateFile();
       return;
     }
     Tools = ToolData.ToDictionary(kvp => kvp.Key.ToLower(), kvp => kvp.Value.Select(s => new Tool(s)).ToList());
@@ -145,11 +150,14 @@ public class ToolManager
   {
     if (!ToolData.ContainsKey(equipment))
       ToolData.Add(equipment, []);
+    var isDefaultFile = Yaml.IsDefaultFile(file, Folder, DefaultFile);
+    foreach (var tool in tools)
+      tool.IsDefaultData = isDefaultFile;
     ToolData[equipment].AddRange(tools);
   }
 
   public static void SetupWatcher()
   {
-    Yaml.SetupWatcher(Paths.ConfigPath, Pattern, Folder, FromFile);
+    Yaml.SetupWatcher(Paths.ConfigPath, Pattern, Folder, FromFiles);
   }
 }
