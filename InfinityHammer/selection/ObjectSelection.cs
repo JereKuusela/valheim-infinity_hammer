@@ -482,6 +482,11 @@ public partial class ObjectSelection : BaseSelection
           var nearestHeight = TerrainHeightInfo?.FindNearest(nodePos, placementPosition, heightRotation);
           if (nearestHeight != null && index < compiler.m_hmap.m_heights.Count)
           {
+            var heightWeight = TerrainHeightInfo!.GetSmoothWeight(nodePos, placementPosition, heightRotation, TerrainHeightInfo.Smooth);
+            var baseHeight = compiler.m_hmap.m_heights[index];
+            var targetHeight = nearestHeight.Value + placementPosition.y;
+            var smoothedHeight = Mathf.Lerp(baseHeight, targetHeight, heightWeight);
+
             beforeTerrain.Heights.Add(new()
             {
               Index = index,
@@ -490,8 +495,7 @@ public partial class ObjectSelection : BaseSelection
               HeightModified = compiler.m_modifiedHeight[index]
             });
 
-            var altitude = nearestHeight.Value + placementPosition.y;
-            compiler.m_levelDelta[index] += compiler.m_smoothDelta[index] + altitude - compiler.m_hmap.m_heights[index];
+            compiler.m_levelDelta[index] += compiler.m_smoothDelta[index] + smoothedHeight - baseHeight;
             compiler.m_smoothDelta[index] = 0f;
             compiler.m_modifiedHeight[index] = compiler.m_levelDelta[index] != 0f;
 
@@ -507,25 +511,30 @@ public partial class ObjectSelection : BaseSelection
           var nearestPaint = TerrainPaintInfo?.FindNearest(nodePos, placementPosition, paintRotation);
           // Snapshot paint is an exact final value. An unmodified compiler cell
           // must still be written so the destination's base biome paint cannot leak through.
-          if (nearestPaint != null && index < compiler.m_paintMask.Length &&
-              (!compiler.m_modifiedPaint[index] || nearestPaint != compiler.m_paintMask[index]))
+          if (nearestPaint != null && index < compiler.m_paintMask.Length)
           {
-            beforeTerrain.Paints.Add(new()
+            var paintWeight = TerrainPaintInfo!.GetSmoothWeight(nodePos, placementPosition, paintRotation, TerrainPaintInfo.Smooth);
+            var currentPaint = compiler.m_paintMask[index];
+            var smoothedPaint = Color.Lerp(currentPaint, nearestPaint.Value, paintWeight);
+            if (!compiler.m_modifiedPaint[index] || smoothedPaint != currentPaint)
             {
-              Index = index,
-              Paint = compiler.m_paintMask[index],
-              PaintModified = compiler.m_modifiedPaint[index]
-            });
+              beforeTerrain.Paints.Add(new()
+              {
+                Index = index,
+                Paint = compiler.m_paintMask[index],
+                PaintModified = compiler.m_modifiedPaint[index]
+              });
 
-            compiler.m_paintMask[index] = nearestPaint.Value;
-            compiler.m_modifiedPaint[index] = true;
+              compiler.m_paintMask[index] = smoothedPaint;
+              compiler.m_modifiedPaint[index] = true;
 
-            afterTerrain.Paints.Add(new()
-            {
-              Index = index,
-              Paint = compiler.m_paintMask[index],
-              PaintModified = compiler.m_modifiedPaint[index]
-            });
+              afterTerrain.Paints.Add(new()
+              {
+                Index = index,
+                Paint = compiler.m_paintMask[index],
+                PaintModified = compiler.m_modifiedPaint[index]
+              });
+            }
           }
         }
       }

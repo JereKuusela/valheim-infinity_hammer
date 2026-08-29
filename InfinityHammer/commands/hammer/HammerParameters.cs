@@ -55,6 +55,16 @@ public class HammerParameters
   public string[] Included = [];
   public float? Terrain;
   public float? Paint;
+  public float? HeightSmooth;
+  public float? PaintSmooth;
+
+  private static float ClampSmooth(string value)
+  {
+    var parsed = Parse.Float(value);
+    if (parsed < 0f) return 0f;
+    if (parsed > 1f) return 1f;
+    return parsed;
+  }
 
   public HammerParameters(Terminal.ConsoleEventArgs args)
   {
@@ -133,6 +143,13 @@ public class HammerParameters
       if (name == "ignore") Ignored = values;
       if (name == "terrain") Terrain = Parse.Float(value);
       if (name == "paint") Paint = Parse.Float(value);
+      if (name == "smooth")
+      {
+        if (values.Length > 0 && !string.IsNullOrWhiteSpace(values[0]))
+          HeightSmooth = ClampSmooth(values[0]);
+        if (values.Length > 1 && !string.IsNullOrWhiteSpace(values[1]))
+          PaintSmooth = ClampSmooth(values[1]);
+      }
     }
     if (Ignored.Length == 0)
       Ignored = Configuration.IgnoredIds;

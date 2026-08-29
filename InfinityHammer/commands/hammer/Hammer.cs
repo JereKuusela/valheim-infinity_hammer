@@ -52,7 +52,7 @@ public class HammerSelect
   public HammerSelect()
   {
     List<string> named = [
-      "freeze", "pick", "scale", "level", "stars", "connect", "health", "type", "include", "ignore", "id", "data", "terrain", "paint",
+      "freeze", "pick", "scale", "level", "stars", "connect", "health", "type", "include", "ignore", "id", "data", "terrain", "paint", "smooth",
     ];
     if (InfinityHammer.StructureTweaks)
     {
@@ -110,6 +110,7 @@ public class HammerSelect
       { "data", index => DataLoading.DataKeys },
       { "terrain", index => ParameterInfo.Create("Terrain radius offset for including terrain height and paint in selection.") },
       { "paint", index => ParameterInfo.Create("Paint radius offset for including terrain paint in selection.") },
+      { "smooth", index => ParameterInfo.Create("Terrain smooth (0.0-1.0) for height or height,paint.") },
     });
     Helper.Command("hammer", "[object id] - Selects the object to be placed (the hovered object by default).", (args) =>
     {
@@ -247,6 +248,10 @@ public class HammerSelect
           if (includeTerrainPaint)
             terrainPaintInfo = TerrainInfo.CollectTerrainPaintInRadius(centerPos, centerRot, searchPos, paintRadius, paintNodeSpacing);
         }
+        if (terrainHeightInfo != null)
+          terrainHeightInfo.Smooth = pars.HeightSmooth ?? Configuration.BlueprintTerrainHeightSmooth;
+        if (terrainPaintInfo != null)
+          terrainPaintInfo.Smooth = pars.PaintSmooth ?? Configuration.BlueprintTerrainPaintSmooth;
       }
       ObjectSelection selection = views.Length == 1
         ? new(views[0], pars.Pick, pars.Scale, extraData, terrainHeightInfo, terrainPaintInfo)

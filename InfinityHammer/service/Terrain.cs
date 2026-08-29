@@ -12,10 +12,35 @@ public abstract class TerrainChannelData<TValue> where TValue : struct
   public Vector3 CenterPosition;
   public Quaternion CenterRotation = Quaternion.identity;
   public float DistanceBetweenNodes = 1.0f;
+  public float Smooth = 0f;
   public int Width = 0;
   public int Height = 0;
 
   public float GetRadius() => GetRequiredRadius();
+
+  public float GetSmoothWeight(Vector3 nodePos, Vector3 placementPos, Quaternion relativeRotation, float smooth)
+  {
+    smooth = Mathf.Clamp01(smooth);
+    if (smooth <= 0f)
+      return 1f;
+
+    var localPos = Quaternion.Inverse(relativeRotation) * (nodePos - placementPos);
+    var localX = localPos.x - CenterPosition.x;
+    var localZ = localPos.z - CenterPosition.z;
+    var radius = GetRequiredRadius();
+    if (radius <= 0f)
+      return 1f;
+
+    var distance = Mathf.Sqrt(localX * localX + localZ * localZ);
+    var innerRadius = radius * (1f - smooth);
+    if (distance <= innerRadius)
+      return 1f;
+    if (distance >= radius)
+      return 0f;
+
+    var falloffRange = Mathf.Max(0.001f, radius - innerRadius);
+    return Mathf.Clamp01(1f - ((distance - innerRadius) / falloffRange));
+  }
 
   protected void InitializeReference(int width, int height, Vector3 centerPos)
   {
@@ -149,6 +174,7 @@ public class TerrainHeight : TerrainChannelData<float>
       CenterPosition = CenterPosition,
       CenterRotation = CenterRotation,
       DistanceBetweenNodes = DistanceBetweenNodes,
+      Smooth = Smooth,
       Width = Width,
       Height = Height,
       Heights = new float?[Width, Height]
@@ -205,6 +231,7 @@ public class TerrainPaint : TerrainChannelData<Color>
       CenterPosition = CenterPosition,
       CenterRotation = CenterRotation,
       DistanceBetweenNodes = DistanceBetweenNodes,
+      Smooth = Smooth,
       Width = Width,
       Height = Height,
       Paints = new Color?[Width, Height]

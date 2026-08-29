@@ -14,8 +14,9 @@ public class ToolManager
   public const string CmdMod1 = "<mod1>";
   public const string CmdMod2 = "<mod2>";
   public const string CmdAlt = "<alt>";
-  public static string FilePath = Path.Combine(Paths.ConfigPath, "infinity_tools.yaml");
-  public static string Pattern = "infinity_tools.yaml";
+  public static string DefaultFile = Path.Combine(Paths.ConfigPath, "infinity_tools.yaml");
+  public static string Folder = "tools";
+  public static string Pattern = "infinity_tools*.yaml";
 
   public static void Initialize()
   {
@@ -46,13 +47,13 @@ public class ToolManager
 
   public static void CreateFile()
   {
-    if (File.Exists(FilePath)) return;
-    File.WriteAllText(FilePath, InitialData.Get());
+    if (File.Exists(DefaultFile)) return;
+    File.WriteAllText(DefaultFile, InitialData.Get());
   }
   public static void ToFile()
   {
     var yaml = Yaml.Serializer().Serialize(ToolData);
-    File.WriteAllText(FilePath, yaml);
+    File.WriteAllText(DefaultFile, yaml);
   }
 
   public static ToolData Import(string equipment, string tool)
@@ -124,12 +125,12 @@ public class ToolManager
   {
     ToolData.Clear();
     Tools.Clear();
-    if (!File.Exists(FilePath))
+    if (!File.Exists(DefaultFile))
     {
       CreateFile();
       return;
     }
-    Yaml.LoadDictFromDirectory<List<ToolData>>(Paths.ConfigPath, Pattern, LoadTool);
+    Yaml.LoadDictFromDirectory<List<ToolData>>(Paths.ConfigPath, Pattern, Folder, LoadTool);
     if (ToolData.Count == 0)
     {
       Log.Warning($"Failed to load any tools.");
@@ -149,6 +150,6 @@ public class ToolManager
 
   public static void SetupWatcher()
   {
-    Yaml.SetupWatcher(Pattern, FromFile);
+    Yaml.SetupWatcher(Paths.ConfigPath, Pattern, Folder, FromFile);
   }
 }

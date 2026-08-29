@@ -29,6 +29,10 @@ public partial class Configuration
   public static float BlueprintTerrainHeightOffset => Parse.Float(configBlueprintTerrainHeightOffset.Value);
   public static ConfigEntry<string> configBlueprintTerrainPaintOffset;
   public static float BlueprintTerrainPaintOffset => Parse.Float(configBlueprintTerrainPaintOffset.Value);
+  public static ConfigEntry<string> configBlueprintTerrainHeightSmooth;
+  public static float BlueprintTerrainHeightSmooth => ClampBlueprintSmooth(Parse.Float(configBlueprintTerrainHeightSmooth.Value));
+  public static ConfigEntry<string> configBlueprintTerrainPaintSmooth;
+  public static float BlueprintTerrainPaintSmooth => ClampBlueprintSmooth(Parse.Float(configBlueprintTerrainPaintSmooth.Value));
   public static ConfigEntry<string> configBlueprintTerrainNodeSpacing;
   public static float BlueprintTerrainNodeSpacing => Math.Max(0f, Parse.Float(configBlueprintTerrainNodeSpacing.Value));
   public static ConfigEntry<string> configBlueprintPaintNodeSpacing;
@@ -45,6 +49,12 @@ public partial class Configuration
   {
     SavedObjectData = ParseHashList(configSavedObjectData.Value);
   }
+  private static float ClampBlueprintSmooth(float value)
+  {
+    if (value < 0f) return 0f;
+    if (value > 1f) return 1f;
+    return value;
+  }
   private static void InitBlueprint(ConfigWrapper wrapper)
   {
     var section = "6. Blueprints";
@@ -59,6 +69,8 @@ public partial class Configuration
     configIncludeTerrainPaint = wrapper.Bind(section, "Include terrain paint", false, "If enabled, hammer area selection captures terrain paint.");
     configBlueprintTerrainHeightOffset = wrapper.Bind(section, "Terrain height offset", "0", "Radius/size offset in meters used when capturing terrain height.");
     configBlueprintTerrainPaintOffset = wrapper.Bind(section, "Terrain paint offset", "0", "Radius/size offset in meters used when capturing terrain paint.");
+    configBlueprintTerrainHeightSmooth = wrapper.Bind(section, "Terrain height smooth", "0", "How gradually blueprint terrain height changes are applied. 0 = exact, 1 = fully gradual.");
+    configBlueprintTerrainPaintSmooth = wrapper.Bind(section, "Terrain paint smooth", "0", "How gradually blueprint terrain paint changes are applied. 0 = exact, 1 = fully gradual.");
     configBlueprintTerrainNodeSpacing = wrapper.Bind(section, "Terrain height spacing", "0", "Distance between captured terrain nodes in meters. Use 0 to auto-detect from the terrain heightmap scale.");
     configBlueprintPaintNodeSpacing = wrapper.Bind(section, "Terrain paint spacing", "0", "Distance between captured terrain paint nodes in meters. Use 0 to auto-detect from the terrain heightmap scale.");
     configBlueprintCenterPiece = wrapper.Bind(section, "Blueprint center piece", "", "Piece name that is used as the center point when saving a blueprint.");

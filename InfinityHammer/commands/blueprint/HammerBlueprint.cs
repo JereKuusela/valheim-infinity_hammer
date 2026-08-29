@@ -375,7 +375,12 @@ public class HammerBlueprintCommand : TextReceiver
       foreach (var snap in bp.SnapPoints)
         bp.Objects.Add(new BlueprintObject(pars.SnapPiece, snap, Quaternion.identity, Vector3.one, "", "", 1f));
     }
-    var obj = Selection.CreateGhost(new ObjectSelection(args.Context, bp, pars.Scale));
+    if (bp.TerrainHeight != null)
+      bp.TerrainHeight.Smooth = pars.HeightSmooth ?? Configuration.BlueprintTerrainHeightSmooth;
+    if (bp.TerrainPaint != null)
+      bp.TerrainPaint.Smooth = pars.PaintSmooth ?? Configuration.BlueprintTerrainPaintSmooth;
+
+    Selection.CreateGhost(new ObjectSelection(args.Context, bp, pars.Scale));
     PrintSelected(args.Context, bp.Name);
   }
 
@@ -384,7 +389,7 @@ public class HammerBlueprintCommand : TextReceiver
     AutoComplete.Register("hammer_blueprint", (index, subIndex) =>
     {
       if (index == 0) return GetBlueprints();
-      return ["c", "center", "d", "data", "sc", "scale", "s", "snap"];
+      return ["c", "center", "d", "data", "sc", "scale", "s", "snap", "sm", "smooth"];
     },
     new() {
       { "scale", index => ParameterInfo.Scale("scale", "Size of the object (if the object can be scaled).", index) },
@@ -395,6 +400,8 @@ public class HammerBlueprintCommand : TextReceiver
       { "s", index => ParameterInfo.ObjectIds},
       { "data", index => ["true", "false"]},
       { "d", index => ["true", "false"]},
+      { "smooth", index => ParameterInfo.Create("Terrain smooth (0.0-1.0) for heigh or height,paint.") },
+      { "sm", index => ParameterInfo.Create("Terrain smooth (0.0-1.0) for height or or height,paint.") },
 
     });
     Helper.Command("hammer_blueprint", "[blueprint file] [center=piece] [snap=piece] [scale=x,z,y] [data=true/false] - Selects the blueprint to be placed.", (args) =>
@@ -455,6 +462,16 @@ public class HammerBlueprintPars
   public string SnapPiece = "";
   public bool LoadData = true;
   public Vector3 Scale = Vector3.one;
+  public float? HeightSmooth;
+  public float? PaintSmooth;
+
+  private static float ClampSmooth(string value)
+  {
+    var parsed = Parse.Float(value);
+    if (parsed < 0f) return 0f;
+    if (parsed > 1f) return 1f;
+    return parsed;
+  }
 
   public HammerBlueprintPars(Terminal.ConsoleEventArgs args)
   {
@@ -479,6 +496,14 @@ public class HammerBlueprintPars
         LoadData = Parse.BoolNull(split[1]) ?? true;
       if (split[0] == "scale" || split[0] == "sc")
         Scale = Parse.Scale(Parse.Split(split[1]));
+      if (split[0] == "smooth" || split[0] == "sm")
+      {
+        var values = split[1].Split(',');
+        if (values.Length > 0 && !string.IsNullOrWhiteSpace(values[0]))
+          HeightSmooth = ClampSmooth(values[0]);
+        if (values.Length > 1 && !string.IsNullOrWhiteSpace(values[1]))
+          PaintSmooth = ClampSmooth(values[1]);
+      }
     }
   }
 }
