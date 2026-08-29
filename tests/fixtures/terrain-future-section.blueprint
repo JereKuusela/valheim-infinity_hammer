@@ -1,0 +1,22 @@
+#Name:Future terrain section fixture
+#Creator:Infinity Hammer
+#Description:Unknown sections must not inherit the preceding parser state
+#Category:InfinityHammer
+#Center:
+#Coordinates:0,0,0
+#Rotation:0,0,0
+#SnapPoints
+#Pieces
+wood_floor;;0;0;0;0;0;0;1;;1;1;1;
+#FuturePieceData:v1
+future_payload;;0;0;0;0;0;0;1;;1;1;1;
+#TerrainHeight:0,0,0;0;1
+1;2
+3;4
+#FutureTerrainData:v1
+999;999
+#TerrainHeight:malformed
+888;888
+#TerrainPaint:0,0,0;0;1
+1:0:0:1;0:1:0:1
+0:0:1:1;1:1:1:1

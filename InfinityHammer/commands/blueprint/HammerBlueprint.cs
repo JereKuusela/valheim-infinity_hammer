@@ -11,6 +11,15 @@ namespace InfinityHammer;
 #pragma warning disable IDE0046
 public class HammerBlueprintCommand : TextReceiver
 {
+  private enum PlanBuildSection
+  {
+    Skip,
+    Pieces,
+    SnapPoints,
+    TerrainHeight,
+    TerrainPaint
+  }
+
   private static void PrintSelected(Terminal terminal, string name)
   {
     if (Configuration.DisableSelectMessages) return;
@@ -104,22 +113,33 @@ public class HammerBlueprintCommand : TextReceiver
     }
     return bp;
   }
-  private static Blueprint GetPlanBuild(Blueprint bp, string[] rows, bool loadData)
+  internal static Blueprint GetPlanBuild(Blueprint bp, string[] rows, bool loadData)
   {
-    var piece = true;
-    var parseTerrainHeight = false;
-    var parseTerrainPaint = false;
+    var section = PlanBuildSection.Pieces;
     TerrainHeight? terrainHeightData = null;
     TerrainPaint? terrainPaintData = null;
     var terrainRowIndex = 0;
-    var planbuildTerrain = false;
 
     foreach (var row in rows)
     {
+      var isHeader = row.StartsWith("#", StringComparison.Ordinal);
+      if (isHeader)
+      {
+        terrainRowIndex = 0;
+        // Metadata and comments can appear between legacy piece rows. Terrain
+        // payloads, however, always end at the next header.
+        if (section is PlanBuildSection.TerrainHeight or PlanBuildSection.TerrainPaint)
+          section = PlanBuildSection.Skip;
+      }
+
       if (row.StartsWith("#name:", StringComparison.OrdinalIgnoreCase))
         bp.Name = row.Split(':')[1];
+      else if (row.StartsWith("#creator:", StringComparison.OrdinalIgnoreCase))
+        bp.Creator = row.Split(':')[1];
       else if (row.StartsWith("#description:", StringComparison.OrdinalIgnoreCase))
         bp.Description = row.Split(':')[1];
+      else if (row.StartsWith("#category:", StringComparison.OrdinalIgnoreCase))
+        bp.Category = row.Split(':')[1];
       else if (row.StartsWith("#center:", StringComparison.OrdinalIgnoreCase))
         bp.CenterPiece = row.Split(':')[1];
       else if (row.StartsWith("#coordinates:", StringComparison.OrdinalIgnoreCase))
@@ -132,6 +152,8 @@ public class HammerBlueprintCommand : TextReceiver
       }
       else if (row.StartsWith("#terrainheight:", StringComparison.OrdinalIgnoreCase))
       {
+        // A malformed channel header must not inherit the preceding section.
+        section = PlanBuildSection.Skip;
         var parts = row.Split(':')[1].Split(';');
         if (parts.Length >= 3)
         {
@@ -142,15 +164,13 @@ public class HammerBlueprintCommand : TextReceiver
             CenterRotation = Quaternion.Euler(0f, rotation, 0f),
             DistanceBetweenNodes = InvariantFloat(parts, 2, 1.0f)
           };
-          piece = false;
-          parseTerrainHeight = true;
-          parseTerrainPaint = false;
-          planbuildTerrain = false;
-          terrainRowIndex = 0;
+          section = PlanBuildSection.TerrainHeight;
         }
       }
       else if (row.StartsWith("#terrainpaint:", StringComparison.OrdinalIgnoreCase))
       {
+        // A malformed channel header must not inherit the preceding section.
+        section = PlanBuildSection.Skip;
         var parts = row.Split(':')[1].Split(';');
         if (parts.Length >= 3)
         {
@@ -161,54 +181,42 @@ public class HammerBlueprintCommand : TextReceiver
             CenterRotation = Quaternion.Euler(0f, rotation, 0f),
             DistanceBetweenNodes = InvariantFloat(parts, 2, 1.0f)
           };
-          piece = false;
-          parseTerrainHeight = false;
-          parseTerrainPaint = true;
-          planbuildTerrain = false;
-          terrainRowIndex = 0;
+          section = PlanBuildSection.TerrainPaint;
         }
       }
-      else if (row.StartsWith("#terrain", StringComparison.OrdinalIgnoreCase))
-      {
-        piece = false;
-        parseTerrainHeight = false;
-        parseTerrainPaint = false;
-        planbuildTerrain = false;
-      }
       else if (row.StartsWith("#snappoints", StringComparison.OrdinalIgnoreCase))
-      {
-        piece = false;
-        parseTerrainHeight = false;
-        parseTerrainPaint = false;
-        planbuildTerrain = false;
-      }
+        section = PlanBuildSection.SnapPoints;
       else if (row.StartsWith("#pieces", StringComparison.OrdinalIgnoreCase))
+        section = PlanBuildSection.Pieces;
+      else if (isHeader)
       {
-        piece = true;
-        parseTerrainHeight = false;
-        parseTerrainPaint = false;
-        planbuildTerrain = false;
-      }
-      else if (row.StartsWith("#", StringComparison.Ordinal))
-        continue;
-      else if (piece)
-        bp.Objects.Add(GetPlanBuildObject(row, loadData));
-      else if (parseTerrainHeight && terrainHeightData != null)
-      {
-        ParseTerrainHeightRow(terrainHeightData, row, terrainRowIndex);
-        terrainRowIndex++;
-      }
-      else if (parseTerrainPaint && terrainPaintData != null)
-      {
-        ParseTerrainPaintRow(terrainPaintData, row, terrainRowIndex);
-        terrainRowIndex++;
-      }
-      else if (planbuildTerrain)
-      {
+        // Keep ordinary comments compatible with headerless piece lists, but
+        // skip payload following unknown section headers.
+        var isComment = row.Length == 1 || char.IsWhiteSpace(row[1]);
+        if (!isComment)
+          section = PlanBuildSection.Skip;
         continue;
       }
-      else if (!parseTerrainHeight && !parseTerrainPaint)
-        bp.SnapPoints.Add(GetPlanBuildSnapPoint(row));
+      else
+      {
+        switch (section)
+        {
+          case PlanBuildSection.Pieces:
+            bp.Objects.Add(GetPlanBuildObject(row, loadData));
+            break;
+          case PlanBuildSection.SnapPoints:
+            bp.SnapPoints.Add(GetPlanBuildSnapPoint(row));
+            break;
+          case PlanBuildSection.TerrainHeight when terrainHeightData != null:
+            ParseTerrainHeightRow(terrainHeightData, row, terrainRowIndex);
+            terrainRowIndex++;
+            break;
+          case PlanBuildSection.TerrainPaint when terrainPaintData != null:
+            ParseTerrainPaintRow(terrainPaintData, row, terrainRowIndex);
+            terrainRowIndex++;
+            break;
+        }
+      }
     }
 
     bp.TerrainHeight = terrainHeightData;

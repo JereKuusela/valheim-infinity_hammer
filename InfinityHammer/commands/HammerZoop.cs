@@ -72,15 +72,20 @@ public partial class ObjectSelection : BaseSelection
   private int ZoopsY = 0;
   private int ZoopsZ = 0;
   private Vector3 ZoopOffset = new();
+  private Vector3 ZoopOrigin = new();
   private readonly Dictionary<Vector3Int, GameObject> Zoops = [];
   public void ZoopReset()
   {
-    if (Objects.Count > 1)
-      ToSingle();
+    foreach (var zoop in Zoops.Values.ToList())
+    {
+      if (zoop)
+        RemoveObject(zoop);
+    }
     ZoopsX = 0;
     ZoopsY = 0;
     ZoopsZ = 0;
     ZoopOffset = new();
+    ZoopOrigin = new();
     Zoops.Clear();
     ZoopPostprocess();
   }
@@ -109,8 +114,11 @@ public partial class ObjectSelection : BaseSelection
   }
   private void AddChildSub(Vector3Int index)
   {
-    var pos = GetOffset(index);
-    Zoops[index] = AddObject(BasePrefab.GetComponent<ZNetView>(), pos);
+    var basePrefab = BasePrefab;
+    if (Zoops.Count == 0)
+      ZoopOrigin = UsesSelectionRoot ? basePrefab.transform.localPosition : Vector3.zero;
+    var pos = ZoopOrigin + GetOffset(index);
+    Zoops[index] = AddObject(basePrefab.GetComponent<ZNetView>(), pos);
     if (Configuration.ZoopMagic == ZoopMagicMode.Mild) Center();
     if (Configuration.ZoopMagic == ZoopMagicMode.Wild) CenterOnRandomChild();
   }
@@ -162,7 +170,17 @@ public partial class ObjectSelection : BaseSelection
     offset.z *= index.z;
     return offset;
   }
-  private GameObject BasePrefab => Zoops.Count > 0 ? Zoops.First().Value : SelectedPrefab;
+  private GameObject BasePrefab
+  {
+    get
+    {
+      if (Zoops.Count > 0)
+        return Zoops.First().Value;
+      if (UsesSelectionRoot && Objects.Count == 1)
+        return Snapping.GetChildren(SelectedPrefab).FirstOrDefault() ?? SelectedPrefab;
+      return SelectedPrefab;
+    }
+  }
   private void UpdateOffsetX(string offset)
   {
     var size = HammerHelper.ParseSize(BasePrefab, offset);

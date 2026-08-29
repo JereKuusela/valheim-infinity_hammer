@@ -11,28 +11,17 @@ public abstract class TerrainChannelData<TValue> where TValue : struct
 {
   public Vector3 CenterPosition;
   public Quaternion CenterRotation = Quaternion.identity;
-  public Vector3? FirstNodeAnchor;
   public float DistanceBetweenNodes = 1.0f;
-  public float? CaptureRadius;
   public int Width = 0;
   public int Height = 0;
 
-  public float GetRadius() => CaptureRadius ??= GetRequiredRadius();
+  public float GetRadius() => GetRequiredRadius();
 
   protected void InitializeReference(int width, int height, Vector3 centerPos)
   {
     Width = width;
     Height = height;
     CenterPosition = centerPos;
-    FirstNodeAnchor = null;
-  }
-
-  protected void InitializeReference(int width, int height, Vector3 centerPos, Vector3 firstNodeAnchor)
-  {
-    Width = width;
-    Height = height;
-    CenterPosition = centerPos;
-    FirstNodeAnchor = firstNodeAnchor;
   }
 
   private float GetRequiredRadius()
@@ -43,21 +32,24 @@ public abstract class TerrainChannelData<TValue> where TValue : struct
     var spacing = Mathf.Max(0.001f, DistanceBetweenNodes);
     var halfOffsetX = (Width - 1) * spacing * 0.5f;
     var halfOffsetZ = (Height - 1) * spacing * 0.5f;
-    var corners = new[]
+    var firstNode = CenterPosition - new Vector3(halfOffsetX, 0f, halfOffsetZ);
+    var radius = 0f;
+    for (var x = 0; x < Width; x++)
     {
-      CenterPosition + CenterRotation * new Vector3(-halfOffsetX, 0f, -halfOffsetZ),
-      CenterPosition + CenterRotation * new Vector3(halfOffsetX, 0f, -halfOffsetZ),
-      CenterPosition + CenterRotation * new Vector3(-halfOffsetX, 0f, halfOffsetZ),
-      CenterPosition + CenterRotation * new Vector3(halfOffsetX, 0f, halfOffsetZ)
-    };
-    return corners.Max(Utils.LengthXZ);
+      for (var z = 0; z < Height; z++)
+      {
+        if (!Get(x, z).HasValue)
+          continue;
+        var node = firstNode + new Vector3(x * spacing, 0f, z * spacing);
+        radius = Mathf.Max(radius, Utils.LengthXZ(node));
+      }
+    }
+    return radius;
   }
 
   public void SetReference(Vector3 center, Quaternion rotation)
   {
     CenterPosition -= center;
-    if (FirstNodeAnchor.HasValue)
-      FirstNodeAnchor = FirstNodeAnchor.Value - center;
     CenterRotation = GetYawRotation(rotation);
     OnSetReference(center);
   }
@@ -75,16 +67,8 @@ public abstract class TerrainChannelData<TValue> where TValue : struct
   {
   }
 
-  protected Vector3 GetCenterAnchor()
-  {
-    return CenterPosition;
-  }
-
   protected Vector3 GetFirstNodeAnchor()
   {
-    if (FirstNodeAnchor.HasValue)
-      return FirstNodeAnchor.Value;
-
     var spacing = Mathf.Max(0.001f, DistanceBetweenNodes);
     var halfOffsetX = (Width - 1) * spacing * 0.5f;
     var halfOffsetZ = (Height - 1) * spacing * 0.5f;
@@ -121,12 +105,6 @@ public class TerrainHeight : TerrainChannelData<float>
   public void InitializeGrid(int width, int height, Vector3 centerPosition)
   {
     InitializeReference(width, height, centerPosition);
-    Heights = new float?[width, height];
-  }
-
-  public void InitializeGrid(int width, int height, Vector3 centerPosition, Vector3 firstNodeAnchor)
-  {
-    InitializeReference(width, height, centerPosition, firstNodeAnchor);
     Heights = new float?[width, height];
   }
 
@@ -170,9 +148,7 @@ public class TerrainHeight : TerrainChannelData<float>
     {
       CenterPosition = CenterPosition,
       CenterRotation = CenterRotation,
-      FirstNodeAnchor = FirstNodeAnchor,
       DistanceBetweenNodes = DistanceBetweenNodes,
-      CaptureRadius = CaptureRadius,
       Width = Width,
       Height = Height,
       Heights = new float?[Width, Height]
@@ -197,12 +173,6 @@ public class TerrainPaint : TerrainChannelData<Color>
   public void InitializeGrid(int width, int height, Vector3 centerPosition)
   {
     InitializeReference(width, height, centerPosition);
-    Paints = new Color?[width, height];
-  }
-
-  public void InitializeGrid(int width, int height, Vector3 centerPosition, Vector3 firstNodeAnchor)
-  {
-    InitializeReference(width, height, centerPosition, firstNodeAnchor);
     Paints = new Color?[width, height];
   }
 
@@ -234,9 +204,7 @@ public class TerrainPaint : TerrainChannelData<Color>
     {
       CenterPosition = CenterPosition,
       CenterRotation = CenterRotation,
-      FirstNodeAnchor = FirstNodeAnchor,
       DistanceBetweenNodes = DistanceBetweenNodes,
-      CaptureRadius = CaptureRadius,
       Width = Width,
       Height = Height,
       Paints = new Color?[Width, Height]
@@ -259,7 +227,12 @@ public class TerrainInfo
 
   public static float ResolveRadius(TerrainHeight? height, TerrainPaint? paint)
   {
-    return Mathf.Max(height?.GetRadius() ?? 0f, paint?.GetRadius() ?? 0f);
+    var sampleRadius = Mathf.Max(height?.GetRadius() ?? 0f, paint?.GetRadius() ?? 0f);
+    // FindNearest rounds to the nearest snapshot node, so the affected area
+    // extends beyond the outer node centers. Include a conservative node/grid
+    // margin when finding compilers, recording undo and refreshing clutter.
+    var samplingMargin = Mathf.Max(1f, height?.DistanceBetweenNodes ?? 0f, paint?.DistanceBetweenNodes ?? 0f);
+    return sampleRadius + samplingMargin;
   }
 
   private static Vector3 VertexToWorld(Heightmap hmap, int x, int z)
@@ -277,7 +250,6 @@ public class TerrainInfo
   {
     var compilers = Terrain.GetCompilers(searchPos, new(radius.Max)).ToList();
     var data = MergeHeightmapsWithCircle(compilers, searchPos, radius, nodeSpacingOverride);
-    data.CaptureRadius = radius.Max;
     data.SetReference(centerPos, centerRot);
     return data;
   }
@@ -286,27 +258,22 @@ public class TerrainInfo
   {
     var compilers = Terrain.GetCompilers(searchPos, new(radius.Max)).ToList();
     var data = MergePaintmapsWithCircle(compilers, searchPos, radius, nodeSpacingOverride);
-    data.CaptureRadius = radius.Max;
     data.SetReference(centerPos, centerRot);
     return data;
   }
 
   public static TerrainHeight CollectTerrainHeightInRect(Vector3 centerPos, Quaternion centerRot, Vector3 searchPos, Range<float> width, Range<float> depth, float angle, float nodeSpacingOverride = 0f)
   {
-    var radius = Math.Max(width.Max, depth.Max);
-    var compilers = Terrain.GetCompilers(searchPos, new(radius)).ToList();
-    var data = MergeHeightmapsWithRect(compilers, centerPos, width, depth, angle, nodeSpacingOverride);
-    data.CaptureRadius = radius;
+    var compilers = Terrain.GetCompilers(searchPos, width, depth, angle).ToList();
+    var data = MergeHeightmapsWithRect(compilers, searchPos, width, depth, angle, nodeSpacingOverride);
     data.SetReference(centerPos, centerRot);
     return data;
   }
 
   public static TerrainPaint CollectTerrainPaintInRect(Vector3 centerPos, Quaternion centerRot, Vector3 searchPos, Range<float> width, Range<float> depth, float angle, float nodeSpacingOverride = 0f)
   {
-    var radius = Math.Max(width.Max, depth.Max);
-    var compilers = Terrain.GetCompilers(searchPos, new(radius)).ToList();
-    var data = MergePaintmapsWithRect(compilers, centerPos, width, depth, angle, nodeSpacingOverride);
-    data.CaptureRadius = radius;
+    var compilers = Terrain.GetCompilers(searchPos, width, depth, angle).ToList();
+    var data = MergePaintmapsWithRect(compilers, searchPos, width, depth, angle, nodeSpacingOverride);
     data.SetReference(centerPos, centerRot);
     return data;
   }
@@ -364,8 +331,7 @@ public class TerrainInfo
     mergedData.InitializeGrid(
       gridWidth,
       gridHeight,
-      new Vector3(minWorldX + (gridWidth - 1) * spacing * 0.5f, 0f, minWorldZ + (gridHeight - 1) * spacing * 0.5f),
-      new Vector3(minWorldX, 0f, minWorldZ)
+      new Vector3(minWorldX + (gridWidth - 1) * spacing * 0.5f, 0f, minWorldZ + (gridHeight - 1) * spacing * 0.5f)
     );
     mergedData.DistanceBetweenNodes = spacing;
 
@@ -440,8 +406,7 @@ public class TerrainInfo
     mergedData.InitializeGrid(
       gridWidth,
       gridHeight,
-      new Vector3(minWorldX + (gridWidth - 1) * spacing * 0.5f, 0f, minWorldZ + (gridHeight - 1) * spacing * 0.5f),
-      new Vector3(minWorldX, 0f, minWorldZ)
+      new Vector3(minWorldX + (gridWidth - 1) * spacing * 0.5f, 0f, minWorldZ + (gridHeight - 1) * spacing * 0.5f)
     );
     mergedData.DistanceBetweenNodes = spacing;
 
@@ -457,14 +422,12 @@ public class TerrainInfo
           if (!Helper.Within(radius, distance))
             continue;
 
-          var index = z * max + x;
-          if (index >= compiler.m_paintMask.Length)
-            continue;
-
           int gridX = Mathf.RoundToInt((nodePos.x - minWorldX) / spacing);
           int gridZ = Mathf.RoundToInt((nodePos.z - minWorldZ) / spacing);
           if (mergedData.Get(gridX, gridZ) == null)
-            mergedData.Set(gridX, gridZ, compiler.m_paintMask[index]);
+            // TerrainComp only stores meaningful paint for modified cells.
+            // Read the composed Heightmap so the snapshot contains final values.
+            mergedData.Set(gridX, gridZ, compiler.m_hmap.GetPaintMask(x, z));
         }
       }
     }
@@ -520,8 +483,7 @@ public class TerrainInfo
     mergedData.InitializeGrid(
       gridWidth,
       gridHeight,
-      new Vector3(minWorldX + (gridWidth - 1) * spacing * 0.5f, 0f, minWorldZ + (gridHeight - 1) * spacing * 0.5f),
-      new Vector3(minWorldX, 0f, minWorldZ)
+      new Vector3(minWorldX + (gridWidth - 1) * spacing * 0.5f, 0f, minWorldZ + (gridHeight - 1) * spacing * 0.5f)
     );
     mergedData.DistanceBetweenNodes = spacing;
 
@@ -604,8 +566,7 @@ public class TerrainInfo
     mergedData.InitializeGrid(
       gridWidth,
       gridHeight,
-      new Vector3(minWorldX + (gridWidth - 1) * spacing * 0.5f, 0f, minWorldZ + (gridHeight - 1) * spacing * 0.5f),
-      new Vector3(minWorldX, 0f, minWorldZ)
+      new Vector3(minWorldX + (gridWidth - 1) * spacing * 0.5f, 0f, minWorldZ + (gridHeight - 1) * spacing * 0.5f)
     );
     mergedData.DistanceBetweenNodes = spacing;
 
@@ -625,14 +586,11 @@ public class TerrainInfo
           if (!Helper.Within(width, depth, Mathf.Abs(dx), Mathf.Abs(dz)))
             continue;
 
-          var index = z * max + x;
-          if (index >= compiler.m_paintMask.Length)
-            continue;
-
           int gridX = Mathf.RoundToInt((nodePos.x - minWorldX) / spacing);
           int gridZ = Mathf.RoundToInt((nodePos.z - minWorldZ) / spacing);
           if (mergedData.Get(gridX, gridZ) == null)
-            mergedData.Set(gridX, gridZ, compiler.m_paintMask[index]);
+            // See the circular capture path above: snapshot composed paint.
+            mergedData.Set(gridX, gridZ, compiler.m_hmap.GetPaintMask(x, z));
         }
       }
     }

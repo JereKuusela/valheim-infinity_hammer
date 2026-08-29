@@ -211,7 +211,9 @@ public class HammerSelect
         var paintNodeSpacing = Configuration.BlueprintPaintNodeSpacing;
 
         Vector3 centerPos = views[0].transform.position;
-        Quaternion centerRot = views[0].transform.rotation;
+        // Multiple selections use an unrotated wrapper whose origin is the first object.
+        // Keep terrain in the same reference frame as that placement root.
+        Quaternion centerRot = views.Length == 1 ? views[0].transform.rotation : Quaternion.identity;
         Vector3 searchPos = centerPos;
         if (pars.Radius != null || (pars.Width != null && pars.Depth != null))
           searchPos = pars.Position;

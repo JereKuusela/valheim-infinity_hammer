@@ -1,0 +1,17 @@
+#Name:Terrain blueprint contract fixture
+#Creator:Infinity Hammer
+#Description:Two pieces with a terrain grid whose origin differs from the first piece
+#Category:InfinityHammer
+#Center:
+#Coordinates:0,0,0
+#Rotation:0,0,0
+#SnapPoints
+#Pieces
+wood_floor;;-2;0;0;0;0;0;1;;1;1;1;
+wood_floor;;2;0;0;0;0;0;1;;1;1;1;
+#TerrainHeight:1,0,0;0;1
+1;;3
+4;5;6
+#TerrainPaint:1,0,0;0;1
+1:0:0:1;;0:1:0:1
+0:0:1:1;1:1:1:1;0:0:0:1
