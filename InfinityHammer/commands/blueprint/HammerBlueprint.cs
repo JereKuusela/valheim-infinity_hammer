@@ -384,9 +384,9 @@ public class HammerBlueprintCommand : TextReceiver
     PrintSelected(args.Context, bp.Name);
   }
 
-  public HammerBlueprintCommand()
+  private static void RegisterAutoComplete(string command)
   {
-    AutoComplete.Register("hammer_blueprint", (index, subIndex) =>
+    AutoComplete.Register(command, (index, subIndex) =>
     {
       if (index == 0) return GetBlueprints();
       return ["c", "center", "d", "data", "sc", "scale", "s", "snap", "sm", "smooth"];
@@ -402,8 +402,12 @@ public class HammerBlueprintCommand : TextReceiver
       { "d", index => ["true", "false"]},
       { "smooth", index => ParameterInfo.Create("Terrain smooth (0.0-1.0) for heigh or height,paint.") },
       { "sm", index => ParameterInfo.Create("Terrain smooth (0.0-1.0) for height or or height,paint.") },
-
     });
+  }
+
+  public HammerBlueprintCommand()
+  {
+    RegisterAutoComplete("hammer_blueprint");
     Helper.Command("hammer_blueprint", "[blueprint file] [center=piece] [snap=piece] [scale=x,z,y] [data=true/false] - Selects the blueprint to be placed.", (args) =>
     {
       Args = args;
@@ -418,22 +422,27 @@ public class HammerBlueprintCommand : TextReceiver
         TextInput.instance.RequestText(this, "Name", 1000);
     });
 
-    AutoComplete.Register("hammer_restore", (index, subIndex) =>
-    {
-      if (index == 0) return GetBlueprints();
-      if (index == 1) return ParameterInfo.Scale("scale", "Size of the object (if the object can be scaled).", subIndex);
-      return ParameterInfo.None;
-    });
-    Helper.Command("hammer_restore", "[blueprint file] [scale] - Restores the blueprint at its saved position.", (args) =>
+    RegisterAutoComplete("hammer_restore");
+    Helper.Command("hammer_restore", "[blueprint file] [center=piece] [snap=piece] [scale=x,z,y] [data=true/false] - Restores the blueprint at its saved position.", (args) =>
     {
       Helper.ArgsCheck(args, 2, "Blueprint name is missing.");
       Hammer.Equip();
-      var name = args[1];
-      var scale = args.Length > 2 ? Parse.Scale(Parse.Split(args[2])) : Vector3.one;
-      var bp = GetBluePrint(name, true);
-      bp.Center("");
-      var obj = Selection.CreateGhost(new ObjectSelection(args.Context, bp, scale));
-      Position.Override = bp.Coordinates;
+      var pars = new HammerBlueprintPars(args);
+      var bp = GetBluePrint(pars.Name, pars.LoadData);
+      // The saved position/rotation are anchored to the blueprint's own center, so
+      // any additional offset from a custom center piece must be added back here.
+      var centerOffset = bp.Center(pars.CenterPiece);
+      if (pars.SnapPiece != "")
+      {
+        foreach (var snap in bp.SnapPoints)
+          bp.Objects.Add(new BlueprintObject(pars.SnapPiece, snap, Quaternion.identity, Vector3.one, "", "", 1f));
+      }
+      if (bp.TerrainHeight != null)
+        bp.TerrainHeight.Smooth = pars.HeightSmooth ?? Configuration.BlueprintTerrainHeightSmooth;
+      if (bp.TerrainPaint != null)
+        bp.TerrainPaint.Smooth = pars.PaintSmooth ?? Configuration.BlueprintTerrainPaintSmooth;
+      var obj = Selection.CreateGhost(new ObjectSelection(args.Context, bp, pars.Scale));
+      Position.Override = bp.Coordinates + Quaternion.Euler(bp.Rotation) * centerOffset;
       PlaceRotation.Set(Quaternion.Euler(bp.Rotation));
       PrintSelected(args.Context, bp.Name);
     });

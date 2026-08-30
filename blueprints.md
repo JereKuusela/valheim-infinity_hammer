@@ -18,8 +18,13 @@ The command has following advanced parameters:
   - Install [Structure Tweaks](https://valheim.thunderstore.io/package/JereKuusela/Structure_Tweaks/) for all clients to unlock scaling for all objects.
 - `snap=object`: If given, this object is placed at the each snap point.
   - This can be used to modify the snap points.
+- `smooth=height,paint`: If given, overrides how gradually the blueprint's terrain height and/or paint snapshots are applied (0.0-1.0, 0 = exact, 1 = fully gradual).
+  - Either value can be left empty to keep the configured default, for example `smooth=,0.5` only overrides paint.
+  - Has no effect if the blueprint doesn't contain a terrain height/paint snapshot.
 
 If the blueprint has no snap points, some are automatically generated.
+
+The `hammer_restore [file name]` command selects the blueprint at its originally saved position and rotation instead of the current placement ghost location. It supports the same `center`, `data`, `scale`, `snap` and `smooth` parameters as `hammer_blueprint`.
 
 ## Creating blueprints
 
@@ -88,8 +93,16 @@ Following data is not copied:
 - Blueprint folder (default: `PlanBuild`): Folder relative to the config folder. Both profile and base Valheim folders are searched for .blueprint and .vbuild files.
 - Blueprint snap piece (default: `auto`): The default snap piece when saving blueprints.
 - Build Share folder (default: `BuildShare/Builds`): Folder relative to the Valheim.exe.
+- Include terrain height (default: `false`): If enabled, hammer area selection captures terrain height.
+- Include terrain paint (default: `false`): If enabled, hammer area selection captures terrain paint.
 - Save blueprint data (default: `true`): If enabled, object data values are saved to blueprints.
 - Save blueprints to profile (default: `false`): If enabled, blueprints are saved to the profile folder instead of the base Valheim folder.
 - Save object data blueprints: Object ids that save extra data when the "Save blueprint data" is disabled.
 - Save simpler blueprints (default: `false`): If enabled, only mandatory information is saved.
+- Terrain height offset (default: `0`): How much terrain height (in meters)  is captured outside the selected area.
+- Terrain height smooth (default: `0`): How gradually blueprint terrain height changes are applied by default (0 = exact, 1 = fully gradual)
+- Terrain height spacing (default: `0`): Distance between captured terrain height nodes in meters. 0 = smallest distance.
+- Terrain paint offset (default: `0`): How much terrain paint (in meters) is captured outside the selected area.
+- Terrain paint smooth (default: `0`): How gradually blueprint terrain paint changes are applied by default (0 = exact, 1 = fully gradual).
+- Terrain paint spacing (default: `0`): Distance between captured terrain paint nodes in meters. 0 = smallest distance.
 - Use blueprint chance (default: `false`): If enabled, the object chance from blueprints is used.

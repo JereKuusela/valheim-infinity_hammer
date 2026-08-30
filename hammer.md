@@ -32,6 +32,15 @@ The `hammer` command has following extra parameters which allow modifying the se
 - `ignore=id1,id2,...`: Ignores certain object ids.
   - These ids are combined with the setting "Ignored ids".
 - `include=id1,id2,...`: Includes only certain object ids.
+- `terrain=radius`: Includes terrain height in an area selection, with an extra radius/size offset in meters.
+  - If given without a value, only the "Terrain height offset" config value is used.
+  - Works even when "Include terrain height" is not set.
+- `paint=radius`: Includes terrain paint in an area selection, with an extra radius/size offset in meters.
+  - If given without a value, only the "Terrain paint offset" config value is used.
+  - Works even when "Include terrain paint" is not set.
+- `smooth=height,paint`: Overrides how gradually the captured terrain height and/or paint are applied (0.0-1.0, 0 = exact, 1 = fully gradual).
+  - Either value can be left empty to keep the configured default, for example `smooth=,0.5` only overrides paint.
+  - Has no effect without `terrain`/`paint` (or the matching config option).
 
 For Structure Tweaks mod:
 
