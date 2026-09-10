@@ -409,9 +409,9 @@ public static class CustomMenu
       tab = tool.TabIndex ?? tab;
       if (pt.m_availablePieces.Count <= tab) return;
       if (!indices.ContainsKey(tab))
-        indices[tab] = equipment == "hammer" ? 0 : pt.m_availablePieces[tab].Count - 1;
+        indices[tab] = equipment == "hammer" ? 0 : pt.m_availablePiecesByCategory[tab].Count - 1;
       var index = tool.Index ?? indices[tab] + 1;
-      var pieces = pt.m_availablePieces[tab];
+      var pieces = pt.m_availablePiecesByCategory[tab];
       index = Math.Min(index, pieces.Count);
       pieces.Insert(index, Build(tool));
       indices[tab] = index;

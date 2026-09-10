@@ -71,7 +71,7 @@ public static class CustomBuildMenu
     // Process categories with pagination if needed
     categories = HandleNavigation(categories);
 
-    AddCategories(pt.m_availablePieces, categories);
+    AddCategories(pt.m_availablePiecesByCategory, categories);
     pt.m_categories = [.. categories.Select((_, index) => (Piece.PieceCategory)(CustomMenu.CATEGORY_OFFSET + index))];
     pt.m_categoryLabels = [.. categories.Select(c => c.Name)];
     SanityCheck(pt);

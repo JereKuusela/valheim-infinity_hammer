@@ -1,3 +1,6 @@
+- v1.81
+  - Fixes for the new game update. Some things might not work properly.
+
 - v1.80
   - Adds support for the permission system from Server Devcommands mod. This allows granularly granting access to specific commands and features.
   - Adds current blueprint names to the autocomplete of `hammer_save` command.
@@ -21,6 +24,3 @@
   - Adds a new setting "No physics" to disable fall and push up properties.
   - Fixes prefabs starting with "vx_" not appearing in visuals menu.
   - Fixes workbench radius projector not updating during placement.
-
-- v1.76
-  - Fixes some issues with build tables.

@@ -32,7 +32,7 @@ public class HammerSaveCommand : TextReceiver
     {
       info = $"{armorStand.m_pose}:";
       info += $"{armorStand.m_slots.Count}:";
-      var slots = armorStand.m_slots.Select(slot => $"{slot.m_visualName}:{slot.m_visualVariant}");
+      var slots = armorStand.m_slots.Select(slot => $"{ZDOKeys.Convert(slot.m_visualHash)}:{slot.m_visualVariant}");
       info += string.Join(":", slots);
     }
     return info;

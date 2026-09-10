@@ -23,6 +23,8 @@ public partial class ObjectSelection : BaseSelection
   public TerrainPaint? TerrainPaintInfo;
   public bool UsesSelectionRoot { get; private set; }
   private string SelectionBaseDescription = "";
+  private Piece.Requirement[]? CachedResources;
+  private bool ResourcesDirty = true;
   public override void Destroy()
   {
     base.Destroy();
@@ -115,6 +117,7 @@ public partial class ObjectSelection : BaseSelection
 
     SetTerrainState(terrainHeightInfo, terrainPaintInfo);
     UpdateSelectionDescription();
+    ResourcesDirty = true;
   }
 
 
@@ -178,6 +181,7 @@ public partial class ObjectSelection : BaseSelection
     Scaling.Set(SelectedPrefab);
 
     UpdateSelectionDescription();
+    ResourcesDirty = true;
   }
 
   private string BuildTerrainSummaryDescription()
@@ -349,7 +353,7 @@ public partial class ObjectSelection : BaseSelection
     {
       sign.m_textWidget.text = signText;
     }
-    if (data.TryGetString(pars, ZDOVars.s_item, out var item) && obj.TryGetComponent<ItemStand>(out var itemStand))
+    if (data.TryGetHash(pars, ZDOVars.s_item, out var item) && obj.TryGetComponent<ItemStand>(out var itemStand))
     {
       var variant = data.TryGetInt(pars, ZDOVars.s_variant, out var v) ? v : 0;
       var quality = data.TryGetInt(pars, ZDOVars.s_quality, out var q) ? q : 1;
@@ -363,9 +367,9 @@ public partial class ObjectSelection : BaseSelection
       SetItemHack.Hack = true;
       for (var i = 0; i < armorStand.m_slots.Count; i++)
       {
-        var name = data.TryGetString(pars, StringExtensionMethods.GetStableHashCode($"{i}_item"), out var s) ? s : "";
-        var variant = data.TryGetInt(pars, StringExtensionMethods.GetStableHashCode($"{i}_variant"), out var v) ? v : 0;
-        if (name != "")
+        var name = data.TryGetHash(pars, StringExtensionMethods.GetStableHashCode($"{i}_item"), out var v) ? v : 0;
+        var variant = data.TryGetInt(pars, StringExtensionMethods.GetStableHashCode($"{i}_variant"), out v) ? v : 0;
+        if (name != 0)
           armorStand.SetVisualItem(i, name, variant);
       }
       SetItemHack.Hack = false;
@@ -603,6 +607,7 @@ public partial class ObjectSelection : BaseSelection
     if (Configuration.Snapping != SnappingMode.Off)
       Snapping.RegenerateSnapPoints(SelectedPrefab);
     Objects.Add(new SelectedObject(Objects[0].Prefab, Objects[0].Scalable, Objects[0].Data));
+    ResourcesDirty = true;
     return obj;
   }
   private void ToMulti()
@@ -631,6 +636,7 @@ public partial class ObjectSelection : BaseSelection
     obj.transform.SetParent(null);
     UnityEngine.Object.Destroy(obj);
     Objects.RemoveAt(Objects.Count - 1);
+    ResourcesDirty = true;
     if (CanCollapseToSingleObject)
       ToSingle();
     else if (Configuration.Snapping != SnappingMode.Off)
@@ -653,5 +659,18 @@ public partial class ObjectSelection : BaseSelection
   {
     base.Activate();
     Scaling.Set(SelectedPrefab);
+  }
+
+  public override Piece GetSelectedPiece()
+  {
+    var piece = base.GetSelectedPiece();
+    if (!piece || !UsesSelectionRoot || !Configuration.GroupResourceCost) return piece!;
+    if (ResourcesDirty)
+    {
+      CachedResources = ResourceCost.Calculate(Objects);
+      ResourcesDirty = false;
+    }
+    piece.m_resources = CachedResources;
+    return piece;
   }
 }

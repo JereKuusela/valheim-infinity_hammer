@@ -54,52 +54,52 @@ public class SetItemHack
 {
   public static bool Hack = false;
 
-  static void SetItem(VisEquipment obj, VisSlot slot, string name, int variant)
+  static void SetItem(VisEquipment obj, VisSlot slot, int itemHash, int variant)
   {
     switch (slot)
     {
       case VisSlot.HandLeft:
-        obj.m_leftItem = name;
+        obj.m_leftItem = itemHash;
         obj.m_leftItemVariant = variant;
         return;
       case VisSlot.HandRight:
-        obj.m_rightItem = name;
+        obj.m_rightItem = itemHash;
         return;
       case VisSlot.BackLeft:
-        obj.m_leftBackItem = name;
+        obj.m_leftBackItem = itemHash;
         obj.m_leftBackItemVariant = variant;
         return;
       case VisSlot.BackRight:
-        obj.m_rightBackItem = name;
+        obj.m_rightBackItem = itemHash;
         return;
       case VisSlot.Chest:
-        obj.m_chestItem = name;
+        obj.m_chestItem = itemHash;
         return;
       case VisSlot.Legs:
-        obj.m_legItem = name;
+        obj.m_legItem = itemHash;
         return;
       case VisSlot.Helmet:
-        obj.m_helmetItem = name;
+        obj.m_helmetItem = itemHash;
         return;
       case VisSlot.Shoulder:
-        obj.m_shoulderItem = name;
+        obj.m_shoulderItem = itemHash;
         obj.m_shoulderItemVariant = variant;
         return;
       case VisSlot.Utility:
-        obj.m_utilityItem = name;
+        obj.m_utilityItem = itemHash;
         return;
       case VisSlot.Beard:
-        obj.m_beardItem = name;
+        obj.m_beardItem = itemHash;
         return;
       case VisSlot.Hair:
-        obj.m_hairItem = name;
+        obj.m_hairItem = itemHash;
         return;
     }
   }
-  static bool Prefix(VisEquipment __instance, VisSlot slot, string name, int variant)
+  static bool Prefix(VisEquipment __instance, VisSlot slot, int itemHash, int variant)
   {
     if (Hack)
-      SetItem(__instance, slot, name, variant);
+      SetItem(__instance, slot, itemHash, variant);
     return !Hack;
   }
 }

@@ -1,4 +1,4 @@
-using Service;
+using Splatform;
 
 namespace InfinityHammer;
 
@@ -19,7 +19,7 @@ public class NoCreator()
       zdo.RemoveLong(Hashes.XRayCreatedID);
     }
     else
-      piece.SetCreator(Game.instance.GetPlayerProfile().GetPlayerID());
+      piece.SetCreator(Game.instance.GetPlayerProfile().GetPlayerID(), PlatformManager.DistributionPlatform.LocalUser.PlatformUserID);
     if (Configuration.NoTarget && (piece.m_primaryTarget || piece.m_randomTarget))
     {
       zdo.Set(Hashes.HasFields, true);

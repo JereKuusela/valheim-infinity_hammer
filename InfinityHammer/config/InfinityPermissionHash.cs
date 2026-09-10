@@ -7,6 +7,8 @@ public static class InfinityPermissionHash
 
   public static readonly int NoCost = "no_cost".GetStableHashCode();
 
+  public static readonly int GroupResourceCost = "group_resource_cost".GetStableHashCode();
+
   public static readonly int IgnoreWards = "ignore_wards".GetStableHashCode();
 
   public static readonly int IgnoreNoBuild = "ignore_no_build".GetStableHashCode();

@@ -35,7 +35,7 @@ public static class UpdateAvailable
       var item = player.GetRightItem();
       if (!Hammer.IsInfinityHammer(item)) return;
       var back = CustomMenu.BackButton();
-      foreach (var tab in __instance.m_availablePieces)
+      foreach (var tab in __instance.m_availablePiecesByCategory)
       {
         tab.Insert(0, back);
       }
@@ -81,8 +81,10 @@ public class TakeOverBuildMenu
 
   [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.DownPiece)), HarmonyPostfix]
   private static void HandleDownPiece(PieceTable __instance) => ActivatePiece(__instance);
-  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetCategory)), HarmonyPostfix]
-  private static void HandleSetCategory(PieceTable __instance) => ActivatePiece(__instance);
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetCategory), typeof(int)), HarmonyPostfix]
+  private static void HandleSetCategoryInt(PieceTable __instance) => ActivatePiece(__instance);
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetCategory), typeof(Piece.PieceCategory)), HarmonyPostfix]
+  private static void HandleSetCategoryPieceCategory(PieceTable __instance) => ActivatePiece(__instance);
   [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.PrevCategory)), HarmonyPostfix]
   private static void HandlePrevCategory(PieceTable __instance) => ActivatePiece(__instance);
   [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.NextCategory)), HarmonyPostfix]

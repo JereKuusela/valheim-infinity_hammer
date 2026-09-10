@@ -132,7 +132,7 @@ public static class Hammer
       {
         ["infinity_hammer"] = "true"
       };
-      if (!inventory.AddItem("Hammer", 1, 100f, freeSlot, false, 1, 0, player.GetPlayerID(), Game.instance.GetPlayerProfile().GetName(), data, 0, true))
+      if (!inventory.AddItem("Hammer", 1, 100f, freeSlot, false, 1, 0, player.GetPlayerID(), Game.instance.GetPlayerProfile().GetName(), data, 0, true, true))
         throw new InvalidOperationException("Unable to add the hammer to inventory.");
     }
     infinityHammer = inventory.m_inventory.Find(item => item != null && item.m_customData.ContainsKey("infinity_hammer"));
