@@ -8,7 +8,7 @@ The main feature of this mod is the ability to build any object with the hammer.
 This is done by using the `hammer` console command which works in four ways:
 
 - `hammer`: Selects (and copies) the hovered object.
-- `hammer [object id]`: Selects an object by id ([Item IDs](https://valheim.fandom.com/wiki/Item_IDs)).
+- `hammer [object id]`: Selects an object by id ([Item IDs](https://valheim.wiki/Item_IDs)).
 - `hammer connect`: Selects the hovered building.
 - `hammer circle=[radius]` or `hammer rect=[width,depth] angle=[degrees]`: Selects all nearby objects.
 
@@ -96,7 +96,7 @@ Binding on mouse wheel automatically turns the number negative when scrolling do
 
 ## Locations
 
-Locations (or [Points of Interests](https://valheim.fandom.com/wiki/Points_of_Interest_(POI))) usually include multiple objects so copying them with the `hammer` command is not simple.
+Locations (or [Points of Interests](https://valheim.wiki/Points_of_Interest_(POI))) usually include multiple objects so copying them with the `hammer` command is not simple.
 
 They also have special behavior like random parts or random damage.
 
