@@ -9,7 +9,6 @@ For players without this mod, the hammer is just a regular hammer.
 Each menu can be activated with a console command for an easy access.
 
 - `hammer_menu`: Opens the main menu with access to other build tools and menus.
-- `hammer_menu close`: Closes the build menu. Repeating the command for the currently open menu also closes it; Escape and the native build-menu toggle remain available.
 - `hammer_menu binds`: Shows key bindings and allows executing their commands.
 - `hammer_menu blueprints`: Shows blueprints and allows selecting them.
   - By default blueprints are sorted by their folder. This can be changed in settings.
