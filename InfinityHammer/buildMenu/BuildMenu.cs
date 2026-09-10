@@ -26,8 +26,12 @@ public static class UpdateAvailable
   [HarmonyPriority(Priority.Low)]
   static void Postfix(PieceTable __instance)
   {
-    if (!Configuration.ToolsEnabled) return;
-    if (Hammer.IsInfinityHammer(__instance) && HammerMenuCommand.CurrentMode != MenuMode.Menu) return;
+    if (!Configuration.ToolsEnabled || !Player.m_localPlayer || __instance != Player.m_localPlayer.m_buildPieces) return;
+    if (Hammer.IsInfinityHammer(__instance))
+    {
+      CustomMenu.AddPipettes(__instance);
+      if (HammerMenuCommand.CurrentMode != MenuMode.Menu) return;
+    }
     CustomMenu.AddTools(__instance);
     if (HammerMenuCommand.CurrentMode == MenuMode.Builds && HammerMenuCommand.CurrentFilter != "")
     {
@@ -38,6 +42,8 @@ public static class UpdateAvailable
       foreach (var tab in __instance.m_availablePiecesByCategory)
       {
         tab.Insert(0, back);
+        __instance.m_availablePieces.Add(back);
+        __instance.m_enabledPieces.Add(back);
       }
     }
   }
@@ -52,7 +58,7 @@ public class TakeOverBuildMenu
   public static bool HandleSetSelectedPiece(Player __instance, Vector2Int p)
   {
     var pt = __instance.m_buildPieces;
-    if (!pt) return true;
+    if (__instance != Player.m_localPlayer || !pt) return true;
     var piece = pt.GetPiece(p);
     if (piece && piece.TryGetComponent<BuildMenuTool>(out var menuTool) && menuTool.tool != null)
     {
@@ -81,10 +87,8 @@ public class TakeOverBuildMenu
 
   [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.DownPiece)), HarmonyPostfix]
   private static void HandleDownPiece(PieceTable __instance) => ActivatePiece(__instance);
-  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetCategory), typeof(int)), HarmonyPostfix]
-  private static void HandleSetCategoryInt(PieceTable __instance) => ActivatePiece(__instance);
   [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetCategory), typeof(Piece.PieceCategory)), HarmonyPostfix]
-  private static void HandleSetCategoryPieceCategory(PieceTable __instance) => ActivatePiece(__instance);
+  private static void HandleSetCategory(PieceTable __instance) => ActivatePiece(__instance);
   [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.PrevCategory)), HarmonyPostfix]
   private static void HandlePrevCategory(PieceTable __instance) => ActivatePiece(__instance);
   [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.NextCategory)), HarmonyPostfix]
@@ -94,6 +98,7 @@ public class TakeOverBuildMenu
 
   private static void ActivatePiece(PieceTable pt)
   {
+    if (!Player.m_localPlayer || Player.m_localPlayer.m_buildPieces != pt) return;
     var category = pt.GetSelectedCategory();
     var index = pt.GetSelectedIndex();
     var piece = pt.GetPiece(category, index);
@@ -113,7 +118,7 @@ public class TakeOverBuildMenu
       Selection.Clear();
   }
 
-  private static string GetInstantCommand(Tool tool, Player player)
+  internal static string GetInstantCommand(Tool tool, Player player)
   {
     var command = tool.GetCommand();
     var position = GetHoveredPosition(player);

@@ -1,4 +1,4 @@
-using Splatform;
+using Service;
 
 namespace InfinityHammer;
 
@@ -12,14 +12,22 @@ public class NoCreator()
     if (Configuration.NoCreator)
     {
       zdo.RemoveLong(ZDOVars.s_creator);
+      zdo.RemoveInt(ZDOVars.s_creatorIndex);
+      piece.m_creator = 0;
+      piece.m_creatorPlatformUserIDIndex = -1;
       // String doesn't have RemoveString.
       ZDOExtraData.s_strings.Remove(zdo.m_uid, ZDOVars.s_creatorName);
       ZDOExtraData.s_strings.Remove(zdo.m_uid, Hashes.XRaySteamName);
       ZDOExtraData.s_strings.Remove(zdo.m_uid, Hashes.XRaySteamID);
       zdo.RemoveLong(Hashes.XRayCreatedID);
     }
-    else
-      piece.SetCreator(Game.instance.GetPlayerProfile().GetPlayerID(), PlatformManager.DistributionPlatform.LocalUser.PlatformUserID);
+    else if (view.IsOwner())
+    {
+      // A blueprint's creator index belongs to its source world's player history.
+      // Attribute the placed copy to its builder using the destination world's native lookup.
+      piece.m_creator = 0;
+      piece.SetCreator(Game.instance.GetPlayerProfile().GetPlayerID(), Splatform.PlatformManager.DistributionPlatform.LocalUser.PlatformUserID);
+    }
     if (Configuration.NoTarget && (piece.m_primaryTarget || piece.m_randomTarget))
     {
       zdo.Set(Hashes.HasFields, true);

@@ -65,6 +65,7 @@ public class OverridePlacementGhost
               new CodeMatch(
                   OpCodes.Call,
                   AccessTools.Method(typeof(Location), nameof(Location.IsInsideNoBuildLocation))))
+          .ThrowIfInvalid("Infinity Hammer: placement no-build check not found.")
           .Advance(-2)
           // If-branches require using ops from the IsInsideBuildLocation so just duplicate the used ops afterwards.
           .Insert(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate<Action<GameObject>>(Position.Apply).operand),

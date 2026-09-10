@@ -54,52 +54,57 @@ public class SetItemHack
 {
   public static bool Hack = false;
 
-  static void SetItem(VisEquipment obj, VisSlot slot, int itemHash, int variant)
+  static void SetItem(VisEquipment obj, VisSlot slot, int hash, int variant, int quality)
   {
     switch (slot)
     {
       case VisSlot.HandLeft:
-        obj.m_leftItem = itemHash;
+        obj.m_leftItem = hash;
+        obj.m_leftItemQuality = quality;
         obj.m_leftItemVariant = variant;
         return;
       case VisSlot.HandRight:
-        obj.m_rightItem = itemHash;
+        obj.m_rightItem = hash;
+        obj.m_rightItemQuality = quality;
         return;
       case VisSlot.BackLeft:
-        obj.m_leftBackItem = itemHash;
+        obj.m_leftBackItem = hash;
+        obj.m_leftBackItemQuality = quality;
         obj.m_leftBackItemVariant = variant;
         return;
       case VisSlot.BackRight:
-        obj.m_rightBackItem = itemHash;
+        obj.m_rightBackItem = hash;
+        obj.m_rightBackItemQuality = quality;
         return;
       case VisSlot.Chest:
-        obj.m_chestItem = itemHash;
+        obj.m_chestItem = hash;
         return;
       case VisSlot.Legs:
-        obj.m_legItem = itemHash;
+        obj.m_legItem = hash;
         return;
       case VisSlot.Helmet:
-        obj.m_helmetItem = itemHash;
+        obj.m_helmetItem = hash;
         return;
       case VisSlot.Shoulder:
-        obj.m_shoulderItem = itemHash;
+        obj.m_shoulderItem = hash;
+        obj.m_shoulderItemQuality = quality;
         obj.m_shoulderItemVariant = variant;
         return;
       case VisSlot.Utility:
-        obj.m_utilityItem = itemHash;
+        obj.m_utilityItem = hash;
         return;
       case VisSlot.Beard:
-        obj.m_beardItem = itemHash;
+        obj.m_beardItem = hash;
         return;
       case VisSlot.Hair:
-        obj.m_hairItem = itemHash;
+        obj.m_hairItem = hash;
         return;
     }
   }
-  static bool Prefix(VisEquipment __instance, VisSlot slot, int itemHash, int variant)
+  static bool Prefix(VisEquipment __instance, VisSlot slot, int itemHash, int variant, int quality)
   {
     if (Hack)
-      SetItem(__instance, slot, itemHash, variant);
+      SetItem(__instance, slot, itemHash, variant, quality);
     return !Hack;
   }
 }
@@ -108,13 +113,24 @@ public class SetItemHack
 [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.GetSelectedPiece))]
 public class GetSelectedPiece
 {
-  public static Piece Postfix(Piece result) => Configuration.Enabled ? Selection.Get().GetSelectedPiece() ?? result : result;
+  public static Piece Postfix(Piece result, PieceTable __instance)
+  {
+    if (!Configuration.Enabled || !Player.m_localPlayer || Player.m_localPlayer.m_buildPieces != __instance) return result;
+    var selected = Selection.Get().GetSelectedPiece();
+    if (selected) return selected;
+    // Navigation/action buttons are never placement prefabs after closing a menu.
+    if (result && result.TryGetComponent<BuildMenuTool>(out var button) && button.tool?.Instant == true) return null!;
+    return result!;
+  }
 }
 
 [HarmonyPatch(typeof(Player), nameof(Player.SetPlaceMode))]
 public class SelectionActivate
 {
-  static void Postfix() => Selection.Get().Activate();
+  static void Postfix(Player __instance)
+  {
+    if (__instance == Player.m_localPlayer) Selection.Get().Activate();
+  }
 }
 
 
@@ -124,6 +140,10 @@ public class PlayerOnDestroy
   static void Prefix(Player __instance)
   {
     if (__instance == Player.m_localPlayer)
+    {
+      Player_ManualUpdate.Projector = null;
       Selection.Destroy();
+      ToolMenuPieces.Clear();
+    }
   }
 }

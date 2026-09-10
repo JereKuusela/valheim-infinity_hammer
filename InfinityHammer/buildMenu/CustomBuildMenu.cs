@@ -71,7 +71,16 @@ public static class CustomBuildMenu
     // Process categories with pagination if needed
     categories = HandleNavigation(categories);
 
+    foreach (var tab in pt.m_availablePiecesByCategory) tab.Clear();
+    pt.m_availablePieces.Clear();
+    pt.m_enabledPieces.Clear();
     AddCategories(pt.m_availablePiecesByCategory, categories);
+    foreach (var category in pt.m_availablePiecesByCategory)
+      foreach (var piece in category)
+      {
+        pt.m_availablePieces.Add(piece);
+        pt.m_enabledPieces.Add(piece);
+      }
     pt.m_categories = [.. categories.Select((_, index) => (Piece.PieceCategory)(CustomMenu.CATEGORY_OFFSET + index))];
     pt.m_categoryLabels = [.. categories.Select(c => c.Name)];
     SanityCheck(pt);

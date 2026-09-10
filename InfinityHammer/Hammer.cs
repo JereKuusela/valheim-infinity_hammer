@@ -85,9 +85,9 @@ public static class Hammer
     item.m_shared.m_attack.m_attackStamina = OriginalUseStamina;
     item.m_shared.m_attack.m_attackEitr = OriginalUseEitr;
   }
-  public static bool IsHammer(string name) => ToolManager.Tools.ContainsKey(name.ToLower());
+  public static bool IsHammer(string name) => Configuration.HammerTools.Contains(name.ToLowerInvariant()) || ToolManager.Tools.ContainsKey(name.ToLowerInvariant());
   public static bool IsHammer(GameObject obj) => obj && IsHammer(Utils.GetPrefabName(obj));
-  public static bool IsHammer(ItemDrop.ItemData item) => item != null && IsHammer(item.m_dropPrefab);
+  public static bool IsHammer(ItemDrop.ItemData item) => item != null && (IsInfinityHammer(item) || IsHammer(item.m_dropPrefab));
   public static bool HasHammer(Player player) => player && IsHammer(player.GetRightItem());
   public static void Equip()
   {
@@ -101,7 +101,9 @@ public static class Hammer
   public static void OpenBuildMenu()
   {
     var player = Helper.GetPlayer();
-    if (EquipInfinityHammer())
+    var alreadyEquipped = EquipInfinityHammer();
+    Selection.Clear();
+    if (alreadyEquipped)
     {
       // Some mods trigger when place mode is set. So make sure it is retriggered if the hammer is already equipped.
       player.SetPlaceMode(player.m_buildPieces);
@@ -112,10 +114,18 @@ public static class Hammer
       pt.m_selectedCategory = pt.m_categories.Count > 0 ? pt.m_categories[0] : 0;
       pt.m_selectedPiece[(int)pt.m_selectedCategory] = new(0, 0);
     }
-    Hud.instance.m_pieceSelectionWindow.SetActive(true);
-    Hud.instance.m_closePieceSelection = 0;
-    Hud.instance.UpdateBuild(Player.m_localPlayer, true);
+    // Deep North uses BuildUi; the legacy HUD window is still present but no longer owns input.
+    player.SetupPlacementGhost();
+    MenuRevision++;
+    var hud = Hud.instance;
+    hud.m_pieceSelectionWindow.SetActive(false);
+    hud.m_buildUi.Close();
+    hud.m_hoveredPiece = null;
+    hud.m_buildUi.m_currentBuildTool = null; // Refresh tags/search even when the same custom table changed.
+    hud.m_buildUi.OpenBuildMenu();
   }
+  public static int MenuRevision { get; private set; }
+
   public static bool IsInfinityHammer(ItemDrop.ItemData item) => item != null && item.m_customData != null && item.m_customData.ContainsKey("infinity_hammer");
   public static bool IsInfinityHammer(PieceTable pt) => pt && pt.name == "_InfinityHammerPieceTable";
   public static bool EquipInfinityHammer()
@@ -132,7 +142,7 @@ public static class Hammer
       {
         ["infinity_hammer"] = "true"
       };
-      if (!inventory.AddItem("Hammer", 1, 100f, freeSlot, false, 1, 0, player.GetPlayerID(), Game.instance.GetPlayerProfile().GetName(), data, 0, true, true))
+      if (!inventory.AddItem("Hammer", 1, 100f, freeSlot, false, 1, 0, player.GetPlayerID(), Game.instance.GetPlayerProfile().GetName(), data, 0, true, true, false))
         throw new InvalidOperationException("Unable to add the hammer to inventory.");
     }
     infinityHammer = inventory.m_inventory.Find(item => item != null && item.m_customData.ContainsKey("infinity_hammer"));
@@ -186,7 +196,7 @@ public class CustomHammer
   public static void SetPlaceModePrefix(Player __instance, ref PieceTable buildPieces)
   {
     var item = __instance.GetRightItem();
-    if (!Hammer.IsInfinityHammer(item)) return;
+    if (__instance != Player.m_localPlayer || !buildPieces || !Hammer.IsInfinityHammer(item)) return;
     if (HammerMenuCommand.CurrentMode == MenuMode.Builds && HammerMenuCommand.CurrentFilter != "")
     {
       var items = CustomMenu.GetBuildItems();

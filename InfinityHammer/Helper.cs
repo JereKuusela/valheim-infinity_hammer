@@ -182,6 +182,8 @@ public static class HammerHelper
   private static void CleanObject(GameObject obj)
   {
     // These are confirmed to cause issues.
+    // Deep North starts material polling even when the preview has no ZNetView.
+    PreviewMaterials.Prepare(obj);
     DestroyComponents<RandomFlyingBird>(obj);
     DestroyComponents<DungeonGenerator>(obj);
     DestroyComponents<MusicLocation>(obj);

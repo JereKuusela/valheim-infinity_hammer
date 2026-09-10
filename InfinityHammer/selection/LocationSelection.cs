@@ -40,28 +40,39 @@ public class LocationSelection : BaseSelection
 
   public override void AfterPlace(GameObject obj)
   {
-    UndoHelper.BeginSubAction();
-    var view = obj.GetComponent<ZNetView>();
-    HammerHelper.RemoveZDO(view.GetZDO());
     var data = GetData();
     if (data == null) return;
     Dictionary<string, string> pars = [];
     if (!data.TryGetInt(pars, ZDOVars.s_location, out var prefab)) return;
     if (!data.TryGetInt(pars, ZDOVars.s_seed, out var seed)) return;
     var location = ZoneSystem.instance.GetLocation(prefab);
+    if (location == null) throw new InvalidOperationException("Location not found.");
     var ghost = HammerHelper.GetPlacementGhost();
     var position = ghost.transform.position;
     var rotation = ghost.transform.rotation;
-    CustomizeSpawnLocation.AllViews = Hammer.AllLocationsObjects;
-    CustomizeSpawnLocation.RandomDamage = Hammer.RandomLocationDamage;
-    ZoneSystem.instance.SpawnLocation(location, seed, position, rotation, ZoneSystem.SpawnMode.Full, []);
-    foreach (var zdo in UndoHelper.GetSpawned())
+    var previousDamage = CustomizeSpawnLocation.RandomDamage;
+    var previousViews = CustomizeSpawnLocation.AllViews;
+    var previousNativeDamage = WearNTear.m_randomInitialDamage;
+    UndoHelper.BeginSubAction();
+    try
     {
-      if (ZNetScene.instance.m_instances.TryGetValue(zdo, out var spawned))
-        PostProcessPlaced(spawned.gameObject);
+      var view = obj.GetComponent<ZNetView>();
+      HammerHelper.RemoveZDO(view.GetZDO());
+      CustomizeSpawnLocation.AllViews = Hammer.AllLocationsObjects;
+      CustomizeSpawnLocation.RandomDamage = Hammer.RandomLocationDamage;
+      ZoneSystem.instance.SpawnLocation(location, seed, position, rotation, ZoneSystem.SpawnMode.Full, []);
+      foreach (var zdo in UndoHelper.GetSpawned())
+      {
+        if (ZNetScene.instance.m_instances.TryGetValue(zdo, out var spawned))
+          PostProcessPlaced(spawned.gameObject);
+      }
     }
-    CustomizeSpawnLocation.RandomDamage = null;
-    CustomizeSpawnLocation.AllViews = false;
-    UndoHelper.EndSubAction();
+    finally
+    {
+      CustomizeSpawnLocation.RandomDamage = previousDamage;
+      CustomizeSpawnLocation.AllViews = previousViews;
+      WearNTear.m_randomInitialDamage = previousNativeDamage;
+      UndoHelper.EndSubAction();
+    }
   }
 }

@@ -20,10 +20,15 @@ public class HammerSaveCommand : TextReceiver
       info = name;
     if (data.TryGetString(pars, ZDOVars.s_tag, out var tag))
       info = tag;
-    if (data.TryGetString(pars, ZDOVars.s_item, out var item))
+    if (obj.GetComponent<ItemStand>() && StandItems.TryGet(data, pars, ZDOVars.s_item, out var hash))
     {
+      var item = StandItems.Name(hash);
       var variant = data.TryGetInt(pars, ZDOVars.s_variant, out var v) ? v : 0;
-      if (variant != 0)
+      var quality = data.TryGetInt(pars, ZDOVars.s_quality, out var q) ? q : 1;
+      var orientation = data.TryGetInt(pars, ZDOVars.s_type, out var t) ? t : 0;
+      if (quality != 1 || orientation != 0)
+        info = $"{item}:{variant}:{quality}:{orientation}";
+      else if (variant != 0)
         info = $"{item}:{variant}";
       else
         info = $"{item}";
@@ -32,7 +37,7 @@ public class HammerSaveCommand : TextReceiver
     {
       info = $"{armorStand.m_pose}:";
       info += $"{armorStand.m_slots.Count}:";
-      var slots = armorStand.m_slots.Select(slot => $"{ZDOKeys.Convert(slot.m_visualHash)}:{slot.m_visualVariant}");
+      var slots = armorStand.m_slots.Select(slot => $"{StandItems.Name(slot.m_visualHash)}:{slot.m_visualVariant}");
       info += string.Join(":", slots);
     }
     return info;
