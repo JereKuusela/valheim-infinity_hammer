@@ -23,8 +23,6 @@ public partial class ObjectSelection : BaseSelection
   public TerrainPaint? TerrainPaintInfo;
   public bool UsesSelectionRoot { get; private set; }
   private string SelectionBaseDescription = "";
-  private Piece.Requirement[]? CachedResources;
-  private bool ResourcesDirty = true;
   public override void Destroy()
   {
     base.Destroy();
@@ -117,7 +115,6 @@ public partial class ObjectSelection : BaseSelection
 
     SetTerrainState(terrainHeightInfo, terrainPaintInfo);
     UpdateSelectionDescription();
-    ResourcesDirty = true;
   }
 
 
@@ -181,7 +178,6 @@ public partial class ObjectSelection : BaseSelection
     Scaling.Set(SelectedPrefab);
 
     UpdateSelectionDescription();
-    ResourcesDirty = true;
   }
 
   private string BuildTerrainSummaryDescription()
@@ -321,7 +317,7 @@ public partial class ObjectSelection : BaseSelection
       var variant = Parse.Int(split, 1, 0);
       var quality = Parse.Int(split, 2, 1);
       var orientation = Parse.Int(split, 3, 0);
-      data.Set(ZDOVars.s_item, name);
+      data.Set(ZDOVars.s_item, StandItems.Hash(name));
       data.Set(ZDOVars.s_variant, variant);
       data.Set(ZDOVars.s_quality, quality);
       if (split.Length > 3)
@@ -339,7 +335,7 @@ public partial class ObjectSelection : BaseSelection
         var name = Parse.String(split, i * 2 + 2, "");
         var variant = Parse.Int(split, i * 2 + 3, 0);
         if (name == "") continue;
-        data.Set(StringExtensionMethods.GetStableHashCode($"{i}_item"), name);
+        data.Set(StringExtensionMethods.GetStableHashCode($"{i}_item"), StandItems.Hash(name));
         data.Set(StringExtensionMethods.GetStableHashCode($"{i}_variant"), variant);
       }
     }
@@ -353,7 +349,7 @@ public partial class ObjectSelection : BaseSelection
     {
       sign.m_textWidget.text = signText;
     }
-    if (data.TryGetHash(pars, ZDOVars.s_item, out var item) && obj.TryGetComponent<ItemStand>(out var itemStand))
+    if (obj.TryGetComponent<ItemStand>(out var itemStand) && StandItems.TryGet(data, pars, ZDOVars.s_item, out var item))
     {
       var variant = data.TryGetInt(pars, ZDOVars.s_variant, out var v) ? v : 0;
       var quality = data.TryGetInt(pars, ZDOVars.s_quality, out var q) ? q : 1;
@@ -364,15 +360,18 @@ public partial class ObjectSelection : BaseSelection
     {
       armorStand.m_pose = data.TryGetInt(pars, ZDOVars.s_pose, out var pose) ? pose : 0;
       armorStand.m_poseAnimator.SetInteger("Pose", pose);
+      var previousHack = SetItemHack.Hack;
       SetItemHack.Hack = true;
-      for (var i = 0; i < armorStand.m_slots.Count; i++)
+      try
       {
-        var name = data.TryGetHash(pars, StringExtensionMethods.GetStableHashCode($"{i}_item"), out var v) ? v : 0;
-        var variant = data.TryGetInt(pars, StringExtensionMethods.GetStableHashCode($"{i}_variant"), out v) ? v : 0;
-        if (name != 0)
-          armorStand.SetVisualItem(i, name, variant);
+        for (var i = 0; i < armorStand.m_slots.Count; i++)
+        {
+          var hash = StandItems.TryGet(data, pars, StringExtensionMethods.GetStableHashCode($"{i}_item"), out var h) ? h : 0;
+          var variant = data.TryGetInt(pars, StringExtensionMethods.GetStableHashCode($"{i}_variant"), out var v) ? v : 0;
+          armorStand.SetVisualItem(i, hash, variant);
+        }
       }
-      SetItemHack.Hack = false;
+      finally { SetItemHack.Hack = previousHack; }
     }
     if (obj.TryGetComponent<Character>(out var character))
     {
@@ -607,7 +606,6 @@ public partial class ObjectSelection : BaseSelection
     if (Configuration.Snapping != SnappingMode.Off)
       Snapping.RegenerateSnapPoints(SelectedPrefab);
     Objects.Add(new SelectedObject(Objects[0].Prefab, Objects[0].Scalable, Objects[0].Data));
-    ResourcesDirty = true;
     return obj;
   }
   private void ToMulti()
@@ -636,7 +634,6 @@ public partial class ObjectSelection : BaseSelection
     obj.transform.SetParent(null);
     UnityEngine.Object.Destroy(obj);
     Objects.RemoveAt(Objects.Count - 1);
-    ResourcesDirty = true;
     if (CanCollapseToSingleObject)
       ToSingle();
     else if (Configuration.Snapping != SnappingMode.Off)
@@ -659,18 +656,5 @@ public partial class ObjectSelection : BaseSelection
   {
     base.Activate();
     Scaling.Set(SelectedPrefab);
-  }
-
-  public override Piece GetSelectedPiece()
-  {
-    var piece = base.GetSelectedPiece();
-    if (!piece || !UsesSelectionRoot || !Configuration.GroupResourceCost) return piece!;
-    if (ResourcesDirty)
-    {
-      CachedResources = ResourceCost.Calculate(Objects);
-      ResourcesDirty = false;
-    }
-    piece.m_resources = CachedResources;
-    return piece;
   }
 }

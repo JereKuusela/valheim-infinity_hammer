@@ -19,8 +19,14 @@ public class BaseSelection
   public virtual float DungeonRoomSnapMultiplier => 1f;
   public virtual float SnapMultiplier => 1f;
   public virtual float MaxPlaceDistance(float value) => Configuration.Range > 0f ? Configuration.Range : value;
-  public virtual Piece GetSelectedPiece() => SelectedPrefab ? SelectedPrefab.GetComponent<Piece>() : null!;
-  public virtual void Destroy() => Object.Destroy(SelectedPrefab);
+  public Piece GetSelectedPiece() => SelectedPrefab ? SelectedPrefab.GetComponent<Piece>() : null!;
+  public virtual void Destroy()
+  {
+    if (SelectedPrefab) SelectedPrefab.SetActive(false);
+    Object.Destroy(SelectedPrefab);
+    SelectedPrefab = null!;
+    if (ReferenceEquals(ActiveSelection, this)) ActiveSelection = null;
+  }
 
   public virtual DataEntry? GetData(int index = 0) => null;
   public virtual int GetPrefab(int index = 0) => 0;

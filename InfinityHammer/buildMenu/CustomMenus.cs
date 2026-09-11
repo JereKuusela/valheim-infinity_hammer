@@ -397,6 +397,24 @@ public static class CustomMenu
     return [category];
   }
 
+  public static void AddPipettes(PieceTable pt)
+  {
+    // Custom hammer_menu pages also expose the hammer's three selection tools.
+    // Keep one valid table slot per tool so selecting a pinned button still uses
+    // the existing identity-based lookup and command permission checks.
+    if (pt.m_availablePiecesByCategory.Count == 0) pt.m_availablePiecesByCategory.Add([]);
+    var tab = pt.m_categories.Count > 0 ? (int)pt.m_categories[0] : 0;
+    foreach (var tool in ToolManager.Get("hammer"))
+    {
+      if (tool.Name != "Pipette" && tool.Name != "Building pipette" && tool.Name != "Area pipette") continue;
+      if (!IsToolCommandAllowed(tool)) continue;
+      var piece = Build(tool);
+      if (!pt.m_availablePieces.Add(piece)) continue;
+      pt.m_availablePiecesByCategory[tab].Add(piece);
+      pt.m_enabledPieces.Add(piece);
+    }
+  }
+
   public static void AddTools(PieceTable pt)
   {
     var equipment = PieceTableToEquipment(pt);
@@ -407,13 +425,17 @@ public static class CustomMenu
     {
       if (!IsToolCommandAllowed(tool)) continue;
       tab = tool.TabIndex ?? tab;
-      if (pt.m_availablePieces.Count <= tab) return;
+      if (tab < 0 || pt.m_availablePiecesByCategory.Count <= tab) continue;
       if (!indices.ContainsKey(tab))
         indices[tab] = equipment == "hammer" ? 0 : pt.m_availablePiecesByCategory[tab].Count - 1;
       var index = tool.Index ?? indices[tab] + 1;
       var pieces = pt.m_availablePiecesByCategory[tab];
-      index = Math.Min(index, pieces.Count);
-      pieces.Insert(index, Build(tool));
+      index = Math.Max(0, Math.Min(index, pieces.Count));
+      var piece = Build(tool);
+      piece.m_category = (Piece.PieceCategory)tab;
+      pieces.Insert(index, piece);
+      pt.m_availablePieces.Add(piece);
+      pt.m_enabledPieces.Add(piece);
       indices[tab] = index;
     }
   }
@@ -443,13 +465,7 @@ public static class CustomMenu
   }
   private static Piece Build(Tool tool)
   {
-    GameObject obj = new();
-    var piece = obj.AddComponent<BuildMenuTool>();
-    piece.tool = tool;
-    piece.m_description = tool.Description;
-    piece.m_name = tool.Name;
-    piece.m_icon = tool.Icon;
-    return piece;
+    return ToolMenuPieces.Get(tool);
   }
 
   public static List<ItemDrop> GetBuildItems()
@@ -499,7 +515,7 @@ public static class CustomMenu
       return cachedPiece;
     }
 
-    GameObject obj = new();
+    GameObject obj = new("_IH_Menu_" + key);
     UnityEngine.Object.DontDestroyOnLoad(obj);
     var piece = obj.AddComponent<BuildMenuTool>();
     var toolData = new ToolData()

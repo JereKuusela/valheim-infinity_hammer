@@ -129,6 +129,7 @@ public class ToolManager
   public static List<Tool> GetAll() => Tools.SelectMany(kvp => kvp.Value).ToList();
   public static void FromFiles()
   {
+    InfinityHammer.ToolMenuPieces.Clear();
     ToolData.Clear();
     Tools.Clear();
 
@@ -138,12 +139,31 @@ public class ToolManager
       if (Yaml.AnyFileExists(Paths.ConfigPath, Pattern, Folder))
         Log.Warning($"Failed to load any tools.");
       else
+      {
         CreateFile();
-      return;
+        // Initialization precedes the watcher: load the new defaults in this same session.
+        Yaml.LoadDictFromDirectory<List<ToolData>>(Paths.ConfigPath, Pattern, Folder, LoadTool);
+      }
+      if (ToolData.Count == 0)
+      {
+        RefreshMenu();
+        return;
+      }
     }
     Tools = ToolData.ToDictionary(kvp => kvp.Key.ToLower(), kvp => kvp.Value.Select(s => new Tool(s)).ToList());
     Log.Info($"Reloading {ToolData.Values.SelectMany(x => x).Count()} tools.");
+    RefreshMenu();
+  }
+
+  private static void RefreshMenu()
+  {
     Player.m_localPlayer?.UpdateAvailablePiecesList();
+    // Same-count edits also need a refresh of the native UI's cached buttons.
+    if (Hud.instance && Hud.IsPieceSelectionVisible())
+    {
+      Hud.instance.m_buildUi.m_currentBuildTool = null;
+      Hud.instance.m_buildUi.OpenBuildMenu();
+    }
   }
 
   private static void LoadTool(string file, string equipment, List<ToolData> tools)

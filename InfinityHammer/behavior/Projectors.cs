@@ -8,13 +8,13 @@ public abstract class BaseRuler : MonoBehaviour
   private static LayerMask Mask = LayerMask.GetMask("terrain");
   // No direct way for the projector prefab, so it must be acquired from some object.
   private static GameObject? basePrefab;
-  private static GameObject BasePrefab => basePrefab ??= GetBasePrefab();
+  private static GameObject BasePrefab => basePrefab ? basePrefab : basePrefab = GetBasePrefab();
   protected static Vector3 BaseScale => BasePrefab.transform.localScale;
   private static GameObject GetBasePrefab()
   {
     var workbench = ZNetScene.instance.GetPrefab("piece_workbench");
     if (!workbench) throw new InvalidOperationException("Error: Unable to find the workbench object.");
-    return workbench.GetComponentInChildren<CircleProjector>().m_prefab;
+    return workbench.GetComponentInChildren<CircleProjector>(true).m_prefab;
   }
 
   public static bool SnapToGround = true;
@@ -31,8 +31,9 @@ public abstract class BaseRuler : MonoBehaviour
     Segments.Clear();
     OffsetSegments.Clear();
   }
-  public void Update()
+  public void Refresh()
   {
+    if (!gameObject.activeInHierarchy) return;
     if (!Visible)
     {
       CreateSegments(0);
@@ -55,12 +56,25 @@ public abstract class BaseRuler : MonoBehaviour
     Segments.Clear();
     Destroy(Center);
     if (count == 0) return;
-    Center = Instantiate(BasePrefab, transform);
+    Center = CreateMarker();
     Center.transform.localPosition = Vector3.zero;
     Center.transform.localRotation = Quaternion.identity;
     Center.transform.localScale = new(0.1f, 0.1f, 0.1f);
     for (int i = 0; i < count; i++)
-      Segments.Add(Instantiate(BasePrefab, transform));
+      Segments.Add(CreateMarker());
+  }
+  // Work on owned clones only. Prefab activation/renderer state is not a
+  // contract of the workbench asset, and the marker can otherwise stay hidden.
+  private GameObject CreateMarker()
+  {
+    var marker = Instantiate(BasePrefab, transform);
+    marker.SetActive(true);
+    foreach (var renderer in marker.GetComponentsInChildren<Renderer>(true))
+    {
+      renderer.gameObject.SetActive(true);
+      renderer.enabled = true;
+    }
+    return marker;
   }
   protected abstract void CreateLines();
   private void Snap()
@@ -71,7 +85,7 @@ public abstract class BaseRuler : MonoBehaviour
   private Vector3 Snap(Vector3 pos)
   {
     if (Physics.Raycast(pos + Vector3.up * 500f, Vector3.down, out var raycastHit, 1000f, Mask.value))
-      pos.y = raycastHit.point.y;
+      pos.y = raycastHit.point.y + 0.05f;
     return pos;
   }
 
@@ -85,7 +99,7 @@ public abstract class BaseRuler : MonoBehaviour
     foreach (GameObject obj in OffsetSegments) Destroy(obj);
     OffsetSegments.Clear();
     for (int i = 0; i < count; i++)
-      OffsetSegments.Add(Instantiate(BasePrefab, Vector3.zero, Quaternion.identity, transform));
+      OffsetSegments.Add(CreateMarker());
   }
   private void CreateOffsetLines()
   {

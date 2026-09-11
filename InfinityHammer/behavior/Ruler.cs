@@ -60,6 +60,7 @@ public class Ruler
     var proj = obj.GetComponent<CircleRuler>();
     proj.Visible = obj.activeSelf;
     proj.Radius = radius;
+    proj.Refresh();
   }
   private static void BuildRectangle(GameObject obj, float width, float depth)
   {
@@ -67,17 +68,23 @@ public class Ruler
     proj.Visible = obj.activeSelf;
     proj.Width = width;
     proj.Depth = depth;
+    proj.Refresh();
   }
   public static void Update()
   {
     var player = Player.m_localPlayer;
     if (Projector == null || !player) return;
-    if (Selection.Get() is not ToolSelection selection) return;
+    if (Selection.Get() is not ToolSelection selection)
+    {
+      Projector.SetActive(false);
+      return;
+    }
     var ghost = player.m_placementGhost;
     var ptr = player.transform;
-    Projector.SetActive(ghost);
-    if (!ghost) return;
-    var gtr = ghost.transform;
+    var visible = ghost && ghost.activeInHierarchy && player.InPlaceMode() && !Hud.IsPieceSelectionVisible();
+    Projector.SetActive(visible);
+    if (!visible) return;
+    var gtr = ghost!.transform;
     var scale = Scaling.Get();
     var tool = selection.Tool;
     if (tool.IsTargetEdge)
@@ -98,6 +105,8 @@ public class Ruler
       var distance = Utils.DistanceXZ(ptr.position, gtr.position) / 2f;
       scale.SetScaleZ(distance);
     }
+    BaseRuler.SnapToGround = selection.Tool.SnapGround;
+    BaseRuler.Offset = selection.Tool.Height ? scale.Y : 0f;
     SanityCheckShape();
     var shape = Shape;
     if (selection.TerrainGrid) scale.SetPrecisionXZ(0.5f, 0.5f);
@@ -160,8 +169,6 @@ public class Ruler
         HighlightRectangle(Projector.transform.position, angle, scale.X, scale.Z, scale.Y);
 
     }
-    BaseRuler.SnapToGround = selection.Tool.SnapGround;
-    BaseRuler.Offset = selection.Tool.Height ? scale.Y : 0f;
   }
 
   public static string DescriptionScale(ToolSelection selection)
@@ -262,7 +269,11 @@ public class Ruler
 
   public static void Remove()
   {
-    if (Projector != null) UnityEngine.Object.Destroy(Projector);
+    if (Projector != null)
+    {
+      Projector.SetActive(false);
+      UnityEngine.Object.Destroy(Projector);
+    }
     Projector = null;
     if (Circle != null) UnityEngine.Object.Destroy(Circle);
     Circle = null;
@@ -349,7 +360,7 @@ public class AddExtraInfo
   }
   private static string Description(ToolSelection selection)
   {
-    if (Hud.instance.m_pieceSelectionWindow.activeSelf) return "";
+    if (Hud.IsPieceSelectionVisible()) return "";
     var lines = new[] { DescriptionHover(), Ruler.DescriptionScale(selection), Ruler.DescriptionPosition() };
     return string.Join("\n", lines.Where(s => s != ""));
   }
@@ -372,9 +383,18 @@ public class AddExtraInfo
     var tr = __instance.m_pieceDescription.rectTransform;
     if (tr.offsetMin != ToolOffset.Value)
       tr.offsetMin = ToolOffset.Value;
-    if (Hud.instance.m_pieceSelectionWindow.activeSelf) return;
+    if (Hud.IsPieceSelectionVisible()) return;
     var text = Description(selection);
     if (__instance.m_pieceDescription.text != "") text = "\n" + text;
     __instance.m_pieceDescription.text += text;
+  }
+}
+// Run after the game's placement transform, once per local-player frame.
+[HarmonyPatch(typeof(Player), nameof(Player.LateUpdate))]
+internal static class UpdateToolRuler
+{
+  private static void Postfix(Player __instance)
+  {
+    if (__instance == Player.m_localPlayer) Ruler.Update();
   }
 }

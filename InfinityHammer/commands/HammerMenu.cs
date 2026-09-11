@@ -39,20 +39,25 @@ public class HammerMenuCommand
   {
     AutoComplete.Register("hammer_menu", (int index, int subIndex) =>
     {
-      if (index == 0) return ["binds", "blueprints", "builds", "objects", "locations", "rooms", "sounds", "visuals", "tools", "types"];
+      if (index == 0) return ["close", "binds", "blueprints", "builds", "objects", "locations", "rooms", "sounds", "visuals", "tools", "types"];
       if (index == 1) return ParameterInfo.Create("Filter text (optional)");
       return ParameterInfo.None;
     });
 
-    Helper.Command("hammer_menu", "[mode] [filter] - Sets the hammer menu mode with optional filter.", Execute);
+    Helper.Command("hammer_menu", "[mode] [filter] - Opens the hammer menu; repeat the same menu to close, or use close.", Execute);
   }
   private static void Execute(Terminal.ConsoleEventArgs args)
   {
-    if (Hud.IsPieceSelectionVisible())
-      IgnoreNextHide.IgnoreHide = true;
 
 
     var mode = args.Length > 1 ? args[1].ToLowerInvariant() : "menu";
+    var requestedFilter = args.Length > 2 ? args[2] : "";
+    var samePage = mode == CurrentMode.ToString().ToLowerInvariant() && requestedFilter == CurrentFilter && CurrentPage == -1;
+    if (mode == "close" || (samePage && Hud.IsPieceSelectionVisible() && Hammer.IsInfinityHammer(Helper.GetPlayer().GetRightItem())))
+    {
+      Hud.CloseBuildUi();
+      return;
+    }
     if (mode == "back")
     {
       if (NavigationStack.Count > 0)
@@ -121,20 +126,5 @@ public class HammerMenuCommand
         return;
     }
     Hammer.OpenBuildMenu();
-  }
-}
-
-[HarmonyPatch(typeof(Hud), nameof(Hud.HidePieceSelection))]
-public class IgnoreNextHide
-{
-  public static bool IgnoreHide = false;
-  static bool Prefix()
-  {
-    if (IgnoreHide)
-    {
-      IgnoreHide = false;
-      return false;
-    }
-    return true;
   }
 }

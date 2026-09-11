@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Configuration;
@@ -11,13 +11,13 @@ namespace InfinityHammer;
 [BepInPlugin(GUID, NAME, VERSION)]
 [BepInDependency("com.rolopogo.gizmo.comfy", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("bruce.valheim.comfymods.gizmo", BepInDependency.DependencyFlags.SoftDependency)]
-[BepInDependency("server_devcommands", "1.110")]
-[BepInDependency("world_edit_commands", "1.75")]
+[BepInDependency("server_devcommands", "1.109.1")]
+[BepInDependency("world_edit_commands", "1.74.1")]
 public class InfinityHammer : BaseUnityPlugin
 {
   public const string GUID = "infinity_hammer";
   public const string NAME = "Infinity Hammer";
-  public const string VERSION = "1.81.0";
+  public const string VERSION = "1.80.5";
   public static bool StructureTweaks = false;
 #nullable disable
   public static ConfigWrapper Wrapper;
@@ -104,9 +104,7 @@ public class InfinityHammer : BaseUnityPlugin
   }
   public void LateUpdate()
   {
-    Ruler.Update();
-    if (Player_ManualUpdate.Projector)
-      Player_ManualUpdate.Projector.Update();
+    Player_ManualUpdate.Update();
   }
 
   private void UpdateBuildMenu()
@@ -153,18 +151,5 @@ public class Initialize
     new HammerMark();
     ToolManager.Initialize();
     InfinityHammer.Wrapper.Bind();
-  }
-}
-
-[HarmonyPatch(typeof(Player), nameof(Player.SetupPlacementGhost)), HarmonyPriority(Priority.Last)]
-public class Player_ManualUpdate
-{
-  public static CircleProjector? Projector = null;
-  static void Postfix(Player __instance)
-  {
-    if (__instance.m_placementGhost)
-      Projector = __instance.m_placementGhost.GetComponentInChildren<CircleProjector>(true);
-    else
-      Projector = null;
   }
 }
