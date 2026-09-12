@@ -23,6 +23,8 @@ public partial class ObjectSelection : BaseSelection
   public TerrainPaint? TerrainPaintInfo;
   public bool UsesSelectionRoot { get; private set; }
   private string SelectionBaseDescription = "";
+  private Piece.Requirement[]? CachedResources;
+  private bool ResourcesDirty = true;
   public override void Destroy()
   {
     base.Destroy();
@@ -48,7 +50,7 @@ public partial class ObjectSelection : BaseSelection
     Wrapper.SetActive(false);
 
     var zdo = view.GetZDO();
-    var prefabHash = zdo == null ? view.GetPrefabName().GetStableHashCode() : zdo.GetPrefab();
+    var prefabHash = zdo == null ? ZDOKeys.Hash(view.GetPrefabName()) : zdo.GetPrefab();
     DataEntry? data = zdo == null ? extraData : DataHelper.Merge(new(zdo), extraData);
 
     SingleUse = singleUse;
@@ -69,6 +71,7 @@ public partial class ObjectSelection : BaseSelection
 
     SetTerrainState(terrainHeightInfo, terrainPaintInfo);
     UpdateSelectionDescription();
+    ResourcesDirty = true;
   }
   // This is for compatibility. Many mods don't expect a cleaned up ghost.
   // So when selecting from the build menu, the ghost doesn't have to be cleaned up.
@@ -77,7 +80,7 @@ public partial class ObjectSelection : BaseSelection
     Wrapper = new GameObject();
     Wrapper.SetActive(false);
     var view = piece.GetComponent<ZNetView>();
-    var prefabHash = view.GetPrefabName().GetStableHashCode();
+    var prefabHash = ZDOKeys.Hash(view.GetPrefabName());
     SelectedPrefab = UnityEngine.Object.Instantiate(view.gameObject, Wrapper.transform);
     SelectedPrefab.name = view.name;
 
@@ -115,6 +118,7 @@ public partial class ObjectSelection : BaseSelection
 
     SetTerrainState(terrainHeightInfo, terrainPaintInfo);
     UpdateSelectionDescription();
+    ResourcesDirty = true;
   }
 
 
@@ -152,7 +156,7 @@ public partial class ObjectSelection : BaseSelection
         obj.transform.localScale = item.Scale;
         DataEntry? data = item.Data == null || item.Data == "" ? ReadExtraInfo(obj, item.ExtraInfo) : DataHelper.Get(item.Data);
         UpdateVisuals(obj, data);
-        Objects.Add(new SelectedObject(item.Prefab.GetStableHashCode(), IsScalable(view), data));
+        Objects.Add(new SelectedObject(ZDOKeys.Hash(item.Prefab), IsScalable(view), data));
       }
       catch (Exception e)
       {
@@ -317,7 +321,7 @@ public partial class ObjectSelection : BaseSelection
       var variant = Parse.Int(split, 1, 0);
       var quality = Parse.Int(split, 2, 1);
       var orientation = Parse.Int(split, 3, 0);
-      data.Set(ZDOVars.s_item, StandItems.Hash(name));
+      data.Set(ZDOVars.s_item, ZDOKeys.Hash(name));
       data.Set(ZDOVars.s_variant, variant);
       data.Set(ZDOVars.s_quality, quality);
       if (split.Length > 3)
@@ -335,8 +339,8 @@ public partial class ObjectSelection : BaseSelection
         var name = Parse.String(split, i * 2 + 2, "");
         var variant = Parse.Int(split, i * 2 + 3, 0);
         if (name == "") continue;
-        data.Set(StringExtensionMethods.GetStableHashCode($"{i}_item"), StandItems.Hash(name));
-        data.Set(StringExtensionMethods.GetStableHashCode($"{i}_variant"), variant);
+        data.Set(ZDOKeys.Hash($"{i}_item"), ZDOKeys.Hash(name));
+        data.Set(ZDOKeys.Hash($"{i}_variant"), variant);
       }
     }
     return data;
@@ -349,12 +353,12 @@ public partial class ObjectSelection : BaseSelection
     {
       sign.m_textWidget.text = signText;
     }
-    if (obj.TryGetComponent<ItemStand>(out var itemStand) && StandItems.TryGet(data, pars, ZDOVars.s_item, out var item))
+    if (obj.TryGetComponent<ItemStand>(out var itemStand) && HammerHelper.TryGetNameHash(data, ZDOVars.s_item, out var hash))
     {
       var variant = data.TryGetInt(pars, ZDOVars.s_variant, out var v) ? v : 0;
       var quality = data.TryGetInt(pars, ZDOVars.s_quality, out var q) ? q : 1;
       var orientation = data.TryGetInt(pars, ZDOVars.s_type, out var t) ? t : 0;
-      itemStand.SetVisualItem(item, variant, quality, orientation);
+      itemStand.SetVisualItem(hash, variant, quality, orientation);
     }
     if (obj.TryGetComponent<ArmorStand>(out var armorStand))
     {
@@ -366,8 +370,8 @@ public partial class ObjectSelection : BaseSelection
       {
         for (var i = 0; i < armorStand.m_slots.Count; i++)
         {
-          var hash = StandItems.TryGet(data, pars, StringExtensionMethods.GetStableHashCode($"{i}_item"), out var h) ? h : 0;
-          var variant = data.TryGetInt(pars, StringExtensionMethods.GetStableHashCode($"{i}_variant"), out var v) ? v : 0;
+          hash = HammerHelper.TryGetNameHash(data, ZDOKeys.Hash($"{i}_item"), out var h) ? h : 0;
+          var variant = data.TryGetInt(pars, ZDOKeys.Hash($"{i}_variant"), out var v) ? v : 0;
           armorStand.SetVisualItem(i, hash, variant);
         }
       }
@@ -425,7 +429,7 @@ public partial class ObjectSelection : BaseSelection
     {
       var name = Utils.GetPrefabName(obj);
       var tr = HammerHelper.GetPlacementGhost().transform;
-      var zdo = DataHelper.Init(StringExtensionMethods.GetStableHashCode(name), tr, GetData(0));
+      var zdo = DataHelper.Init(ZDOKeys.Hash(name), tr, GetData(0));
       if (zdo != null)
         DungeonRooms.Reposition(zdo, tr);
       return ZNetScene.instance.GetPrefab(name);
@@ -606,6 +610,7 @@ public partial class ObjectSelection : BaseSelection
     if (Configuration.Snapping != SnappingMode.Off)
       Snapping.RegenerateSnapPoints(SelectedPrefab);
     Objects.Add(new SelectedObject(Objects[0].Prefab, Objects[0].Scalable, Objects[0].Data));
+    ResourcesDirty = true;
     return obj;
   }
   private void ToMulti()
@@ -634,6 +639,7 @@ public partial class ObjectSelection : BaseSelection
     obj.transform.SetParent(null);
     UnityEngine.Object.Destroy(obj);
     Objects.RemoveAt(Objects.Count - 1);
+    ResourcesDirty = true;
     if (CanCollapseToSingleObject)
       ToSingle();
     else if (Configuration.Snapping != SnappingMode.Off)
@@ -656,5 +662,17 @@ public partial class ObjectSelection : BaseSelection
   {
     base.Activate();
     Scaling.Set(SelectedPrefab);
+  }
+  public override Piece GetSelectedPiece()
+  {
+    var piece = base.GetSelectedPiece();
+    if (!piece || !UsesSelectionRoot || !Configuration.GroupResourceCost) return piece!;
+    if (ResourcesDirty)
+    {
+      CachedResources = ResourceCost.Calculate(Objects);
+      ResourcesDirty = false;
+    }
+    piece.m_resources = CachedResources;
+    return piece;
   }
 }

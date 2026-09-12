@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using Data;
 using HarmonyLib;
 using ServerDevcommands;
 using Service;
@@ -269,6 +270,41 @@ public static class HammerHelper
   {
     EnabledCheck();
     Hammer.Equip();
+  }
+
+  public static string ConvertHashToName(int hash) => ZNetScene.instance.GetPrefab(hash)?.name ?? hash.ToString(CultureInfo.InvariantCulture);
+
+  public static bool TryGetName(DataEntry data, int key, out string name)
+  {
+    Dictionary<string, string> pars = [];
+    if (data.TryGetHash(pars, key, out var hash))
+    {
+      name = ConvertHashToName(hash);
+      return true;
+    }
+    if (data.TryGetString(pars, key, out var str))
+    {
+      name = str;
+      return true;
+    }
+    name = "";
+    return false;
+  }
+  public static bool TryGetNameHash(DataEntry data, int key, out int hash)
+  {
+    Dictionary<string, string> pars = [];
+    if (data.TryGetHash(pars, key, out var h))
+    {
+      hash = h;
+      return true;
+    }
+    if (data.TryGetString(pars, key, out var str))
+    {
+      hash = ZDOKeys.Hash(str);
+      return true;
+    }
+    hash = 0;
+    return false;
   }
 
 

@@ -1,22 +1,8 @@
-## 1.80.4
+- v1.82
+  - More fixes. Thanks JPValheim!
 
-- Select hoe/cultivator tools from uncategorized piece tables.
-- Keep menu tool identities stable across availability refreshes; clean them up on tool reload and logout.
-- Clear command previews when selecting native pieces, and prevent menu action buttons from becoming placement previews.
-- Refresh the native menu when navigating; repeat a menu command to close it, or use `hammer_menu close`.
-- Find inactive projector children and suspend ruler work while the build menu is open.
-
-## 1.80.3
-
-- Stop RandomMaterialValues polling on placement previews, including inactive children.
-- Skip projector/ruler work while previews are hidden and avoid duplicate CircleProjector updates.
-- Release native-created preview materials when their ghost is destroyed; preserve shared assets.
-- Clear the active selection reference on destruction.
-
-- v1.80.1 (Deep North 1.0.7 prototype, iteration 1)
-  - Updates build-menu collections, equipment hashes, stand blueprint data, hammer creation and creator attribution for game 1.0.7.
-  - Fixes the removal transpiler, placement return branches, location damage override ordering and temporary-state cleanup.
-  - Requires the accompanying WEC 1.74.1 and patched SDC 1.109.1. In-game validation pending.
+- v1.81
+  - Fixes for the new game update. Some things might not work properly.
 
 - v1.80
   - Adds support for the permission system from Server Devcommands mod. This allows granularly granting access to specific commands and features.
@@ -34,13 +20,3 @@
 - v1.78
   - Adds a new menu for vegetation in the Infinity Hammer build menu.
   - Adds support for receiving server side location and vegetation IDs from Expand World Data mod.
-
-- v1.77
-  - Adds a new setting "No target" to replace both "No primary target" and "No secondary target" settings.
-  - Adds a new setting "No remove" to prevent placed pieces from being removed by players.
-  - Adds a new setting "No physics" to disable fall and push up properties.
-  - Fixes prefabs starting with "vx_" not appearing in visuals menu.
-  - Fixes workbench radius projector not updating during placement.
-
-- v1.76
-  - Fixes some issues with build tables.

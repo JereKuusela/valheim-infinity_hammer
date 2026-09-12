@@ -23,26 +23,24 @@ public class PlacePiece
   // Parameter is the selected piece which doesn't have the correct transformation.
   static GameObject GetPrefab(GameObject obj) => Configuration.Enabled ? Selection.Get().GetPrefab(obj) : obj;
 
-  static void Postprocess(GameObject obj)
-  {
-    if (!Configuration.Enabled) return;
-    Selection.Get().AfterPlace(obj);
-  }
-
+  // While PlacePiece has piece as parameter, most flexible to override the actual game object.
   static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
   {
-    var matcher = new CodeMatcher(instructions)
+    return new CodeMatcher(instructions)
       .MatchForward(false, new CodeMatch(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(Component), nameof(Component.gameObject))))
-      .ThrowIfInvalid("Infinity Hammer: PlacePiece prefab getter not found.")
       .Advance(1)
       .Insert(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate(GetPrefab).operand))
-      .MatchForward(false, new CodeMatch(OpCodes.Ret))
-      .ThrowIfInvalid("Infinity Hammer: PlacePiece return not found.");
-    // Branches to the return must also execute postprocessing.
-    var load = new CodeInstruction(OpCodes.Ldloc_0);
-    load.labels.AddRange(matcher.Instruction.ExtractLabels());
-    return matcher.Insert(load, new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate(Postprocess).operand))
       .InstructionEnumeration();
+  }
+}
+
+[HarmonyPatch(typeof(Piece), nameof(Piece.OnPlaced))]
+public class OnPlaced
+{
+  static void Postfix(Piece __instance)
+  {
+    if (!Configuration.Enabled) return;
+    Selection.Get().AfterPlace(__instance.gameObject);
   }
 }
 
@@ -65,7 +63,6 @@ public class HoldUse
               new CodeMatch(
                   OpCodes.Ldfld,
                   AccessTools.Field(typeof(ItemDrop.ItemData.SharedData), nameof(ItemDrop.ItemData.SharedData.m_destroyEffect))))
-          .ThrowIfInvalid("Infinity Hammer: removal effect not found.")
           .Advance(2)
           .Set(OpCodes.Call, AccessTools.Method(typeof(HoldUse), nameof(RemoveFailSafe)))
           .InstructionEnumeration();
@@ -130,11 +127,10 @@ public class CustomizeSpawnLocation
   {
     return new CodeMatcher(instructions)
           .MatchForward(
-              useEnd: true,
+              useEnd: false,
               new CodeMatch(
                   OpCodes.Stsfld,
                   AccessTools.Field(typeof(WearNTear), nameof(WearNTear.m_randomInitialDamage))))
-          .ThrowIfInvalid("Infinity Hammer: location damage assignment not found.")
           .Advance(1)
           .InsertAndAdvance(new CodeInstruction(OpCodes.Ldloc_0))
           .InsertAndAdvance(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate(Customize).operand))

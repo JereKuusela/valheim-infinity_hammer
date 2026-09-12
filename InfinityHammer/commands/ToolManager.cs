@@ -141,7 +141,7 @@ public class ToolManager
       else
       {
         CreateFile();
-        // Initialization precedes the watcher: load the new defaults in this same session.
+        // Watcher not set yet, so have to manually load the tools.
         Yaml.LoadDictFromDirectory<List<ToolData>>(Paths.ConfigPath, Pattern, Folder, LoadTool);
       }
       if (ToolData.Count == 0)

@@ -1,4 +1,4 @@
-using System.IO;
+﻿using System.IO;
 using BepInEx;
 using BepInEx.Bootstrap;
 using BepInEx.Configuration;
@@ -11,13 +11,13 @@ namespace InfinityHammer;
 [BepInPlugin(GUID, NAME, VERSION)]
 [BepInDependency("com.rolopogo.gizmo.comfy", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("bruce.valheim.comfymods.gizmo", BepInDependency.DependencyFlags.SoftDependency)]
-[BepInDependency("server_devcommands", "1.109.1")]
-[BepInDependency("world_edit_commands", "1.74.1")]
+[BepInDependency("server_devcommands", "1.112")]
+[BepInDependency("world_edit_commands", "1.76")]
 public class InfinityHammer : BaseUnityPlugin
 {
   public const string GUID = "infinity_hammer";
   public const string NAME = "Infinity Hammer";
-  public const string VERSION = "1.80.5";
+  public const string VERSION = "1.82";
   public static bool StructureTweaks = false;
 #nullable disable
   public static ConfigWrapper Wrapper;

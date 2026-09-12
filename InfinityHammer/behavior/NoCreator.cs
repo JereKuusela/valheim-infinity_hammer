@@ -1,4 +1,4 @@
-using Service;
+using Splatform;
 
 namespace InfinityHammer;
 
@@ -21,12 +21,10 @@ public class NoCreator()
       ZDOExtraData.s_strings.Remove(zdo.m_uid, Hashes.XRaySteamID);
       zdo.RemoveLong(Hashes.XRayCreatedID);
     }
-    else if (view.IsOwner())
+    else
     {
-      // A blueprint's creator index belongs to its source world's player history.
-      // Attribute the placed copy to its builder using the destination world's native lookup.
       piece.m_creator = 0;
-      piece.SetCreator(Game.instance.GetPlayerProfile().GetPlayerID(), Splatform.PlatformManager.DistributionPlatform.LocalUser.PlatformUserID);
+      piece.SetCreator(Game.instance.GetPlayerProfile().GetPlayerID(), PlatformManager.DistributionPlatform.LocalUser.PlatformUserID);
     }
     if (Configuration.NoTarget && (piece.m_primaryTarget || piece.m_randomTarget))
     {

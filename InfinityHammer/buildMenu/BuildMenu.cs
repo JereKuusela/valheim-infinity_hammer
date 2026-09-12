@@ -87,8 +87,10 @@ public class TakeOverBuildMenu
 
   [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.DownPiece)), HarmonyPostfix]
   private static void HandleDownPiece(PieceTable __instance) => ActivatePiece(__instance);
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetCategory), typeof(int)), HarmonyPostfix]
+  private static void HandleSetCategoryInt(PieceTable __instance) => ActivatePiece(__instance);
   [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetCategory), typeof(Piece.PieceCategory)), HarmonyPostfix]
-  private static void HandleSetCategory(PieceTable __instance) => ActivatePiece(__instance);
+  private static void HandleSetCategoryPieceCategory(PieceTable __instance) => ActivatePiece(__instance);
   [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.PrevCategory)), HarmonyPostfix]
   private static void HandlePrevCategory(PieceTable __instance) => ActivatePiece(__instance);
   [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.NextCategory)), HarmonyPostfix]

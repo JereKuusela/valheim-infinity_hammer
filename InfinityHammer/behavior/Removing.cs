@@ -45,7 +45,6 @@ public class RemovePiece
       .MatchForward(
         useEnd: false,
         new CodeMatch(OpCodes.Call, AccessTools.PropertyGetter(typeof(ZNetScene), nameof(ZNetScene.instance))))
-      .ThrowIfInvalid("Infinity Hammer: removal scene getter not found.")
       .InsertAndAdvance(new CodeInstruction(OpCodes.Ldloc_1))
       .InsertAndAdvance(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(RemovePiece), nameof(HandleRemoved))))
       .InstructionEnumeration();
