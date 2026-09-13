@@ -23,6 +23,12 @@ public class PlacePiece
   // Parameter is the selected piece which doesn't have the correct transformation.
   static GameObject GetPrefab(GameObject obj) => Configuration.Enabled ? Selection.Get().GetPrefab(obj) : obj;
 
+  static void Postprocess(GameObject obj)
+  {
+    if (!Configuration.Enabled) return;
+    Selection.Get().AfterPlace(obj);
+  }
+
   // While PlacePiece has piece as parameter, most flexible to override the actual game object.
   static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
   {
@@ -30,17 +36,10 @@ public class PlacePiece
       .MatchForward(false, new CodeMatch(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(Component), nameof(Component.gameObject))))
       .Advance(1)
       .Insert(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate(GetPrefab).operand))
+      .MatchForward(false, new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(Piece), nameof(Piece.m_placeEffect))))
+      .InsertAndAdvance(new CodeInstruction(OpCodes.Ldloc_0))
+      .InsertAndAdvance(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PlacePiece), nameof(Postprocess))))
       .InstructionEnumeration();
-  }
-}
-
-[HarmonyPatch(typeof(Piece), nameof(Piece.OnPlaced))]
-public class OnPlaced
-{
-  static void Postfix(Piece __instance)
-  {
-    if (!Configuration.Enabled) return;
-    Selection.Get().AfterPlace(__instance.gameObject);
   }
 }
 

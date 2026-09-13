@@ -1,3 +1,6 @@
+- v1.83
+  - Fixes location placing not working.
+
 - v1.82
   - More fixes. Thanks JPValheim!
 
@@ -16,7 +19,3 @@
 - v1.79
   - Improves compatibility with PlanBuild mod (extra info, item drops, item stand orientation). Thanks Haloa!
   - Fixes some prefabs disappearing from selection (TimedDestruction and Vine components are now removed). Thanks Haloa!
-
-- v1.78
-  - Adds a new menu for vegetation in the Infinity Hammer build menu.
-  - Adds support for receiving server side location and vegetation IDs from Expand World Data mod.
