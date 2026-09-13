@@ -82,6 +82,9 @@ public partial class ObjectSelection : BaseSelection
     var view = piece.GetComponent<ZNetView>();
     var prefabHash = ZDOKeys.Hash(view.GetPrefabName());
     SelectedPrefab = UnityEngine.Object.Instantiate(view.gameObject, Wrapper.transform);
+    // This shouldn't be needed but this mod probably calls SetupPlacementGhost somewhat incorrectly.
+    // That causes something weird.
+    HammerHelper.DisableRandomMaterialValues(SelectedPrefab);
     SelectedPrefab.name = view.name;
 
     SingleUse = singleUse;

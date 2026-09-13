@@ -1,5 +1,6 @@
 - v1.83
   - Fixes location placing not working.
+  - Fixes selecting repar hammer causing error.
 
 - v1.82
   - More fixes. Thanks JPValheim!

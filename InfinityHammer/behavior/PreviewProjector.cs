@@ -17,7 +17,6 @@ public class Player_ManualUpdate
     if (__instance != Player.m_localPlayer) return;
     Projector = null;
     if (!__instance.m_placementGhost) return;
-    if (Configuration.Enabled) PreviewMaterials.Prepare(__instance.m_placementGhost);
     Projector = __instance.m_placementGhost.GetComponentInChildren<CircleProjector>(true);
     // IH drives this projector after placement transforms, exactly once per
     // visible frame. Disable the automatic Unity Update to avoid doing both.

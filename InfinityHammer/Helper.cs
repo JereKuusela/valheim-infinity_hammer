@@ -179,12 +179,20 @@ public static class HammerHelper
     if (obj.TryGetComponent<WearNTear>(out var wear))
       wear.ResetHighlight();
   }
+  ///<summary>Not sure why these triggers, so disable to prevent errors even for objects that skip full CleanObject.</summary>
+  public static void DisableRandomMaterialValues(GameObject obj)
+  {
+    foreach (var component in obj.GetComponentsInChildren<RandomMaterialValues>(true))
+    {
+      component.CancelInvoke();
+      component.enabled = false;
+    }
+  }
   ///<summary>Removes scripts that try to run (for example placement needs only the model and Piece component).</summary>
   private static void CleanObject(GameObject obj)
   {
+    DisableRandomMaterialValues(obj);
     // These are confirmed to cause issues.
-    // Deep North starts material polling even when the preview has no ZNetView.
-    PreviewMaterials.Prepare(obj);
     DestroyComponents<RandomFlyingBird>(obj);
     DestroyComponents<DungeonGenerator>(obj);
     DestroyComponents<MusicLocation>(obj);
