@@ -408,7 +408,7 @@ public static class CustomMenu
     {
       if (tool.Name != "Pipette" && tool.Name != "Building pipette" && tool.Name != "Area pipette") continue;
       if (!IsToolCommandAllowed(tool)) continue;
-      var piece = Build(tool);
+      var piece = Build(pt, tool);
       if (!pt.m_availablePieces.Add(piece)) continue;
       pt.m_availablePiecesByCategory[tab].Add(piece);
       pt.m_enabledPieces.Add(piece);
@@ -431,7 +431,7 @@ public static class CustomMenu
       var index = tool.Index ?? indices[tab] + 1;
       var pieces = pt.m_availablePiecesByCategory[tab];
       index = Math.Max(0, Math.Min(index, pieces.Count));
-      var piece = Build(tool);
+      var piece = Build(pt, tool);
       piece.m_category = (Piece.PieceCategory)tab;
       pieces.Insert(index, piece);
       pt.m_availablePieces.Add(piece);
@@ -463,9 +463,9 @@ public static class CustomMenu
     if (name.EndsWith("PieceTable")) name = name.Substring(0, name.Length - "PieceTable".Length);
     return name.ToLowerInvariant();
   }
-  private static Piece Build(Tool tool)
+  private static Piece Build(PieceTable pt, Tool tool)
   {
-    return ToolMenuPieces.Get(tool);
+    return ToolMenuPieces.Get(pt, tool);
   }
 
   public static List<ItemDrop> GetBuildItems()

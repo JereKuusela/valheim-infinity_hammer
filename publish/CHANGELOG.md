@@ -1,5 +1,6 @@
 - v1.84
   - Adds new setting to snap zoom scaling at specific increments.
+  - Fixes favorites + tools + keep equip on death combination causing null reference exception.
 
 - v1.83
   - Fixes location placing not working.

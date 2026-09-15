@@ -45,23 +45,25 @@ public class ScalingData(bool sanityY, bool minXZ, bool printChanges, Vector3 va
     Value.z = RawValue.z;
     AfterScaling();
   }
-  public void Zoom(float amount) => TryCommit(RawValue + new Vector3(amount, amount, amount));
-  public void ZoomPercentage(float percentage) => TryCommitPercentage(RawValue * (1f + percentage));
-  public void ZoomX(float amount) => TryCommit(RawValue + new Vector3(amount, 0f, 0f));
-  public void ZoomXPercentage(float percentage) => TryCommitPercentage(new(RawValue.x * (1f + percentage), RawValue.y, RawValue.z));
-  public void ZoomY(float amount) => TryCommit(RawValue + new Vector3(0f, amount, 0f));
-  public void ZoomYPercentage(float percentage) => TryCommitPercentage(new(RawValue.x, RawValue.y * (1f + percentage), RawValue.z));
-  public void ZoomZ(float amount) => TryCommit(RawValue + new Vector3(0f, 0f, amount));
-  public void ZoomZPercentage(float percentage) => TryCommitPercentage(new(RawValue.x, RawValue.y, RawValue.z * (1f + percentage)));
-  private void TryCommit(Vector3 candidate)
+  public void Zoom(float amount) => TryCommit(RawValue, new(amount, amount, amount));
+  public void ZoomPercentage(float percentage) => TryCommitPercentage(RawValue, new(1f + percentage, 1f + percentage, 1f + percentage));
+  public void ZoomX(float amount) => TryCommit(RawValue, new(amount, 0f, 0f));
+  public void ZoomXPercentage(float percentage) => TryCommitPercentage(RawValue, new(1f + percentage, 1f, 1f));
+  public void ZoomY(float amount) => TryCommit(RawValue, new(0f, amount, 0f));
+  public void ZoomYPercentage(float percentage) => TryCommitPercentage(RawValue, new(1f, 1f + percentage, 1f));
+  public void ZoomZ(float amount) => TryCommit(RawValue, new(0f, 0f, amount));
+  public void ZoomZPercentage(float percentage) => TryCommitPercentage(RawValue, new(1f, 1f, 1f + percentage));
+  private void TryCommit(Vector3 original, Vector3 change)
   {
+    var candidate = original + change;
     if (!IsValid(candidate)) return;
     RawValue = candidate;
     Value = candidate;
     AfterScaling();
   }
-  private void TryCommitPercentage(Vector3 candidate)
+  private void TryCommitPercentage(Vector3 original, Vector3 multiplier, int step = 0)
   {
+    var candidate = new Vector3(original.x * multiplier.x, original.y * multiplier.y, original.z * multiplier.z);
     // Percentage is limited at precision, must reject if already at limit to avoid loss of uniformal scaling.
     if ((candidate.x < RawValue.x && AtLimit(Value.x)) ||
         (candidate.y < RawValue.y && AtLimit(Value.y)) ||
@@ -69,8 +71,19 @@ public class ScalingData(bool sanityY, bool minXZ, bool printChanges, Vector3 va
 
     if (!IsValid(candidate)) return;
     RawValue = candidate;
-    Value = SnapToPrecision(candidate);
-    AfterScaling();
+    var nextValue = SnapToPrecision(candidate);
+    // Snap can mean the change wasn't big enough to change the final value.
+    // So redo steps until something happens.
+    if (nextValue == Value && step < 100)
+    {
+      TryCommitPercentage(RawValue, multiplier, step + 1);
+    }
+    else
+    {
+
+      Value = nextValue;
+      AfterScaling();
+    }
   }
   private bool IsValid(Vector3 value)
   {

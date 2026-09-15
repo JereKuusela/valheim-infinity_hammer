@@ -143,7 +143,6 @@ public class PlayerOnDestroy
     {
       Player_ManualUpdate.Projector = null;
       Selection.Destroy();
-      ToolMenuPieces.Clear();
       TrackPreviewMaterials.Clear();
     }
   }

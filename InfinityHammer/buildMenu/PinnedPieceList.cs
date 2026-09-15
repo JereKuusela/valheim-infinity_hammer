@@ -48,7 +48,7 @@ internal static class KeepPipettesVisible
     var changed = false;
     foreach (var button in __instance.m_pieceButtons)
     {
-      if (!button || PinnedPieceList.PinIndex(button.Piece) < 0 || !table!.m_availablePieces.Contains(button.Piece)) continue;
+      if (!button || PinnedPieceList.PinIndex(button.Piece) < 0 || !table.m_availablePieces.Contains(button.Piece)) continue;
       if (button.gameObject.activeSelf) continue;
       button.gameObject.SetActive(true);
       changed = true;

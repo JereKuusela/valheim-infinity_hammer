@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using BepInEx;
 using HarmonyLib;
+using InfinityHammer;
 using ServerDevcommands;
 using Service;
 namespace InfinityTools;
@@ -126,10 +127,10 @@ public class ToolManager
     return false;
   }
   public static List<Tool> Get(string equipment) => Tools.TryGetValue(equipment, out var tools) ? tools : [];
-  public static List<Tool> GetAll() => Tools.SelectMany(kvp => kvp.Value).ToList();
+  public static List<Tool> GetAll() => [.. Tools.SelectMany(kvp => kvp.Value)];
   public static void FromFiles()
   {
-    InfinityHammer.ToolMenuPieces.Clear();
+    ToolMenuPieces.Invalidate();
     ToolData.Clear();
     Tools.Clear();
 
