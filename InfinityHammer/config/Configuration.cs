@@ -68,7 +68,16 @@ public partial class Configuration
   public static bool PlaceEmptyRooms => configPlaceEmptyRooms.Value;
   public static ConfigEntry<bool> configScaleZSyncObjects;
   public static bool ScaleZSyncObjects => configScaleZSyncObjects.Value;
+  public static ConfigEntry<string> configScalePrecision;
+  public static float ScalePrecision => ParsePercentage(configScalePrecision.Value);
   public static ConfigWrapper Wrapper;
+
+  private static float ParsePercentage(string value)
+  {
+    if (value.EndsWith("%", System.StringComparison.Ordinal))
+      return Parse.Float(value.Substring(0, value.Length - 1), 5f) / 100f;
+    return Parse.Float(value, 0.05f);
+  }
 
 #nullable enable
 
@@ -100,6 +109,7 @@ public partial class Configuration
     configUnfreezeOnUnequip = wrapper.Bind(section, "Unfreeze on unequip", true, "Removes the placement freeze when unequipping the hammer.");
     configSnapping = wrapper.Bind(section, "Snap points", SnappingMode.Corners, new ConfigDescription("Automatic snap points.", new AcceptableValueList<string>(SnappingMode.Off, SnappingMode.Edges, SnappingMode.Corners, SnappingMode.All)));
     configScaleZSyncObjects = wrapper.Bind(section, "Scale ZSyncTransform objects", false, "Allows scaling objects with ZSyncTransform (required Expand World Prefabs mod on server)");
+    configScalePrecision = wrapper.Bind(section, "Scale precision", "5%", "Snaps hammer_zoom scaling changes to this percentage interval. Use 0 to disable.");
     configIgnoreOtherRestrictions = wrapper.Bind(section, "Ignore other restrictions", true, "Ignores any other restrictions (material, biome, etc.)");
     configPlaceEmptyRooms = wrapper.Bind(section, "Place empty rooms", false, "hammer_room command places rooms without their contents.");
     InitVisuals(wrapper);

@@ -12,6 +12,15 @@ public static class TrackPreviewMaterials
 {
   private static readonly Dictionary<Material, Material> Cache = [];
 
+  public static void Clear()
+  {
+    foreach (var material in Cache.Values)
+    {
+      if (material) Object.Destroy(material);
+    }
+    Cache.Clear();
+  }
+
   static IEnumerable<MethodBase> TargetMethods()
   {
     var method = AccessTools.Method(typeof(Player), nameof(Player.CleanupGhostMaterials));

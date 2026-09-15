@@ -1,3 +1,6 @@
+- v1.84
+  - Adds new setting to snap zoom scaling at specific increments.
+
 - v1.83
   - Fixes location placing not working.
   - Fixes selecting repar hammer causing error.
@@ -16,7 +19,3 @@
   - Improves compatibility with PlanBuild mod (terrain data is ignored). Thanks Haloa!
   - Fixes some prefabs disappearing from selection (Ragdoll, LocationProxy, MapTable, ArcheryTarget and Plant components are now removed). Thanks Haloa!
   - Fixes instant tools always using player coordinates instead of the hovered coordinates.
-
-- v1.79
-  - Improves compatibility with PlanBuild mod (extra info, item drops, item stand orientation). Thanks Haloa!
-  - Fixes some prefabs disappearing from selection (TimedDestruction and Vine components are now removed). Thanks Haloa!

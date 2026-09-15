@@ -266,6 +266,7 @@ For example you could bind command `hammer_rotate_y random;hammer_place` to buil
 - Remove area (default: `0`): Removes same objects within the radius.
 - Repair anything (default: `false`): Allows healing or repairing any object.
 - Reset offset on unfreeze (default `true`): Removes the placement offset when unfreezing the placement.
+- Scale precision (default: `5%`): Snaps percentage-based scaling changes to this interval. Set to `0` to disable.
 - Set invulnerability (default: `Off`): Built objects can't take any damage.
   - The exact mechanic depends on the object type:
     - Creatures: Very high health causes damage to be rounded down to zero.

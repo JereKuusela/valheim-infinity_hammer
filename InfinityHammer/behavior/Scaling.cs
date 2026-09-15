@@ -1,6 +1,8 @@
+using System;
 using ServerDevcommands;
 using UnityEngine;
 namespace InfinityHammer;
+
 public class Scaling()
 {
   private static readonly ScalingData PieceScaling = new(true, false, true, Vector3.one);
@@ -19,6 +21,8 @@ public class ScalingData(bool sanityY, bool minXZ, bool printChanges, Vector3 va
   private readonly bool OnlyPositiveHeight = sanityY;
   private readonly bool MinXZ = minXZ;
   private Vector3 Value = value;
+  // Unsnapped accumulator so repeated zooming doesn't lose precision to snapping.
+  private Vector3 RawValue = value;
   public Vector3 Vec3 => Value;
   private readonly bool PrintChanges = printChanges;
   public float X => MinXZ ? Mathf.Max(0.25f, Value.x) : Value.x;
@@ -33,85 +37,91 @@ public class ScalingData(bool sanityY, bool minXZ, bool printChanges, Vector3 va
     else
       HammerHelper.Message(terminal, $"Scale set to {Y:P0}.");
   }
-  private void Sanity()
-  {
-    Value.x = Mathf.Max(0f, Value.x);
-    if (OnlyPositiveHeight)
-      Value.y = Mathf.Max(0f, Value.y);
-    Value.z = Mathf.Max(0f, Value.z);
-
-    Value.x = Helper.Round(Value.x);
-    Value.y = Helper.Round(Value.y);
-    Value.z = Helper.Round(Value.z);
-  }
-
   public void SetPrecisionXZ(float min, float precision)
   {
-    Value.x = min + precision * Mathf.Floor((Value.x - min) / precision);
-    Value.z = min + precision * Mathf.Floor((Value.z - min) / precision);
+    RawValue.x = min + precision * Mathf.Floor((RawValue.x - min) / precision);
+    RawValue.z = min + precision * Mathf.Floor((RawValue.z - min) / precision);
+    Value.x = RawValue.x;
+    Value.z = RawValue.z;
     AfterScaling();
   }
-  public void Zoom(float amount, float percentage)
+  public void Zoom(float amount) => TryCommit(RawValue + new Vector3(amount, amount, amount));
+  public void ZoomPercentage(float percentage) => TryCommitPercentage(RawValue * (1f + percentage));
+  public void ZoomX(float amount) => TryCommit(RawValue + new Vector3(amount, 0f, 0f));
+  public void ZoomXPercentage(float percentage) => TryCommitPercentage(new(RawValue.x * (1f + percentage), RawValue.y, RawValue.z));
+  public void ZoomY(float amount) => TryCommit(RawValue + new Vector3(0f, amount, 0f));
+  public void ZoomYPercentage(float percentage) => TryCommitPercentage(new(RawValue.x, RawValue.y * (1f + percentage), RawValue.z));
+  public void ZoomZ(float amount) => TryCommit(RawValue + new Vector3(0f, 0f, amount));
+  public void ZoomZPercentage(float percentage) => TryCommitPercentage(new(RawValue.x, RawValue.y, RawValue.z * (1f + percentage)));
+  private void TryCommit(Vector3 candidate)
   {
-    Value += new Vector3(amount, amount, amount);
-    if (percentage < 0f) Value /= 1f - percentage;
-    else Value *= 1f + percentage;
-    Sanity();
+    if (!IsValid(candidate)) return;
+    RawValue = candidate;
+    Value = candidate;
     AfterScaling();
   }
-  public void ZoomX(float amount, float percentage)
+  private void TryCommitPercentage(Vector3 candidate)
   {
-    Value.x += amount;
-    if (percentage < 0f) Value.x /= 1f - percentage;
-    else Value.x *= 1f + percentage;
-    Sanity();
-    AfterScaling();
-  }
-  public void ZoomY(float amount, float percentage)
-  {
-    Value.y += amount;
-    if (percentage < 0f) Value.y /= 1f - percentage;
-    else Value.y *= 1f + percentage;
-    Sanity();
-    AfterScaling();
-  }
+    // Percentage is limited at precision, must reject if already at limit to avoid loss of uniformal scaling.
+    if ((candidate.x < RawValue.x && AtLimit(Value.x)) ||
+        (candidate.y < RawValue.y && AtLimit(Value.y)) ||
+        (candidate.z < RawValue.z && AtLimit(Value.z))) return;
 
-  public void ZoomZ(float amount, float percentage)
-  {
-    Value.z += amount;
-    if (percentage < 0f) Value.z /= 1f - percentage;
-    else Value.z *= 1f + percentage;
-    Sanity();
+    if (!IsValid(candidate)) return;
+    RawValue = candidate;
+    Value = SnapToPrecision(candidate);
     AfterScaling();
   }
+  private bool IsValid(Vector3 value)
+  {
+    if (value.x <= 0f || value.z <= 0f) return false;
+    return !OnlyPositiveHeight || value.y > 0f;
+  }
+  private bool AtLimit(float value)
+  {
+    var precision = Configuration.ScalePrecision;
+    if (precision <= 0f) return false;
+    return OnlyPositiveHeight ? value <= precision : Mathf.Abs(value) <= precision;
+  }
+  private static float SnapToPrecision(float value)
+  {
+    var precision = Configuration.ScalePrecision;
+    if (precision <= 0f) return value;
+    var sign = Mathf.Sign(value);
+    return sign * Mathf.Max(precision, Mathf.Round(Mathf.Abs(value) / precision) * precision);
+  }
+  private static Vector3 SnapToPrecision(Vector3 value) => new(
+    SnapToPrecision(value.x),
+    SnapToPrecision(value.y),
+    SnapToPrecision(value.z));
   public void SetScale(float value)
   {
-    Value = value * Vector3.one;
-    Sanity();
+    RawValue = value * Vector3.one;
+    Value = RawValue;
     AfterScaling();
   }
   public void SetScaleX(float value)
   {
+    RawValue.x = value;
     Value.x = value;
-    Sanity();
     AfterScaling();
   }
   public void SetScaleY(float value)
   {
+    RawValue.y = value;
     Value.y = value;
-    Sanity();
     AfterScaling();
   }
   public void SetScaleZ(float value)
   {
+    RawValue.z = value;
     Value.z = value;
-    Sanity();
     AfterScaling();
   }
   public void SetScale(Vector3 value)
   {
-    Value = value;
-    Sanity();
+    RawValue = value;
+    Value = RawValue;
     AfterScaling();
   }
   private void AfterScaling()
