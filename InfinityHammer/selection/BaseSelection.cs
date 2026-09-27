@@ -31,7 +31,7 @@ public class BaseSelection
   public virtual DataEntry? GetData(int index = 0) => null;
   public virtual int GetPrefab(int index = 0) => 0;
   public virtual bool IsScalingSupported() => false;
-  public virtual GameObject GetPrefab(GameObject obj) => obj;
+  public virtual GameObject GetPrefab(GameObject obj, Vector3 pos, Quaternion rot) => obj;
   public virtual void AfterPlace(GameObject obj) { }
 
   public void SetScale(Vector3 value)

@@ -109,6 +109,12 @@ public class RemovePiece
   {
     obj.GetComponent<CharacterDrop>()?.OnDeath();
     obj.GetComponent<Piece>()?.DropResources();
+    if (!Configuration.RemoveContents)
+    {
+      obj.GetComponent<ArmorStand>()?.OnDestroyed();
+      obj.GetComponent<ItemStand>()?.OnDestroyed();
+      obj.GetComponent<Container>()?.OnDestroyed();
+    }
     UndoHelper.AddRemoveAction(obj.GetZDO());
     HammerHelper.RemoveZDO(obj.GetZDO());
   }
@@ -138,6 +144,12 @@ public class Remove
   }
 }
 
+
+[HarmonyPatch(typeof(Destructible), nameof(Destructible.CreateFragments))]
+public class PreventDestructibleFragments
+{
+  static bool Prefix() => !Configuration.HideEffects;
+}
 [HarmonyPatch(typeof(Piece), nameof(Piece.DropResources))]
 public class PreventPieceDrops
 {

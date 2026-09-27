@@ -96,7 +96,7 @@ Binding on mouse wheel automatically turns the number negative when scrolling do
 
 ## Locations
 
-Locations (or [Points of Interests](https://valheim.wiki/Points_of_Interest_(POI))) usually include multiple objects so copying them with the `hammer` command is not simple.
+Locations (or [Points of Interests](https://valheim.wiki/Point_of_Interest)) usually include multiple objects so copying them with the `hammer` command is not simple.
 
 They also have special behavior like random parts or random damage.
 

@@ -39,7 +39,7 @@ public class RoomSelection : BaseSelection
   }
   public override DataEntry? GetData(int index = 0) => Object.Data;
   public override int GetPrefab(int index = 0) => Object.Prefab;
-  public override GameObject GetPrefab(GameObject obj)
+  public override GameObject GetPrefab(GameObject obj, Vector3 pos, Quaternion rot)
   {
     var dummy = new GameObject
     {

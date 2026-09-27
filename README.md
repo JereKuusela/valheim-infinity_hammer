@@ -12,6 +12,7 @@ Recommended mods:
 
 - [Gizmo](https://valheim.thunderstore.io/package/ComfyMods/Gizmo/): Enables free rotation.
 - [More Vanilla Build Prefabs](https://valheim.thunderstore.io/package/Searica/More_Vanilla_Build_Prefabs/): Adds more objects to the build menu.
+- [DragNBuild](https://valheim.hexium.gg/mods/KG/DragNBuild): Adds easy to way "zoop" by just dragging.
 
 This mod has a massive amount of features and setting. For ease of use, the documentation is split into three parts.
 

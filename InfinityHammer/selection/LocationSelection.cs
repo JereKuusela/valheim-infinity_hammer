@@ -36,7 +36,7 @@ public class LocationSelection : BaseSelection
   }
   public override DataEntry? GetData(int index = 0) => Object.Data;
   public override int GetPrefab(int index = 0) => Object.Prefab;
-  public override GameObject GetPrefab(GameObject obj) => ZoneSystem.instance.m_locationProxyPrefab;
+  public override GameObject GetPrefab(GameObject obj, Vector3 pos, Quaternion rot) => ZoneSystem.instance.m_locationProxyPrefab;
 
   public override void AfterPlace(GameObject obj)
   {

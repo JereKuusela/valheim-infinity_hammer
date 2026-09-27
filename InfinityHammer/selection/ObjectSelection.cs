@@ -425,14 +425,15 @@ public partial class ObjectSelection : BaseSelection
     return Objects[index].Prefab;
   }
   public override bool IsScalingSupported() => Objects.All(obj => obj.Scalable);
-  public override GameObject GetPrefab(GameObject obj)
+  public override GameObject GetPrefab(GameObject obj, Vector3 pos, Quaternion rot)
   {
     UndoHelper.BeginSubAction();
     if (!UsesSelectionRoot)
     {
       var name = Utils.GetPrefabName(obj);
+      // Place piece has pos and rot so ghost transform should only be used for scale.
       var tr = HammerHelper.GetPlacementGhost().transform;
-      var zdo = DataHelper.Init(ZDOKeys.Hash(name), tr, GetData(0));
+      var zdo = DataHelper.Init(ZDOKeys.Hash(name), pos, rot, tr.lossyScale, GetData(0));
       if (zdo != null)
         DungeonRooms.Reposition(zdo, tr);
       return ZNetScene.instance.GetPrefab(name);

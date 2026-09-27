@@ -33,6 +33,8 @@ public partial class Configuration
   public static bool DisableScaleMessages => configDisableScaleMessages.Value;
   public static ConfigEntry<bool> configDisableLoot;
   public static bool DisableLoot => IsEnabled(InfinityPermissionHash.DisableLoot, configDisableLoot.Value);
+  public static ConfigEntry<bool> configRemoveContents;
+  public static bool RemoveContents => configRemoveContents.Value;
   public static ConfigEntry<bool> configRepairAnything;
   public static bool RepairAnything => IsEnabled(InfinityPermissionHash.RepairAnything, configRepairAnything.Value);
   public static ConfigEntry<bool> configNoCreator;
@@ -94,6 +96,7 @@ public partial class Configuration
     configAllowInDungeons = wrapper.Bind(section, "Allow in dungeons", true, "Allows building in dungeons.");
     configRemoveAnything = wrapper.Bind(section, "Remove anything", false, "Allows removing anything.");
     configDisableLoot = wrapper.Bind(section, "Disable loot", false, "Prevents creatures and structures dropping loot when removed with the hammer.");
+    configRemoveContents = wrapper.Bind(section, "Remove chest contents", false, "Removes anything also removes armor stand, item stand and chest contents.");
     configRepairAnything = wrapper.Bind(section, "Repair anything", false, "Allows reparing anything.");
     configOverwriteHealth = wrapper.Bind(section, "Overwrite health", "0", "Overwrites the health of built or repaired objects.");
     configInvulnerability = wrapper.Bind(section, "Set invulnerability", InvulnerabilityMode.Off, new ConfigDescription("Built objects are invulnerable.", new AcceptableValueList<string>(InvulnerabilityMode.Off, InvulnerabilityMode.On, InvulnerabilityMode.Damaged, InvulnerabilityMode.Worn, InvulnerabilityMode.Legacy)));

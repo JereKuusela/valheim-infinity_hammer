@@ -21,7 +21,7 @@ public class PlacePiece
       Hammer.SelectRepair();
   }
   // Parameter is the selected piece which doesn't have the correct transformation.
-  static GameObject GetPrefab(GameObject obj) => Configuration.Enabled ? Selection.Get().GetPrefab(obj) : obj;
+  static GameObject GetPrefab(GameObject obj, Vector3 pos, Quaternion rot) => Configuration.Enabled ? Selection.Get().GetPrefab(obj, pos, rot) : obj;
 
   static void Postprocess(GameObject obj)
   {
@@ -35,7 +35,10 @@ public class PlacePiece
     return new CodeMatcher(instructions)
       .MatchForward(false, new CodeMatch(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(Component), nameof(Component.gameObject))))
       .Advance(1)
-      .Insert(new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate(GetPrefab).operand))
+      .Insert(
+        new CodeInstruction(OpCodes.Ldarg_2),
+        new CodeInstruction(OpCodes.Ldarg_3),
+        new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate(GetPrefab).operand))
       .MatchForward(false, new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(Piece), nameof(Piece.m_placeEffect))))
       .InsertAndAdvance(new CodeInstruction(OpCodes.Ldloc_0))
       .InsertAndAdvance(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PlacePiece), nameof(Postprocess))))
