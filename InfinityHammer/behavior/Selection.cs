@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Reflection.Emit;
 using Data;
 using HarmonyLib;
 using ServerDevcommands;
@@ -106,6 +107,21 @@ public class SetItemHack
     if (Hack)
       SetItem(__instance, slot, itemHash, variant, quality);
     return !Hack;
+  }
+}
+
+///<summary>Preview item stands have no ZNetView, so the ownership check must not throw.</summary>
+[HarmonyPatch(typeof(ItemStand), nameof(ItemStand.SetVisualItem))]
+public class ItemStandSetVisualItemNullSafe
+{
+  static bool IsOwner(ZNetView view) => view && view.IsOwner();
+
+  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+  {
+    return new CodeMatcher(instructions)
+      .MatchForward(false, new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(ZNetView), nameof(ZNetView.IsOwner))))
+      .Set(OpCodes.Call, AccessTools.Method(typeof(ItemStandSetVisualItemNullSafe), nameof(IsOwner)))
+      .InstructionEnumeration();
   }
 }
 

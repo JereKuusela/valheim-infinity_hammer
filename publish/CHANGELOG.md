@@ -1,3 +1,6 @@
+- v1.86
+  - Fixes blueprints with itemstands not working.
+
 - v1.85
   - Adds new setting to control whether "Remove anything" also removes armor stands, item stands, and chest contents.
   - Fixes "Hide effects" not hiding destruction fragments.
@@ -13,6 +16,3 @@
 
 - v1.82
   - More fixes. Thanks JPValheim!
-
-- v1.81
-  - Fixes for the new game update. Some things might not work properly.

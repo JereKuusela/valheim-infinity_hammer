@@ -306,6 +306,11 @@ public static class HammerHelper
       hash = h;
       return true;
     }
+    if (data.TryGetInt(pars, key, out var i))
+    {
+      hash = i;
+      return true;
+    }
     if (data.TryGetString(pars, key, out var str))
     {
       hash = ZDOKeys.Hash(str);
