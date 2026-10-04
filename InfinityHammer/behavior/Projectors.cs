@@ -49,6 +49,8 @@ public abstract class BaseRuler : MonoBehaviour
   }
 
   protected List<GameObject> Segments = [];
+  // The center marker sits at the object origin, which is meaningless for world-space rulers.
+  protected virtual bool HasCenter => true;
   protected void CreateSegments(int count)
   {
     if (Segments.Count == count) return;
@@ -56,10 +58,13 @@ public abstract class BaseRuler : MonoBehaviour
     Segments.Clear();
     Destroy(Center);
     if (count == 0) return;
-    Center = CreateMarker();
-    Center.transform.localPosition = Vector3.zero;
-    Center.transform.localRotation = Quaternion.identity;
-    Center.transform.localScale = new(0.1f, 0.1f, 0.1f);
+    if (HasCenter)
+    {
+      Center = CreateMarker();
+      Center.transform.localPosition = Vector3.zero;
+      Center.transform.localRotation = Quaternion.identity;
+      Center.transform.localScale = new(0.1f, 0.1f, 0.1f);
+    }
     for (int i = 0; i < count; i++)
       Segments.Add(CreateMarker());
   }
@@ -118,6 +123,63 @@ public abstract class BaseRuler : MonoBehaviour
   protected Transform Get(int index) => Segments[index].transform;
   protected void Set(int index, Vector3 pos) => Get(index).localPosition = pos;
   protected void SetRot(int index, Vector3 rot) => Get(index).localRotation = Quaternion.LookRotation(rot, Vector3.up);
+}
+
+// Lives in world space (the root object stays at the origin), so local positions are world positions.
+public class PathRuler : BaseRuler
+{
+  public List<Vector3> Points = [];
+  public Vector3 Cursor;
+  public float Radius = 0.5f;
+  private const int MaxLineSegments = 500;
+  private const float Speed = 0.1f;
+  protected override bool HasCenter => false;
+
+  // Saved points are connected in order, the last leg ends at the cursor.
+  private (Vector3 from, Vector3 to) Leg(int index) => (Points[index], index + 1 < Points.Count ? Points[index + 1] : Cursor);
+  private static int Steps(float length, float spacing) => length < 0.1f ? 0 : Math.Max(1, Mathf.RoundToInt(length / spacing));
+
+  protected override void CreateLines()
+  {
+    var circleSegments = Points.Count == 0 ? 0 : Math.Max(3, (int)(Radius * 4));
+    var totalLength = 0f;
+    for (var i = 0; i < Points.Count; i++)
+    {
+      var (from, to) = Leg(i);
+      totalLength += Utils.DistanceXZ(from, to);
+    }
+    var spacing = Mathf.Max(1f, totalLength / MaxLineSegments);
+    var lineSegments = 0;
+    for (var i = 0; i < Points.Count; i++)
+    {
+      var (from, to) = Leg(i);
+      lineSegments += Steps(Utils.DistanceXZ(from, to), spacing);
+    }
+    CreateSegments(circleSegments * Points.Count + lineSegments);
+
+    var index = 0;
+    var time = Time.time * Speed;
+    foreach (var point in Points)
+    {
+      for (var i = 0; i < circleSegments; i++, index++)
+      {
+        var f = i * Mathf.PI * 2f / circleSegments + time;
+        Set(index, point + new Vector3(Mathf.Sin(f) * Radius, 0f, Mathf.Cos(f) * Radius));
+        SetRot(index, new Vector3(Mathf.Cos(f), 0f, -Mathf.Sin(f)));
+      }
+    }
+    for (var i = 0; i < Points.Count; i++)
+    {
+      var (from, to) = Leg(i);
+      var steps = Steps(Utils.DistanceXZ(from, to), spacing);
+      var direction = Utils.DirectionXZ(to - from);
+      for (var j = 0; j < steps; j++, index++)
+      {
+        Set(index, Vector3.Lerp(from, to, (j + 0.5f) / steps));
+        SetRot(index, direction);
+      }
+    }
+  }
 }
 
 public class CircleRuler : BaseRuler

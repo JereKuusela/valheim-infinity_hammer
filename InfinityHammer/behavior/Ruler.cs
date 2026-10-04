@@ -73,6 +73,7 @@ public class Ruler
   public static void Update()
   {
     var player = Player.m_localPlayer;
+    if (player && Selection.Get() is ToolSelection pathSelection) pathSelection.UpdatePath(player);
     if (Projector == null || !player) return;
     if (Selection.Get() is not ToolSelection selection)
     {
@@ -361,7 +362,7 @@ public class AddExtraInfo
   private static string Description(ToolSelection selection)
   {
     if (Hud.IsPieceSelectionVisible()) return "";
-    var lines = new[] { DescriptionHover(), Ruler.DescriptionScale(selection), Ruler.DescriptionPosition() };
+    var lines = new[] { DescriptionHover(), Ruler.DescriptionScale(selection), Ruler.DescriptionPosition(), selection.DescriptionPoints() };
     return string.Join("\n", lines.Where(s => s != ""));
   }
   static Vector2? DefaultOffset;

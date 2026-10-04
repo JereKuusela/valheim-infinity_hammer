@@ -1,5 +1,6 @@
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using InfinityHammer;
@@ -8,9 +9,13 @@ using Service;
 using UnityEngine;
 
 namespace InfinityTools;
+
 public class ToolSelection : BaseSelection
 {
   public Tool Tool;
+  // Positions captured so far for tools with <xN>/<yN>/<zN>/<pN> placeholders.
+  private readonly List<Vector3> Points = [];
+  private PathRuler? Path;
   public ToolSelection(Tool tool)
   {
     Tool = tool;
@@ -53,6 +58,8 @@ public class ToolSelection : BaseSelection
   {
     var placedCommand = obj.AddComponent<PlacedCommand>();
     var ghost = HammerHelper.GetPlacementGhost().transform;
+    if (Tool.UsesPoints && !CapturePoint(ghost.position))
+      return;
     var x = ghost.position.x.ToString(CultureInfo.InvariantCulture);
     var y = ghost.position.y.ToString(CultureInfo.InvariantCulture);
     var z = ghost.position.z.ToString(CultureInfo.InvariantCulture);
@@ -89,6 +96,21 @@ public class ToolSelection : BaseSelection
     if (multiShape)
       command = RemoveUnusedShapeParameters(command, shape);
 
+    if (Tool.UsesPoints)
+    {
+      var points = Points.ToArray();
+      Points.Clear();
+      if (Tool.Variadic) command = ExpandRepeated(command, points.Length);
+      command = Tool.PointRegex.Replace(command, match =>
+      {
+        var index = int.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture) - 1;
+        if (index < 0 || index >= points.Length) return match.Value;
+        var point = points[index];
+        var value = match.Groups[1].Value == "x" ? point.x : match.Groups[1].Value == "y" ? point.y : point.z;
+        return value.ToString(CultureInfo.InvariantCulture);
+      });
+    }
+
     if (command.Contains("<id>"))
     {
       var hovered = Selector.GetHovered(Configuration.Range, [], Configuration.IgnoredIds);
@@ -119,6 +141,42 @@ public class ToolSelection : BaseSelection
     placedCommand.Command = command;
   }
 
+  private string ExpandRepeated(string command, int pointCount)
+  {
+    var result = new List<string>();
+    foreach (var arg in command.Split(' '))
+    {
+      if (!arg.Contains(Tool.RepeatPlaceholder))
+      {
+        result.Add(arg);
+        continue;
+      }
+      for (var i = Tool.PointCount + 1; i <= pointCount; i++)
+        result.Add(arg.Replace(Tool.RepeatPlaceholder, $"<x{i}>,<z{i}>,<y{i}>"));
+    }
+    return string.Join(" ", result);
+  }
+
+  // Placing on top of the previous point also finishes a repeating path.
+  private const float RepeatDistance = 0.05f;
+  private const int MaxPoints = 64;
+  // Returns true when all points are captured and the command can run.
+  private bool CapturePoint(Vector3 position)
+  {
+    var minimum = Tool.PointCount + (Tool.Variadic ? 1 : 0);
+    var repeated = Tool.Variadic && Points.Count > 0 && Utils.DistanceXZ(Points[Points.Count - 1], position) < RepeatDistance;
+    if (!repeated) Points.Add(position);
+    var finished = Tool.Variadic ? repeated || Tool.Finish || Points.Count >= MaxPoints : Points.Count >= minimum;
+    if (finished && Points.Count < minimum)
+    {
+      Helper.AddError(Console.instance, $"At least {minimum} points are needed.", true);
+      return false;
+    }
+    if (!finished && !Configuration.DisableMessages)
+      Console.instance.AddString($"Hammering point {Points.Count}" + (Tool.Variadic ? "" : $"/{minimum}"));
+    return finished;
+  }
+
   private string RemoveUnusedShapeParameters(string command, RulerShape shape)
   {
     var isCircle = shape == RulerShape.Circle || shape == RulerShape.Ring;
@@ -142,13 +200,35 @@ public class ToolSelection : BaseSelection
     base.Activate();
     BindCommand.SetMode("command");
     Ruler.Create(Tool);
-
+    if (Tool.UsesPoints && Path == null)
+    {
+      Path = new GameObject("InfinityHammerPath").AddComponent<PathRuler>();
+      Path.Visible = false;
+    }
+  }
+  public string DescriptionPoints() => !Tool.UsesPoints ? "" : Tool.Variadic ? $"point: {Points.Count + 1}" : $"point: {Points.Count + 1}/{Tool.PointCount}";
+  public void UpdatePath(Player player)
+  {
+    if (Path == null) return;
+    var ghost = player.m_placementGhost;
+    var visible = ghost && ghost.activeInHierarchy && player.InPlaceMode() && !Hud.IsPieceSelectionVisible();
+    Path.Visible = visible && Points.Count > 0;
+    if (!visible) return;
+    Path.Points = Points;
+    Path.Cursor = ghost!.transform.position;
+    Path.Radius = Tool.Width || Tool.Radius ? Scaling.Get().X : 0.5f;
+    BaseRuler.SnapToGround = true;
+    BaseRuler.Offset = 0f;
+    Path.Refresh();
   }
   public override void Deactivate()
   {
     base.Deactivate();
     Ruler.Remove();
     BindCommand.SetMode("");
+    Points.Clear();
+    if (Path != null) UnityEngine.Object.Destroy(Path.gameObject);
+    Path = null;
   }
 }
 

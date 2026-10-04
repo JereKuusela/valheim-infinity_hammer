@@ -37,6 +37,10 @@ Following fields are available:
   - Key codes are supported to enable/disable this with a modifier key.
   - This can be used for precise terrain changes (especially with the rectable).
   - This disables rotation to align with the nodes.
+- finish: Finishes a path that uses `<p*>`.
+  - Key codes are supported. For example `<mod2>` finishes the path when placing the last point.
+  - Placing a point on the previous point (double click) also finishes the path.
+  - The path also finishes automatically at 64 points.
 - instant: If true, the command is executed instantly without any selection.
   - If not set, the value is automatically determined from the command.
 - tabIndex: Tab of the tool in the build menu.
@@ -57,6 +61,11 @@ Following parameters can be used in the command:
 - `<x>`: X coordinate.
 - `<y>`: Y coordinate.
 - `<z>`: Z coordinate.
+- `<x1>`, `<y1>`, `<z1>`, `<x2>`, ...: Coordinates of numbered points. The command is executed only after all points have been placed (the highest number is the point count).
+- `<p1>`, `<p2>`, ...: Same as `<x1>,<z1>,<y1>` (and so on) for World Edit Commands.
+- `<p*>`: Repeats the argument for every point after the numbered ones. For example `p=<p*>` with 4 points gives `p=<p1> p=<p2> p=<p3> p=<p4>`.
+  - Stops after clicking the previous point again.
+  - For example `terrain curve paint=paved level circle=<r> p=<p*>`
 - `<a>`: Angle. Mostly matters for rectangles.
 - `<r>`: Radius. Enables circle shape.
 - `<r2>`: Radius end range. Enables ring shape.

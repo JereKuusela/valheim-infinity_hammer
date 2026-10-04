@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 using InfinityHammer;
 using ServerDevcommands;
 using UnityEngine;
@@ -39,6 +41,8 @@ public class ToolData
   public string highlight = "false";
   [DefaultValue("false")]
   public string terrainGrid = "false";
+  [DefaultValue("")]
+  public string finish = "";
   [DefaultValue(null)]
   public bool? instant = null;
   [DefaultValue(null)]
@@ -95,10 +99,18 @@ public class Tool
   private readonly string targetEdge;
   public bool IsTargetEdge => targetEdge == "true" || HammerHelper.IsDown(targetEdge);
   public bool IsId;
+  // Number of positions to capture before running the command (from <xN>, <yN>, <zN>, <pN>).
+  public int PointCount;
+  // <p*> repeats its argument for every point after the numbered ones.
+  public bool Variadic;
+  public bool UsesPoints => PointCount > 0 || Variadic;
+  private readonly string finish;
+  public bool Finish => finish == "true" || HammerHelper.IsDown(finish);
 
   public Tool(ToolData data)
   {
     Name = data.name;
+    finish = data.finish;
     description = data.description.Replace("\\n", "\n");
     iconName = data.icon;
     continuous = data.continuous;
@@ -118,8 +130,16 @@ public class Tool
     Instant = data.instant == null ? Instant : (bool)data.instant;
     RotateWithPlayer = true;
     foreach (var cmd in Commands)
+    {
       ParseParameters(cmd.Command);
+      if (cmd.Command.Contains(RepeatPlaceholder))
+        Variadic = true;
+      foreach (Match match in PointRegex.Matches(cmd.Command))
+        PointCount = Math.Max(PointCount, int.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture));
+    }
   }
+  public static readonly Regex PointRegex = new(@"<([xyz])(\d+)>");
+  public const string RepeatPlaceholder = "<p*>";
 
   public string GetCommand()
   {
@@ -194,7 +214,7 @@ public class CommandValue(string command, string keys)
   public string[] BannedKeys = [.. Parse.Split(keys).Where(k => k[0] == '-').Select(k => k.Substring(1))];
 
   public bool IsDown() => Keys.All(HammerHelper.IsDown) && !BannedKeys.Any(HammerHelper.IsDown);
-  private static string ReplaceHelpers(string command) => command
+  private static string ReplaceHelpers(string command) => Regex.Replace(command, @"<p(\d+)>", "<x$1>,<z$1>,<y$1>")
     .Replace("hoe_", "tool_")
     .Replace("hammer_command", "")
     .Replace("<area>", "from=<x>,<z>,<y> circle=<r>-<r2> angle=<a> rect=<w>-<w2>,<d> ignore=<ignore> id=<include>")
