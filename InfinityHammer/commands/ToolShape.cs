@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using InfinityHammer;
 using ServerDevcommands;
-namespace InfinityTools;
+namespace InfinityHammer;
+
 public class ToolShapeCommand
 {
   public ToolShapeCommand()

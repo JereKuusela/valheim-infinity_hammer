@@ -1,7 +1,6 @@
-using InfinityHammer;
 using ServerDevcommands;
 
-namespace InfinityTools;
+namespace InfinityHammer;
 
 public class ToolImportCommand
 {

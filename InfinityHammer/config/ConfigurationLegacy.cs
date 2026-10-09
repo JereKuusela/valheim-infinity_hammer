@@ -1,10 +1,9 @@
-using System.Collections.Generic;
 using BepInEx.Configuration;
-using InfinityHammer;
 using Service;
 using UnityEngine;
 
-namespace InfinityTools;
+namespace InfinityHammer;
+
 public partial class ConfigurationLegacy
 {
 #nullable disable

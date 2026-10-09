@@ -1,12 +1,10 @@
-using System;
 using System.Globalization;
 using System.Linq;
 using HarmonyLib;
-using InfinityHammer;
 using ServerDevcommands;
 using Service;
 using UnityEngine;
-namespace InfinityTools;
+namespace InfinityHammer;
 
 public class RulerParameters
 {
@@ -355,7 +353,7 @@ public class AddExtraInfo
   private static string DescriptionHover()
   {
     if (Ruler.Projector) return "";
-    var hovered = Selector.GetHovered(InfinityHammer.Configuration.Range, [], InfinityHammer.Configuration.IgnoredIds);
+    var hovered = Selector.GetHovered(Configuration.Range, [], Configuration.IgnoredIds);
     var name = hovered == null ? "" : Utils.GetPrefabName(hovered.gameObject);
     return $"id: {name}";
   }

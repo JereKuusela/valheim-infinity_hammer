@@ -1,8 +1,7 @@
 using System.Linq;
-using InfinityHammer;
 using ServerDevcommands;
 using UnityEngine;
-namespace InfinityTools;
+namespace InfinityHammer;
 
 public class ToolCommand
 {

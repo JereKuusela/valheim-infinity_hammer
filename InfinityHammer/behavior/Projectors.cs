@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
-namespace InfinityTools;
+namespace InfinityHammer;
 
 public abstract class BaseRuler : MonoBehaviour
 {

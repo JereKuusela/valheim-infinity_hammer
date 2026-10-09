@@ -1,6 +1,5 @@
 using BepInEx.Configuration;
 using HarmonyLib;
-using InfinityTools;
 using Service;
 
 namespace InfinityHammer;

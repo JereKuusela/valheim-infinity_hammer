@@ -4,10 +4,9 @@ using System.IO;
 using System.Linq;
 using BepInEx;
 using HarmonyLib;
-using InfinityHammer;
 using ServerDevcommands;
 using Service;
-namespace InfinityTools;
+namespace InfinityHammer;
 
 [HarmonyPatch]
 public class ToolManager

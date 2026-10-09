@@ -3,12 +3,11 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using InfinityHammer;
 using ServerDevcommands;
 using Service;
 using UnityEngine;
 
-namespace InfinityTools;
+namespace InfinityHammer;
 
 public class ToolSelection : BaseSelection
 {
@@ -37,7 +36,7 @@ public class ToolSelection : BaseSelection
     piece.m_description = tool.Description;
     piece.m_clipEverything = true;
     if (tool.SnapPiece)
-      InfinityHammer.Snapping.CreateSnapPoint(SelectedPrefab, Vector3.zero, "Snap");
+      Snapping.CreateSnapPoint(SelectedPrefab, Vector3.zero, "Snap");
     Ruler.Create(tool);
   }
 

@@ -1,3 +1,6 @@
+- v1.88
+  - Recompiled to work with latest World Edit Commands mod.
+
 - v1.87
   - Adds support for multi-point commands.
 
@@ -12,7 +15,3 @@
 - v1.84
   - Adds new setting to snap zoom scaling at specific increments.
   - Fixes favorites + tools + keep equip on death combination causing null reference exception.
-
-- v1.83
-  - Fixes location placing not working.
-  - Fixes selecting repar hammer causing error.

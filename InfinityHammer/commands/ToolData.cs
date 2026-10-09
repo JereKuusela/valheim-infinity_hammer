@@ -4,12 +4,11 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
-using InfinityHammer;
 using ServerDevcommands;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace InfinityTools;
+namespace InfinityHammer;
 
 public class ToolData
 {
