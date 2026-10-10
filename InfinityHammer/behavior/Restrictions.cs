@@ -6,7 +6,7 @@ public class HaveRequirements
 {
   public static bool Prefix(ref bool __result)
   {
-    if (Configuration.NoCost)
+    if (Configuration.NoResourceCost)
     {
       __result = true;
       return false;
@@ -18,7 +18,7 @@ public class HaveRequirements
 [HarmonyPatch(typeof(Player), nameof(Player.ConsumeResources))]
 public class ConsumeResources
 {
-  static bool Prefix() => !Configuration.NoCost;
+  static bool Prefix() => !Configuration.NoResourceCost;
 }
 [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
 public class UnlockPlacement
@@ -66,7 +66,7 @@ public class CheckCanRemovePiece
 {
   static bool Prefix(ref bool __result)
   {
-    if (Configuration.NoCost) __result = true;
-    return !Configuration.NoCost;
+    if (Configuration.NoResourceCost) __result = true;
+    return !Configuration.NoResourceCost;
   }
 }

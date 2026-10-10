@@ -253,9 +253,11 @@ For example you could bind command `hammer_rotate_y random;hammer_place` to buil
 - Ignore wards (default: `true`): Wards no longer prevent building.
 - Ignored ids: Objects ignored by this mod (ids separated by ,).
 - Ignored remove ids: Additional ids that are ignored when removing anything.
-- Group resource cost (default: `false`): Requires resources (summed from all objects) when placing multiple objects or blueprints. Ignored when No cost is enabled.
+- Group resource cost (default: `false`): Requires resources (summed from all objects) when placing multiple objects or blueprints. Ignored when No resource cost is enabled.
 - Infinite health (default: `false`): Sets the Overwrite health setting to 1E30.
-- No cost (default: `false`): Removes durability, resource and stamina costs.
+- No durability cost (default: `false`): Removes durability costs.
+- No resource cost (default: `false`): Removes resource costs.
+- No stamina cost (default: `false`): Removes stamina and eitr costs.
 - No creator (default: `false`): Reduces save data by not setting the creator id.
 - No target (default: `false`): Prevents the build piece being targeted by enemies.
 - No physics (default: `false`): Prevents objects from falling when placed.

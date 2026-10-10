@@ -1,3 +1,6 @@
+- v1.89
+  - Splits setting "No cost" into "No resource cost", "No durability cost", and "No stamina cost".
+
 - v1.88
   - Recompiled to work with latest World Edit Commands mod.
 

@@ -9,8 +9,12 @@ public partial class Configuration
 
   public static bool IsEnabled(int hash, bool localValue) => Enabled && PermissionManager.Instance.IsFeatureEnabledByHash(InfinityPermissionHash.Section, hash, localValue);
 #nullable disable
-  public static ConfigEntry<bool> configNoCost;
-  public static bool NoCost => IsEnabled(InfinityPermissionHash.NoCost, configNoCost.Value);
+  public static ConfigEntry<bool> configNoResourceCost;
+  public static bool NoResourceCost => IsEnabled(InfinityPermissionHash.NoResourceCost, configNoResourceCost.Value);
+  public static ConfigEntry<bool> configNoDurabilityCost;
+  public static bool NoDurabilityCost => IsEnabled(InfinityPermissionHash.NoDurabilityCost, configNoDurabilityCost.Value);
+  public static ConfigEntry<bool> configNoStaminaCost;
+  public static bool NoStaminaCost => IsEnabled(InfinityPermissionHash.NoStaminaCost, configNoStaminaCost.Value);
   public static ConfigEntry<bool> configGroupResourceCost;
   public static bool GroupResourceCost => IsEnabled(InfinityPermissionHash.GroupResourceCost, configGroupResourceCost.Value);
   public static ConfigEntry<bool> configIgnoreWards;
@@ -89,8 +93,10 @@ public partial class Configuration
     var section = "1. General";
     configRemoveArea = wrapper.Bind(section, "Remove area", "0", "Removes same objects within the radius.");
     configRange = wrapper.Bind(section, "Hammer range", "50", "Range for actions.");
-    configNoCost = wrapper.Bind(section, "No cost", false, "Removes durability, resource and stamina costs.");
-    configGroupResourceCost = wrapper.Bind(section, "Group resource cost", false, "Requires resources (summed from all objects) when placing multiple objects or blueprints. Ignored when No cost is enabled.");
+    configNoResourceCost = wrapper.Bind(section, "No resource cost", false, "Removes resource costs.");
+    configNoDurabilityCost = wrapper.Bind(section, "No durability cost", false, "Removes durability costs.");
+    configNoStaminaCost = wrapper.Bind(section, "No stamina cost", false, "Removes stamina and eitr costs.");
+    configGroupResourceCost = wrapper.Bind(section, "Group resource cost", false, "Requires resources (summed from all objects) when placing multiple objects or blueprints. Ignored when No resource cost is enabled.");
     configIgnoreWards = wrapper.Bind(section, "Ignore wards", true, "Ignores ward restrictions.");
     configIgnoreNoBuild = wrapper.Bind(section, "Ignore no build", true, "Ignores no build areas.");
     configAllowInDungeons = wrapper.Bind(section, "Allow in dungeons", true, "Allows building in dungeons.");

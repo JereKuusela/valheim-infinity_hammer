@@ -6,7 +6,9 @@ Section name is `infinityhammer`
 
 Setting names are:
 
-- `no_cost`: no resource, durability, and stamina costs.
+- `no_resource_cost`: no resource costs.
+- `no_durability_cost`: no durability costs.
+- `no_stamina_cost`: no stamina and eitr costs.
 - `ignore_wards`: bypassing ward restrictions.
 - `ignore_no_build`: bypassing no-build areas.
 - `allow_in_dungeons`: building where pieces are normally disallowed in dungeons.

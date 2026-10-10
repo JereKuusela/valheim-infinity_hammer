@@ -69,20 +69,30 @@ public static class Hammer
   }
   public static void RemoveToolCosts(ItemDrop.ItemData item)
   {
-    if (item == null || !Configuration.NoCost) return;
-    OriginalUseDurability = item.m_shared.m_useDurability;
-    OriginalUseStamina = item.m_shared.m_attack.m_attackStamina;
-    OriginalUseEitr = item.m_shared.m_attack.m_attackEitr;
-    item.m_shared.m_useDurability = false;
-    item.m_shared.m_attack.m_attackStamina = 0f;
-    item.m_shared.m_attack.m_attackEitr = 0f;
+    if (item == null) return;
+    if (Configuration.NoDurabilityCost)
+    {
+      OriginalUseDurability = item.m_shared.m_useDurability;
+      item.m_shared.m_useDurability = false;
+    }
+    if (Configuration.NoStaminaCost)
+    {
+      OriginalUseStamina = item.m_shared.m_attack.m_attackStamina;
+      OriginalUseEitr = item.m_shared.m_attack.m_attackEitr;
+      item.m_shared.m_attack.m_attackStamina = 0f;
+      item.m_shared.m_attack.m_attackEitr = 0f;
+    }
   }
   public static void RestoreToolCosts(ItemDrop.ItemData item)
   {
-    if (item == null || !Configuration.NoCost) return;
-    item.m_shared.m_useDurability = OriginalUseDurability;
-    item.m_shared.m_attack.m_attackStamina = OriginalUseStamina;
-    item.m_shared.m_attack.m_attackEitr = OriginalUseEitr;
+    if (item == null) return;
+    if (Configuration.NoDurabilityCost)
+      item.m_shared.m_useDurability = OriginalUseDurability;
+    if (Configuration.NoStaminaCost)
+    {
+      item.m_shared.m_attack.m_attackStamina = OriginalUseStamina;
+      item.m_shared.m_attack.m_attackEitr = OriginalUseEitr;
+    }
   }
   public static bool IsHammer(string name) => Configuration.HammerTools.Contains(name.ToLowerInvariant()) || ToolManager.Tools.ContainsKey(name.ToLowerInvariant());
   public static bool IsHammer(GameObject obj) => obj && IsHammer(Utils.GetPrefabName(obj));

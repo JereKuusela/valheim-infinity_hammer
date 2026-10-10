@@ -5,7 +5,11 @@ public static class InfinityPermissionHash
 {
   public const string Section = "infinityhammer";
 
-  public static readonly int NoCost = "no_cost".GetStableHashCode();
+  public static readonly int NoResourceCost = "no_resource_cost".GetStableHashCode();
+
+  public static readonly int NoDurabilityCost = "no_durability_cost".GetStableHashCode();
+
+  public static readonly int NoStaminaCost = "no_stamina_cost".GetStableHashCode();
 
   public static readonly int GroupResourceCost = "group_resource_cost".GetStableHashCode();
 
