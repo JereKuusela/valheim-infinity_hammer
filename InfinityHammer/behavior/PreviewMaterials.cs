@@ -11,6 +11,7 @@ namespace InfinityHammer;
 public static class TrackPreviewMaterials
 {
   private static readonly Dictionary<Material, Material> Cache = [];
+  private static readonly HashSet<Material> Cleaned = [];
 
   public static void Clear()
   {
@@ -19,6 +20,7 @@ public static class TrackPreviewMaterials
       if (material) Object.Destroy(material);
     }
     Cache.Clear();
+    Cleaned.Clear();
   }
 
   static IEnumerable<MethodBase> TargetMethods()
@@ -28,15 +30,13 @@ public static class TrackPreviewMaterials
     yield return method.MakeGenericMethod(typeof(SkinnedMeshRenderer));
   }
 
-  static bool Prefix(Player __instance, GameObject ghost, MethodBase __originalMethod)
+  static bool Prefix(Player __instance, GameObject ghost)
   {
     if (!ghost) return false;
 
-    var rendererType = __originalMethod.GetGenericArguments()[0];
-    var renderers = ghost.GetComponentsInChildren(rendererType);
-
-    foreach (Renderer renderer in renderers)
+    foreach (var renderer in ghost.GetComponentsInChildren<Renderer>())
     {
+      if (renderer is not MeshRenderer && renderer is not SkinnedMeshRenderer) continue;
       if (!renderer || renderer.sharedMaterial == null) continue;
 
       var sharedMaterials = renderer.sharedMaterials;
@@ -44,7 +44,7 @@ public static class TrackPreviewMaterials
       for (int j = 0; j < sharedMaterials.Length; j++)
       {
         var original = sharedMaterials[j];
-        if (!original) continue;
+        if (!original || Cleaned.Contains(original)) continue;
 
         if (!Cache.TryGetValue(original, out var cleaned) || !cleaned)
         {
@@ -56,10 +56,11 @@ public static class TrackPreviewMaterials
           cleaned.SetFloat("_ValueNoise", 0f);
           cleaned.SetFloat("_TriplanarLocalPos", 1f);
           Cache[original] = cleaned;
+          Cleaned.Add(cleaned);
         }
         else if (cleaned.HasProperty("_RippleDistance") && !__instance.m_ghostRippleDistance.ContainsKey(cleaned))
         {
-          __instance.m_ghostRippleDistance[cleaned] = cleaned.GetFloat("_RippleDistance");
+          __instance.m_ghostRippleDistance[cleaned] = original.GetFloat("_RippleDistance");
         }
 
         sharedMaterials[j] = cleaned;
