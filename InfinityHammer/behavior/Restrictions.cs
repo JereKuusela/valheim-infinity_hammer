@@ -1,10 +1,12 @@
 using HarmonyLib;
 namespace InfinityHammer;
-///<summary>Disables the resource check.</summary>
-[HarmonyPatch(typeof(Player), nameof(Player.HaveRequirements), typeof(Piece), typeof(Player.RequirementMode))]
-public class HaveRequirements
+
+[HarmonyPatch]
+public static class Restrictions
 {
-  public static bool Prefix(ref bool __result)
+  ///<summary>Disables the resource check.</summary>
+  [HarmonyPatch(typeof(Player), nameof(Player.HaveRequirements), typeof(Piece), typeof(Player.RequirementMode)), HarmonyPrefix]
+  static bool HaveRequirements(ref bool __result)
   {
     if (Configuration.NoResourceCost)
     {
@@ -13,23 +15,21 @@ public class HaveRequirements
     }
     return true;
   }
-}
-///<summary>Removes resource usage.</summary>
-[HarmonyPatch(typeof(Player), nameof(Player.ConsumeResources))]
-public class ConsumeResources
-{
-  static bool Prefix() => !Configuration.NoResourceCost;
-}
-[HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
-public class UnlockPlacement
-{
-  public static void Prefix(Player __instance)
+
+  ///<summary>Removes resource usage.</summary>
+  [HarmonyPatch(typeof(Player), nameof(Player.ConsumeResources)), HarmonyPrefix]
+  static bool ConsumeResources() => !Configuration.NoResourceCost;
+
+  [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost)), HarmonyPrefix]
+  static void UnlockPlacementPrefix(Player __instance)
   {
     if (!__instance.m_placementGhost) return;
     var piece = __instance.m_placementGhost.GetComponent<Piece>();
     if (Configuration.AllowInDungeons) piece.m_allowedInDungeons = true;
   }
-  public static void Finalizer(Player __instance)
+
+  [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost)), HarmonyFinalizer]
+  static void UnlockPlacementFinalizer(Player __instance)
   {
     if (!__instance.m_placementGhost) return;
     if (!__instance.m_placementGhost.activeSelf) return;
@@ -42,29 +42,22 @@ public class UnlockPlacement
     __instance.m_placementStatus = Player.PlacementStatus.Valid;
     __instance.SetPlacementGhostValid(true);
   }
-}
-[HarmonyPatch(typeof(Location), nameof(Location.IsInsideNoBuildLocation)), HarmonyPriority(Priority.Last)]
-public class IsInsideNoBuildLocation
-{
-  static bool Postfix(bool result)
-  {
-    if (Configuration.IgnoreNoBuild) return false;
-    return result;
-  }
-}
-[HarmonyPatch(typeof(PrivateArea), nameof(PrivateArea.CheckAccess)), HarmonyPriority(Priority.Last)]
-public class CheckAccess
-{
-  static bool Prefix(ref bool __result)
+
+  [HarmonyPatch(typeof(Location), nameof(Location.IsInsideNoBuildLocation)), HarmonyPostfix, HarmonyPriority(Priority.Last)]
+  static bool IsInsideNoBuildLocation(bool result) => !Configuration.IgnoreNoBuild && result;
+
+  [HarmonyPatch(typeof(Location), nameof(Location.IsInsideActiveBossDungeon)), HarmonyPostfix, HarmonyPriority(Priority.Last)]
+  static bool IsInsideActiveBossDungeon(bool result) => !Configuration.IgnoreNoBuild && result;
+
+  [HarmonyPatch(typeof(PrivateArea), nameof(PrivateArea.CheckAccess)), HarmonyPrefix, HarmonyPriority(Priority.Last)]
+  static bool CheckAccess(ref bool __result)
   {
     if (Configuration.IgnoreWards) __result = true;
     return !Configuration.IgnoreWards;
   }
-}
-[HarmonyPatch(typeof(Player), nameof(Player.CheckCanRemovePiece)), HarmonyPriority(Priority.Last)]
-public class CheckCanRemovePiece
-{
-  static bool Prefix(ref bool __result)
+
+  [HarmonyPatch(typeof(Player), nameof(Player.CheckCanRemovePiece)), HarmonyPrefix, HarmonyPriority(Priority.Last)]
+  static bool CheckCanRemovePiece(ref bool __result)
   {
     if (Configuration.NoResourceCost) __result = true;
     return !Configuration.NoResourceCost;

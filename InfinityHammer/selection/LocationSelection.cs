@@ -50,16 +50,16 @@ public class LocationSelection : BaseSelection
     var ghost = HammerHelper.GetPlacementGhost();
     var position = ghost.transform.position;
     var rotation = ghost.transform.rotation;
-    var previousDamage = CustomizeSpawnLocation.RandomDamage;
-    var previousViews = CustomizeSpawnLocation.AllViews;
+    var previousDamage = Placing.SpawnRandomDamage;
+    var previousViews = Placing.SpawnAllViews;
     var previousNativeDamage = WearNTear.m_randomInitialDamage;
     UndoHelper.BeginSubAction();
     try
     {
       var view = obj.GetComponent<ZNetView>();
       HammerHelper.RemoveZDO(view.GetZDO());
-      CustomizeSpawnLocation.AllViews = Hammer.AllLocationsObjects;
-      CustomizeSpawnLocation.RandomDamage = Hammer.RandomLocationDamage;
+      Placing.SpawnAllViews = Hammer.AllLocationsObjects;
+      Placing.SpawnRandomDamage = Hammer.RandomLocationDamage;
       ZoneSystem.instance.SpawnLocation(location, seed, position, rotation, ZoneSystem.SpawnMode.Full, []);
       foreach (var zdo in UndoHelper.GetSpawned())
       {
@@ -69,8 +69,8 @@ public class LocationSelection : BaseSelection
     }
     finally
     {
-      CustomizeSpawnLocation.RandomDamage = previousDamage;
-      CustomizeSpawnLocation.AllViews = previousViews;
+      Placing.SpawnRandomDamage = previousDamage;
+      Placing.SpawnAllViews = previousViews;
       WearNTear.m_randomInitialDamage = previousNativeDamage;
       UndoHelper.EndSubAction();
     }

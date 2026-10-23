@@ -49,11 +49,10 @@ public static class Selection
   }
 }
 
-///<summary>Removes resource usage.</summary>
-[HarmonyPatch(typeof(VisEquipment), nameof(VisEquipment.SetItem))]
-public class SetItemHack
+[HarmonyPatch]
+public static class SelectionPatches
 {
-  public static bool Hack = false;
+  public static bool SetItemHack = false;
 
   static void SetItem(VisEquipment obj, VisSlot slot, int hash, int variant, int quality)
   {
@@ -102,34 +101,29 @@ public class SetItemHack
         return;
     }
   }
-  static bool Prefix(VisEquipment __instance, VisSlot slot, int itemHash, int variant, int quality)
+  [HarmonyPatch(typeof(VisEquipment), nameof(VisEquipment.SetItem)), HarmonyPrefix]
+  static bool SetItemPrefix(VisEquipment __instance, VisSlot slot, int itemHash, int variant, int quality)
   {
-    if (Hack)
+    if (SetItemHack)
       SetItem(__instance, slot, itemHash, variant, quality);
-    return !Hack;
+    return !SetItemHack;
   }
-}
 
-///<summary>Preview item stands have no ZNetView, so the ownership check must not throw.</summary>
-[HarmonyPatch(typeof(ItemStand), nameof(ItemStand.SetVisualItem))]
-public class ItemStandSetVisualItemNullSafe
-{
   static bool IsOwner(ZNetView view) => view && view.IsOwner();
 
-  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+  ///<summary>Preview item stands have no ZNetView, so the ownership check must not throw.</summary>
+  [HarmonyPatch(typeof(ItemStand), nameof(ItemStand.SetVisualItem)), HarmonyTranspiler]
+  static IEnumerable<CodeInstruction> ItemStandSetVisualItemNullSafe(IEnumerable<CodeInstruction> instructions)
   {
     return new CodeMatcher(instructions)
       .MatchForward(false, new CodeMatch(OpCodes.Callvirt, AccessTools.Method(typeof(ZNetView), nameof(ZNetView.IsOwner))))
-      .Set(OpCodes.Call, AccessTools.Method(typeof(ItemStandSetVisualItemNullSafe), nameof(IsOwner)))
+      .Set(OpCodes.Call, AccessTools.Method(typeof(SelectionPatches), nameof(IsOwner)))
       .InstructionEnumeration();
   }
-}
 
-///<summary>Overrides the piece selection.</summary>
-[HarmonyPatch(typeof(PieceTable), nameof(PieceTable.GetSelectedPiece))]
-public class GetSelectedPiece
-{
-  public static Piece Postfix(Piece result, PieceTable __instance)
+  ///<summary>Overrides the piece selection.</summary>
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.GetSelectedPiece)), HarmonyPostfix]
+  static Piece GetSelectedPiece(Piece result, PieceTable __instance)
   {
     if (!Configuration.Enabled || !Player.m_localPlayer || Player.m_localPlayer.m_buildPieces != __instance) return result;
     var selected = Selection.Get().GetSelectedPiece();
@@ -138,22 +132,15 @@ public class GetSelectedPiece
     if (result && result.TryGetComponent<BuildMenuTool>(out var button) && button.tool?.Instant == true) return null!;
     return result!;
   }
-}
 
-[HarmonyPatch(typeof(Player), nameof(Player.SetPlaceMode))]
-public class SelectionActivate
-{
-  static void Postfix(Player __instance)
+  [HarmonyPatch(typeof(Player), nameof(Player.SetPlaceMode)), HarmonyPostfix]
+  static void SelectionActivate(Player __instance)
   {
     if (__instance == Player.m_localPlayer) Selection.Get().Activate();
   }
-}
 
-
-[HarmonyPatch(typeof(Player), nameof(Player.OnDestroy))]
-public class PlayerOnDestroy
-{
-  static void Prefix(Player __instance)
+  [HarmonyPatch(typeof(Player), nameof(Player.OnDestroy)), HarmonyPrefix]
+  static void PlayerOnDestroy(Player __instance)
   {
     if (__instance == Player.m_localPlayer)
     {

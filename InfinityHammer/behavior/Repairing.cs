@@ -6,12 +6,13 @@ using WorldEditCommands;
 // Code related to repairing objects.
 namespace InfinityHammer;
 
-[HarmonyPatch(typeof(Player), nameof(Player.Repair))]
-public class Repair
+[HarmonyPatch]
+public static class Repairing
 {
-  static void Prefix(Player __instance)
+  [HarmonyPatch(typeof(Player), nameof(Player.Repair)), HarmonyPrefix]
+  static void RepairPrefix(Player __instance)
   {
-    HideEffects.Active = true;
+    Visuals.HideEffectsActive = true;
     UndoHelper.BeginAction();
     if (!Configuration.RepairAnything) return;
     if (!__instance.InPlaceMode()) return;
@@ -19,10 +20,11 @@ public class Repair
     if (__instance.GetHoveringPiece()) return;
     RepairAnything(__instance);
   }
-  static void Finalizer()
+  [HarmonyPatch(typeof(Player), nameof(Player.Repair)), HarmonyFinalizer]
+  static void RepairFinalizer()
   {
     UndoHelper.EndAction();
-    HideEffects.Active = false;
+    Visuals.HideEffectsActive = false;
   }
 
   private static bool RepairPlayer(ZNetView obj)
@@ -163,35 +165,29 @@ public class Repair
     }
     return true;
   }
-}
 
-[HarmonyPatch(typeof(Player), nameof(Player.UpdateWearNTearHover))]
-public class UnlockRepairDistance
-{
-  static void Prefix(Player __instance, ref float __state)
+  [HarmonyPatch(typeof(Player), nameof(Player.UpdateWearNTearHover)), HarmonyPrefix]
+  static void UnlockRepairDistancePrefix(Player __instance, ref float __state)
   {
     __state = __instance.m_maxPlaceDistance;
     if (Configuration.Range > 0f)
       __instance.m_maxPlaceDistance = Configuration.Range;
   }
-  static void Postfix(Player __instance, float __state)
+  [HarmonyPatch(typeof(Player), nameof(Player.UpdateWearNTearHover)), HarmonyPostfix]
+  static void UnlockRepairDistancePostfix(Player __instance, float __state)
   {
     __instance.m_maxPlaceDistance = __state;
   }
 
-}
-
-[HarmonyPatch(typeof(WearNTear), nameof(WearNTear.Repair))]
-public class AdvancedRepair
-{
-  public static bool Prefix(WearNTear __instance, ref bool __result)
+  [HarmonyPatch(typeof(WearNTear), nameof(WearNTear.Repair)), HarmonyPrefix]
+  static bool AdvancedRepair(WearNTear __instance, ref bool __result)
   {
     if (!Configuration.Enabled || !__instance.m_nview) return true;
     var zdo = __instance.m_nview.GetZDO();
     var customHealth = Configuration.OverwriteHealth > 0f || Configuration.Invulnerability != InvulnerabilityMode.Off;
     var hasCustomHealth = zdo.GetFloat(Hashes.MaxHealth) != 0f;
     if (!customHealth && !hasCustomHealth) return true;
-    __result = Repair.RepairStructure(__instance.m_nview);
+    __result = RepairStructure(__instance.m_nview);
     return false;
   }
 }

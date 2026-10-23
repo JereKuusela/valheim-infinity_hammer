@@ -8,30 +8,20 @@ using WorldEditCommands;
 // Code related to removing objects.
 namespace InfinityHammer;
 
-[HarmonyPatch(typeof(Player), nameof(Player.RemovePiece))]
-public class UnlockRemoveDistance
+[HarmonyPatch]
+public static class Removing
 {
-  public static void Prefix(Player __instance, ref float __state)
+  public static bool DisableDrops = false;
+
+  [HarmonyPatch(typeof(Player), nameof(Player.RemovePiece)), HarmonyPrefix]
+  static bool RemovePiecePrefix(Player __instance, ref bool __result, ref float __state)
   {
     __state = __instance.m_maxPlaceDistance;
     if (Configuration.Range > 0f)
       __instance.m_maxPlaceDistance = Configuration.Range;
-  }
-  public static void Postfix(Player __instance, float __state)
-  {
-    __instance.m_maxPlaceDistance = __state;
-  }
-}
-
-[HarmonyPatch(typeof(Player), nameof(Player.RemovePiece))]
-public class RemovePiece
-{
-  public static bool Prefix(Player __instance, ref bool __result)
-  {
     UndoHelper.BeginAction();
-    HideEffects.Active = true;
-    PreventPieceDrops.Active = Configuration.DisableLoot;
-    PreventCreaturerops.Active = Configuration.DisableLoot;
+    Visuals.HideEffectsActive = true;
+    DisableDrops = Configuration.DisableLoot;
     if (Configuration.RemoveAnything)
     {
       __result = RemoveAnything(__instance);
@@ -39,22 +29,24 @@ public class RemovePiece
     }
     return true;
   }
-  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+  [HarmonyPatch(typeof(Player), nameof(Player.RemovePiece)), HarmonyTranspiler]
+  static IEnumerable<CodeInstruction> RemovePieceTranspiler(IEnumerable<CodeInstruction> instructions)
   {
     return new CodeMatcher(instructions)
       .MatchForward(
         useEnd: false,
         new CodeMatch(OpCodes.Call, AccessTools.PropertyGetter(typeof(ZNetScene), nameof(ZNetScene.instance))))
       .InsertAndAdvance(new CodeInstruction(OpCodes.Ldloc_1))
-      .InsertAndAdvance(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(RemovePiece), nameof(HandleRemoved))))
+      .InsertAndAdvance(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Removing), nameof(HandleRemoved))))
       .InstructionEnumeration();
   }
-  static void Finalizer()
+  [HarmonyPatch(typeof(Player), nameof(Player.RemovePiece)), HarmonyFinalizer]
+  static void RemovePieceFinalizer(Player __instance, float __state)
   {
+    __instance.m_maxPlaceDistance = __state;
     UndoHelper.EndAction();
-    HideEffects.Active = false;
-    PreventPieceDrops.Active = false;
-    PreventCreaturerops.Active = false;
+    Visuals.HideEffectsActive = false;
+    DisableDrops = false;
   }
   private static void HandleRemoved(Piece piece)
   {
@@ -132,33 +124,20 @@ public class RemovePiece
     foreach (var obj in toRemove)
       Remove(obj);
   }
-}
 
-[HarmonyPatch(typeof(WearNTear), nameof(WearNTear.Remove))]
-public class Remove
-{
-  static void Prefix(WearNTear __instance)
+  [HarmonyPatch(typeof(WearNTear), nameof(WearNTear.Remove)), HarmonyPrefix]
+  static void WearNTearRemove(WearNTear __instance)
   {
     if (!__instance.m_nview.IsValid()) return;
     UndoHelper.AddRemoveAction(__instance.m_nview.GetZDO());
   }
-}
 
+  [HarmonyPatch(typeof(Destructible), nameof(Destructible.CreateFragments)), HarmonyPrefix]
+  static bool PreventDestructibleFragments() => !Configuration.HideEffects;
 
-[HarmonyPatch(typeof(Destructible), nameof(Destructible.CreateFragments))]
-public class PreventDestructibleFragments
-{
-  static bool Prefix() => !Configuration.HideEffects;
-}
-[HarmonyPatch(typeof(Piece), nameof(Piece.DropResources))]
-public class PreventPieceDrops
-{
-  public static bool Active = false;
-  static bool Prefix() => !Active;
-}
-[HarmonyPatch(typeof(CharacterDrop), nameof(CharacterDrop.OnDeath))]
-public class PreventCreaturerops
-{
-  public static bool Active = false;
-  static bool Prefix() => !Active;
+  [HarmonyPatch(typeof(Piece), nameof(Piece.DropResources)), HarmonyPrefix]
+  static bool PreventPieceDrops() => !DisableDrops;
+
+  [HarmonyPatch(typeof(CharacterDrop), nameof(CharacterDrop.OnDeath)), HarmonyPrefix]
+  static bool PreventCreatureDrops() => !DisableDrops;
 }

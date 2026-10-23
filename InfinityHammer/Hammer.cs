@@ -229,27 +229,3 @@ public class CustomHammer
     buildPieces = cachedPieceTable;
   }
 }
-
-
-[HarmonyPatch(typeof(Humanoid), nameof(Humanoid.UnequipItem))]
-public class UnfreezeOnUnequip
-{
-  static void Prefix(Humanoid __instance, ItemDrop.ItemData item)
-  {
-    if (__instance != Player.m_localPlayer || item == null) return;
-    if (Configuration.UnfreezeOnUnequip) Position.Unfreeze();
-  }
-}
-
-[HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
-public class DisableSnapCycleWhenTyping
-{
-  static void Prefix(Player __instance, ref int __state)
-  {
-    __state = __instance.m_manualSnapPoint;
-  }
-  static void Postfix(Player __instance, ref int __state)
-  {
-    if (!__instance.TakeInput()) __instance.m_manualSnapPoint = __state;
-  }
-}

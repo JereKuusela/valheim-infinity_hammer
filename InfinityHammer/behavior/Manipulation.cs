@@ -9,17 +9,15 @@ using UnityEngine;
 namespace InfinityHammer;
 
 
-[HarmonyPatch(typeof(Player), nameof(Player.FindClosestSnapPoints))]
-public class DisableSnapsWhenFrozen
+[HarmonyPatch]
+public static class Manipulation
 {
-  static bool Prefix() => !Position.Override.HasValue;
-}
+  [HarmonyPatch(typeof(Player), nameof(Player.FindClosestSnapPoints)), HarmonyPrefix]
+  static bool DisableSnapsWhenFrozen() => !Position.Override.HasValue;
 
-[HarmonyPatch(typeof(Player), nameof(Player.PieceRayTest))]
-public class FreezePlacementMarker
-{
   static Vector3 CurrentNormal = Vector3.up;
-  static void Postfix(ref Vector3 point, ref Vector3 normal, ref Piece piece, ref Heightmap heightmap, ref Collider waterSurface, ref bool __result)
+  [HarmonyPatch(typeof(Player), nameof(Player.PieceRayTest)), HarmonyPostfix]
+  static void FreezePlacementMarker(ref Vector3 point, ref Vector3 normal, ref Piece piece, ref Heightmap heightmap, ref Collider waterSurface, ref bool __result)
   {
     if (__result && Grid.Enabled)
     {
@@ -51,13 +49,10 @@ public class FreezePlacementMarker
       CurrentNormal = normal;
     }
   }
-}
 
-[HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
-public class OverridePlacementGhost
-{
   ///<summary>Then override snapping and other modifications for the final result (and some rules are checked too).</summary>
-  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+  [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost)), HarmonyTranspiler]
+  static IEnumerable<CodeInstruction> OverridePlacementGhost(IEnumerable<CodeInstruction> instructions)
   {
     return new CodeMatcher(instructions)
           .MatchForward(
@@ -73,8 +68,25 @@ public class OverridePlacementGhost
           )
           .InstructionEnumeration();
   }
-}
 
+  [HarmonyPatch(typeof(Humanoid), nameof(Humanoid.UnequipItem)), HarmonyPrefix]
+  static void UnfreezeOnUnequip(Humanoid __instance, ItemDrop.ItemData item)
+  {
+    if (__instance != Player.m_localPlayer || item == null) return;
+    if (Configuration.UnfreezeOnUnequip) Position.Unfreeze();
+  }
+
+  [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost)), HarmonyPrefix]
+  static void DisableSnapCycleWhenTypingPrefix(Player __instance, ref int __state)
+  {
+    __state = __instance.m_manualSnapPoint;
+  }
+  [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost)), HarmonyPostfix]
+  static void DisableSnapCycleWhenTypingPostfix(Player __instance, int __state)
+  {
+    if (!__instance.TakeInput()) __instance.m_manualSnapPoint = __state;
+  }
+}
 
 public static class Grid
 {

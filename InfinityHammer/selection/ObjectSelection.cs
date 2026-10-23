@@ -367,8 +367,8 @@ public partial class ObjectSelection : BaseSelection
     {
       armorStand.m_pose = data.TryGetInt(pars, ZDOVars.s_pose, out var pose) ? pose : 0;
       armorStand.m_poseAnimator.SetInteger("Pose", pose);
-      var previousHack = SetItemHack.Hack;
-      SetItemHack.Hack = true;
+      var previousHack = SelectionPatches.SetItemHack;
+      SelectionPatches.SetItemHack = true;
       try
       {
         for (var i = 0; i < armorStand.m_slots.Count; i++)
@@ -378,7 +378,7 @@ public partial class ObjectSelection : BaseSelection
           armorStand.SetVisualItem(i, hash, variant);
         }
       }
-      finally { SetItemHack.Hack = previousHack; }
+      finally { SelectionPatches.SetItemHack = previousHack; }
     }
     if (obj.TryGetComponent<Character>(out var character))
     {

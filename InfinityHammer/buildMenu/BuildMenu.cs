@@ -10,10 +10,11 @@ public class BuildMenuTool : Piece
 {
   public Tool? tool;
 }
-[HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpdateAvailable))]
-public static class UpdateAvailable
+[HarmonyPatch]
+public class TakeOverBuildMenu
 {
-  static bool Prefix(PieceTable __instance)
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpdateAvailable)), HarmonyPrefix]
+  static bool UpdateAvailablePrefix(PieceTable __instance)
   {
     if (Hammer.IsInfinityHammer(__instance))
     {
@@ -22,8 +23,8 @@ public static class UpdateAvailable
     }
     return true;
   }
-  [HarmonyPriority(Priority.Low)]
-  static void Postfix(PieceTable __instance)
+  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpdateAvailable)), HarmonyPostfix, HarmonyPriority(Priority.Low)]
+  static void UpdateAvailablePostfix(PieceTable __instance)
   {
     if (!Configuration.ToolsEnabled || !Player.m_localPlayer || __instance != Player.m_localPlayer.m_buildPieces) return;
     if (Hammer.IsInfinityHammer(__instance))
@@ -46,11 +47,7 @@ public static class UpdateAvailable
       }
     }
   }
-}
 
-[HarmonyPatch]
-public class TakeOverBuildMenu
-{
   [HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece), typeof(Vector2Int))]
   [HarmonyPrefix]
   [HarmonyPriority(Priority.Low)]

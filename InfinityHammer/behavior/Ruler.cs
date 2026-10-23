@@ -341,15 +341,12 @@ public class Ruler
   }
 }
 
-[HarmonyPatch(typeof(Player), nameof(Player.UpdateWearNTearHover))]
-public class UpdateWearNTearHover
+[HarmonyPatch]
+public static class RulerPatches
 {
-  static bool Prefix() => !Ruler.IsActive;
-}
+  [HarmonyPatch(typeof(Player), nameof(Player.UpdateWearNTearHover)), HarmonyPrefix]
+  static bool UpdateWearNTearHover() => !Ruler.IsActive;
 
-[HarmonyPatch(typeof(Hud), nameof(Hud.SetupPieceInfo))]
-public class AddExtraInfo
-{
   private static string DescriptionHover()
   {
     if (Ruler.Projector) return "";
@@ -365,7 +362,8 @@ public class AddExtraInfo
   }
   static Vector2? DefaultOffset;
   static Vector2? ToolOffset;
-  static void Prefix(Hud __instance)
+  [HarmonyPatch(typeof(Hud), nameof(Hud.SetupPieceInfo)), HarmonyPrefix]
+  static void SetupPieceInfoPrefix(Hud __instance)
   {
     var tr = __instance.m_pieceDescription.rectTransform;
     if (DefaultOffset == null) DefaultOffset = tr.offsetMin;
@@ -374,7 +372,8 @@ public class AddExtraInfo
     if (tr.offsetMin != DefaultOffset.Value)
       tr.offsetMin = DefaultOffset.Value;
   }
-  static void Postfix(Hud __instance, Piece piece)
+  [HarmonyPatch(typeof(Hud), nameof(Hud.SetupPieceInfo)), HarmonyPostfix]
+  static void SetupPieceInfoPostfix(Hud __instance, Piece piece)
   {
     if (!piece) return;
     if (Selection.Get() is not ToolSelection selection) return;
@@ -387,12 +386,10 @@ public class AddExtraInfo
     if (__instance.m_pieceDescription.text != "") text = "\n" + text;
     __instance.m_pieceDescription.text += text;
   }
-}
-// Run after the game's placement transform, once per local-player frame.
-[HarmonyPatch(typeof(Player), nameof(Player.LateUpdate))]
-internal static class UpdateToolRuler
-{
-  private static void Postfix(Player __instance)
+
+  // Run after the game's placement transform, once per local-player frame.
+  [HarmonyPatch(typeof(Player), nameof(Player.LateUpdate)), HarmonyPostfix]
+  static void UpdateToolRuler(Player __instance)
   {
     if (__instance == Player.m_localPlayer) Ruler.Update();
   }

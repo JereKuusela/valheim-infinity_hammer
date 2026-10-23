@@ -29,17 +29,16 @@ public partial class Configuration
   }
 }
 
-[HarmonyPatch(typeof(EffectList), nameof(EffectList.Create))]
-public class HideEffects
+[HarmonyPatch]
+public static class Visuals
 {
-  public static bool Active = false;
-  static bool Prefix() => !Active || !Configuration.HideEffects;
-}
+  public static bool HideEffectsActive = false;
 
-[HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
-public class HidePlacementMarker
-{
-  static void Postfix(Player __instance)
+  [HarmonyPatch(typeof(EffectList), nameof(EffectList.Create)), HarmonyPrefix]
+  static bool HideEffects() => !HideEffectsActive || !Configuration.HideEffects;
+
+  [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost)), HarmonyPostfix]
+  static void HidePlacementMarker(Player __instance)
   {
     var marker = __instance.m_placementMarkerInstance;
     if (marker)
@@ -49,18 +48,13 @@ public class HidePlacementMarker
         marker.transform.GetChild(i).gameObject.SetActive(!Configuration.HidePlacementMarker);
     }
   }
-}
 
-[HarmonyPatch(typeof(WearNTear), nameof(WearNTear.Highlight))]
-public class HideSupportColor
-{
   // Bit hacky, but some things reuse the highlight system and then HideSupportColor shouldn't apply.
-  static bool Prefix() => !Configuration.HideSupportColor || HammerMark.MarkedPieces.Count > 0 || Ruler.IsActive;
-}
-[HarmonyPatch(typeof(Hud), nameof(Hud.UpdateCrosshair))]
-public class HidePieceHealth
-{
-  static void Postfix(Hud __instance)
+  [HarmonyPatch(typeof(WearNTear), nameof(WearNTear.Highlight)), HarmonyPrefix]
+  static bool HideSupportColor() => !Configuration.HideSupportColor || HammerMark.MarkedPieces.Count > 0 || Ruler.IsActive;
+
+  [HarmonyPatch(typeof(Hud), nameof(Hud.UpdateCrosshair)), HarmonyPostfix]
+  static void HidePieceHealth(Hud __instance)
   {
     if (Configuration.HidePieceHealth)
       __instance.m_pieceHealthRoot.gameObject.SetActive(false);

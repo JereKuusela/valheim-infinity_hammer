@@ -6,16 +6,18 @@ using UnityEngine;
 // Code related to adding objects.
 namespace InfinityHammer;
 
-[HarmonyPatch(typeof(Player), nameof(Player.PlacePiece))]
-public class PlacePiece
+[HarmonyPatch]
+public static class Placing
 {
-  static void Prefix()
+  [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece)), HarmonyPrefix]
+  static void PlacePiecePrefix()
   {
-    HideEffects.Active = true;
+    Visuals.HideEffectsActive = true;
   }
-  static void Finalizer()
+  [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece)), HarmonyFinalizer]
+  static void PlacePieceFinalizer()
   {
-    HideEffects.Active = false;
+    Visuals.HideEffectsActive = false;
     DataHelper.CleanUp();
     if (Selection.Get().SingleUse)
       Hammer.SelectRepair();
@@ -30,7 +32,8 @@ public class PlacePiece
   }
 
   // While PlacePiece has piece as parameter, most flexible to override the actual game object.
-  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+  [HarmonyPatch(typeof(Player), nameof(Player.PlacePiece)), HarmonyTranspiler]
+  static IEnumerable<CodeInstruction> PlacePieceTranspiler(IEnumerable<CodeInstruction> instructions)
   {
     return new CodeMatcher(instructions)
       .MatchForward(false, new CodeMatch(OpCodes.Callvirt, AccessTools.PropertyGetter(typeof(Component), nameof(Component.gameObject))))
@@ -41,23 +44,20 @@ public class PlacePiece
         new CodeInstruction(OpCodes.Call, Transpilers.EmitDelegate(GetPrefab).operand))
       .MatchForward(false, new CodeMatch(OpCodes.Ldfld, AccessTools.Field(typeof(Piece), nameof(Piece.m_placeEffect))))
       .InsertAndAdvance(new CodeInstruction(OpCodes.Ldloc_0))
-      .InsertAndAdvance(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(PlacePiece), nameof(Postprocess))))
+      .InsertAndAdvance(new CodeInstruction(OpCodes.Call, AccessTools.Method(typeof(Placing), nameof(Postprocess))))
       .InstructionEnumeration();
   }
-}
 
-[HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacement))]
-public class HoldUse
-{
-
-  static void Prefix(Player __instance, ref ItemDrop.ItemData __state)
+  [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacement)), HarmonyPrefix]
+  static void HoldUsePrefix(Player __instance, ref ItemDrop.ItemData __state)
   {
     __state = __instance.GetRightItem();
     Hammer.RemoveToolCosts(__state);
     Hammer.AddRemoveAnything(__state);
   }
   static Transform RemoveFailSafe(Piece piece) => piece == null ? Player.m_localPlayer.transform : piece.transform;
-  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+  [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacement)), HarmonyTranspiler]
+  static IEnumerable<CodeInstruction> HoldUseTranspiler(IEnumerable<CodeInstruction> instructions)
   {
     return new CodeMatcher(instructions)
           .MatchForward(
@@ -66,10 +66,11 @@ public class HoldUse
                   OpCodes.Ldfld,
                   AccessTools.Field(typeof(ItemDrop.ItemData.SharedData), nameof(ItemDrop.ItemData.SharedData.m_destroyEffect))))
           .Advance(2)
-          .Set(OpCodes.Call, AccessTools.Method(typeof(HoldUse), nameof(RemoveFailSafe)))
+          .Set(OpCodes.Call, AccessTools.Method(typeof(Placing), nameof(RemoveFailSafe)))
           .InstructionEnumeration();
   }
-  static void Postfix(Player __instance)
+  [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacement)), HarmonyPostfix]
+  static void HoldUsePostfix(Player __instance)
   {
     if (!Selection.Get().Continuous) return;
     if (__instance.m_placePressedTime != -9999f) return;
@@ -84,48 +85,43 @@ public class HoldUse
     __instance.m_lastToolUseTime = 0f;
 
   }
-  static void Finalizer(ItemDrop.ItemData __state)
+  [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacement)), HarmonyFinalizer]
+  static void HoldUseFinalizer(ItemDrop.ItemData __state)
   {
     Hammer.RestoreToolCosts(__state);
     Hammer.RestoreRemoveAnything(__state);
   }
-}
 
-
-[HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost))]
-public class UnlockBuildDistance
-{
-  public static void Prefix(Player __instance, ref float __state)
+  [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost)), HarmonyPrefix]
+  static void UnlockBuildDistancePrefix(Player __instance, ref float __state)
   {
     __state = __instance.m_maxPlaceDistance;
     var selection = Selection.Get();
     if (selection != null)
       __instance.m_maxPlaceDistance = selection.MaxPlaceDistance(__instance.m_maxPlaceDistance);
   }
-  public static void Postfix(Player __instance, float __state)
+  [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacementGhost)), HarmonyPostfix]
+  static void UnlockBuildDistancePostfix(Player __instance, float __state)
   {
     __instance.m_maxPlaceDistance = __state;
   }
-}
 
-[HarmonyPatch(typeof(ZoneSystem), nameof(ZoneSystem.SpawnLocation))]
-public class CustomizeSpawnLocation
-{
-  public static bool? RandomDamage = null;
-  public static bool AllViews = false;
+  public static bool? SpawnRandomDamage = null;
+  public static bool SpawnAllViews = false;
   static void Customize(ZNetView[] views)
   {
-    if (RandomDamage.HasValue)
+    if (SpawnRandomDamage.HasValue)
     {
-      WearNTear.m_randomInitialDamage = RandomDamage.Value;
+      WearNTear.m_randomInitialDamage = SpawnRandomDamage.Value;
     }
-    if (AllViews)
+    if (SpawnAllViews)
     {
       foreach (var view in views)
         view.gameObject.SetActive(true);
     }
   }
-  static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+  [HarmonyPatch(typeof(ZoneSystem), nameof(ZoneSystem.SpawnLocation)), HarmonyTranspiler]
+  static IEnumerable<CodeInstruction> SpawnLocationTranspiler(IEnumerable<CodeInstruction> instructions)
   {
     return new CodeMatcher(instructions)
           .MatchForward(

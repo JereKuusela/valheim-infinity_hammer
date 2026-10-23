@@ -365,56 +365,47 @@ public static class HammerHelper
 
   public static Sprite? FindSprite(string name) => SpriteHelper.FindSprite(name);
 }
-[HarmonyPatch(typeof(Player), nameof(Player.Message))]
-public class ReplaceMessage
+[HarmonyPatch]
+public static class Fixes
 {
-  public static string Message = "";
-  public static void Prefix(ref string msg)
+  public static string ReplacedMessage = "";
+  [HarmonyPatch(typeof(Player), nameof(Player.Message)), HarmonyPrefix]
+  static void ReplaceMessage(ref string msg)
   {
-    if (Message != "")
+    if (ReplacedMessage != "")
     {
-      msg = Message;
-      Message = "";
+      msg = ReplacedMessage;
+      ReplacedMessage = "";
     }
   }
-}
-[HarmonyPatch(typeof(MaterialMan), nameof(MaterialMan.UnregisterRenderers))]
-public class UnregisterRenderers
-{
-  // ItemStyles use this and may cause issues for armor and item stands.
-  static bool Prefix(MaterialMan __instance, GameObject gameObject) => __instance.m_blocks.ContainsKey(gameObject.GetInstanceID());
-}
 
-[HarmonyPatch(typeof(ItemDrop), nameof(ItemDrop.MakePiece))]
-public class PreventFishBecomingPieces
-{
+  // ItemStyles use this and may cause issues for armor and item stands.
+  [HarmonyPatch(typeof(MaterialMan), nameof(MaterialMan.UnregisterRenderers)), HarmonyPrefix]
+  static bool UnregisterRenderers(MaterialMan __instance, GameObject gameObject) => __instance.m_blocks.ContainsKey(gameObject.GetInstanceID());
+
   // Vanilla automatically turns placed item drops to pieces.
   // This removes body which breaks fishes (that have Piece for some reasoon).
-  static bool Prefix(ItemDrop __instance) => !__instance.GetComponent<Fish>();
-}
+  [HarmonyPatch(typeof(ItemDrop), nameof(ItemDrop.MakePiece)), HarmonyPrefix]
+  static bool PreventFishBecomingPieces(ItemDrop __instance) => !__instance.GetComponent<Fish>();
 
-[HarmonyPatch(typeof(Fish), nameof(Fish.Awake))]
-public class PreventFishBeingPiece
-{
   // Good idea also auto clean up fish that have gone wrong.
-  static void Postfix(Fish __instance)
+  [HarmonyPatch(typeof(Fish), nameof(Fish.Awake)), HarmonyPostfix]
+  static void PreventFishBeingPiece(Fish __instance)
   {
     var view = __instance.m_nview;
     if (!view || !view.IsValid()) return;
     if (!view.GetZDO().GetBool(ZDOVars.s_piece)) return;
     view.GetZDO().Set(ZDOVars.s_piece, false);
   }
-}
 
-// For some reason, vanilla messes up the object name.
-[HarmonyPatch(typeof(MineRock5), nameof(MineRock5.Awake))]
-public class MineRock5_NameFix
-{
-  static void Prefix(MineRock5 __instance, ref string __state)
+  // For some reason, vanilla messes up the object name.
+  [HarmonyPatch(typeof(MineRock5), nameof(MineRock5.Awake)), HarmonyPrefix]
+  static void MineRock5NameFixPrefix(MineRock5 __instance, ref string __state)
   {
     __state = __instance.name;
   }
-  static void Postfix(MineRock5 __instance, string __state)
+  [HarmonyPatch(typeof(MineRock5), nameof(MineRock5.Awake)), HarmonyPostfix]
+  static void MineRock5NameFixPostfix(MineRock5 __instance, string __state)
   {
     __instance.name = __state;
   }
