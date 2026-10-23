@@ -77,6 +77,7 @@ public class CustomHealth
     var change = 0f;
     foreach (var area in mineRock.m_hitAreas)
     {
+      if (area.m_health <= 0f) continue;
       change += mineRock.m_health - area.m_health;
       area.m_health = mineRock.m_health;
     }
