@@ -595,7 +595,7 @@ public partial class ObjectSelection : BaseSelection
       var prefab = ZNetScene.instance.GetPrefab(hash);
       if (prefab)
       {
-        var zdo = DataHelper.Init(hash, ghostChild.transform, GetData(i));
+        var zdo = DataHelper.Init(hash, ghostChild.transform.position, ghostChild.transform.rotation, ghostChild.transform.lossyScale, GetData(i));
         if (zdo != null)
           DungeonRooms.Reposition(zdo, ghostChild.transform);
         var childObj = UnityEngine.Object.Instantiate(prefab, ghostChild.transform.position, ghostChild.transform.rotation);
