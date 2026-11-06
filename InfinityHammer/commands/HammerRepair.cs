@@ -8,7 +8,8 @@ public class HammerRepairCommand
     AutoComplete.RegisterEmpty("hammer_repair");
     Helper.Command("hammer_repair", "Selects the repair tool.", (args) =>
     {
-      HammerHelper.Init();
+      HammerHelper.Init("");
+      Selection.Clear();
       Hammer.SelectRepair();
       Helper.GetPlayer().SetupPlacementGhost();
     });

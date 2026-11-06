@@ -274,10 +274,10 @@ public static class HammerHelper
   {
     if (!Configuration.Enabled) throw new InvalidOperationException("Infinity Hammer is disabled.");
   }
-  public static void Init()
+  public static void Init(string piece)
   {
     EnabledCheck();
-    Hammer.Equip();
+    Hammer.EquipByPiece(piece);
   }
 
   public static string ConvertHashToName(int hash) => ZNetScene.instance.GetPrefab(hash)?.name ?? hash.ToString(CultureInfo.InvariantCulture);

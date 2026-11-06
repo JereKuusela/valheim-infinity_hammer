@@ -98,15 +98,35 @@ public static class Hammer
   public static bool IsHammer(GameObject obj) => obj && IsHammer(Utils.GetPrefabName(obj));
   public static bool IsHammer(ItemDrop.ItemData item) => item != null && (IsInfinityHammer(item) || IsHammer(item.m_dropPrefab));
   public static bool HasHammer(Player player) => player && IsHammer(player.GetRightItem());
-  public static void Equip()
+  private static bool HasPiece(ItemDrop.ItemData? item, string piece)
+  {
+    if (item == null || !item.m_shared.m_buildPieces) return false;
+    return item.m_shared.m_buildPieces.m_pieces.Any(p => p && p.name.Equals(piece, StringComparison.OrdinalIgnoreCase));
+  }
+  private static bool IsDefaultHammer(ItemDrop.ItemData? item) => item != null && item.m_dropPrefab && Utils.GetPrefabName(item.m_dropPrefab) == "Hammer";
+  private static string GetKey(ItemDrop.ItemData item) => IsInfinityHammer(item) ? "infinity_hammer" : Utils.GetPrefabName(item.m_dropPrefab).ToLowerInvariant();
+  // Keeps the current item if it already satisfies the best available tier.
+  private static void EquipFirst(Func<ItemDrop.ItemData, bool> first)
   {
     var player = Helper.GetPlayer();
-    if (HasHammer(player)) return;
-    var inventory = player.GetInventory();
-    var item = inventory.m_inventory.Find(IsHammer) ?? throw new InvalidOperationException($"Unable to find the hammer.");
-
-    player.EquipItem(item);
+    var current = player.GetRightItem();
+    var items = player.GetInventory().m_inventory.Where(IsHammer).ToList();
+    Func<ItemDrop.ItemData, bool>[] tiers = [first, IsDefaultHammer, i => true];
+    foreach (var tier in tiers)
+    {
+      if (current != null && items.Contains(current) && tier(current)) return;
+      var item = items.Find(i => tier(i));
+      if (item == null) continue;
+      player.EquipItem(item);
+      return;
+    }
+    throw new InvalidOperationException("Unable to find the hammer.");
   }
+  // Priority: item with the piece, then the default "Hammer", then any hammer-like item.
+  public static void EquipByPiece(string piece) => EquipFirst(i => piece != "" && HasPiece(i, piece));
+  // Tools are injected per equipment key, so match the key instead of build pieces.
+  public static void EquipByTool(string equipment) => EquipFirst(i => equipment != "" && GetKey(i) == equipment.ToLowerInvariant());
+  public static void Equip() => EquipByPiece("");
   public static void OpenBuildMenu()
   {
     var player = Helper.GetPlayer();

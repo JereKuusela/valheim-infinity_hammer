@@ -13,9 +13,11 @@ public class ToolCommand
   protected static void Execute(Terminal.ConsoleEventArgs args)
   {
     Helper.ArgsCheck(args, 2, "Missing the tool name.");
-    if (!Hammer.HasAny())
-      Hammer.Equip();
     var toolName = HammerHelper.GetArgs("tool", args);
+    if (ToolManager.TryGetToolData(toolName, out _, out var equipment))
+      Hammer.EquipByTool(equipment);
+    else if (!Hammer.HasAny())
+      Hammer.Equip();
     if (!ToolManager.TryGetTool(Hammer.Get(), toolName, out var tool))
     {
       ToolData data = new()

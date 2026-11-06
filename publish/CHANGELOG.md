@@ -1,3 +1,6 @@
+- v1.92
+  - Changes commands to prefer equipping the right tool for the task.
+
 - v1.91
   - Fixes scaling not working properly for blueprints. Thanks Zeall!
   - Fixes "Repair anything" not fixing rocks properly.
@@ -10,6 +13,3 @@
 
 - v1.88
   - Recompiled to work with latest World Edit Commands mod.
-
-- v1.87
-  - Adds support for multi-point commands.

@@ -17,7 +17,8 @@ public class ConfigWrapper
   {
     ConfigFile = configFile;
 
-    new Terminal.ConsoleCommand(command, "[key] [value] - Toggles or sets a config value.", (Terminal.ConsoleEventArgs args) =>
+    new Terminal.ConsoleCommand(command, "[key] [value] - Toggles or sets a config value.", args =>
+
     {
       if (args.Length < 2) return;
       if (!SettingHandlers.TryGetValue(args[1].ToLower(), out var handler)) return;
@@ -121,7 +122,7 @@ public class ConfigWrapper
   {
     var name = setting.Definition.Key;
     var key = ToKey(name);
-    SettingHandlers.Add(key, (Terminal terminal, string value) => Toggle(terminal, setting, name, value));
+    SettingHandlers.Add(key, (terminal, value) => Toggle(terminal, setting, name, value));
   }
   public static string GetKeys(KeyboardShortcut key)
   {
@@ -161,25 +162,25 @@ public class ConfigWrapper
     var key = ToKey(name);
     setting.SettingChanged += (s, e) => UpdateWheelKey(setting.Value, command, offCommand, mode);
     Binders.Add(() => UpdateWheelKey(setting.Value, command, offCommand, mode));
-    SettingHandlers.Add(key, (Terminal terminal, string value) => SetKey(terminal, setting, name, value));
+    SettingHandlers.Add(key, (terminal, value) => SetKey(terminal, setting, name, value));
   }
   private void Register(ConfigEntry<KeyboardShortcut> setting)
   {
     var name = setting.Definition.Key;
     var key = ToKey(name);
-    SettingHandlers.Add(key, (Terminal terminal, string value) => SetKey(terminal, setting, name, value));
+    SettingHandlers.Add(key, (terminal, value) => SetKey(terminal, setting, name, value));
   }
   private void RegisterList(ConfigEntry<string> setting)
   {
     var name = setting.Definition.Key;
     var key = ToKey(name);
-    SettingHandlers.Add(key, (Terminal terminal, string value) => ToggleFlag(terminal, setting, name, value));
+    SettingHandlers.Add(key, (terminal, value) => ToggleFlag(terminal, setting, name, value));
   }
   private void Register<T>(ConfigEntry<T> setting)
   {
     var name = setting.Definition.Key;
     var key = ToKey(name);
-    SettingHandlers.Add(key, (Terminal terminal, string value) => SetValue(terminal, setting, name, value));
+    SettingHandlers.Add(key, (terminal, value) => SetValue(terminal, setting, name, value));
   }
   private static string State(bool value) => value ? "enabled" : "disabled";
   private static string Flag(bool value) => value ? "Removed" : "Added";

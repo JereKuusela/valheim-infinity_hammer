@@ -116,6 +116,7 @@ public class HammerSelect
     {
       HammerParameters pars = new(args);
       ZNetView[] views = [];
+      var pieceName = "";
       if (pars.Radius != null)
         views = Selector.GetNearby(pars.Included, pars.Components, pars.Ignored, pars.Position, pars.Radius, pars.Height);
       else if (pars.Width != null && pars.Depth != null)
@@ -123,6 +124,7 @@ public class HammerSelect
       else if (args.Length > 1 && !args[1].Contains("=") && !pars.Connect && !pars.Pick && !pars.Freeze)
       {
         var obj = ZNetScene.instance.GetPrefab(args[1]) ?? throw new InvalidOperationException("Object not found.");
+        pieceName = obj.name;
         views = [obj.GetComponent<ZNetView>()];
       }
       else
@@ -146,7 +148,7 @@ public class HammerSelect
         HammerHelper.Message(args.Context, $"Including {markedViews.Length} marked pieces in selection.");
       }
 
-      HammerHelper.Init();
+      HammerHelper.Init(pieceName);
       DataEntry? extraData = pars.Data == null ? null : DataHelper.Get(pars.Data);
       if (pars.Health.HasValue)
       {
