@@ -1,3 +1,7 @@
+- v1.93
+  - Adds new setting "Prefer correct tools" for the new behavior (so that people can use the old way).
+  - Fixes compatibility issue with the MasterBuilderHeeler mod.
+
 - v1.92
   - Changes commands to prefer equipping the right tool for the task.
 

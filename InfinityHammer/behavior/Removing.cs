@@ -29,6 +29,13 @@ public static class Removing
     }
     return true;
   }
+  [HarmonyPatch(typeof(Player), nameof(Player.RemovePiece)), HarmonyPostfix]
+  static void RemovePiecePostfix(Player __instance, ref bool __result)
+  {
+    if (!__result || __instance.GetHoveringPiece() != null) return;
+    __instance.m_lastToolUseTime = Time.time;
+    __result = false;
+  }
   [HarmonyPatch(typeof(Player), nameof(Player.RemovePiece)), HarmonyTranspiler]
   static IEnumerable<CodeInstruction> RemovePieceTranspiler(IEnumerable<CodeInstruction> instructions)
   {

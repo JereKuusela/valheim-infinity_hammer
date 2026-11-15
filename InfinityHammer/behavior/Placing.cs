@@ -55,20 +55,6 @@ public static class Placing
     Hammer.RemoveToolCosts(__state);
     Hammer.AddRemoveAnything(__state);
   }
-  static Transform RemoveFailSafe(Piece piece) => piece == null ? Player.m_localPlayer.transform : piece.transform;
-  [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacement)), HarmonyTranspiler]
-  static IEnumerable<CodeInstruction> HoldUseTranspiler(IEnumerable<CodeInstruction> instructions)
-  {
-    return new CodeMatcher(instructions)
-          .MatchForward(
-              useEnd: false,
-              new CodeMatch(
-                  OpCodes.Ldfld,
-                  AccessTools.Field(typeof(ItemDrop.ItemData.SharedData), nameof(ItemDrop.ItemData.SharedData.m_destroyEffect))))
-          .Advance(2)
-          .Set(OpCodes.Call, AccessTools.Method(typeof(Placing), nameof(RemoveFailSafe)))
-          .InstructionEnumeration();
-  }
   [HarmonyPatch(typeof(Player), nameof(Player.UpdatePlacement)), HarmonyPostfix]
   static void HoldUsePostfix(Player __instance)
   {
