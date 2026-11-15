@@ -43,6 +43,8 @@ Following fields are available:
   - The path also finishes automatically at 64 points.
 - instant: If true, the command is executed instantly without any selection.
   - If not set, the value is automatically determined from the command.
+- categories: Comma separated list of categories (numbers or names) where the tool is visible.
+  - If not set, the tool is visible in all categories.
 - tabIndex: Tab of the tool in the build menu.
   - If not set, the tool is added to the same tab as the previous tool.
 - index: Index of the tool in the build tab.

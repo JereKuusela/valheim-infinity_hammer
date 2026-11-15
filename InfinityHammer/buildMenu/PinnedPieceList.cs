@@ -13,28 +13,34 @@ internal sealed class PinnedPieceList(IPieceList original) : IPieceList
   public string GetTagDisplayName(int index) => original.GetTagDisplayName(index);
   public int GetTagIdByIndex(int index) => original.GetTagIdByIndex(index);
   public void UpdateAvailableTags(PieceTable buildTool) => original.UpdateAvailableTags(buildTool);
-  internal static int PinIndex(Piece piece)
+  // Returns the hammer tool index, or -1. The Infinity Hammer Menu page is excluded because AddTools places the tools there.
+  internal static int PinIndex(Piece piece, PieceTable table)
   {
-    if (!piece || !piece.TryGetComponent<BuildMenuTool>(out var button)) return -1;
-    return button.tool?.Name switch { "Pipette" => 0, "Building pipette" => 1, "Area pipette" => 2, _ => -1 };
+    if (!piece || (HammerMenuCommand.CurrentMode == MenuMode.Menu && Hammer.IsInfinityHammer(table))) return -1;
+    if (!piece.TryGetComponent<BuildMenuTool>(out var button) || button.tool == null) return -1;
+    return ToolManager.Get("hammer").IndexOf(button.tool);
   }
   public void GetAvailablePiecesWithTag(int tag, PieceTable buildTool, IList<Piece> pieces)
   {
     original.GetAvailablePiecesWithTag(tag, buildTool, pieces);
-    Piece? first = null, second = null, third = null;
     // Availability already enforces equipment and command permissions.
+    List<(int index, Piece piece)> pinned = [];
     foreach (var piece in buildTool.m_availablePieces)
-      switch (PinIndex(piece))
-      {
-        case 0: first = piece; break;
-        case 1: second = piece; break;
-        case 2: third = piece; break;
-      }
+    {
+      var index = PinIndex(piece, buildTool);
+      if (index >= 0 && piece.GetComponent<BuildMenuTool>().tool!.IsVisibleIn(tag)) pinned.Add((index, piece));
+    }
     for (var i = pieces.Count - 1; i >= 0; i--)
-      if (PinIndex(pieces[i]) >= 0) pieces.RemoveAt(i);
-    if (third) pieces.Insert(0, third!);
-    if (second) pieces.Insert(0, second!);
-    if (first) pieces.Insert(0, first!);
+      if (PinIndex(pieces[i], buildTool) >= 0) pieces.RemoveAt(i);
+    pinned.Sort((a, b) => a.index.CompareTo(b.index));
+    // Same slot logic as AddTools: explicit index, otherwise right after the previous tool.
+    var previous = 0;
+    foreach (var (_, piece) in pinned)
+    {
+      var slot = System.Math.Max(0, System.Math.Min(piece.GetComponent<BuildMenuTool>().tool!.Index ?? previous + 1, pieces.Count));
+      pieces.Insert(slot, piece);
+      previous = slot;
+    }
   }
 }
 
@@ -48,7 +54,7 @@ internal static class KeepPipettesVisible
     var changed = false;
     foreach (var button in __instance.m_pieceButtons)
     {
-      if (!button || PinnedPieceList.PinIndex(button.Piece) < 0 || !table.m_availablePieces.Contains(button.Piece)) continue;
+      if (!button || PinnedPieceList.PinIndex(button.Piece, table) < 0 || button.Piece.GetComponent<BuildMenuTool>().tool!.Categories != null || !table.m_availablePieces.Contains(button.Piece)) continue;
       if (button.gameObject.activeSelf) continue;
       button.gameObject.SetActive(true);
       changed = true;

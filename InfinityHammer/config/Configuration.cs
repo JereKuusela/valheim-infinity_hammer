@@ -25,6 +25,8 @@ public partial class Configuration
   public static bool AllowInDungeons => IsEnabled(InfinityPermissionHash.AllowInDungeons, configAllowInDungeons.Value);
   public static ConfigEntry<bool> configIgnoreOtherRestrictions;
   public static bool IgnoreOtherRestrictions => IsEnabled(InfinityPermissionHash.IgnoreOtherRestrictions, configIgnoreOtherRestrictions.Value);
+  public static ConfigEntry<bool> configPreferCorrectTools;
+  public static bool PreferCorrectTools => configPreferCorrectTools.Value;
   public static ConfigEntry<bool> configRemoveAnything;
   public static bool RemoveAnything => IsEnabled(InfinityPermissionHash.RemoveAnything, configRemoveAnything.Value);
   public static ConfigEntry<bool> configDisableMessages;
@@ -100,6 +102,7 @@ public partial class Configuration
     configIgnoreWards = wrapper.Bind(section, "Ignore wards", true, "Ignores ward restrictions.");
     configIgnoreNoBuild = wrapper.Bind(section, "Ignore no build", true, "Ignores no build areas.");
     configAllowInDungeons = wrapper.Bind(section, "Allow in dungeons", true, "Allows building in dungeons.");
+    configPreferCorrectTools = wrapper.Bind(section, "Prefer correct tools", true, "Commands equip the item that has the needed piece or tool. If disabled, the currently equipped hammer-like item is kept.");
     configRemoveAnything = wrapper.Bind(section, "Remove anything", false, "Allows removing anything.");
     configDisableLoot = wrapper.Bind(section, "Disable loot", false, "Prevents creatures and structures dropping loot when removed with the hammer.");
     configRemoveContents = wrapper.Bind(section, "Remove chest contents", false, "Removes anything also removes armor stand, item stand and chest contents.");

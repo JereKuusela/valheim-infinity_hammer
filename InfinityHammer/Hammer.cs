@@ -103,15 +103,18 @@ public static class Hammer
     if (item == null || !item.m_shared.m_buildPieces) return false;
     return item.m_shared.m_buildPieces.m_pieces.Any(p => p && p.name.Equals(piece, StringComparison.OrdinalIgnoreCase));
   }
-  private static bool IsDefaultHammer(ItemDrop.ItemData? item) => item != null && item.m_dropPrefab && Utils.GetPrefabName(item.m_dropPrefab) == "Hammer";
+  private static bool IsDefaultHammer(ItemDrop.ItemData? item) => item != null && !IsInfinityHammer(item) && item.m_dropPrefab && Utils.GetPrefabName(item.m_dropPrefab) == "Hammer";
   private static string GetKey(ItemDrop.ItemData item) => IsInfinityHammer(item) ? "infinity_hammer" : Utils.GetPrefabName(item.m_dropPrefab).ToLowerInvariant();
   // Keeps the current item if it already satisfies the best available tier.
   private static void EquipFirst(Func<ItemDrop.ItemData, bool> first)
   {
     var player = Helper.GetPlayer();
     var current = player.GetRightItem();
+    // Infinity Hammer can place any object or run any command.
+    if (IsInfinityHammer(current)) return;
+    if (!Configuration.PreferCorrectTools && IsHammer(current)) return;
     var items = player.GetInventory().m_inventory.Where(IsHammer).ToList();
-    Func<ItemDrop.ItemData, bool>[] tiers = [first, IsDefaultHammer, i => true];
+    Func<ItemDrop.ItemData, bool>[] tiers = [first, IsInfinityHammer, IsDefaultHammer, i => true];
     foreach (var tier in tiers)
     {
       if (current != null && items.Contains(current) && tier(current)) return;

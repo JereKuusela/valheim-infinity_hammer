@@ -27,12 +27,8 @@ public class TakeOverBuildMenu
   static void UpdateAvailablePostfix(PieceTable __instance)
   {
     if (!Configuration.ToolsEnabled || !Player.m_localPlayer || __instance != Player.m_localPlayer.m_buildPieces) return;
-    if (Hammer.IsInfinityHammer(__instance))
-    {
-      CustomMenu.AddPipettes(__instance);
-      if (HammerMenuCommand.CurrentMode != MenuMode.Menu) return;
-    }
     CustomMenu.AddTools(__instance);
+    if (Hammer.IsInfinityHammer(__instance) && HammerMenuCommand.CurrentMode != MenuMode.Menu) return;
     if (HammerMenuCommand.CurrentMode == MenuMode.Builds && HammerMenuCommand.CurrentFilter != "")
     {
       var player = Helper.GetPlayer();

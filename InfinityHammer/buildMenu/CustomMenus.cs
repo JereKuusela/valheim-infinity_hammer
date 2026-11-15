@@ -395,46 +395,42 @@ public static class CustomMenu
     return [category];
   }
 
-  public static void AddPipettes(PieceTable pt)
-  {
-    // Custom hammer_menu pages also expose the hammer's three selection tools.
-    // Keep one valid table slot per tool so selecting a pinned button still uses
-    // the existing identity-based lookup and command permission checks.
-    if (pt.m_availablePiecesByCategory.Count == 0) pt.m_availablePiecesByCategory.Add([]);
-    var tab = pt.m_categories.Count > 0 ? (int)pt.m_categories[0] : 0;
-    foreach (var tool in ToolManager.Get("hammer"))
-    {
-      if (tool.Name != "Pipette" && tool.Name != "Building pipette" && tool.Name != "Area pipette") continue;
-      if (!IsToolCommandAllowed(tool)) continue;
-      var piece = Build(pt, tool);
-      if (!pt.m_availablePieces.Add(piece)) continue;
-      pt.m_availablePiecesByCategory[tab].Add(piece);
-      pt.m_enabledPieces.Add(piece);
-    }
-  }
-
   public static void AddTools(PieceTable pt)
   {
     var equipment = PieceTableToEquipment(pt);
+    // Custom pages may leave the table without any tab.
+    if (pt.m_availablePiecesByCategory.Count == 0 && Hammer.IsInfinityHammer(pt)) pt.m_availablePiecesByCategory.Add([]);
     List<Tool> tools = ToolManager.Get(equipment);
+    // Custom pages have their own tabs, so hammer tools go to every tab they are visible in.
+    var customPages = Hammer.IsInfinityHammer(pt) && HammerMenuCommand.CurrentMode != MenuMode.Menu;
     int tab = 0;
     Dictionary<int, int> indices = [];
     foreach (var tool in tools)
     {
       if (!IsToolCommandAllowed(tool)) continue;
-      tab = tool.TabIndex ?? tab;
-      if (tab < 0 || pt.m_availablePiecesByCategory.Count <= tab) continue;
-      if (!indices.ContainsKey(tab))
-        indices[tab] = equipment == "hammer" ? 0 : pt.m_availablePiecesByCategory[tab].Count - 1;
-      var index = tool.Index ?? indices[tab] + 1;
-      var pieces = pt.m_availablePiecesByCategory[tab];
-      index = Math.Max(0, Math.Min(index, pieces.Count));
+      List<int> targets;
+      if (customPages)
+        targets = [.. pt.m_categories.Select(c => (int)c).Where(c => c >= 0 && c < pt.m_availablePiecesByCategory.Count && tool.IsVisibleIn(c))];
+      else
+      {
+        tab = tool.TabIndex ?? tab;
+        if (tab < 0 || pt.m_availablePiecesByCategory.Count <= tab || !tool.IsVisibleIn(tab)) continue;
+        targets = [tab];
+      }
       var piece = Build(pt, tool);
-      piece.m_category = (Piece.PieceCategory)tab;
-      pieces.Insert(index, piece);
+      foreach (var target in targets)
+      {
+        if (!indices.ContainsKey(target))
+          indices[target] = equipment == "hammer" ? 0 : pt.m_availablePiecesByCategory[target].Count - 1;
+        var pieces = pt.m_availablePiecesByCategory[target];
+        var index = Math.Max(0, Math.Min(tool.Index ?? indices[target] + 1, pieces.Count));
+        piece.m_category = (Piece.PieceCategory)target;
+        pieces.Insert(index, piece);
+        indices[target] = index;
+      }
+      if (targets.Count == 0) continue;
       pt.m_availablePieces.Add(piece);
       pt.m_enabledPieces.Add(piece);
-      indices[tab] = index;
     }
   }
 

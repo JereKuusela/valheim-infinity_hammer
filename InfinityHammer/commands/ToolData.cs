@@ -44,6 +44,8 @@ public class ToolData
   public string finish = "";
   [DefaultValue(null)]
   public bool? instant = null;
+  [DefaultValue("")]
+  public string categories = "";
   [DefaultValue(null)]
   public int? tabIndex;
   [DefaultValue(null)]
@@ -86,6 +88,9 @@ public class Tool
   public bool Instant;
   public int? TabIndex;
   public int? Index;
+  // Null means visible in all categories.
+  public HashSet<int>? Categories;
+  public bool IsVisibleIn(int category) => Categories == null || category == -1 || Categories.Contains(category);
 
   // For ruler
   public bool Radius;
@@ -122,6 +127,7 @@ public class Tool
     terrainGrid = data.terrainGrid;
     snapPiece = data.snapPiece;
     TabIndex = data.tabIndex;
+    Categories = ParseCategories(data.categories);
     targetEdge = data.targetEdge;
     Index = data.index;
     Commands = data.commands == null ? GetCommands(data.command) : [.. data.commands.Select(c => new CommandValue(c.command, c.keys))];
@@ -136,6 +142,18 @@ public class Tool
       foreach (Match match in PointRegex.Matches(cmd.Command))
         PointCount = Math.Max(PointCount, int.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture));
     }
+  }
+  private static HashSet<int>? ParseCategories(string value)
+  {
+    var names = value.Split(',').Select(s => s.Trim()).Where(s => s != "").ToList();
+    if (names.Count == 0) return null;
+    HashSet<int> result = [];
+    foreach (var name in names)
+    {
+      if (int.TryParse(name, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id)) result.Add(id);
+      else if (Enum.TryParse<Piece.PieceCategory>(name, true, out var category)) result.Add((int)category);
+    }
+    return result;
   }
   public static readonly Regex PointRegex = new(@"<([xyz])(\d+)>");
   public const string RepeatPlaceholder = "<p*>";
