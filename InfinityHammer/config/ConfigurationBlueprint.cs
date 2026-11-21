@@ -3,6 +3,7 @@ using System.IO;
 using System;
 using BepInEx;
 using BepInEx.Configuration;
+using Data;
 using Service;
 using ServerDevcommands;
 namespace InfinityHammer;
@@ -13,6 +14,8 @@ public partial class Configuration
 
   public static ConfigEntry<bool> configSaveBlueprintData;
   public static bool SaveBlueprintData => configSaveBlueprintData.Value;
+  public static ConfigEntry<bool> configRemoveCreatorData;
+  public static bool RemoveCreatorData => configRemoveCreatorData.Value;
   public static ConfigEntry<string> configBlueprintCenterPiece;
   public static string BlueprintCenterPiece => configBlueprintCenterPiece.Value;
   public static ConfigEntry<string> configBlueprintSnapPiece;
@@ -59,8 +62,11 @@ public partial class Configuration
   {
     var section = "6. Blueprints";
     configBlueprintFolder = wrapper.Bind(section, "Blueprint folder", "PlanBuild", "Folder relative to the config folder.");
+    Blueprints.FolderProvider = () => [BlueprintGlobalFolder, BlueprintLocalFolder];
     configSaveBlueprintsToProfile = wrapper.Bind(section, "Save blueprints to profile", false, "If enabled, blueprints are saved to the profile folder instead of base Valheim folder.");
     configSaveBlueprintData = wrapper.Bind(section, "Save data to blueprints", true, "If enabled, object data values are saved to blueprints.");
+    configRemoveCreatorData = wrapper.Bind(section, "Remove creator data", true, "If enabled, creator data is removed from saved and loaded blueprints.");
+    Blueprints.RemoveCreatorData = () => RemoveCreatorData;
     configSaveSimplerBlueprints = wrapper.Bind(section, "Save simpler blueprints", false, "If enabled, only mandatory information is saved.");
     configSavedObjectData = wrapper.Bind(section, "Save object data blueprints", "", "Object ids that save extra data if save data is disabled.");
     configSavedObjectData.SettingChanged += (s, e) => UpdateSavedObjectData();

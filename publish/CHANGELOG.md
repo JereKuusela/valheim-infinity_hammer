@@ -1,4 +1,10 @@
-- v1.93
+﻿- v1.93
+  - Adds support for alternative objects in blueprints (chance with a group like `0.5_a`) when `Use blueprint chance` is enabled.
+  - Changes blueprint loading to use the shared code of World Edit Commands mod.
+  - Changes blueprints without `#Center` to be centered on `piece_bpcenterpoint` (if the config `Blueprint center piece` is empty).
+  - Changes invalid terrain in a blueprint to only skip the terrain instead of failing the whole blueprint.
+  - Changes blueprint comments (`# text`) and unknown sections to follow the shared format.
+  - Fixes commas being replaced in the blueprint info text.
   - Adds new setting "Prefer correct tools" for the new behavior (so that people can use the old way).
   - Fixes compatibility issue with the MasterBuilderHeeler mod.
 
@@ -14,6 +20,3 @@
 
 - v1.89
   - Splits setting "No cost" into "No resource cost", "No durability cost", and "No stamina cost".
-
-- v1.88
-  - Recompiled to work with latest World Edit Commands mod.

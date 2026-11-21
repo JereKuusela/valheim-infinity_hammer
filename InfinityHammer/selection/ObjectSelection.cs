@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Data;
@@ -133,21 +133,29 @@ public partial class ObjectSelection : BaseSelection
 
     SelectedPrefab = new GameObject();
     SelectedPrefab.transform.SetParent(Wrapper.transform);
-    SelectedPrefab.name = bp.Name;
+    SelectedPrefab.name = HammerBlueprintCommand.GetDisplayName(bp);
     SelectedPrefab.transform.localScale = scale;
     SelectedPrefab.transform.position = Helper.GetPlayer().transform.position;
     var piece = SelectedPrefab.AddComponent<Piece>();
-    piece.m_name = bp.Name;
+    piece.m_name = HammerBlueprintCommand.GetDisplayName(bp);
     piece.m_description = bp.Description;
     if (piece.m_description == "")
       piece.m_description = "Center: " + bp.CenterPiece;
     SelectionBaseDescription = piece.m_description;
     var centerPieceExists = false;
+    var picked = Configuration.UseBlueprintChance ? BlueprintPlan.PickGroups(bp.Objects, () => UnityEngine.Random.value) : [];
     foreach (var item in bp.Objects)
     {
       if (item.Prefab == bp.CenterPiece)
         centerPieceExists = true;
-      if (Configuration.UseBlueprintChance && item.Chance != 1f && UnityEngine.Random.value > item.Chance) continue;
+      if (Configuration.UseBlueprintChance)
+      {
+        if (item.Group != "")
+        {
+          if (picked[item.Group] != item) continue;
+        }
+        else if (item.Chance != 1f && UnityEngine.Random.value > item.Chance) continue;
+      }
       try
       {
         var prefab = ZNetScene.instance.GetPrefab(item.Prefab);
@@ -156,8 +164,9 @@ public partial class ObjectSelection : BaseSelection
         var obj = HammerHelper.ChildInstantiate(view, SelectedPrefab);
         obj.transform.localPosition = item.Pos;
         obj.transform.localRotation = item.Rot;
-        obj.transform.localScale = item.Scale;
-        DataEntry? data = item.Data == null || item.Data == "" ? ReadExtraInfo(obj, item.ExtraInfo) : DataHelper.Get(item.Data);
+        obj.transform.localScale = item.Scale ?? Vector3.one;
+        // Data from the blueprint includes the converted info column.
+        var data = Blueprints.FilterObjectData(item.Data, Configuration.RemoveCreatorData);
         UpdateVisuals(obj, data);
         Objects.Add(new SelectedObject(ZDOKeys.Hash(item.Prefab), IsScalable(view), data));
       }
@@ -178,7 +187,7 @@ public partial class ObjectSelection : BaseSelection
       if (bp.SnapPoints.Count == 0)
         Snapping.GenerateSnapPoints(SelectedPrefab);
       else
-        Snapping.CreateSnapPoints(SelectedPrefab, bp.SnapPoints);
+        Snapping.CreateSnapPoints(SelectedPrefab, bp.SnapPoints.Select(snap => snap.Pos).ToList());
     }
 
     piece.m_clipEverything = Snapping.CountSnapPoints(SelectedPrefab) == 0;
@@ -287,66 +296,6 @@ public partial class ObjectSelection : BaseSelection
       plant.m_healthy.SetActive(healthy || healthyGrown);
       plant.m_unhealthy.SetActive(unhealthy || unhealthyGrown);
     }
-  }
-  protected static DataEntry? ReadExtraInfo(GameObject obj, string extraInfo)
-  {
-    if (extraInfo == "") return null;
-
-    // new planbuild format can have an escaped string, try to deserialize
-    if (extraInfo.StartsWith("\"") && extraInfo.EndsWith("\""))
-    {
-      extraInfo = Regex.Unescape(extraInfo.Substring(1, extraInfo.Length - 2));
-    }
-
-    DataEntry data = new();
-    if (obj.TryGetComponent<Sign>(out var sign))
-    {
-      data.Set(ZDOVars.s_text, extraInfo);
-      sign.m_textWidget.text = extraInfo;
-    }
-    if (obj.GetComponent<TeleportWorld>())
-    {
-      data.Set(ZDOVars.s_tag, extraInfo);
-    }
-    if (obj.GetComponent<Tameable>())
-    {
-      data.Set(ZDOVars.s_tamedName, extraInfo);
-    }
-    // Fish don't work with piece, see PreventFishBecomingPieces patch.
-    if (obj.TryGetComponent<ItemDrop>(out var _) && !obj.TryGetComponent<Fish>(out var _))
-    {
-      data.Set(ZDOVars.s_piece, 1);
-    }
-    if (obj.TryGetComponent<ItemStand>(out var _))
-    {
-      var split = extraInfo.Split(':');
-      var name = split[0];
-      var variant = Parse.Int(split, 1, 0);
-      var quality = Parse.Int(split, 2, 1);
-      var orientation = Parse.Int(split, 3, 0);
-      data.Set(ZDOVars.s_item, ZDOKeys.Hash(name));
-      data.Set(ZDOVars.s_variant, variant);
-      data.Set(ZDOVars.s_quality, quality);
-      if (split.Length > 3)
-      {
-        data.Set(ZDOVars.s_type, orientation);
-      }
-    }
-    if (obj.TryGetComponent<ArmorStand>(out var armorStand))
-    {
-      var split = extraInfo.Split(':');
-      var pose = Parse.Int(split, 0, 0);
-      data.Set(ZDOVars.s_pose, pose);
-      for (var i = 0; i < armorStand.m_slots.Count; i++)
-      {
-        var name = Parse.String(split, i * 2 + 2, "");
-        var variant = Parse.Int(split, i * 2 + 3, 0);
-        if (name == "") continue;
-        data.Set(ZDOKeys.Hash($"{i}_item"), ZDOKeys.Hash(name));
-        data.Set(ZDOKeys.Hash($"{i}_variant"), variant);
-      }
-    }
-    return data;
   }
   protected static void UpdateVisuals(GameObject obj, DataEntry? data)
   {
@@ -490,10 +439,10 @@ public partial class ObjectSelection : BaseSelection
           var nodePos = VertexToWorld(compiler.m_hmap, x, z);
           var index = z * max + x;
 
-          var nearestHeight = TerrainHeightInfo?.FindNearest(nodePos, placementPosition, heightRotation);
+          var nearestHeight = TerrainHeightInfo?.FindNearestRelative(nodePos, placementPosition, heightRotation);
           if (nearestHeight != null && index < compiler.m_hmap.m_heights.Count)
           {
-            var heightWeight = TerrainHeightInfo!.GetSmoothWeight(nodePos, placementPosition, heightRotation, TerrainHeightInfo.Smooth);
+            var heightWeight = TerrainHeightInfo!.GetSmoothWeight(nodePos, placementPosition, heightRotation);
             var baseHeight = compiler.m_hmap.m_heights[index];
             var targetHeight = nearestHeight.Value + placementPosition.y;
             var smoothedHeight = Mathf.Lerp(baseHeight, targetHeight, heightWeight);
@@ -519,12 +468,12 @@ public partial class ObjectSelection : BaseSelection
             });
           }
 
-          var nearestPaint = TerrainPaintInfo?.FindNearest(nodePos, placementPosition, paintRotation);
+          var nearestPaint = TerrainPaintInfo?.FindNearestRelative(nodePos, placementPosition, paintRotation);
           // Snapshot paint is an exact final value. An unmodified compiler cell
           // must still be written so the destination's base biome paint cannot leak through.
           if (nearestPaint != null && index < compiler.m_paintMask.Length)
           {
-            var paintWeight = TerrainPaintInfo!.GetSmoothWeight(nodePos, placementPosition, paintRotation, TerrainPaintInfo.Smooth);
+            var paintWeight = TerrainPaintInfo!.GetSmoothWeight(nodePos, placementPosition, paintRotation);
             var currentPaint = compiler.m_paintMask[index];
             var smoothedPaint = Color.Lerp(currentPaint, nearestPaint.Value, paintWeight);
             if (!compiler.m_modifiedPaint[index] || smoothedPaint != currentPaint)

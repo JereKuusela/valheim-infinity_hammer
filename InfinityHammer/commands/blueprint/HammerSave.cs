@@ -43,11 +43,11 @@ public class HammerSaveCommand : TextReceiver
   }
   private static Blueprint BuildBluePrint(Player player, GameObject obj, string centerPiece, string snapPiece, bool saveData)
   {
-    Blueprint bp = new()
+    Blueprint bp = new(Utils.GetPrefabName(obj))
     {
-      Name = Utils.GetPrefabName(obj),
       Creator = player.GetPlayerName(),
       Rotation = HammerHelper.GetPlacementGhost().transform.rotation.eulerAngles,
+      CenterPiece = Configuration.BlueprintCenterPiece,
     };
     var piece = obj.GetComponent<Piece>();
     if (piece)
@@ -68,7 +68,7 @@ public class HammerSaveCommand : TextReceiver
       // Since single objects should just have custom data but otherwise the original behavior.
       var snaps = Snapping.GetSnapPoints(obj);
       foreach (var snap in snaps)
-        bp.SnapPoints.Add(snap.transform.localPosition);
+        bp.SnapPoints.Add(new(snap.transform.localPosition, Quaternion.identity));
     }
     else
     {
@@ -76,7 +76,7 @@ public class HammerSaveCommand : TextReceiver
       foreach (var tr in objects)
       {
         if (snapPiece != "" && Utils.GetPrefabName(tr) == snapPiece)
-          bp.SnapPoints.Add(tr.transform.localPosition);
+          bp.SnapPoints.Add(new(tr.transform.localPosition, Quaternion.identity));
         else
           AddObject(bp, pars, tr, saveData, i);
         i += 1;
@@ -85,10 +85,10 @@ public class HammerSaveCommand : TextReceiver
       {
         var snaps = Snapping.GetSnapPoints(obj);
         foreach (var snap in snaps)
-          bp.SnapPoints.Add(snap.transform.localPosition);
+          bp.SnapPoints.Add(new(snap.transform.localPosition, Quaternion.identity));
       }
     }
-    var offset = bp.Center(centerPiece);
+    var offset = bp.Center(centerPiece, true);
     bp.Coordinates = player.m_placementGhost.transform.position - offset;
     return bp;
   }
@@ -97,17 +97,17 @@ public class HammerSaveCommand : TextReceiver
   {
     var name = Utils.GetPrefabName(obj);
     var save = saveData || Configuration.SavedObjectData.Contains(name.ToLowerInvariant());
-    var data = save ? Selection.Get().GetData() : null;
+    var data = save ? Blueprints.FilterObjectData(Selection.Get().GetData(), Configuration.RemoveCreatorData) : null;
     var info = data == null ? "" : GetExtraInfo(obj, data);
-    bp.Objects.Add(new BlueprintObject(name, Vector3.zero, Quaternion.identity, obj.transform.localScale, info, data?.GetBase64(pars) ?? "", 1f));
+    bp.Objects.Add(new(name, Vector3.zero, Quaternion.identity, obj.transform.localScale, null, 1f) { Info = info, RawData = data?.GetBase64(pars) ?? "" });
   }
   private static void AddObject(Blueprint bp, Dictionary<string, string> pars, GameObject obj, bool saveData, int index = 0)
   {
     var name = Utils.GetPrefabName(obj);
     var save = saveData || Configuration.SavedObjectData.Contains(name.ToLowerInvariant());
-    var data = save ? Selection.Get().GetData(index) : null;
+    var data = save ? Blueprints.FilterObjectData(Selection.Get().GetData(index), Configuration.RemoveCreatorData) : null;
     var info = data == null ? "" : GetExtraInfo(obj, data);
-    bp.Objects.Add(new BlueprintObject(name, obj.transform.localPosition, obj.transform.localRotation, obj.transform.localScale, info, data?.GetBase64(pars) ?? "", 1f));
+    bp.Objects.Add(new(name, obj.transform.localPosition, obj.transform.localRotation, obj.transform.localScale, null, 1f) { Info = info, RawData = data?.GetBase64(pars) ?? "" });
   }
   private static string[] GetPlanBuildFile(Blueprint bp)
   {
@@ -129,7 +129,7 @@ public class HammerSaveCommand : TextReceiver
       $"#Rotation:{HammerHelper.PrintYXZ(bp.Rotation)}",
       "#SnapPoints",
     };
-    lines.AddRange(bp.SnapPoints.Select(GetPlanBuildSnapPoint));
+    lines.AddRange(bp.SnapPoints.Select(snap => GetPlanBuildSnapPoint(snap.Pos)));
     lines.Add("#Pieces");
     lines.AddRange(bp.Objects.OrderBy(o => o.Prefab).Select(GetPlanBuildObject));
 
@@ -191,11 +191,12 @@ public class HammerSaveCommand : TextReceiver
     var rotY = HammerHelper.Format(obj.Rot.y);
     var rotZ = HammerHelper.Format(obj.Rot.z);
     var rotW = HammerHelper.Format(obj.Rot.w);
-    var scaleX = HammerHelper.Format(obj.Scale.x);
-    var scaleY = HammerHelper.Format(obj.Scale.y);
-    var scaleZ = HammerHelper.Format(obj.Scale.z);
-    var info = obj.ExtraInfo;
-    var data = obj.Data;
+    var scale = obj.Scale ?? Vector3.one;
+    var scaleX = HammerHelper.Format(scale.x);
+    var scaleY = HammerHelper.Format(scale.y);
+    var scaleZ = HammerHelper.Format(scale.z);
+    var info = obj.Info.Replace(";", "").Replace("\r\n", " ").Replace('\r', ' ').Replace('\n', ' ');
+    var data = obj.RawData;
     return $"{name};;{posX};{posY};{posZ};{rotX};{rotY};{rotZ};{rotW};{info};{scaleX};{scaleY};{scaleZ};{data}";
   }
 
@@ -243,7 +244,7 @@ public class HammerSaveCommand : TextReceiver
       args.Context.AddString($"Blueprint saved to {path.Replace("\\", "\\\\")} (pos: {HammerHelper.PrintXZY(bp.Coordinates)} rot: {HammerHelper.PrintYXZ(bp.Rotation)}).");
       // Use the serialized representation so immediate placement and a later reload
       // have identical terrain anchors, dimensions and numeric precision.
-      var savedBlueprint = HammerBlueprintCommand.GetPlanBuild(new() { Name = bp.Name }, lines, true);
+      var savedBlueprint = Blueprints.GetPlanBuild(new(bp.Name), lines) ?? throw new System.InvalidOperationException("The saved blueprint could not be read. See the log for details.");
       Selection.CreateGhost(new ObjectSelection(args.Context, savedBlueprint, Vector3.one));
     }
     Pars = null;

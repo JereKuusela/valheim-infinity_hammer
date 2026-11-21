@@ -35,3 +35,11 @@ Repeat placement at yaw 0, 90 and 180 degrees. The terrain must retain the same 
 - Load exactly one piece (`wood_floor`), never `future_payload`.
 - Load a 2 by 2 height grid; `999` and `888` must not be appended to it.
 - Load the following 2 by 2 paint grid normally.
+
+## Blueprint object data regression
+
+Use an existing blueprint with a piece whose scale columns differ from its embedded `scale`, and whose payload contains `support`, `creator`, `author`, `authorPlatformDisplayName`, and unrelated object data (for example, sign text).
+
+1. Load and place it with **Remove creator data** enabled. The piece should use the scale columns and retain its sign text, not the original builder data or saved support value.
+2. Save and inspect the new blueprint. Scale should appear only in the scale columns, and the payload should omit `support` and all three builder fields. The `#Creator` header should still be present.
+3. Disable **Remove creator data** and reload the original file. Save it again and verify the three builder fields survive, but embedded scale and `support` are still absent.

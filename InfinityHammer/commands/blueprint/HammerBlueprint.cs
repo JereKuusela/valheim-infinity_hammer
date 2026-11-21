@@ -1,8 +1,8 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
+using Data;
 using ServerDevcommands;
 using UnityEngine;
 using Service;
@@ -11,52 +11,29 @@ namespace InfinityHammer;
 #pragma warning disable IDE0046
 public class HammerBlueprintCommand : TextReceiver
 {
-  private enum PlanBuildSection
-  {
-    Skip,
-    Pieces,
-    SnapPoints,
-    TerrainHeight,
-    TerrainPaint
-  }
-
   private static void PrintSelected(Terminal terminal, string name)
   {
     if (Configuration.DisableSelectMessages) return;
     HammerHelper.Message(terminal, $"Selected {name}.");
   }
-  private static IEnumerable<string> LoadFiles(string folder, IEnumerable<string> bps)
-  {
-    if (Directory.Exists(folder))
-    {
-      var blueprints = Directory.EnumerateFiles(folder, "*.blueprint", SearchOption.AllDirectories);
-      var vbuilds = Directory.EnumerateFiles(folder, "*.vbuild", SearchOption.AllDirectories);
-      return bps.Concat(blueprints).Concat(vbuilds);
-    }
-    return bps;
-  }
-  private static IEnumerable<string> Files()
-  {
-    IEnumerable<string> bps = [];
-    bps = LoadFiles(Configuration.BlueprintGlobalFolder, bps);
-    if (Path.GetFullPath(Configuration.BlueprintLocalFolder) != Path.GetFullPath(Configuration.BlueprintGlobalFolder))
-      bps = LoadFiles(Configuration.BlueprintLocalFolder, bps);
-    return bps.Distinct().OrderBy(s => s);
-  }
-  public static List<string> GetBlueprints() => [.. Files().Select(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_"))];
+  // The file name is the identifier, the title from the file is only for display.
+  public static string GetDisplayName(Blueprint bp) => bp.Title != "" ? bp.Title : bp.Name;
 
-  public static List<Blueprint> GetBlueprintsByCategory() => [.. Files().Select(GetBluePrintCategory)];
+  public static List<string> GetBlueprints() => [.. Blueprints.Files().Select(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_"))];
 
-  public static List<Blueprint> GetBlueprintsByFolder() => [.. Files().Select(GetBluePrintWithFolder)];
+  public static List<Blueprint> GetBlueprintsByCategory() => [.. Blueprints.Files().Select(GetBluePrintCategory)];
 
-  public static List<Blueprint> GetBlueprintsByCategoryAndFolder() => [.. Files().Select(GetBluePrintWithCategoryAndFolder)];
+  public static List<Blueprint> GetBlueprintsByFolder() => [.. Blueprints.Files().Select(GetBluePrintWithFolder)];
 
+  public static List<Blueprint> GetBlueprintsByCategoryAndFolder() => [.. Blueprints.Files().Select(GetBluePrintWithCategoryAndFolder)];
+
+  // Menus only need the header, so the pieces are not parsed.
   private static Blueprint GetBluePrintCategory(string filePath)
   {
     var name = Path.GetFileNameWithoutExtension(filePath).Replace(" ", "_");
     var rows = File.ReadAllLines(filePath);
     var extension = Path.GetExtension(filePath);
-    Blueprint bp = new() { Name = name };
+    Blueprint bp = new(name);
     if (extension == ".vbuild") return bp;
     if (extension == ".blueprint") return GetPlanBuildCategory(bp, rows);
     throw new InvalidOperationException("Unknown file format.");
@@ -66,7 +43,7 @@ public class HammerBlueprintCommand : TextReceiver
   {
     var name = Path.GetFileNameWithoutExtension(filePath).Replace(" ", "_");
     var category = GetFolderNameFromPath(filePath);
-    return new() { Name = name, Category = category };
+    return new(name) { Category = category };
   }
 
   private static Blueprint GetBluePrintWithCategoryAndFolder(string filePath)
@@ -90,16 +67,8 @@ public class HammerBlueprintCommand : TextReceiver
   }
 
   private static Blueprint GetBluePrint(string name, bool loadData)
-  {
-    var path = Files().FirstOrDefault(path => Path.GetFileNameWithoutExtension(path).Replace(" ", "_") == name)
-      ?? throw new InvalidOperationException("Blueprint not found.");
-    var rows = File.ReadAllLines(path);
-    var extension = Path.GetExtension(path);
-    Blueprint bp = new() { Name = name };
-    if (extension == ".vbuild") return GetBuildShare(bp, rows, loadData);
-    if (extension == ".blueprint") return GetPlanBuild(bp, rows, loadData);
-    throw new InvalidOperationException("Unknown file format.");
-  }
+    => Blueprints.GetBluePrint(name, loadData) ?? throw new InvalidOperationException($"Blueprint {name} was not found or is invalid. See the log for details.");
+
   private static Blueprint GetPlanBuildCategory(Blueprint bp, string[] rows)
   {
     foreach (var row in rows)
@@ -113,255 +82,13 @@ public class HammerBlueprintCommand : TextReceiver
     }
     return bp;
   }
-  internal static Blueprint GetPlanBuild(Blueprint bp, string[] rows, bool loadData)
+
+  // The configured center piece is the default for files that don't define one.
+  public static Vector3 CenterBlueprint(Blueprint bp, string centerPiece)
   {
-    var section = PlanBuildSection.Pieces;
-    TerrainHeight? terrainHeightData = null;
-    TerrainPaint? terrainPaintData = null;
-    var terrainRowIndex = 0;
-
-    foreach (var row in rows)
-    {
-      var isHeader = row.StartsWith("#", StringComparison.Ordinal);
-      if (isHeader)
-      {
-        terrainRowIndex = 0;
-        // Metadata and comments can appear between legacy piece rows. Terrain
-        // payloads, however, always end at the next header.
-        if (section is PlanBuildSection.TerrainHeight or PlanBuildSection.TerrainPaint)
-          section = PlanBuildSection.Skip;
-      }
-
-      if (row.StartsWith("#name:", StringComparison.OrdinalIgnoreCase))
-        bp.Name = row.Split(':')[1];
-      else if (row.StartsWith("#creator:", StringComparison.OrdinalIgnoreCase))
-        bp.Creator = row.Split(':')[1];
-      else if (row.StartsWith("#description:", StringComparison.OrdinalIgnoreCase))
-        bp.Description = row.Split(':')[1];
-      else if (row.StartsWith("#category:", StringComparison.OrdinalIgnoreCase))
-        bp.Category = row.Split(':')[1];
-      else if (row.StartsWith("#center:", StringComparison.OrdinalIgnoreCase))
-        bp.CenterPiece = row.Split(':')[1];
-      else if (row.StartsWith("#coordinates:", StringComparison.OrdinalIgnoreCase))
-        bp.Coordinates = Parse.VectorXZY(row.Split(':')[1]);
-      else if (row.StartsWith("#rotation:", StringComparison.OrdinalIgnoreCase))
-        bp.Rotation = Parse.VectorXZY(row.Split(':')[1]);
-      else if (row.StartsWith("#height:", StringComparison.OrdinalIgnoreCase) || row.StartsWith("#paint:", StringComparison.OrdinalIgnoreCase))
-      {
-        throw new InvalidOperationException("Legacy #Height/#Paint terrain format is no longer supported. Re-save the blueprint with a newer Infinity Hammer version.");
-      }
-      else if (row.StartsWith("#terrainheight:", StringComparison.OrdinalIgnoreCase))
-      {
-        // A malformed channel header must not inherit the preceding section.
-        section = PlanBuildSection.Skip;
-        var parts = row.Split(':')[1].Split(';');
-        if (parts.Length >= 3)
-        {
-          var rotation = InvariantFloat(parts, 1, 0f);
-          terrainHeightData = new TerrainHeight
-          {
-            CenterPosition = Parse.VectorXZY(parts[0]),
-            CenterRotation = Quaternion.Euler(0f, rotation, 0f),
-            DistanceBetweenNodes = InvariantFloat(parts, 2, 1.0f)
-          };
-          section = PlanBuildSection.TerrainHeight;
-        }
-      }
-      else if (row.StartsWith("#terrainpaint:", StringComparison.OrdinalIgnoreCase))
-      {
-        // A malformed channel header must not inherit the preceding section.
-        section = PlanBuildSection.Skip;
-        var parts = row.Split(':')[1].Split(';');
-        if (parts.Length >= 3)
-        {
-          var rotation = InvariantFloat(parts, 1, 0f);
-          terrainPaintData = new TerrainPaint
-          {
-            CenterPosition = Parse.VectorXZY(parts[0]),
-            CenterRotation = Quaternion.Euler(0f, rotation, 0f),
-            DistanceBetweenNodes = InvariantFloat(parts, 2, 1.0f)
-          };
-          section = PlanBuildSection.TerrainPaint;
-        }
-      }
-      else if (row.StartsWith("#snappoints", StringComparison.OrdinalIgnoreCase))
-        section = PlanBuildSection.SnapPoints;
-      else if (row.StartsWith("#pieces", StringComparison.OrdinalIgnoreCase))
-        section = PlanBuildSection.Pieces;
-      else if (isHeader)
-      {
-        // Keep ordinary comments compatible with headerless piece lists, but
-        // skip payload following unknown section headers.
-        var isComment = row.Length == 1 || char.IsWhiteSpace(row[1]);
-        if (!isComment)
-          section = PlanBuildSection.Skip;
-        continue;
-      }
-      else
-      {
-        switch (section)
-        {
-          case PlanBuildSection.Pieces:
-            bp.Objects.Add(GetPlanBuildObject(row, loadData));
-            break;
-          case PlanBuildSection.SnapPoints:
-            bp.SnapPoints.Add(GetPlanBuildSnapPoint(row));
-            break;
-          case PlanBuildSection.TerrainHeight when terrainHeightData != null:
-            ParseTerrainHeightRow(terrainHeightData, row, terrainRowIndex);
-            terrainRowIndex++;
-            break;
-          case PlanBuildSection.TerrainPaint when terrainPaintData != null:
-            ParseTerrainPaintRow(terrainPaintData, row, terrainRowIndex);
-            terrainRowIndex++;
-            break;
-        }
-      }
-    }
-
-    bp.TerrainHeight = terrainHeightData;
-    bp.TerrainPaint = terrainPaintData;
-
-    return bp;
-  }
-
-  private static BlueprintObject GetPlanBuildObject(string row, bool loadData)
-  {
-    if (row.IndexOf(',') > -1) row = row.Replace(',', '.');
-    var split = row.Split(';');
-    var name = split[0];
-    var posX = InvariantFloat(split, 2);
-    var posY = InvariantFloat(split, 3);
-    var posZ = InvariantFloat(split, 4);
-    var rotX = InvariantFloat(split, 5);
-    var rotY = InvariantFloat(split, 6);
-    var rotZ = InvariantFloat(split, 7);
-    var rotW = InvariantFloat(split, 8);
-    var info = split.Length > 9 ? split[9] : "";
-    var scaleX = InvariantFloat(split, 10, 1f);
-    var scaleY = InvariantFloat(split, 11, 1f);
-    var scaleZ = InvariantFloat(split, 12, 1f);
-    var data = loadData && split.Length > 13 ? split[13] : "";
-    var chance = InvariantFloat(split, 14, 1f);
-    return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), new(scaleX, scaleY, scaleZ), info, data, chance);
-  }
-  private static Vector3 GetPlanBuildSnapPoint(string row)
-  {
-    if (row.IndexOf(',') > -1) row = row.Replace(',', '.');
-    var split = row.Split(';');
-    var x = InvariantFloat(split, 0);
-    var y = InvariantFloat(split, 1);
-    var z = InvariantFloat(split, 2);
-    return new Vector3(x, y, z);
-  }
-  private static Blueprint GetBuildShare(Blueprint bp, string[] rows, bool loadData)
-  {
-    bp.Objects = rows.Select(r => GetBuildShareObject(r, loadData)).ToList();
-    return bp;
-  }
-  private static BlueprintObject GetBuildShareObject(string row, bool loadData)
-  {
-    if (row.IndexOf(',') > -1) row = row.Replace(',', '.');
-    var split = row.Split(' ');
-    var name = split[0];
-    var rotX = InvariantFloat(split, 1);
-    var rotY = InvariantFloat(split, 2);
-    var rotZ = InvariantFloat(split, 3);
-    var rotW = InvariantFloat(split, 4);
-    var posX = InvariantFloat(split, 5);
-    var posY = InvariantFloat(split, 6);
-    var posZ = InvariantFloat(split, 7);
-    var data = loadData && split.Length > 8 ? split[8] : "";
-    var chance = InvariantFloat(split, 9, 1f);
-    return new BlueprintObject(name, new(posX, posY, posZ), new(rotX, rotY, rotZ, rotW), Vector3.one, "", data, chance);
-  }
-
-  private static void ParseTerrainHeightRow(TerrainHeight terrainData, string row, int rowIndex)
-  {
-    if (row.IndexOf(',') > -1) row = row.Replace(',', '.');
-    var values = row.Split(';');
-
-    if (rowIndex == 0)
-    {
-      terrainData.InitializeGrid(values.Length, 0, terrainData.CenterPosition);
-    }
-
-    if (rowIndex >= terrainData.Height)
-    {
-      var oldHeights = terrainData.Heights;
-      terrainData.Heights = new float?[terrainData.Width, rowIndex + 1];
-
-      for (int x = 0; x < terrainData.Width; x++)
-      {
-        for (int z = 0; z < terrainData.Height; z++)
-        {
-          terrainData.Heights[x, z] = oldHeights[x, z];
-        }
-      }
-      terrainData.Height = rowIndex + 1;
-    }
-
-    for (int x = 0; x < values.Length && x < terrainData.Width; x++)
-    {
-      if (!string.IsNullOrEmpty(values[x]))
-      {
-        if (float.TryParse(values[x], NumberStyles.Any, NumberFormatInfo.InvariantInfo, out float height))
-        {
-          terrainData.Set(x, rowIndex, height);
-        }
-      }
-    }
-  }
-
-  private static void ParseTerrainPaintRow(TerrainPaint terrainData, string row, int rowIndex)
-  {
-    if (row.IndexOf(',') > -1) row = row.Replace(',', '.');
-    var values = row.Split(';');
-
-    if (rowIndex == 0)
-    {
-      terrainData.InitializeGrid(values.Length, 0, terrainData.CenterPosition);
-    }
-
-    if (rowIndex >= terrainData.Height)
-    {
-      var oldPaints = terrainData.Paints;
-      terrainData.Paints = new Color?[terrainData.Width, rowIndex + 1];
-      for (int x = 0; x < terrainData.Width; x++)
-      {
-        for (int z = 0; z < terrainData.Height; z++)
-        {
-          terrainData.Paints[x, z] = oldPaints[x, z];
-        }
-      }
-      terrainData.Height = rowIndex + 1;
-    }
-
-    for (int x = 0; x < values.Length && x < terrainData.Width; x++)
-    {
-      if (!string.IsNullOrEmpty(values[x]))
-      {
-        var colorParts = values[x].Split(':');
-        if (colorParts.Length >= 3)
-        {
-          if (float.TryParse(colorParts[0], NumberStyles.Any, NumberFormatInfo.InvariantInfo, out float r) &&
-              float.TryParse(colorParts[1], NumberStyles.Any, NumberFormatInfo.InvariantInfo, out float g) &&
-              float.TryParse(colorParts[2], NumberStyles.Any, NumberFormatInfo.InvariantInfo, out float b))
-          {
-            float a = colorParts.Length > 3 && float.TryParse(colorParts[3], NumberStyles.Any, NumberFormatInfo.InvariantInfo, out float alpha) ? alpha : 1f;
-            terrainData.Set(x, rowIndex, new Color(r, g, b, a));
-          }
-        }
-      }
-    }
-  }
-
-  private static float InvariantFloat(string[] row, int index, float defaultValue = 0f)
-  {
-    if (index >= row.Length) return defaultValue;
-    var s = row[index];
-    if (string.IsNullOrEmpty(s)) return defaultValue;
-    return float.Parse(s, NumberStyles.Any, NumberFormatInfo.InvariantInfo);
+    if (centerPiece == "" && Configuration.BlueprintCenterPiece != "" && bp.CenterPiece == Blueprint.DefaultCenterPiece)
+      centerPiece = Configuration.BlueprintCenterPiece;
+    return bp.Center(centerPiece, true);
   }
 
   private void SelectBlueprint(Terminal.ConsoleEventArgs args, HammerBlueprintPars pars)
@@ -369,11 +96,11 @@ public class HammerBlueprintCommand : TextReceiver
     if (pars.Name == "") return;
     Hammer.Equip();
     var bp = GetBluePrint(pars.Name, pars.LoadData);
-    bp.Center(pars.CenterPiece);
+    CenterBlueprint(bp, pars.CenterPiece);
     if (pars.SnapPiece != "")
     {
       foreach (var snap in bp.SnapPoints)
-        bp.Objects.Add(new BlueprintObject(pars.SnapPiece, snap, Quaternion.identity, Vector3.one, "", "", 1f));
+        bp.Objects.Add(new(pars.SnapPiece, snap.Pos, Quaternion.identity, Vector3.one, null, 1f));
     }
     if (bp.TerrainHeight != null)
       bp.TerrainHeight.Smooth = pars.HeightSmooth ?? Configuration.BlueprintTerrainHeightSmooth;
@@ -381,7 +108,7 @@ public class HammerBlueprintCommand : TextReceiver
       bp.TerrainPaint.Smooth = pars.PaintSmooth ?? Configuration.BlueprintTerrainPaintSmooth;
 
     Selection.CreateGhost(new ObjectSelection(args.Context, bp, pars.Scale));
-    PrintSelected(args.Context, bp.Name);
+    PrintSelected(args.Context, GetDisplayName(bp));
   }
 
   private static void RegisterAutoComplete(string command)
@@ -431,11 +158,11 @@ public class HammerBlueprintCommand : TextReceiver
       var bp = GetBluePrint(pars.Name, pars.LoadData);
       // The saved position/rotation are anchored to the blueprint's own center, so
       // any additional offset from a custom center piece must be added back here.
-      var centerOffset = bp.Center(pars.CenterPiece);
+      var centerOffset = CenterBlueprint(bp, pars.CenterPiece);
       if (pars.SnapPiece != "")
       {
         foreach (var snap in bp.SnapPoints)
-          bp.Objects.Add(new BlueprintObject(pars.SnapPiece, snap, Quaternion.identity, Vector3.one, "", "", 1f));
+          bp.Objects.Add(new(pars.SnapPiece, snap.Pos, Quaternion.identity, Vector3.one, null, 1f));
       }
       if (bp.TerrainHeight != null)
         bp.TerrainHeight.Smooth = pars.HeightSmooth ?? Configuration.BlueprintTerrainHeightSmooth;
@@ -444,7 +171,7 @@ public class HammerBlueprintCommand : TextReceiver
       var obj = Selection.CreateGhost(new ObjectSelection(args.Context, bp, pars.Scale));
       Position.Override = bp.Coordinates + Quaternion.Euler(bp.Rotation) * centerOffset;
       PlaceRotation.Set(Quaternion.Euler(bp.Rotation));
-      PrintSelected(args.Context, bp.Name);
+      PrintSelected(args.Context, GetDisplayName(bp));
     });
   }
 

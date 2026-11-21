@@ -2,6 +2,8 @@
 
 Basic support is provided for BuildShare .vbuild and [PlanBuild](https://valheim.thunderstore.io/package/MathiasDecrock/PlanBuild/) .blueprint files.
 
+The file format, including the extra fields (data, chance and terrain), is shared with Expand World Data and Expand World Prefabs. See [blueprints](https://github.com/JereKuusela/valheim-expand_world_data/blob/main/docs/blueprints.md) for all fields and sections.
+
 ## Placing blueprints
 
 Blueprints can be selected with the `hammer_blueprint [file name]` command and then placed with the hammer.
@@ -12,7 +14,7 @@ The command has following advanced parameters:
 
 - `center=object`: If given, the blueprint is centered around this object.
   - Note: The object is not included in the selection.
-- `data=true/false`: If false, object data is not loaded.
+- `data=true/false`: If false, the full object data is not loaded. The PlanBuild `Info` field can still restore values such as sign text or item stand contents.
 - `scale=number`: If given, the blueprint is scaled by this factor.
   - The scale is only applied to objects that can be scaled.
   - Install [Structure Tweaks](https://valheim.thunderstore.io/package/JereKuusela/Structure_Tweaks/) for all clients to unlock scaling for all objects.
@@ -36,7 +38,7 @@ The command has optional parameters. Their default values can be set in the conf
 
 - `center=object`: If given, the blueprint is centered around this object.
   - Note: The object won't be included in the blueprint.
-- `data=true/false`: If false, object data is not saved.
+- `data=true/false`: If false, object data is saved only for prefabs listed in "Save object data blueprints".
 - `snap=object`: If given, these objects are converted into snap points.
   - Note: The snap objects won't be included in the blueprint.
   - Option `all` adds every snap point of every piece to the blueprint.
@@ -89,16 +91,20 @@ Following data is not copied:
 
 ## Configuration
 
-- Blueprint center piece: The default center piece when saving blueprints.
+- Blueprint center piece: The default center piece when saving blueprints. Also used when loading blueprints that don't have a `#Center` line (otherwise `piece_bpcenterpoint`).
 - Blueprint folder (default: `PlanBuild`): Folder relative to the config folder. Both profile and base Valheim folders are searched for .blueprint and .vbuild files.
 - Blueprint snap piece (default: `auto`): The default snap piece when saving blueprints.
 - Build Share folder (default: `BuildShare/Builds`): Folder relative to the Valheim.exe.
 - Include terrain height (default: `false`): If enabled, hammer area selection captures terrain height.
 - Include terrain paint (default: `false`): If enabled, hammer area selection captures terrain paint.
 - Save blueprint data (default: `true`): If enabled, object data values are saved to blueprints.
+- Remove creator data (default: `true`): Removes creator data from saved and loaded blueprints.
+  - `creator`: The creator id of the object.
+  - `author`: The author of the object.
+  - `authorPlatformDisplayName`: The display name of the author's platform.
 - Save blueprints to profile (default: `false`): If enabled, blueprints are saved to the profile folder instead of the base Valheim folder.
 - Save object data blueprints: Object ids that save extra data when the "Save blueprint data" is disabled.
-- Save simpler blueprints (default: `false`): If enabled, only mandatory information is saved.
+- Save simpler blueprints (default: `false`): If enabled, only the center and piece rows are saved.
 - Terrain height offset (default: `0`): How much terrain height (in meters)  is captured outside the selected area.
 - Terrain height smooth (default: `0`): How gradually blueprint terrain height changes are applied by default (0 = exact, 1 = fully gradual)
 - Terrain height spacing (default: `0`): Distance between captured terrain height nodes in meters. 0 = smallest distance.
@@ -106,3 +112,4 @@ Following data is not copied:
 - Terrain paint smooth (default: `0`): How gradually blueprint terrain paint changes are applied by default (0 = exact, 1 = fully gradual).
 - Terrain paint spacing (default: `0`): Distance between captured terrain paint nodes in meters. 0 = smallest distance.
 - Use blueprint chance (default: `false`): If enabled, the object chance from blueprints is used.
+  - Objects with the same group (like `0.5_a`) are alternatives, so only one of them is picked.
