@@ -1,4 +1,4 @@
-﻿- v1.93
+- v1.93
   - Adds support for alternative objects in blueprints (chance with a group like `0.5_a`) when `Use blueprint chance` is enabled.
   - Changes blueprint loading to use the shared code of World Edit Commands mod.
   - Changes blueprints without `#Center` to be centered on `piece_bpcenterpoint` (if the config `Blueprint center piece` is empty).
