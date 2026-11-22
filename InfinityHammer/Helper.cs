@@ -108,13 +108,38 @@ public static class HammerHelper
     }
     return SafeInstantiate(obj, view.transform.rotation, parent.transform);
   }
-  public static GameObject ChildInstantiate(ZNetView view, GameObject parent)
+  public static GameObject ChildInstantiate(ZNetView view, GameObject parent, Vector3 pos, Quaternion rot, bool local)
   {
     var obj = view.gameObject;
     ResetHighlight(obj);
     var ret = UnityEngine.Object.Instantiate(obj, parent.transform);
-    CleanObject(ret);
+    try
+    {
+      if (local)
+      {
+        ret.transform.localPosition = pos;
+        ret.transform.localRotation = rot;
+      }
+      else
+      {
+        ret.transform.position = pos;
+        ret.transform.rotation = rot;
+      }
+      CleanObject(ret);
+    }
+    catch
+    {
+      RemovePreviewChild(ret);
+      throw;
+    }
     return ret;
+  }
+  internal static void RemovePreviewChild(GameObject obj)
+  {
+    if (!obj) return;
+    obj.SetActive(false);
+    obj.transform.SetParent(null, false);
+    UnityEngine.Object.Destroy(obj);
   }
   public static GameObject SafeInstantiateRoom(DungeonDB.RoomData room, bool emptyRoom, GameObject parent)
   {

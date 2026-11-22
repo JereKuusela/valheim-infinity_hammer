@@ -1,3 +1,6 @@
+- v1.94
+  - Fixes compatibility issue with signs from Odins Kingdom mod.
+
 - v1.93
   - Adds support for alternative objects in blueprints (chance with a group like `0.5_a`) when `Use blueprint chance` is enabled.
   - Changes blueprint loading to use the shared code of World Edit Commands mod.
@@ -14,9 +17,3 @@
 - v1.91
   - Fixes scaling not working properly for blueprints. Thanks Zeall!
   - Fixes "Repair anything" not fixing rocks properly.
-
-- v1.90
-  - Fixes placement ghost flickering. Thanks Zeall!
-
-- v1.89
-  - Splits setting "No cost" into "No resource cost", "No durability cost", and "No stamina cost".

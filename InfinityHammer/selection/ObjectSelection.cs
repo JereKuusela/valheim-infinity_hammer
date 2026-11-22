@@ -6,9 +6,27 @@ using ServerDevcommands;
 using Service;
 using UnityEngine;
 using WorldEditCommands;
-using System.Text.RegularExpressions;
 
 namespace InfinityHammer;
+
+// Some signs from mods use a shared text widget that is assigned after creation.
+// So text setting must be delayed.
+internal sealed class DeferredPreviewSignText : MonoBehaviour
+{
+  public string Text = "";
+  private int FramesRemaining = 5;
+
+  public void LateUpdate()
+  {
+    if (TryGetComponent<Sign>(out var sign) && sign.m_textWidget)
+    {
+      sign.m_textWidget.text = Text;
+      Destroy(this);
+    }
+    else if (--FramesRemaining == 0)
+      Destroy(this);
+  }
+}
 
 // This is quite messy because single and multiple objects behave differently.
 // But they have to be the same because selection is changed when zooping.
@@ -107,9 +125,7 @@ public partial class ObjectSelection : BaseSelection
     foreach (var view in views)
     {
       DataEntry? data = DataHelper.Merge(new(view.GetZDO()), extraData);
-      var obj = HammerHelper.ChildInstantiate(view, SelectedPrefab);
-      obj.transform.position = view.transform.position;
-      obj.transform.rotation = view.transform.rotation;
+      var obj = HammerHelper.ChildInstantiate(view, SelectedPrefab, view.transform.position, view.transform.rotation, false);
       UpdateVisuals(obj, data);
       Objects.Add(new(view.GetZDO().GetPrefab(), IsScalable(view), data));
     }
@@ -156,23 +172,27 @@ public partial class ObjectSelection : BaseSelection
         }
         else if (item.Chance != 1f && UnityEngine.Random.value > item.Chance) continue;
       }
+      GameObject? previewChild = null;
       try
       {
         var prefab = ZNetScene.instance.GetPrefab(item.Prefab);
         if (!prefab) throw new InvalidOperationException($"Prefab {item.Prefab} not found.");
         var view = prefab.GetComponent<ZNetView>();
-        var obj = HammerHelper.ChildInstantiate(view, SelectedPrefab);
-        obj.transform.localPosition = item.Pos;
-        obj.transform.localRotation = item.Rot;
-        obj.transform.localScale = item.Scale ?? Vector3.one;
+        if (!view) throw new InvalidOperationException($"Prefab {item.Prefab} has no root ZNetView.");
+        previewChild = HammerHelper.ChildInstantiate(view, SelectedPrefab, item.Pos, item.Rot, true);
+        previewChild.transform.localScale = item.Scale ?? Vector3.one;
         // Data from the blueprint includes the converted info column.
         var data = Blueprints.FilterObjectData(item.Data, Configuration.RemoveCreatorData);
-        UpdateVisuals(obj, data);
+        UpdateVisuals(previewChild, data);
         Objects.Add(new SelectedObject(ZDOKeys.Hash(item.Prefab), IsScalable(view), data));
       }
       catch (Exception e)
       {
-        HammerHelper.Message(terminal, $"Warning: {e.Message}");
+        if (previewChild != null)
+          HammerHelper.RemovePreviewChild(previewChild);
+        var message = $"Failed to load piece {item.Prefab}";
+        Log.Warning($"{message} from blueprint {bp.Name}: {message}\n{e}");
+        HammerHelper.Message(terminal, message);
       }
     }
     SetTerrainState(bp.TerrainHeight?.Clone(), bp.TerrainPaint?.Clone());
@@ -303,7 +323,10 @@ public partial class ObjectSelection : BaseSelection
     Dictionary<string, string> pars = [];
     if (data.TryGetString(pars, ZDOVars.s_text, out var signText) && obj.TryGetComponent<Sign>(out var sign))
     {
-      sign.m_textWidget.text = signText;
+      if (sign.m_textWidget)
+        sign.m_textWidget.text = signText;
+      else
+        obj.AddComponent<DeferredPreviewSignText>().Text = signText;
     }
     if (obj.TryGetComponent<ItemStand>(out var itemStand) && HammerHelper.TryGetNameHash(data, ZDOVars.s_item, out var hash))
     {
@@ -557,9 +580,8 @@ public partial class ObjectSelection : BaseSelection
   {
     if (!UsesSelectionRoot)
       ToMulti();
-    var obj = HammerHelper.ChildInstantiate(view, SelectedPrefab);
-    obj.transform.rotation = view.transform.rotation;
-    obj.transform.localPosition = pos;
+    var localRot = Quaternion.Inverse(SelectedPrefab.transform.rotation) * view.transform.rotation;
+    var obj = HammerHelper.ChildInstantiate(view, SelectedPrefab, pos, localRot, true);
     if (Configuration.Snapping != SnappingMode.Off)
       Snapping.RegenerateSnapPoints(SelectedPrefab);
     Objects.Add(new SelectedObject(Objects[0].Prefab, Objects[0].Scalable, Objects[0].Data));

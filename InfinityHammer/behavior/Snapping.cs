@@ -70,16 +70,27 @@ public static class Snapping
       CreateSnapPoint(obj, point, $"Snap {++counter}");
   }
 
+  ///<summary>Snap points are optional, so failures are logged instead of breaking the selection.</summary>
   public static void RegenerateSnapPoints(GameObject obj)
   {
-    RemoveSnapPoints(obj);
-    GenerateSnapPoints(obj);
+    try
+    {
+      RemoveSnapPoints(obj);
+      GenerateSnapPoints(obj);
+    }
+    catch (System.Exception e)
+    {
+      Log.Warning($"Failed to regenerate snap points: {e}");
+    }
   }
   public static void RemoveSnapPoints(GameObject obj)
   {
-    foreach (Transform tr in obj.transform)
+    // Destroy is deferred, so detach first to keep old points out of counts this frame.
+    foreach (var snap in GetSnapPoints(obj))
     {
-      if (IsSnapPoint(tr)) Object.Destroy(tr.gameObject);
+      snap.SetActive(false);
+      snap.transform.SetParent(null, false);
+      Object.Destroy(snap);
     }
   }
   public static void BuildSnaps(GameObject obj)
