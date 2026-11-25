@@ -229,8 +229,8 @@ public static class CustomMenu
     var items = DungeonDB.m_instance.m_rooms
       .Where(room => room.m_prefab.IsValid)
       .Where(room => string.IsNullOrEmpty(HammerMenuCommand.CurrentFilter) ||
-                    room.m_prefab.Name.StartsWith(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase))
-      .Select(room => BuildItem($"hammer_room {room.m_prefab.Name}", room.m_prefab.Name)).ToList();
+                    room.m_prefab.name.StartsWith(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase))
+      .Select(room => BuildItem($"hammer_room {room.m_prefab.name}", room.m_prefab.name)).ToList();
     return GenerateCategories(items, MaxItemsPerTab);
   }
   public static List<CategoryInfo> GenerateBluePrints()

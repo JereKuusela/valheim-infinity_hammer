@@ -165,7 +165,7 @@ public static class HammerHelper
     {
       var obj = new GameObject();
       EnsurePiece(obj);
-      obj.name = location.m_prefab.Name;
+      obj.name = location.m_prefab.name;
       return obj;
     }
     location.m_prefab.Load();
