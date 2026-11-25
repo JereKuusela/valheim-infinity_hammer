@@ -402,8 +402,9 @@ public static class CustomMenu
     // Custom pages may leave the table without any tab.
     if (pt.m_availablePiecesByCategory.Count == 0 && Hammer.IsInfinityHammer(pt)) pt.m_availablePiecesByCategory.Add([]);
     List<Tool> tools = ToolManager.Get(equipment);
-    // Custom pages have their own tabs, so hammer tools go to every tab they are visible in.
-    var customPages = Hammer.IsInfinityHammer(pt) && HammerMenuCommand.CurrentMode != MenuMode.Menu;
+    // Infinity Hammer pages have their own tabs, so tools go to the tabs they are visible in.
+    var customPages = Hammer.IsInfinityHammer(pt);
+    var defaultTab = pt.m_categories.Count > 0 ? (int)pt.m_categories[0] : 0;
     int tab = 0;
     Dictionary<int, int> indices = [];
     foreach (var tool in tools)
@@ -411,11 +412,11 @@ public static class CustomMenu
       if (!IsToolCommandAllowed(tool)) continue;
       List<int> targets;
       if (customPages)
-        targets = [.. pt.m_categories.Select(c => (int)c).Where(c => c >= 0 && c < pt.m_availablePiecesByCategory.Count && tool.IsVisibleIn(c))];
+        targets = [.. pt.m_categories.Select(c => (int)c).Where(c => c >= 0 && c < pt.m_availablePiecesByCategory.Count && tool.IsVisibleIn(c, defaultTab))];
       else
       {
         tab = tool.TabIndex ?? tab;
-        if (tab < 0 || pt.m_availablePiecesByCategory.Count <= tab || !tool.IsVisibleIn(tab)) continue;
+        if (tab < 0 || pt.m_availablePiecesByCategory.Count <= tab || !tool.IsVisibleIn(tab, tab)) continue;
         targets = [tab];
       }
       var piece = Build(pt, tool);

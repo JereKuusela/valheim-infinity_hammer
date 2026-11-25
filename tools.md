@@ -44,7 +44,9 @@ Following fields are available:
 - instant: If true, the command is executed instantly without any selection.
   - If not set, the value is automatically determined from the command.
 - categories: Comma separated list of categories (numbers or names) where the tool is visible.
-  - If not set, the tool is visible in all categories.
+  - Use `all` for the "Show all" view (the first category).
+  - If not set, the tool is only visible in "Show all".
+  - If set, the tool is only visible in the listed categories (hidden from "Show all" unless `all` is listed).
 - tabIndex: Tab of the tool in the build menu.
   - If not set, the tool is added to the same tab as the previous tool.
 - index: Index of the tool in the build tab.

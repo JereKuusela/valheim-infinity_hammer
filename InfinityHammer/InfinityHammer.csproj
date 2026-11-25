@@ -8,66 +8,67 @@
   <Target Name="CopyDLL" AfterTargets="Build">
     <Copy
       SourceFiles="$(TargetDir)$(ProjectName).dll"
-      DestinationFolder="$(ProjectDir)\..\..\Libs" />
+      DestinationFolder="$(LibsDir)" />
     <Message Text="Copied to Libs folder." Importance="High" />
   </Target>
   <ItemGroup>
+    <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.3" PrivateAssets="all" />
     <Reference Include="BepInEx.dll">
-      <HintPath>..\..\Libs\BepinEx.dll</HintPath>
+      <HintPath>$(BepInExDir)\BepInEx.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.dll">
-      <HintPath>..\..\Libs\UnityEngine.dll</HintPath>
+      <HintPath>$(ManagedDir)\UnityEngine.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule.dll">
-      <HintPath>..\..\Libs\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(ManagedDir)\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule.dll">
-      <HintPath>..\..\Libs\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>$(ManagedDir)\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI.dll">
-      <HintPath>..\..\Libs\UnityEngine.UI.dll</HintPath>
+      <HintPath>$(ManagedDir)\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule.dll">
-      <HintPath>..\..\Libs\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>$(ManagedDir)\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule.dll">
-      <HintPath>..\..\Libs\UnityEngine.InputLegacyModule.dll</HintPath>
+      <HintPath>$(ManagedDir)\UnityEngine.InputLegacyModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule.dll">
-      <HintPath>..\..\Libs\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath>$(ManagedDir)\UnityEngine.AnimationModule.dll</HintPath>
     </Reference>
     <Reference Include="0Harmony.dll">
-      <HintPath>..\..\Libs\0Harmony.dll</HintPath>
+      <HintPath>$(BepInExDir)\0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="BepInEx.Harmony.dll">
-      <HintPath>..\..\Libs\BepInEx.Harmony.dll</HintPath>
+      <HintPath>$(BepInExDir)\BepInEx.Harmony.dll</HintPath>
     </Reference>
-    <Reference Include="SoftReferenceableAssets.dll">
-      <HintPath>..\..\Libs\SoftReferenceableAssets.dll</HintPath>
+    <Reference Include="SoftReferenceableAssets.dll" Publicize="true">
+      <HintPath>$(ManagedDir)\SoftReferenceableAssets.dll</HintPath>
     </Reference>
-    <Reference Include="assembly_valheim.dll">
-      <HintPath>..\..\Libs\assembly_valheim.dll</HintPath>
+    <Reference Include="assembly_valheim.dll" Publicize="true">
+      <HintPath>$(ManagedDir)\assembly_valheim.dll</HintPath>
     </Reference>
-    <Reference Include="assembly_utils.dll">
-      <HintPath>..\..\Libs\assembly_utils.dll</HintPath>
+    <Reference Include="assembly_utils.dll" Publicize="true">
+      <HintPath>$(ManagedDir)\assembly_utils.dll</HintPath>
     </Reference>
-    <Reference Include="assembly_guiutils.dll">
-      <HintPath>..\..\Libs\assembly_guiutils.dll</HintPath>
+    <Reference Include="assembly_guiutils.dll" Publicize="true">
+      <HintPath>$(ManagedDir)\assembly_guiutils.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro">
-      <HintPath>..\..\Libs\Unity.TextMeshPro.dll</HintPath>
+      <HintPath>$(ManagedDir)\Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="Unity.InputSystem">
-      <HintPath>..\..\Libs\Unity.InputSystem.dll</HintPath>
+      <HintPath>$(ManagedDir)\Unity.InputSystem.dll</HintPath>
     </Reference>
     <Reference Include="Splatform.dll">
-      <HintPath>..\..\Libs\Splatform.dll</HintPath>
+      <HintPath>$(ManagedDir)\Splatform.dll</HintPath>
     </Reference>
     <Reference Include="ServerDevcommands.dll">
-      <HintPath>..\..\Libs\ServerDevcommands.dll</HintPath>
+      <HintPath>$(LibsDir)\ServerDevcommands.dll</HintPath>
     </Reference>
     <Reference Include="WorldEditCommands.dll">
-      <HintPath>..\..\Libs\WorldEditCommands.dll</HintPath>
+      <HintPath>$(LibsDir)\WorldEditCommands.dll</HintPath>
     </Reference>
   </ItemGroup>
 </Project>

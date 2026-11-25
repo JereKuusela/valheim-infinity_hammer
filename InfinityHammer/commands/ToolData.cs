@@ -88,9 +88,14 @@ public class Tool
   public bool Instant;
   public int? TabIndex;
   public int? Index;
-  // Null means visible in all categories.
+  // Null means show all. The first category is the show all tab, so "all" (-1) also covers it.
   public HashSet<int>? Categories;
-  public bool IsVisibleIn(int category) => Categories == null || category == -1 || Categories.Contains(category);
+  public bool IsVisibleIn(int category, int allCategory)
+  {
+    var isAll = category == -1 || category == allCategory;
+    if (Categories == null) return isAll;
+    return Categories.Contains(category) || (isAll && Categories.Contains(-1));
+  }
 
   // For ruler
   public bool Radius;
@@ -150,7 +155,8 @@ public class Tool
     HashSet<int> result = [];
     foreach (var name in names)
     {
-      if (int.TryParse(name, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id)) result.Add(id);
+      if (name.Equals("all", StringComparison.OrdinalIgnoreCase)) result.Add(-1);
+      else if (int.TryParse(name, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id)) result.Add(id);
       else if (Enum.TryParse<Piece.PieceCategory>(name, true, out var category)) result.Add((int)category);
     }
     return result;

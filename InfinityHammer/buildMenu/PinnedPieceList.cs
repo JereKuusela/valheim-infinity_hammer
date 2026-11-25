@@ -13,10 +13,10 @@ internal sealed class PinnedPieceList(IPieceList original) : IPieceList
   public string GetTagDisplayName(int index) => original.GetTagDisplayName(index);
   public int GetTagIdByIndex(int index) => original.GetTagIdByIndex(index);
   public void UpdateAvailableTags(PieceTable buildTool) => original.UpdateAvailableTags(buildTool);
-  // Returns the hammer tool index, or -1. The Infinity Hammer Menu page is excluded because AddTools places the tools there.
+  // Returns the hammer tool index, or -1. Only Infinity Hammer tables pin; other tables place tools via AddTools.
   internal static int PinIndex(Piece piece, PieceTable table)
   {
-    if (!piece || (HammerMenuCommand.CurrentMode == MenuMode.Menu && Hammer.IsInfinityHammer(table))) return -1;
+    if (!piece || !Hammer.IsInfinityHammer(table)) return -1;
     if (!piece.TryGetComponent<BuildMenuTool>(out var button) || button.tool == null) return -1;
     return ToolManager.Get("hammer").IndexOf(button.tool);
   }
@@ -25,10 +25,11 @@ internal sealed class PinnedPieceList(IPieceList original) : IPieceList
     original.GetAvailablePiecesWithTag(tag, buildTool, pieces);
     // Availability already enforces equipment and command permissions.
     List<(int index, Piece piece)> pinned = [];
+    var defaultTag = buildTool.m_categories.Count > 0 ? (int)buildTool.m_categories[0] : 0;
     foreach (var piece in buildTool.m_availablePieces)
     {
       var index = PinIndex(piece, buildTool);
-      if (index >= 0 && piece.GetComponent<BuildMenuTool>().tool!.IsVisibleIn(tag)) pinned.Add((index, piece));
+      if (index >= 0 && piece.GetComponent<BuildMenuTool>().tool!.IsVisibleIn(tag, defaultTag)) pinned.Add((index, piece));
     }
     for (var i = pieces.Count - 1; i >= 0; i--)
       if (PinIndex(pieces[i], buildTool) >= 0) pieces.RemoveAt(i);

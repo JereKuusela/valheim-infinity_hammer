@@ -3,3 +3,4 @@ Libs
 bin
 obj
 .ionide/symbolCache.db
+/Directory.Build.props.user

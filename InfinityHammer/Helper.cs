@@ -226,7 +226,8 @@ public static class HammerHelper
     DestroyComponents<LocationProxy>(obj);
     DestroyComponents<MapTable>(obj);
     DestroyComponents<ArcheryTarget>(obj);
-
+    // Must go before Aoe because Trap.Awake needs its Aoe.
+    DestroyComponents<Trap>(obj);
     // Could be disables but destroying maybe better for performance.
     DestroyComponents<FootStep>(obj);
     DestroyComponents<Growup>(obj);

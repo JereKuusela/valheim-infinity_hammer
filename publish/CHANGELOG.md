@@ -1,3 +1,7 @@
+- v1.95
+  - Adds new field to tools to specify in which build menu categories they appear.
+  - Fixes objects with Trap component not working in blueprints or area selections.
+
 - v1.94
   - Fixes compatibility issue with signs from Odins Kingdom mod.
 
