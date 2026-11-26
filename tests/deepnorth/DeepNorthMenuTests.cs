@@ -27,12 +27,6 @@ class DeepNorthMenuTests
     C(DeepNorthBuildMenu.TryGetIndex(hoe, pipette, out xy, out cat) && xy.x == 0 && (int)cat == 0, "uncategorized hoe finds the visible tool");
     Player.m_localPlayer.m_buildPieces = hoe; ZInput.touch = false; var before = Hud.closed;
     Call("SelectTool", ui, pipette); C(Console.instance.Last == "tool Pipette" && Hud.closed == before + 1, "uncategorized hoe tool executes and closes menu");
-    var plain = new Piece(); hoe.m_availablePiecesByCategory[0].Add(plain);
-    Selection.Current = new Selection.State { piece = pipette }; Call("ClearCommandSelection", Player.m_localPlayer, plain);
-    C(Selection.Get().GetSelectedPiece() == null && hoe.m_selectedPiece[0].x == 1 && Player.m_localPlayer.setups == 1, "normal hoe selection clears command ghost even in the same slot");
-    Selection.Current = new Selection.State { piece = pipette }; var remote = new Player { m_buildPieces = hoe }; Call("ClearCommandSelection", remote, plain);
-    C(Selection.Get().GetSelectedPiece() == pipette && remote.setups == 0, "remote selection leaves local preview unchanged");
-    Call("ClearCommandSelection", Player.m_localPlayer, new Piece()); C(Selection.Get().GetSelectedPiece() == pipette, "foreign piece cannot clear active selection");
     System.Console.WriteLine($"PASS {n} production Deep North menu assertions (Unity/UI substitutes)");
   }
 }

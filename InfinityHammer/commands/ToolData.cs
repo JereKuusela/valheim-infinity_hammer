@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using ServerDevcommands;
+using Service;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -46,10 +47,12 @@ public class ToolData
   public bool? instant = null;
   [DefaultValue("")]
   public string categories = "";
+  [DefaultValue("")]
+  public string materials = "";
   [DefaultValue(null)]
   public int? tabIndex;
-  [DefaultValue(null)]
-  public int? index;
+  [DefaultValue("")]
+  public string index = "";
   // Non-public so YamlDotNet's default field serialization skips it.
   internal bool IsDefaultData = false;
 }
@@ -87,15 +90,39 @@ public class Tool
   public bool SnapPiece => snapPiece == "true" || HammerHelper.IsDown(snapPiece);
   public bool Instant;
   public int? TabIndex;
-  public int? Index;
-  // Null means show all. The first category is the show all tab, so "all" (-1) also covers it.
-  public HashSet<int>? Categories;
-  public bool IsVisibleIn(int category, int allCategory)
+  private readonly string index;
+  public bool FollowsPiece => index != "" && !int.TryParse(index, NumberStyles.Integer, CultureInfo.InvariantCulture, out _);
+  public string TargetPiece => index.StartsWith("-", StringComparison.Ordinal) ? index.Substring(1) : index;
+  // Number from the start, negative from the end, piece or tool name to go after it, or -name to go before it.
+  // Returns -1 if the named piece is missing.
+  public int GetSlot(IList<Piece> pieces, int previous)
   {
-    var isAll = category == -1 || category == allCategory;
-    if (Categories == null) return isAll;
-    return Categories.Contains(category) || (isAll && Categories.Contains(-1));
+    var slot = previous + 1;
+    if (int.TryParse(index, NumberStyles.Integer, CultureInfo.InvariantCulture, out var number))
+      slot = number < 0 ? pieces.Count + 1 + number : number;
+    else if (index != "")
+    {
+      var before = index.StartsWith("-", StringComparison.Ordinal);
+      var name = TargetPiece;
+      slot = -1;
+      for (var i = 0; i < pieces.Count; i++)
+      {
+        if (!IsNamed(pieces[i], name)) continue;
+        slot = before ? i : i + 1;
+        break;
+      }
+      if (slot < 0) return -1;
+    }
+    return Math.Max(0, Math.Min(slot, pieces.Count));
   }
+  public static bool IsNamed(Piece piece, string name) => piece is BuildMenuTool { tool: { } tool }
+    ? tool.Name.Equals(name, StringComparison.OrdinalIgnoreCase)
+    : Utils.GetPrefabName(piece.gameObject).Equals(name, StringComparison.OrdinalIgnoreCase)
+      || Localization.instance.Localize(piece.m_name).Equals(name, StringComparison.OrdinalIgnoreCase);
+  public Piece.UsageTagFlags Usage;
+  public bool ShowInAll;
+  // Lower case item prefab names.
+  public HashSet<string>? Materials;
 
   // For ruler
   public bool Radius;
@@ -132,9 +159,12 @@ public class Tool
     terrainGrid = data.terrainGrid;
     snapPiece = data.snapPiece;
     TabIndex = data.tabIndex;
-    Categories = ParseCategories(data.categories);
+    Usage = ParseUsage(data.categories);
+    var categories = SplitNames(data.categories);
+    ShowInAll = categories.Count == 0 || categories.Contains("all", StringComparer.OrdinalIgnoreCase);
+    Materials = ParseMaterials(data.materials);
     targetEdge = data.targetEdge;
-    Index = data.index;
+    index = data.index.Trim();
     Commands = data.commands == null ? GetCommands(data.command) : [.. data.commands.Select(c => new CommandValue(c.command, c.keys))];
     Instant = Commands.All(c => !c.Command.Contains("<") && !c.Command.Contains("hammer "));
     Instant = data.instant == null ? Instant : (bool)data.instant;
@@ -148,18 +178,23 @@ public class Tool
         PointCount = Math.Max(PointCount, int.Parse(match.Groups[2].Value, CultureInfo.InvariantCulture));
     }
   }
-  private static HashSet<int>? ParseCategories(string value)
+  private static List<string> SplitNames(string value) => [.. value.Split(',').Select(s => s.Trim()).Where(s => s != "")];
+  private static Piece.UsageTagFlags ParseUsage(string value)
   {
-    var names = value.Split(',').Select(s => s.Trim()).Where(s => s != "").ToList();
-    if (names.Count == 0) return null;
-    HashSet<int> result = [];
-    foreach (var name in names)
+    Piece.UsageTagFlags result = 0;
+    foreach (var name in SplitNames(value))
     {
-      if (name.Equals("all", StringComparison.OrdinalIgnoreCase)) result.Add(-1);
-      else if (int.TryParse(name, NumberStyles.Integer, CultureInfo.InvariantCulture, out var id)) result.Add(id);
-      else if (Enum.TryParse<Piece.PieceCategory>(name, true, out var category)) result.Add((int)category);
+      if (name.Equals("all", StringComparison.OrdinalIgnoreCase)) continue;
+      // Numbers would be accepted as raw flag values.
+      if (!int.TryParse(name, out _) && Enum.TryParse<Piece.UsageTagFlags>(name, true, out var usage)) result |= usage;
+      else Log.Warning($"Tool category {name} is not a valid usage tag.");
     }
     return result;
+  }
+  private static HashSet<string>? ParseMaterials(string value)
+  {
+    var names = SplitNames(value);
+    return names.Count == 0 ? null : [.. names.Select(s => s.ToLowerInvariant())];
   }
   public static readonly Regex PointRegex = new(@"<([xyz])(\d+)>");
   public const string RepeatPlaceholder = "<p*>";

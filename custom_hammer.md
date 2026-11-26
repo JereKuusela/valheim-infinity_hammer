@@ -22,24 +22,22 @@ Each menu can be activated with a console command for an easy access.
 - `hammer_menu objects`: Shows most objects sorted by name.
   - Objects starting with "fx_", "sfx_" or "vfx_" are not shown.
   - Each letter becomes own category.
-  - You can hover the button to see some object names in that category.
 - `hammer_menu rooms`: Shows dungeon rooms and allows selecting them from dungeon building.
 - `hammer_menu sounds`: Shows objects starting with "sfx_".
 - `hammer_menu tools`: Shows custom command tools and allows executing them.
 - `hammer_menu types`: Shows objects sorted by their component types.
   - Each component type becomes own category.
   - Each object can be in multiple categories.
-  - You can hover the button to see some object names in that category.
 - `hammer_menu visuals`: Shows objects starting with "fx_" or "vfx_".
 
 ## Filtering
 
 Some menus have huge amounts of categories and objects.
 
-Additional categories are created when a category exceeds 90 items (default limit). A navigation layer is added if there are more than 5 categories (default limit).
+Categories are shown as tags on the left side of the build menu and each category shows all of its items.
 
-These limits can be changed in settings, for example when using a mod that increases the build menu size.
+The "All" tag only shows the first category if the menu has more than 1000 items (default limit), because creating thousands of buttons is slow. This limit can be changed in settings.
 
-Second parameter can be used to filter the results, which can prevent the need for navigation layers.
+Second parameter can be used to filter the results.
 
 For example `hammer_menu types Tree` shows only component types that start with "Tree".

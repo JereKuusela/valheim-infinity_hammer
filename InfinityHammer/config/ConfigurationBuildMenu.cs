@@ -7,10 +7,8 @@ namespace InfinityHammer;
 public partial class Configuration
 {
 #nullable disable
-  public static ConfigEntry<int> configMaxTabs;
-  public static int MaxTabs => configMaxTabs.Value;
-  public static ConfigEntry<int> configItemsPerTab;
-  public static int ItemsPerTab => configItemsPerTab.Value;
+  public static ConfigEntry<int> configMaxAllItems;
+  public static int MaxAllItems => configMaxAllItems.Value;
   public static ConfigEntry<string> configBlueprintSorting;
   public static string BlueprintSorting => configBlueprintSorting.Value;
   public static ConfigEntry<KeyboardShortcut> configKeybindMenuTypes;
@@ -36,8 +34,7 @@ public partial class Configuration
   private static void InitCustomMenu(ConfigWrapper wrapper)
   {
     var section = "7. Build Menu";
-    configMaxTabs = wrapper.Bind(section, "Max tabs", 5, "Maximum number of tabs in the custom build menu.");
-    configItemsPerTab = wrapper.Bind(section, "Items per tab", 90, "Maximum number of items per tab in the custom build menu.");
+    configMaxAllItems = wrapper.Bind(section, "Max items in all", 1000, "If the custom build menu has more items, the All tag only shows the first category.");
     configBlueprintSorting = wrapper.Bind(section, "Blueprint sorting", BlueprintSortingMode.Folder, new ConfigDescription("How blueprints are sorted in the menu.", new AcceptableValueList<string>(BlueprintSortingMode.Category, BlueprintSortingMode.Folder, BlueprintSortingMode.CategoryAndFolder, BlueprintSortingMode.OnlyName)));
     configKeybindMenu = wrapper.BindCommand("hammer_menu", section, "Menu", new KeyboardShortcut(KeyCode.None), "Opens the custom menu.");
     configKeybindMenuBinds = wrapper.BindCommand("hammer_menu binds", section, "Menu: Binds", new KeyboardShortcut(KeyCode.None), "Opens the binds menu.");

@@ -21,9 +21,6 @@ public class BuildItem
 public static class CustomMenu
 {
   public const int CATEGORY_OFFSET = 1000;
-  private static int MaxTabs => Configuration.MaxTabs;
-  private static int MaxItemsPerTab => Configuration.ItemsPerTab - 1; // Reserve 1 slot for back button
-  private static int MaxItems => MaxTabs * MaxItemsPerTab;
   public static BuildItem BuildItem(string command, string shortName, string? fullName = null, bool instant = true, string? icon = null)
   {
     return new BuildItem()
@@ -42,54 +39,8 @@ public static class CustomMenu
       .Where(prefab => string.IsNullOrEmpty(HammerMenuCommand.CurrentFilter) ||
                       prefab.name.StartsWith(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase))
       .Select(prefab => BuildItem($"hammer {prefab.name}", prefab.name))
-      .OrderBy(item => item.ShortName, StringComparer.InvariantCultureIgnoreCase)
       .ToList();
-
-    if (allItems.Count == 0) return [];
-
-    // Group items by starting letter
-    var groupedByLetter = allItems
-      .GroupBy(item => item.ShortName.Substring(0, 1).ToUpper())
-      .OrderBy(g => g.Key);
-
-    List<CategoryInfo> categories = [];
-
-    foreach (var letterGroup in groupedByLetter)
-    {
-      var letter = letterGroup.Key;
-      var itemsInGroup = letterGroup.OrderBy(item => item.ShortName, StringComparer.InvariantCultureIgnoreCase).ToList();
-
-      // If the group fits in one category, create a single category for this letter
-      if (itemsInGroup.Count <= MaxItemsPerTab)
-      {
-        categories.Add(new CategoryInfo
-        {
-          Name = letter,
-          Items = itemsInGroup
-        });
-      }
-      else
-      {
-        // If too many items for one letter, split into subcategories
-        int count = itemsInGroup.Count;
-        int subIndex = 1;
-        while (count > 0)
-        {
-          var categoryItems = itemsInGroup.Take(MaxItemsPerTab).ToList();
-          count -= categoryItems.Count;
-          itemsInGroup = [.. itemsInGroup.Skip(categoryItems.Count)];
-          var secondLetter = categoryItems.First().ShortName.Substring(1, 1).ToLower();
-          categories.Add(new CategoryInfo
-          {
-            Name = $"{letter}{secondLetter}",
-            Items = categoryItems
-          });
-          subIndex++;
-        }
-      }
-    }
-
-    return categories;
+    return GenerateCategories(allItems);
   }
 
   public static List<CategoryInfo> GenerateMenu()
@@ -126,7 +77,7 @@ public static class CustomMenu
       .Where(prefab => string.IsNullOrEmpty(HammerMenuCommand.CurrentFilter) ||
                       prefab.name.Substring(4).Trim().StartsWith(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase))
       .Select(prefab => BuildItem($"hammer {prefab.name}", prefab.name.Substring(4).Trim(), prefab.name)).ToList();
-    return GenerateCategories(items, MaxItemsPerTab);
+    return GenerateCategories(items);
   }
 
   public static List<CategoryInfo> GenerateVisuals()
@@ -136,7 +87,7 @@ public static class CustomMenu
       .Where(prefab => string.IsNullOrEmpty(HammerMenuCommand.CurrentFilter) ||
                       prefab.name.Split(['_'], 2).Last().Trim().StartsWith(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase))
       .Select(prefab => BuildItem($"hammer {prefab.name}", prefab.name.Split(['_'], 2).Last().Trim(), prefab.name)).ToList();
-    return GenerateCategories(items, MaxItemsPerTab);
+    return GenerateCategories(items);
   }
 
   public static List<CategoryInfo> GenerateComponents()
@@ -162,49 +113,16 @@ public static class CustomMenu
         componentCategories[name].Add(prefab.name);
       }
     }
-    var limit = componentCategories.Count > MaxTabs ? MaxItems : MaxItemsPerTab;
-    // Process each category and generate category info
     List<CategoryInfo> categories = [];
-    foreach (var category in componentCategories)
+    foreach (var category in componentCategories.OrderBy(kvp => kvp.Key, StringComparer.InvariantCultureIgnoreCase))
     {
-      var componentType = category.Key;
-      var objectNames = category.Value;
-
-      // Sort objects within category
-      objectNames.Sort(StringComparer.InvariantCultureIgnoreCase);
-
-      // Create pieces for this component category
-      var items = objectNames.Select(name => BuildItem($"hammer {name}", name)).ToList();
-
-      // Split into multiple categories if too many items
-      if (items.Count <= limit)
+      category.Value.Sort(StringComparer.InvariantCultureIgnoreCase);
+      categories.Add(new CategoryInfo
       {
-        categories.Add(new CategoryInfo
-        {
-          Name = componentType,
-          Items = items
-        });
-      }
-      else
-      {
-        // Split large categories into smaller ones with letter prefixes
-        var sortedItems = items.OrderBy(p => p.ShortName, StringComparer.InvariantCultureIgnoreCase).ToList();
-        int count = sortedItems.Count;
-        while (count > 0)
-        {
-          var categoryItems = sortedItems.Take(limit).ToList();
-          count -= categoryItems.Count;
-          sortedItems = sortedItems.Skip(categoryItems.Count).ToList();
-
-          categories.Add(new CategoryInfo
-          {
-            Name = componentType,
-            Items = categoryItems
-          });
-        }
-      }
+        Name = category.Key,
+        Items = [.. category.Value.Select(name => BuildItem($"hammer {name}", name))]
+      });
     }
-
     return categories;
   }
 
@@ -214,7 +132,7 @@ public static class CustomMenu
       .Where(veg => string.IsNullOrEmpty(HammerMenuCommand.CurrentFilter) ||
                    veg.StartsWith(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase))
       .Select(veg => BuildItem($"hammer {veg}", veg)).ToList();
-    return GenerateCategories(items, MaxItemsPerTab);
+    return GenerateCategories(items);
   }
   public static List<CategoryInfo> GenerateLocations()
   {
@@ -222,7 +140,7 @@ public static class CustomMenu
       .Where(loc => string.IsNullOrEmpty(HammerMenuCommand.CurrentFilter) ||
                    loc.StartsWith(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase))
       .Select(loc => BuildItem($"hammer_location {loc}", loc)).ToList();
-    return GenerateCategories(items, MaxItemsPerTab);
+    return GenerateCategories(items);
   }
   public static List<CategoryInfo> GenerateRooms()
   {
@@ -231,7 +149,7 @@ public static class CustomMenu
       .Where(room => string.IsNullOrEmpty(HammerMenuCommand.CurrentFilter) ||
                     room.m_prefab.name.StartsWith(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase))
       .Select(room => BuildItem($"hammer_room {room.m_prefab.name}", room.m_prefab.name)).ToList();
-    return GenerateCategories(items, MaxItemsPerTab);
+    return GenerateCategories(items);
   }
   public static List<CategoryInfo> GenerateBluePrints()
   {
@@ -270,43 +188,13 @@ public static class CustomMenu
 
     foreach (var categoryGroup in categorizedBlueprints)
     {
-      var categoryName = categoryGroup.Key;
-      var blueprintsInCategory = categoryGroup
-        .OrderBy(bp => bp.Name, StringComparer.InvariantCultureIgnoreCase)
-        .Select(bp => BuildItem($"hammer_blueprint {bp.Name}", bp.Name))
-        .ToList();
-
-      // If category has too many items, split them
-      if (blueprintsInCategory.Count <= MaxItemsPerTab)
+      categories.Add(new CategoryInfo
       {
-        categories.Add(new CategoryInfo
-        {
-          Name = categoryName,
-          Items = blueprintsInCategory
-        });
-      }
-      else
-      {
-        // Split large categories into smaller ones with letter prefixes
-        var sortedItems = blueprintsInCategory.OrderBy(p => p.ShortName, StringComparer.InvariantCultureIgnoreCase).ToList();
-        int count = sortedItems.Count;
-        while (count > 0)
-        {
-          var categoryItems = sortedItems.Take(MaxItemsPerTab).ToList();
-          count -= categoryItems.Count;
-          sortedItems = sortedItems.Skip(categoryItems.Count).ToList();
-
-          var firstLetter = categoryItems.First().ShortName.Substring(0, 1).ToUpper();
-          var lastLetter = categoryItems.Last().ShortName.Substring(0, 1).ToUpper();
-          var subCategoryName = firstLetter == lastLetter ? $"{categoryName}-{firstLetter}" : $"{categoryName}-{firstLetter}-{lastLetter}";
-
-          categories.Add(new CategoryInfo
-          {
-            Name = subCategoryName,
-            Items = categoryItems
-          });
-        }
-      }
+        Name = categoryGroup.Key,
+        Items = [.. categoryGroup
+          .OrderBy(bp => bp.Name, StringComparer.InvariantCultureIgnoreCase)
+          .Select(bp => BuildItem($"hammer_blueprint {bp.Name}", bp.Name))]
+      });
     }
 
     return categories;
@@ -318,7 +206,7 @@ public static class CustomMenu
       .Where(bp => string.IsNullOrEmpty(HammerMenuCommand.CurrentFilter) ||
                   bp.StartsWith(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase))
       .Select(bp => BuildItem($"hammer_blueprint {bp}", bp)).ToList();
-    return GenerateCategories(items, MaxItemsPerTab);
+    return GenerateCategories(items);
   }
 
   public static List<CategoryInfo> GenerateTools()
@@ -344,41 +232,13 @@ public static class CustomMenu
       if (filteredTools.Count == 0) continue;
 
       // Create build items for this equipment category
-      var items = filteredTools
-        .OrderBy(tool => tool.Name, StringComparer.InvariantCultureIgnoreCase)
-        .Select(tool => BuildItem($"tool {tool.Name}", tool.Name, tool.Description, tool.Instant))
-        .ToList();
-
-      // If we have too many tools in one category, split them
-      if (items.Count <= MaxItemsPerTab)
+      categories.Add(new CategoryInfo
       {
-        categories.Add(new CategoryInfo
-        {
-          Name = equipment,
-          Items = items
-        });
-      }
-      else
-      {
-        // Split large categories into smaller ones with letter prefixes
-        int count = items.Count;
-        while (count > 0)
-        {
-          var categoryItems = items.Take(MaxItemsPerTab).ToList();
-          count -= categoryItems.Count;
-          items = items.Skip(categoryItems.Count).ToList();
-
-          var firstLetter = categoryItems.First().ShortName.Substring(0, 1).ToUpper();
-          var lastLetter = categoryItems.Last().ShortName.Substring(0, 1).ToUpper();
-          var categoryName = firstLetter == lastLetter ? $"{equipment}-{firstLetter}" : $"{equipment}-{firstLetter}-{lastLetter}";
-
-          categories.Add(new CategoryInfo
-          {
-            Name = categoryName,
-            Items = categoryItems
-          });
-        }
-      }
+        Name = equipment,
+        Items = [.. filteredTools
+          .OrderBy(tool => tool.Name, StringComparer.InvariantCultureIgnoreCase)
+          .Select(tool => BuildItem($"tool {tool.Name}", tool.Name, tool.Description, tool.Instant))]
+      });
     }
 
     return categories;
@@ -402,7 +262,7 @@ public static class CustomMenu
     // Custom pages may leave the table without any tab.
     if (pt.m_availablePiecesByCategory.Count == 0 && Hammer.IsInfinityHammer(pt)) pt.m_availablePiecesByCategory.Add([]);
     List<Tool> tools = ToolManager.Get(equipment);
-    // Infinity Hammer pages have their own tabs, so tools go to the tabs they are visible in.
+    // Infinity Hammer pages have their own tabs, so tools go to the first one.
     var customPages = Hammer.IsInfinityHammer(pt);
     var defaultTab = pt.m_categories.Count > 0 ? (int)pt.m_categories[0] : 0;
     int tab = 0;
@@ -410,27 +270,25 @@ public static class CustomMenu
     foreach (var tool in tools)
     {
       if (!IsToolCommandAllowed(tool)) continue;
-      List<int> targets;
+      int target;
       if (customPages)
-        targets = [.. pt.m_categories.Select(c => (int)c).Where(c => c >= 0 && c < pt.m_availablePiecesByCategory.Count && tool.IsVisibleIn(c, defaultTab))];
+        target = defaultTab;
       else
       {
         tab = tool.TabIndex ?? tab;
-        if (tab < 0 || pt.m_availablePiecesByCategory.Count <= tab || !tool.IsVisibleIn(tab, tab)) continue;
-        targets = [tab];
+        target = tab;
       }
+      if (target < 0 || pt.m_availablePiecesByCategory.Count <= target) continue;
       var piece = Build(pt, tool);
-      foreach (var target in targets)
-      {
-        if (!indices.ContainsKey(target))
-          indices[target] = equipment == "hammer" ? 0 : pt.m_availablePiecesByCategory[target].Count - 1;
-        var pieces = pt.m_availablePiecesByCategory[target];
-        var index = Math.Max(0, Math.Min(tool.Index ?? indices[target] + 1, pieces.Count));
-        piece.m_category = (Piece.PieceCategory)target;
-        pieces.Insert(index, piece);
-        indices[target] = index;
-      }
-      if (targets.Count == 0) continue;
+      if (!indices.ContainsKey(target))
+        indices[target] = equipment == "hammer" ? 0 : pt.m_availablePiecesByCategory[target].Count - 1;
+      var pieces = pt.m_availablePiecesByCategory[target];
+      var index = tool.GetSlot(pieces, indices[target]);
+      // The piece can be in another legacy tab, so visibility is decided by the build menu view.
+      if (index < 0) index = pieces.Count;
+      piece.m_category = (Piece.PieceCategory)target;
+      pieces.Insert(index, piece);
+      indices[target] = index;
       pt.m_availablePieces.Add(piece);
       pt.m_enabledPieces.Add(piece);
     }
@@ -452,7 +310,7 @@ public static class CustomMenu
     return true;
   }
 
-  private static string PieceTableToEquipment(PieceTable pt)
+  internal static string PieceTableToEquipment(PieceTable pt)
   {
     var name = pt.name;
     if (name.StartsWith("_")) name = name.Substring(1);
@@ -474,31 +332,16 @@ public static class CustomMenu
     return buildItems;
   }
 
-  public static List<CategoryInfo> GenerateCategories(List<BuildItem> items, int limit)
+  public static List<CategoryInfo> GenerateCategories(List<BuildItem> items)
   {
-    List<CategoryInfo> categories = [];
-    if (items.Count == 0) return categories;
-
-    var sorted = items.OrderBy(i => i.ShortName, StringComparer.InvariantCultureIgnoreCase).ToList();
-    int count = sorted.Count;
-    // Use MaxItemsPerTab to determine category splits
-    while (count > 0)
-    {
-      var itemsForCategory = sorted.Take(limit).ToList();
-      count -= itemsForCategory.Count;
-      sorted = [.. sorted.Skip(itemsForCategory.Count)];
-      var firstLetter = itemsForCategory.First().ShortName.Substring(0, 1).ToUpper();
-      var lastLetter = itemsForCategory.Last().ShortName.Substring(0, 1).ToUpper();
-      var categoryName = firstLetter == lastLetter ? firstLetter : $"{firstLetter}-{lastLetter}";
-      categories.Add(new CategoryInfo
+    return [.. items
+      .GroupBy(i => i.ShortName.Length > 0 ? i.ShortName.Substring(0, 1).ToUpperInvariant() : "#")
+      .OrderBy(g => g.Key, StringComparer.InvariantCultureIgnoreCase)
+      .Select(g => new CategoryInfo
       {
-        Name = categoryName,
-        Items = itemsForCategory,
-      });
-    }
-    if (categories.Count > MaxTabs && limit < MaxItems) return GenerateCategories(items, MaxItems);
-    return categories;
-
+        Name = g.Key,
+        Items = [.. g.OrderBy(i => i.ShortName, StringComparer.InvariantCultureIgnoreCase)]
+      })];
   }
 
   private static readonly Dictionary<string, Piece> pieceCache = [];
@@ -512,6 +355,8 @@ public static class CustomMenu
     }
 
     GameObject obj = new("_IH_Menu_" + key);
+    // Inactive so that Piece.Awake doesn't register it as a world piece.
+    obj.SetActive(false);
     UnityEngine.Object.DontDestroyOnLoad(obj);
     var piece = obj.AddComponent<BuildMenuTool>();
     var toolData = new ToolData()
@@ -529,6 +374,16 @@ public static class CustomMenu
     pieceCache[key] = piece;
     piece.m_category = category;
     return piece;
+  }
+
+  public static void ReleaseUnused(HashSet<Piece> used)
+  {
+    var unused = pieceCache.Where(kvp => kvp.Value is BuildMenuTool && !used.Contains(kvp.Value)).Select(kvp => kvp.Key).ToList();
+    foreach (var key in unused)
+    {
+      if (pieceCache[key]) UnityEngine.Object.Destroy(pieceCache[key].gameObject);
+      pieceCache.Remove(key);
+    }
   }
 
   public static Piece RepairButton()

@@ -28,6 +28,9 @@ internal sealed class HammerPieceList(IPieceList original) : IPieceList
       return;
     }
     var added = new HashSet<Piece>();
+    // Thousands of buttons would stall the UI.
+    if (tag == -1 && buildTool.m_availablePieces.Count > Configuration.MaxAllItems && buildTool.m_categories.Count > 0)
+      tag = (int)buildTool.m_categories[0];
     foreach (var category in buildTool.m_categories)
     {
       if (tag != -1 && tag != (int)category) continue;
@@ -45,10 +48,11 @@ public static class DeepNorthBuildMenu
   {
     for (var i = 0; i < __instance.m_pieceLists.Count; i++)
     {
-      if (__instance.m_pieceLists[i] is PinnedPieceList) continue;
-      var original = __instance.m_pieceLists[i];
-      if (i == 0) original = new HammerPieceList(original);
-      __instance.m_pieceLists[i] = new PinnedPieceList(original);
+      var list = __instance.m_pieceLists[i];
+      // Recent and favorites have their own order.
+      if (list is PinnedPieceList or RecentPieceList or FavoritePieceList) continue;
+      if (i == 0) list = new HammerPieceList(list);
+      __instance.m_pieceLists[i] = new PinnedPieceList(list);
     }
   }
 
@@ -77,20 +81,6 @@ public static class DeepNorthBuildMenu
       Hud.CloseBuildUi();
     }
     return false;
-  }
-
-  [HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece), typeof(Piece)), HarmonyPrefix]
-  private static void ClearCommandSelection(Player __instance, Piece __0)
-  {
-    var piece = __0;
-    if (__instance != Player.m_localPlayer || !piece || piece.GetComponent<BuildMenuTool>() || !__instance.m_buildPieces) return;
-    if (!TryGetIndex(__instance.m_buildPieces, piece, out var index, out var category)) return;
-    if (Selection.Get().GetSelectedPiece() == null) return;
-    Selection.Clear();
-    // The native method skips SetupPlacementGhost when the slot is unchanged.
-    __instance.m_buildPieces.m_selectedCategory = category;
-    __instance.m_buildPieces.m_selectedPiece[(int)category] = index;
-    __instance.SetupPlacementGhost();
   }
 
   // Native lookup compares names and returns Piece.m_category. IH can put the same

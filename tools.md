@@ -43,13 +43,23 @@ Following fields are available:
   - The path also finishes automatically at 64 points.
 - instant: If true, the command is executed instantly without any selection.
   - If not set, the value is automatically determined from the command.
-- categories: Comma separated list of categories (numbers or names) where the tool is visible.
-  - Use `all` for the "Show all" view (the first category).
-  - If not set, the tool is only visible in "Show all".
-  - If set, the tool is only visible in the listed categories (hidden from "Show all" unless `all` is listed).
-- tabIndex: Tab of the tool in the build menu.
+- categories: Comma separated list of usage tags where the tool is visible (for example `misc, building`).
+  - Use `all` to also show the tool in "All".
+  - If not set, the tool is only visible in "All".
+  - Available tags: misc, crafting, building, floor, wall, roof, architecture, furniture, lighting, decor, storage, transport, food, meads, feasts, defense, stacks, stairs, doors, seasonal.
+- materials: Comma separated list of item ids where the tool is also visible in the "By material" list (for example `Wood, Stone`).
+  - The tool doesn't cost these materials.
+- tabIndex: Tab of the tool in the legacy build menu.
   - If not set, the tool is added to the same tab as the previous tool.
-- index: Index of the tool in the build tab.
+- index: Position of the tool in the build menu.
+  - Number: Position from the start (0 is the first).
+  - Negative number: Position from the end (-1 is the last).
+  - Piece or tool name: Placed after that piece (for example `piece_repair` or `Pipette`).
+    - Pieces can also be matched by their displayed name (for example `Level ground`), but this only works for the language it was written in.
+  - Name starting with `-`: Placed before that piece (for example `-mud_road`).
+  - If the named piece is not in the shown list, the tool is hidden.
+    - This also applies when the piece is hidden by the search.
+  - Without `categories` or `materials`, the tool is shown in every usage/material tag that contains the named piece.
   - If not set, the tool is added after the previous tool.
 
 ## Command parameters

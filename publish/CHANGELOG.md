@@ -1,3 +1,10 @@
+- v1.96
+  - Adds new field to tool to specify in which build menu materials they appear.
+  - Adds negative value support to tool index.
+  - Adds piece name support to tool index.
+  - Changes Infinity Hammer build menu to have flatter structure.
+  - Fixes tool index not working (put always at end).
+
 - v1.95
   - Adds new field to tools to specify in which build menu categories they appear.
   - Fixes objects with Trap component not working in blueprints or area selections.

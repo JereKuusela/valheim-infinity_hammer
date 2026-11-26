@@ -13,9 +13,34 @@ public class BuildMenuTool : Piece
 [HarmonyPatch]
 public class TakeOverBuildMenu
 {
+  private static bool Selecting;
+  private static bool Activated;
+
+  // Native selection calls SetBuildCategory which rebuilds the unchanged piece table.
+  [HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece), typeof(Piece)), HarmonyPrefix]
+  static void SelectPiecePrefix()
+  {
+    Selecting = true;
+    Activated = false;
+  }
+  [HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece), typeof(Piece)), HarmonyPostfix]
+  static void SelectPiecePostfix(Player __instance, bool __result)
+  {
+    Selecting = false;
+    // Native skips SetSelected when the slot is unchanged.
+    if (__result && !Activated)
+    {
+      ActivatePiece(__instance.m_buildPieces);
+      __instance.SetupPlacementGhost();
+    }
+  }
+  [HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece), typeof(Piece)), HarmonyFinalizer]
+  static void SelectPieceFinalizer() => Selecting = false;
+
   [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpdateAvailable)), HarmonyPrefix]
   static bool UpdateAvailablePrefix(PieceTable __instance)
   {
+    if (Selecting) return false;
     if (Hammer.IsInfinityHammer(__instance))
     {
       CustomBuildMenu.HandleCustomMenuMode(__instance);
@@ -26,7 +51,10 @@ public class TakeOverBuildMenu
   [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpdateAvailable)), HarmonyPostfix, HarmonyPriority(Priority.Low)]
   static void UpdateAvailablePostfix(PieceTable __instance)
   {
-    if (!Configuration.ToolsEnabled || !Player.m_localPlayer || __instance != Player.m_localPlayer.m_buildPieces) return;
+    if (Selecting || !Player.m_localPlayer || __instance != Player.m_localPlayer.m_buildPieces) return;
+    // Native UI only refreshes when the piece count changes.
+    if (Hud.instance) Hud.instance.m_buildUi.m_availablePieceCount = -1;
+    if (!Configuration.ToolsEnabled) return;
     CustomMenu.AddTools(__instance);
     if (Hammer.IsInfinityHammer(__instance) && HammerMenuCommand.CurrentMode != MenuMode.Menu) return;
     if (HammerMenuCommand.CurrentMode == MenuMode.Builds && HammerMenuCommand.CurrentFilter != "")
@@ -68,31 +96,13 @@ public class TakeOverBuildMenu
     return true;
   }
 
-  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.LeftPiece)), HarmonyPostfix]
-  private static void HandleLeftPiece(PieceTable __instance) => ActivatePiece(__instance);
-
-  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.RightPiece)), HarmonyPostfix]
-  private static void HandleRightPiece(PieceTable __instance) => ActivatePiece(__instance);
-
-  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpPiece)), HarmonyPostfix]
-  private static void HandleUpPiece(PieceTable __instance) => ActivatePiece(__instance);
-
-  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.DownPiece)), HarmonyPostfix]
-  private static void HandleDownPiece(PieceTable __instance) => ActivatePiece(__instance);
-  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetCategory), typeof(int)), HarmonyPostfix]
-  private static void HandleSetCategoryInt(PieceTable __instance) => ActivatePiece(__instance);
-  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetCategory), typeof(Piece.PieceCategory)), HarmonyPostfix]
-  private static void HandleSetCategoryPieceCategory(PieceTable __instance) => ActivatePiece(__instance);
-  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.PrevCategory)), HarmonyPostfix]
-  private static void HandlePrevCategory(PieceTable __instance) => ActivatePiece(__instance);
-  [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.NextCategory)), HarmonyPostfix]
-  private static void HandleNextCategory(PieceTable __instance) => ActivatePiece(__instance);
   [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetSelected)), HarmonyPostfix]
   private static void HandleSetSelected(PieceTable __instance) => ActivatePiece(__instance);
 
   private static void ActivatePiece(PieceTable pt)
   {
     if (!Player.m_localPlayer || Player.m_localPlayer.m_buildPieces != pt) return;
+    Activated = true;
     var category = pt.GetSelectedCategory();
     var index = pt.GetSelectedIndex();
     var piece = pt.GetPiece(category, index);

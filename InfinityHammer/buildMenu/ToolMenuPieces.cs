@@ -24,6 +24,7 @@ internal static class ToolMenuPieces
       piece.m_description = tool.Description;
       piece.m_name = tool.Name;
       piece.m_icon = tool.Icon;
+      piece.m_usage = tool.Usage;
       return piece;
     }
     private void Purge()

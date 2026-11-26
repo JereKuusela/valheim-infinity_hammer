@@ -158,12 +158,6 @@ public class ToolManager
   private static void RefreshMenu()
   {
     Player.m_localPlayer?.UpdateAvailablePiecesList();
-    // Same-count edits also need a refresh of the native UI's cached buttons.
-    if (Hud.instance && Hud.IsPieceSelectionVisible())
-    {
-      Hud.instance.m_buildUi.m_currentBuildTool = null;
-      Hud.instance.m_buildUi.OpenBuildMenu();
-    }
   }
 
   private static void LoadTool(string file, string equipment, List<ToolData> tools)
