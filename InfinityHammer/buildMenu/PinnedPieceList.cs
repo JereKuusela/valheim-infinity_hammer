@@ -1,29 +1,76 @@
 using System.Collections.Generic;
+using System.Linq;
 using HarmonyLib;
 namespace InfinityHammer;
 
 // Native lists follow the available set order, so tools are moved to their configured slots.
 // Infinity Hammer pages are already ordered by HammerPieceList.
-internal sealed class PinnedPieceList(IPieceList original) : IPieceList
+internal sealed class PinnedPieceList(IPieceList original, bool reorder) : IPieceList
 {
   private readonly ByMaterialPieceList? materials = original as ByMaterialPieceList;
+  // Tool categories/materials that no piece uses, shown before the native tags.
+  private readonly List<(int id, string name, string display)> extraTags = [];
   public string DisplayName => original.DisplayName;
   public bool ShowTags => original.ShowTags;
   public bool CanCustomizeTags => original.CanCustomizeTags;
-  public int TagCount => original.TagCount;
-  public int TagSeparatorIndex => original.TagSeparatorIndex;
-  public string GetTagDisplayName(int index) => original.GetTagDisplayName(index);
-  public int GetTagIdByIndex(int index) => original.GetTagIdByIndex(index);
-  public void UpdateAvailableTags(PieceTable buildTool) => original.UpdateAvailableTags(buildTool);
+  public int TagCount => extraTags.Count + original.TagCount;
+  public int TagSeparatorIndex => original.TagSeparatorIndex < 0 ? -1 : original.TagSeparatorIndex + extraTags.Count;
+  public string GetTagDisplayName(int index) => index < extraTags.Count ? extraTags[index].display : original.GetTagDisplayName(index - extraTags.Count);
+  public int GetTagIdByIndex(int index) => index < extraTags.Count ? extraTags[index].id : original.GetTagIdByIndex(index - extraTags.Count);
+  public void UpdateAvailableTags(PieceTable buildTool)
+  {
+    original.UpdateAvailableTags(buildTool);
+    extraTags.Clear();
+    if (Hammer.IsInfinityHammer(buildTool) || !reorder) return;
+    HashSet<int> existing = [.. Enumerable.Range(0, original.TagCount).Select(original.GetTagIdByIndex)];
+    foreach (var piece in buildTool.m_availablePieces)
+    {
+      if (piece is not BuildMenuTool { tool: { } tool }) continue;
+      var names = materials != null ? tool.Materials : tool.Categories;
+      if (names == null) continue;
+      foreach (var name in names)
+      {
+        var (key, display) = materials != null ? ResolveMaterial(name) : (name.ToLowerInvariant(), name);
+        var id = key.GetStableHashCode();
+        if (existing.Add(id)) extraTags.Add((id, key, display));
+      }
+    }
+  }
+  private static (string name, string display) ResolveMaterial(string name)
+  {
+    var item = ObjectDB.instance ? ObjectDB.instance.m_items.FirstOrDefault(i => i && i.name.Equals(name, System.StringComparison.OrdinalIgnoreCase)) : null;
+    if (item && item!.TryGetComponent<ItemDrop>(out var drop)) return (item.name, drop.m_itemData.m_shared.m_name);
+    return (name, name);
+  }
+  private string? GetExtraTag(int tag)
+  {
+    foreach (var extra in extraTags)
+      if (extra.id == tag) return extra.name;
+    return null;
+  }
   public void GetAvailablePiecesWithTag(int tag, PieceTable buildTool, IList<Piece> pieces)
   {
-    original.GetAvailablePiecesWithTag(tag, buildTool, pieces);
+    if (reorder) Fill(tag, buildTool, pieces);
+    else original.GetAvailablePiecesWithTag(tag, buildTool, pieces);
+    CustomMenu.EnsureIcons(pieces);
+  }
+  private void Fill(int tag, PieceTable buildTool, IList<Piece> pieces)
+  {
+    var extra = GetExtraTag(tag);
+    // Native lists would fail to resolve the unknown tag.
+    if (extra == null)
+      original.GetAvailablePiecesWithTag(tag, buildTool, pieces);
+    else
+    {
+      foreach (var piece in buildTool.m_availablePieces)
+        if (piece.m_repairPiece || piece.m_removePiece) pieces.Add(piece);
+    }
     if (Hammer.IsInfinityHammer(buildTool)) return;
     var equipment = CustomMenu.PieceTableToEquipment(buildTool);
     var tools = ToolManager.Get(equipment);
     MoveMenuButtons(tools, buildTool, pieces);
     if (tools.Count == 0) return;
-    if (tag != -1) AddTaggedTools(tag, buildTool, pieces);
+    if (tag != -1) AddTaggedTools(tag, extra, buildTool, pieces);
     List<(int index, BuildMenuTool piece)> pinned = [];
     for (var i = pieces.Count - 1; i >= 0; i--)
     {
@@ -61,20 +108,24 @@ internal sealed class PinnedPieceList(IPieceList original) : IPieceList
     }
   }
   // Native filters never match tools. Without own tags, tools placed next to a piece follow it (hidden later if missing).
-  private void AddTaggedTools(int tag, PieceTable buildTool, IList<Piece> pieces)
+  private void AddTaggedTools(int tag, string? extra, PieceTable buildTool, IList<Piece> pieces)
   {
-    string? material = null;
-    if (materials != null)
+    var material = extra;
+    if (material == null && materials != null)
     {
       var requirement = materials.GetTagById(tag);
-      if (requirement != null && requirement.m_resItem) material = requirement.m_resItem.gameObject.name.ToLowerInvariant();
+      if (requirement != null && requirement.m_resItem) material = requirement.m_resItem.gameObject.name;
     }
     foreach (var piece in buildTool.m_availablePieces)
     {
       if (piece is not BuildMenuTool { tool: { } tool } || pieces.Contains(piece)) continue;
-      var add = materials != null
-        ? tool.Materials == null ? tool.FollowsPiece : material != null && tool.Materials.Contains(material)
-        : tool.Usage == 0 && tool.FollowsPiece;
+      bool add;
+      if (materials != null)
+        add = tool.Materials == null ? tool.FollowsPiece : material != null && tool.Materials.Contains(material);
+      else if (extra != null)
+        add = tool.Categories?.Contains(extra) == true;
+      else
+        add = tool.Usage == 0 && tool.Categories == null && tool.FollowsPiece;
       if (add) pieces.Add(piece);
     }
   }

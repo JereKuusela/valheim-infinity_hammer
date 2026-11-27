@@ -36,7 +36,7 @@ Some menus have huge amounts of categories and objects.
 
 Categories are shown as tags on the left side of the build menu and each category shows all of its items.
 
-The "All" tag only shows the first category if the menu has more than 1000 items (default limit), because creating thousands of buttons is slow. This limit can be changed in settings.
+Showing all items of huge menus can take a moment the first time.
 
 Second parameter can be used to filter the results.
 

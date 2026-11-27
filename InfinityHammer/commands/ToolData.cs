@@ -70,6 +70,7 @@ public class Tool
   private readonly string description;
   public string Description => DisplayKeys(description);
   private readonly string iconName;
+  public string IconName => iconName;
   private Sprite? icon;
   // Lazy load needed because the sprites are not instantly available.
   public Sprite? Icon => icon ??= HammerHelper.FindSprite(iconName);
@@ -120,8 +121,9 @@ public class Tool
     : Utils.GetPrefabName(piece.gameObject).Equals(name, StringComparison.OrdinalIgnoreCase)
       || Localization.instance.Localize(piece.m_name).Equals(name, StringComparison.OrdinalIgnoreCase);
   public Piece.UsageTagFlags Usage;
+  // Category names that aren't usage tags, shown as extra tags.
+  public HashSet<string>? Categories;
   public bool ShowInAll;
-  // Lower case item prefab names.
   public HashSet<string>? Materials;
 
   // For ruler
@@ -159,10 +161,17 @@ public class Tool
     terrainGrid = data.terrainGrid;
     snapPiece = data.snapPiece;
     TabIndex = data.tabIndex;
-    Usage = ParseUsage(data.categories);
     var categories = SplitNames(data.categories);
     ShowInAll = categories.Count == 0 || categories.Contains("all", StringComparer.OrdinalIgnoreCase);
-    Materials = ParseMaterials(data.materials);
+    foreach (var name in categories)
+    {
+      if (name.Equals("all", StringComparison.OrdinalIgnoreCase)) continue;
+      // Numbers would be accepted as raw flag values.
+      if (!int.TryParse(name, out _) && Enum.TryParse<Piece.UsageTagFlags>(name, true, out var usage)) Usage |= usage;
+      else (Categories ??= new(StringComparer.OrdinalIgnoreCase)).Add(name);
+    }
+    var materials = SplitNames(data.materials);
+    Materials = materials.Count == 0 ? null : new(materials, StringComparer.OrdinalIgnoreCase);
     targetEdge = data.targetEdge;
     index = data.index.Trim();
     Commands = data.commands == null ? GetCommands(data.command) : [.. data.commands.Select(c => new CommandValue(c.command, c.keys))];
@@ -179,23 +188,6 @@ public class Tool
     }
   }
   private static List<string> SplitNames(string value) => [.. value.Split(',').Select(s => s.Trim()).Where(s => s != "")];
-  private static Piece.UsageTagFlags ParseUsage(string value)
-  {
-    Piece.UsageTagFlags result = 0;
-    foreach (var name in SplitNames(value))
-    {
-      if (name.Equals("all", StringComparison.OrdinalIgnoreCase)) continue;
-      // Numbers would be accepted as raw flag values.
-      if (!int.TryParse(name, out _) && Enum.TryParse<Piece.UsageTagFlags>(name, true, out var usage)) result |= usage;
-      else Log.Warning($"Tool category {name} is not a valid usage tag.");
-    }
-    return result;
-  }
-  private static HashSet<string>? ParseMaterials(string value)
-  {
-    var names = SplitNames(value);
-    return names.Count == 0 ? null : [.. names.Select(s => s.ToLowerInvariant())];
-  }
   public static readonly Regex PointRegex = new(@"<([xyz])(\d+)>");
   public const string RepeatPlaceholder = "<p*>";
 

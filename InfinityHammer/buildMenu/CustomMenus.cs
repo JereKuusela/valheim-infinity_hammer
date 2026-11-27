@@ -90,33 +90,39 @@ public static class CustomMenu
     return GenerateCategories(items);
   }
 
-  public static List<CategoryInfo> GenerateComponents()
+  private static ZNetScene? componentScene;
+  private static Dictionary<string, List<string>> componentCache = [];
+  // Scanning components of every prefab is slow, so it's done once per scene.
+  private static Dictionary<string, List<string>> GetComponentPrefabs()
   {
-    Dictionary<string, List<string>> componentCategories = [];
+    if (componentScene == ZNetScene.instance) return componentCache;
+    componentScene = ZNetScene.instance;
+    Dictionary<string, HashSet<string>> result = [];
     foreach (var prefab in ZNetScene.instance.m_namedPrefabs.Values)
     {
       if (!prefab) continue;
       prefab.GetComponentsInChildren(ZNetView.m_tempComponents);
-      if (ZNetView.m_tempComponents.Count == 0) continue;
       foreach (var c in ZNetView.m_tempComponents)
       {
         var name = c.GetType().Name;
         if (name == "ZNetView") continue;
-
-        // Apply filter if specified - for components mode, filter component names
-        if (!string.IsNullOrEmpty(HammerMenuCommand.CurrentFilter) &&
-            !name.StartsWith(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase))
-          continue;
-
-        if (!componentCategories.ContainsKey(name))
-          componentCategories[name] = [];
-        componentCategories[name].Add(prefab.name);
+        if (!result.TryGetValue(name, out var prefabs))
+          result[name] = prefabs = [];
+        prefabs.Add(prefab.name);
       }
     }
+    ZNetView.m_tempComponents.Clear();
+    componentCache = result.ToDictionary(kvp => kvp.Key, kvp => kvp.Value.OrderBy(n => n, StringComparer.InvariantCultureIgnoreCase).ToList());
+    return componentCache;
+  }
+  public static List<CategoryInfo> GenerateComponents()
+  {
     List<CategoryInfo> categories = [];
-    foreach (var category in componentCategories.OrderBy(kvp => kvp.Key, StringComparer.InvariantCultureIgnoreCase))
+    foreach (var category in GetComponentPrefabs().OrderBy(kvp => kvp.Key, StringComparer.InvariantCultureIgnoreCase))
     {
-      category.Value.Sort(StringComparer.InvariantCultureIgnoreCase);
+      if (!string.IsNullOrEmpty(HammerMenuCommand.CurrentFilter) &&
+          !category.Key.StartsWith(HammerMenuCommand.CurrentFilter, StringComparison.InvariantCultureIgnoreCase))
+        continue;
       categories.Add(new CategoryInfo
       {
         Name = category.Key,
@@ -370,10 +376,20 @@ public static class CustomMenu
     piece.tool = new Tool(toolData);
     piece.m_description = item.FullName;
     piece.m_name = item.ShortName;
-    piece.m_icon = piece.tool.Icon;
     pieceCache[key] = piece;
     piece.m_category = category;
     return piece;
+  }
+
+  // Icons are created only for shown buttons because text icons are slow to render.
+  public static void EnsureIcons(IList<Piece> pieces)
+  {
+    List<BuildMenuTool> missing = [];
+    foreach (var piece in pieces)
+      if (piece is BuildMenuTool { tool: not null } button && !button.m_icon) missing.Add(button);
+    if (missing.Count == 0) return;
+    SpriteHelper.PrepareSprites(missing.Select(p => p.tool!.IconName));
+    foreach (var piece in missing) piece.m_icon = piece.tool!.Icon;
   }
 
   public static void ReleaseUnused(HashSet<Piece> used)

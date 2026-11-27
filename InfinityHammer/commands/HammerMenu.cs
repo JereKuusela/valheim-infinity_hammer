@@ -20,18 +20,16 @@ public enum MenuMode
   Vegetation,
 }
 
-public class MenuNavigation(MenuMode mode, string filter, int page)
+public class MenuNavigation(MenuMode mode, string filter)
 {
   public MenuMode Mode = mode;
   public string Filter = filter;
-  public int Page = page;
 }
 
 public class HammerMenuCommand
 {
   public static MenuMode CurrentMode => NavigationStack.Count > 0 ? NavigationStack[NavigationStack.Count - 1].Mode : MenuMode.Menu;
   public static string CurrentFilter => NavigationStack.Count > 0 ? NavigationStack[NavigationStack.Count - 1].Filter : "";
-  public static int CurrentPage => NavigationStack.Count > 0 ? NavigationStack[NavigationStack.Count - 1].Page : -1;
 
   private static readonly List<MenuNavigation> NavigationStack = [];
 
@@ -52,7 +50,7 @@ public class HammerMenuCommand
 
     var mode = args.Length > 1 ? args[1].ToLowerInvariant() : "menu";
     var requestedFilter = args.Length > 2 ? args[2] : "";
-    var samePage = mode == CurrentMode.ToString().ToLowerInvariant() && requestedFilter == CurrentFilter && CurrentPage == -1;
+    var samePage = mode == CurrentMode.ToString().ToLowerInvariant() && requestedFilter == CurrentFilter;
     if (mode == "close" || (samePage && Hud.IsPieceSelectionVisible() && Hammer.IsInfinityHammer(Helper.GetPlayer().GetRightItem())))
     {
       Hud.CloseBuildUi();
@@ -72,59 +70,18 @@ public class HammerMenuCommand
         HammerHelper.Message(args.Context, "Missing the navigation step.");
         return;
       }
-      var page = Parse.IntNull(args[2]);
-      if (page.HasValue)
-        NavigationStack.Add(new MenuNavigation(CurrentMode, CurrentFilter, page.Value));
-      else
-        NavigationStack.Add(new MenuNavigation(CurrentMode, args[2], CurrentPage));
+      NavigationStack.Add(new MenuNavigation(CurrentMode, args[2]));
       Hammer.OpenBuildMenu();
       return;
     }
     var filter = args.Length > 2 ? args[2] : "";
-
-    NavigationStack.Clear();
-    switch (mode)
+    if (int.TryParse(mode, out _) || !System.Enum.TryParse<MenuMode>(mode, true, out var menuMode))
     {
-      case "menu":
-        NavigationStack.Add(new MenuNavigation(MenuMode.Menu, filter, -1));
-        break;
-      case "binds":
-        NavigationStack.Add(new MenuNavigation(MenuMode.Binds, filter, -1));
-        break;
-      case "types":
-        NavigationStack.Add(new MenuNavigation(MenuMode.Types, filter, -1));
-        break;
-      case "objects":
-        NavigationStack.Add(new MenuNavigation(MenuMode.Objects, filter, -1));
-        break;
-      case "locations":
-        NavigationStack.Add(new MenuNavigation(MenuMode.Locations, filter, -1));
-        break;
-      case "blueprints":
-        NavigationStack.Add(new MenuNavigation(MenuMode.Blueprints, filter, -1));
-        break;
-      case "rooms":
-        NavigationStack.Add(new MenuNavigation(MenuMode.Rooms, filter, -1));
-        break;
-      case "sounds":
-        NavigationStack.Add(new MenuNavigation(MenuMode.Sounds, filter, -1));
-        break;
-      case "visuals":
-        NavigationStack.Add(new MenuNavigation(MenuMode.Visuals, filter, -1));
-        break;
-      case "tools":
-        NavigationStack.Add(new MenuNavigation(MenuMode.Tools, filter, -1));
-        break;
-      case "builds":
-        NavigationStack.Add(new MenuNavigation(MenuMode.Builds, filter, -1));
-        break;
-      case "vegetation":
-        NavigationStack.Add(new MenuNavigation(MenuMode.Vegetation, filter, -1));
-        break;
-      default:
-        HammerHelper.Message(args.Context, "Invalid mode.");
-        return;
+      HammerHelper.Message(args.Context, "Invalid mode.");
+      return;
     }
+    NavigationStack.Clear();
+    NavigationStack.Add(new MenuNavigation(menuMode, filter));
     Hammer.OpenBuildMenu();
   }
 }

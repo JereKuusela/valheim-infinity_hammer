@@ -10,8 +10,8 @@ class HammerMenuTests
     Run("hammer_menu"); C(!Hud.open, "repeated root command closes"); Run("hammer_menu"); C(Hud.open, "root can reopen after closing");
     Run("hammer_menu locations"); C(Hud.open && HammerMenuCommand.CurrentMode == MenuMode.Locations, "subpage remains open");
     Run("hammer_menu locations"); C(!Hud.open, "repeated subpage hotkey closes"); Run("hammer_menu locations");
-    Run("hammer_menu navigate 2"); C(HammerMenuCommand.CurrentPage == 2, "pagination navigates");
-    Run("hammer_menu back"); C(Hud.open && HammerMenuCommand.CurrentMode == MenuMode.Locations && HammerMenuCommand.CurrentPage == -1, "back restores previous page");
+    Run("hammer_menu navigate Hoe"); C(HammerMenuCommand.CurrentFilter == "Hoe", "navigation adds a filter");
+    Run("hammer_menu back"); C(Hud.open && HammerMenuCommand.CurrentMode == MenuMode.Locations && HammerMenuCommand.CurrentFilter == "", "back restores previous page");
     Run("hammer_menu back"); C(Hud.open && HammerMenuCommand.CurrentMode == MenuMode.Menu, "back returns to root");
     Run("hammer_menu close"); C(!Hud.open, "explicit close works on the root");
     Run("hammer_menu builds Hoe"); C(HammerMenuCommand.CurrentFilter == "Hoe" && Hud.open, "hoe page opens"); Run("hammer_menu close"); C(!Hud.open, "explicit close also works on borrowed hoe table");

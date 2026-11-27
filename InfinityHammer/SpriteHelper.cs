@@ -11,7 +11,8 @@ namespace InfinityHammer;
 public static class SpriteHelper
 {
   private static Dictionary<string, int> PrefabNames = [];
-  private static readonly Dictionary<string, Sprite> GeneratedSpriteCache = [];
+  private static Dictionary<string, Sprite>? StatusEffectIcons;
+  private static readonly Dictionary<string, Sprite> SpriteCache = [];
 #nullable disable
   private static GameObject _cachedCameraObj;
 #nullable enable
@@ -39,14 +40,40 @@ public static class SpriteHelper
 
   public static Sprite? FindSprite(string name)
   {
-    if (!ZNetScene.instance) return null;
-    if (PrefabNames.Count == 0)
+    if (SpriteCache.TryGetValue(name, out var cached)) return cached;
+    if (!CanResolve()) return null;
+    var sprite = FindExistingSprite(name);
+    if (sprite) return SpriteCache[name] = sprite!;
+    CreateTextSprites([name]);
+    return SpriteCache.TryGetValue(name, out cached) ? cached : null;
+  }
+
+  // Text sprites are rendered in batches because each GPU readback stalls.
+  public static void PrepareSprites(IEnumerable<string> names)
+  {
+    if (!CanResolve()) return;
+    List<string> texts = [];
+    HashSet<string> seen = [];
+    foreach (var name in names)
     {
-      PrefabNames = ZNetScene.instance.m_namedPrefabs.GroupBy(kvp => kvp.Value.name.ToLower()).ToDictionary(kvp => kvp.Key, kvp => kvp.First().Key);
+      if (SpriteCache.ContainsKey(name) || !seen.Add(name)) continue;
+      var sprite = FindExistingSprite(name);
+      if (sprite) SpriteCache[name] = sprite!;
+      else texts.Add(name);
     }
+    CreateTextSprites(texts);
+  }
+
+  // Missing data would cache text sprites for names that have a real icon.
+  private static bool CanResolve() => ZNetScene.instance && ObjectDB.instance && Player.m_localPlayer && Hud.instance;
+
+  private static Sprite? FindExistingSprite(string name)
+  {
+    if (PrefabNames.Count == 0)
+      PrefabNames = ZNetScene.instance.m_namedPrefabs.GroupBy(kvp => kvp.Value.name.ToLower()).ToDictionary(kvp => kvp.Key, kvp => kvp.First().Key);
+    StatusEffectIcons ??= ObjectDB.instance.m_StatusEffects.Where(se => se && se.m_icon).GroupBy(se => se.name.ToLower()).ToDictionary(g => g.Key, g => g.First().m_icon);
 
     var lower = name.ToLower();
-    Sprite? sprite;
     int spriteIndex = 1;
     var name_parts = Parse.Split(lower);
     if (name_parts.Length > 1)
@@ -55,108 +82,95 @@ public static class SpriteHelper
       spriteIndex = int.TryParse(name_parts[1], NumberStyles.Integer, CultureInfo.InvariantCulture, out var index) ? index : 1;
     }
 
-    // Try to find existing sprite first
     if (PrefabNames.TryGetValue(lower, out var hash))
     {
       var prefab = ZNetScene.instance.GetPrefab(hash);
-      sprite = prefab?.GetComponent<Piece>()?.m_icon;
+      var sprite = prefab?.GetComponent<Piece>()?.m_icon;
       if (sprite) return sprite;
       sprite = prefab?.GetComponent<ItemDrop>()?.m_itemData?.m_shared?.m_icons.ElementAtOrDefault(spriteIndex - 1);
       if (sprite) return sprite;
     }
-    var effect = ObjectDB.instance.m_StatusEffects.Find(se => se.name.ToLower() == lower);
-    sprite = effect?.m_icon;
-    if (sprite) return sprite;
+    if (StatusEffectIcons.TryGetValue(lower, out var effectIcon)) return effectIcon;
     var skill = Player.m_localPlayer.m_skills.m_skills.Find(skill => skill.m_skill.ToString().ToLowerInvariant() == lower);
-    sprite = skill?.m_icon;
-    if (sprite) return sprite;
-
-    // Auto-generate text sprite if nothing found (with caching)
-    return GetOrCreateTextSprite(name);
+    return skill?.m_icon;
   }
 
-  private static Sprite? GetOrCreateTextSprite(string text)
-  {
-    if (text.Length == 0) return null;
-    if (GeneratedSpriteCache.TryGetValue(text, out var cachedSprite))
-    {
-      return cachedSprite;
-    }
+  private const int TextureSize = 64;
+  private const int AtlasColumns = 16;
+  // Far apart so that each viewport only sees its own text.
+  private const float TextSpacing = 100f;
+  private static readonly Vector3 RenderOrigin = new(10000f, 10000f, 0f);
 
-    // Generate new sprite and cache it
-    var sprite = CreateTextSprite(text);
-    GeneratedSpriteCache[text] = sprite;
-    return sprite;
+  private static void CreateTextSprites(List<string> texts)
+  {
+    texts = [.. texts.Where(t => t.Length > 0)];
+    for (var start = 0; start < texts.Count; start += AtlasColumns * AtlasColumns)
+      RenderBatch([.. texts.Skip(start).Take(AtlasColumns * AtlasColumns)]);
   }
 
-  private static Sprite CreateTextSprite(string text)
+  // Each text gets its own viewport in a shared texture, so only one readback is needed.
+  private static void RenderBatch(List<string> texts)
   {
-    var isHuge = text.StartsWith("+");
-    if (isHuge) text = text.Substring(1);
-    // Create a temporary GameObject with TextMeshPro component
-    GameObject tempObj = new GameObject("TempTextSprite");
+    var columns = Math.Min(AtlasColumns, texts.Count);
+    var rows = (texts.Count + columns - 1) / columns;
+    var width = columns * TextureSize;
+    var height = rows * TextureSize;
+    List<GameObject> objects = [];
+    var renderTexture = new RenderTexture(width, height, 24) { format = RenderTextureFormat.ARGB32 };
     try
     {
-      // Move temp object to the same isolated position as camera
-      tempObj.transform.position = Vector3.zero;
-      tempObj.SetActive(false);
-      var mesh = tempObj.AddComponent<TextMeshPro>();
-      mesh.font = Hud.instance.m_buildSelection.font;
-      mesh.fontSize = 8;
-      mesh.color = Color.white;
-      mesh.alignment = TextAlignmentOptions.Center;
-      mesh.text = GenerateDisplayName(text);
-      tempObj.SetActive(true);
-      tempObj.layer = LayerMask.NameToLayer("ghost"); // Ensure it's on UI layer for isolated rendering
-
-      // Force mesh generation
-      mesh.ForceMeshUpdate();
-
-      // Get text bounds
-      var bounds = mesh.bounds;
-
-      // Temporarily enable camera and configure it for rendering
       Camera.enabled = true;
-      Camera.orthographicSize = mesh.text.Length <= 2 ? 0.75f : 2f; // Fixed size for consistent scaling
-      if (isHuge) Camera.orthographicSize *= 0.25f;
-      CameraObj.transform.position = new Vector3(bounds.center.x, bounds.center.y, bounds.center.z - 5f);
-      CameraObj.transform.LookAt(bounds.center);
-
-      // Create RenderTexture
-      int textureSize = 64;
-      RenderTexture renderTexture = new RenderTexture(textureSize, textureSize, 24)
-      {
-        format = RenderTextureFormat.ARGB32
-      };
-
-      // Store original render texture to restore later
-      var originalRenderTexture = Camera.targetTexture;
       Camera.targetTexture = renderTexture;
+      CameraObj.transform.rotation = Quaternion.identity;
+      for (var i = 0; i < texts.Count; i++)
+      {
+        var text = texts[i];
+        var isHuge = text.StartsWith("+");
+        if (isHuge) text = text.Substring(1);
+        var obj = new GameObject("TempTextSprite");
+        objects.Add(obj);
+        obj.transform.position = RenderOrigin + new Vector3(i * TextSpacing, 0f, 0f);
+        obj.SetActive(false);
+        var mesh = obj.AddComponent<TextMeshPro>();
+        mesh.font = Hud.instance.m_buildSelection.font;
+        mesh.fontSize = 8;
+        mesh.color = Color.white;
+        mesh.alignment = TextAlignmentOptions.Center;
+        mesh.text = GenerateDisplayName(text);
+        obj.SetActive(true);
+        obj.layer = LayerMask.NameToLayer("ghost");
+        mesh.ForceMeshUpdate();
 
-      // Render the text
-      Camera.Render();
+        var center = obj.transform.position + mesh.bounds.center;
+        Camera.rect = new Rect((float)(i % columns) / columns, 1f - (float)(i / columns + 1) / rows, 1f / columns, 1f / rows);
+        Camera.aspect = 1f;
+        Camera.orthographicSize = mesh.text.Length <= 2 ? 0.75f : 2f;
+        if (isHuge) Camera.orthographicSize *= 0.25f;
+        CameraObj.transform.position = center - new Vector3(0f, 0f, 5f);
+        Camera.Render();
+      }
 
-      // Convert RenderTexture to Texture2D
       RenderTexture.active = renderTexture;
-      Texture2D texture = new Texture2D(textureSize, textureSize, TextureFormat.RGBA32, false);
-      texture.ReadPixels(new Rect(0, 0, textureSize, textureSize), 0, 0);
+      var texture = new Texture2D(width, height, TextureFormat.RGBA32, false);
+      texture.ReadPixels(new Rect(0, 0, width, height), 0, 0);
       texture.Apply();
       RenderTexture.active = null;
 
-      // Create sprite from texture
-      Sprite sprite = Sprite.Create(texture, new Rect(0, 0, textureSize, textureSize), new Vector2(0.5f, 0.5f));
-
-      // Cleanup render texture and restore camera state
-      renderTexture.Release();
-      Camera.targetTexture = originalRenderTexture;
-      Camera.enabled = false; // Disable camera again to prevent interference
-
-      return sprite;
+      for (var i = 0; i < texts.Count; i++)
+      {
+        var rect = new Rect(i % columns * TextureSize, height - (i / columns + 1) * TextureSize, TextureSize, TextureSize);
+        SpriteCache[texts[i]] = Sprite.Create(texture, rect, new Vector2(0.5f, 0.5f));
+      }
     }
     finally
     {
-      // Always cleanup the temporary GameObject
-      UnityEngine.Object.DestroyImmediate(tempObj);
+      Camera.targetTexture = null;
+      Camera.rect = new Rect(0f, 0f, 1f, 1f);
+      Camera.enabled = false;
+      renderTexture.Release();
+      UnityEngine.Object.Destroy(renderTexture);
+      foreach (var obj in objects)
+        UnityEngine.Object.DestroyImmediate(obj);
     }
   }
 

@@ -129,7 +129,7 @@ public static class SelectionPatches
     var selected = Selection.Get().GetSelectedPiece();
     if (selected) return selected;
     // Navigation/action buttons are never placement prefabs after closing a menu.
-    if (result && result.TryGetComponent<BuildMenuTool>(out var button) && button.tool?.Instant == true) return null!;
+    if (result is BuildMenuTool { tool.Instant: true }) return null!;
     return result!;
   }
 

@@ -28,9 +28,6 @@ internal sealed class HammerPieceList(IPieceList original) : IPieceList
       return;
     }
     var added = new HashSet<Piece>();
-    // Thousands of buttons would stall the UI.
-    if (tag == -1 && buildTool.m_availablePieces.Count > Configuration.MaxAllItems && buildTool.m_categories.Count > 0)
-      tag = (int)buildTool.m_categories[0];
     foreach (var category in buildTool.m_categories)
     {
       if (tag != -1 && tag != (int)category) continue;
@@ -49,10 +46,11 @@ public static class DeepNorthBuildMenu
     for (var i = 0; i < __instance.m_pieceLists.Count; i++)
     {
       var list = __instance.m_pieceLists[i];
+      if (list is PinnedPieceList) continue;
       // Recent and favorites have their own order.
-      if (list is PinnedPieceList or RecentPieceList or FavoritePieceList) continue;
+      var reorder = list is not RecentPieceList and not FavoritePieceList;
       if (i == 0) list = new HammerPieceList(list);
-      __instance.m_pieceLists[i] = new PinnedPieceList(list);
+      __instance.m_pieceLists[i] = new PinnedPieceList(list, reorder);
     }
   }
 

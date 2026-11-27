@@ -47,8 +47,10 @@ Following fields are available:
   - Use `all` to also show the tool in "All".
   - If not set, the tool is only visible in "All".
   - Available tags: misc, crafting, building, floor, wall, roof, architecture, furniture, lighting, decor, storage, transport, food, meads, feasts, defense, stacks, stairs, doors, seasonal.
+  - Other names create custom tags at the top of the tag list (for example `terrain`).
 - materials: Comma separated list of item ids where the tool is also visible in the "By material" list (for example `Wood, Stone`).
   - The tool doesn't cost these materials.
+  - Materials not used by any piece create new tags at the top of the tag list.
 - tabIndex: Tab of the tool in the legacy build menu.
   - If not set, the tool is added to the same tab as the previous tool.
 - index: Position of the tool in the build menu.
