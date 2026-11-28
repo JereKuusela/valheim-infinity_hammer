@@ -10,6 +10,7 @@ namespace InfinityHammer;
 [BepInPlugin(GUID, NAME, VERSION)]
 [BepInDependency("com.rolopogo.gizmo.comfy", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("bruce.valheim.comfymods.gizmo", BepInDependency.DependencyFlags.SoftDependency)]
+[BepInDependency("com.jotunn.jotunn", BepInDependency.DependencyFlags.SoftDependency)]
 [BepInDependency("server_devcommands", "1.112")]
 [BepInDependency("world_edit_commands", "1.83")]
 public class InfinityHammer : BaseUnityPlugin
