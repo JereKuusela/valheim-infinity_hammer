@@ -17,6 +17,8 @@ public partial class Configuration
   public static bool HideSupportColor => hideSupportColor.Value && Enabled;
   public static ConfigEntry<bool> hidePieceHealth;
   public static bool HidePieceHealth => hidePieceHealth.Value && Enabled;
+  public static ConfigEntry<bool> hidePlacementInfo;
+  public static bool HidePlacementInfo => hidePlacementInfo.Value && Enabled;
 #nullable enable
   public static void InitVisuals(ConfigWrapper wrapper)
   {
@@ -26,6 +28,7 @@ public partial class Configuration
     hidePlacementMarker = wrapper.Bind(section, "No placement marker", false, "Hides the yellow placement marker (also affects Gizmo mod).");
     hideSupportColor = wrapper.Bind(section, "No support indicator", false, "Hides the color that shows support.");
     hidePieceHealth = wrapper.Bind(section, "No health indicator", false, "Hides the piece health bar.");
+    hidePlacementInfo = wrapper.Bind(section, "No placement info", false, "Hides the placement info next to the crosshair.");
   }
 }
 
