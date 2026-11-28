@@ -1,5 +1,6 @@
 using System;
 using System.Globalization;
+using System.Linq;
 using HarmonyLib;
 using ServerDevcommands;
 using Service;
@@ -15,6 +16,7 @@ public class TakeOverBuildMenu
 {
   private static bool Selecting;
   private static bool Activated;
+  private static bool Locating;
 
   // Native selection calls SetBuildCategory which rebuilds the unchanged piece table.
   [HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece), typeof(Piece)), HarmonyPrefix]
@@ -24,7 +26,7 @@ public class TakeOverBuildMenu
     Activated = false;
   }
   [HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece), typeof(Piece)), HarmonyPostfix]
-  static void SelectPiecePostfix(Player __instance, bool __result)
+  static void SelectPiecePostfix(Player __instance, Piece p, ref bool __result)
   {
     Selecting = false;
     // Native skips SetSelected when the slot is unchanged.
@@ -33,6 +35,35 @@ public class TakeOverBuildMenu
       ActivatePiece(__instance.m_buildPieces);
       __instance.SetupPlacementGhost();
     }
+    if (__result || Locating || !p) return;
+    Locating = true;
+    try
+    {
+      __result = Hammer.IsInfinityHammer(__instance.GetRightItem()) ? SelectFromBuildItem(__instance, p) : SelectFromInventory(__instance, p);
+    }
+    finally
+    {
+      Locating = false;
+    }
+  }
+  private static bool SelectFromInventory(Player player, Piece piece)
+  {
+    var name = Utils.GetPrefabName(piece.gameObject);
+    var item = player.GetInventory().m_inventory.Find(i => i.m_shared.m_buildPieces != player.m_buildPieces && Hammer.HasPiece(i, name));
+    if (item == null) return false;
+    player.EquipItem(item);
+    return player.SetSelectedPiece(piece);
+  }
+  private static bool SelectFromBuildItem(Player player, Piece piece)
+  {
+    var name = Utils.GetPrefabName(piece.gameObject);
+    var item = CustomMenu.GetBuildItems().FirstOrDefault(i => i.m_itemData.m_shared.m_buildPieces != player.m_buildPieces && Hammer.HasPiece(i.m_itemData, name));
+    if (!item) return false;
+    var open = Hud.IsPieceSelectionVisible();
+    Console.instance.TryRunCommand($"hammer_menu builds {item.name}");
+    var result = player.SetSelectedPiece(piece);
+    if (!open) Hud.CloseBuildUi();
+    return result;
   }
   [HarmonyPatch(typeof(Player), nameof(Player.SetSelectedPiece), typeof(Piece)), HarmonyFinalizer]
   static void SelectPieceFinalizer() => Selecting = false;
