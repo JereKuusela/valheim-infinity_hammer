@@ -224,6 +224,7 @@ public class ToolSelection : BaseSelection
   {
     base.Deactivate();
     Ruler.Remove();
+    ToolKeyHints.Hide();
     BindCommand.SetMode("");
     Points.Clear();
     if (Path != null) UnityEngine.Object.Destroy(Path.gameObject);
