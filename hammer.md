@@ -296,6 +296,7 @@ Visual settings work even without cheat access. These all are disabled by defaul
 
 - No effects: Hides visual effects of building, repairing and destroying.
 - No health indicator: Hides the piece health bar.
+- No placement info: Hides the placement info next to the crosshair.
 - No placement marker: Hides the yellow placement marker (also affects Gizmo mod).
 - No support indicator: Hides the color that shows support.
 
