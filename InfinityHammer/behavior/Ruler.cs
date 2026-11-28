@@ -71,7 +71,11 @@ public class Ruler
   public static void Update()
   {
     var player = Player.m_localPlayer;
-    if (player && Selection.Get() is ToolSelection pathSelection) pathSelection.UpdatePath(player);
+    if (player && Selection.Get() is ToolSelection pathSelection)
+    {
+      pathSelection.UpdatePath(player);
+      if (Projector == null && player.InPlaceMode() && !Hud.IsPieceSelectionVisible()) ToolKeyHints.Update(pathSelection.Tool, null);
+    }
     if (Projector == null || !player) return;
     if (Selection.Get() is not ToolSelection selection)
     {
@@ -108,6 +112,7 @@ public class Ruler
     BaseRuler.Offset = selection.Tool.Height ? scale.Y : 0f;
     SanityCheckShape();
     var shape = Shape;
+    ToolKeyHints.Update(tool, shape);
     if (selection.TerrainGrid) scale.SetPrecisionXZ(0.5f, 0.5f);
     if (Circle != null)
     {
