@@ -98,7 +98,7 @@ public static class Hammer
   public static bool IsHammer(GameObject obj) => obj && IsHammer(Utils.GetPrefabName(obj));
   public static bool IsHammer(ItemDrop.ItemData item) => item != null && (IsInfinityHammer(item) || IsHammer(item.m_dropPrefab));
   public static bool HasHammer(Player player) => player && IsHammer(player.GetRightItem());
-  private static bool HasPiece(ItemDrop.ItemData? item, string piece)
+  internal static bool HasPiece(ItemDrop.ItemData? item, string piece)
   {
     if (item == null || !item.m_shared.m_buildPieces) return false;
     return item.m_shared.m_buildPieces.m_pieces.Any(p => p && p.name.Equals(piece, StringComparison.OrdinalIgnoreCase));
